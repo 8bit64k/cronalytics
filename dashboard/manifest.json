@@ -5,7 +5,7 @@
   "icon": "Clock",
   "version": "0.1.0",
   "tab": {
-    "path": "/cron",
+    "path": "/cron-insights",
     "position": "end",
     "hidden": false
   },
