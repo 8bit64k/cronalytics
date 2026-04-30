@@ -12,7 +12,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .logger import logger
+import logging
+logger = logging.getLogger("cron-insights")
 
 # Reused connection per thread (SQLite is fine with this for our
 # write-light, read-medium workload).
@@ -389,3 +390,69 @@ def query_health(db_path: Path) -> dict[str, Any]:
         "last_ingested_at": last_ingested,
         "last_run_time": last_run,
     }
+
+
+def query_models(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
+    """Return per-model usage aggregates."""
+    conn = get_conn(db_path)
+    cutoff = time.time() - (days * 86400)
+
+    cursor = conn.execute(
+        """
+        SELECT model,
+               count(*) AS runs,
+               COALESCE(SUM(estimated_cost_usd), 0) AS total_cost,
+               COALESCE(AVG(estimated_cost_usd), 0) AS avg_cost,
+               COALESCE(SUM(input_tokens), 0) AS total_input,
+               COALESCE(SUM(output_tokens), 0) AS total_output,
+               MAX(run_time) AS last_run
+        FROM cron_runs
+        WHERE run_time >= ?
+        GROUP BY model
+        ORDER BY total_cost DESC
+        """,
+        (cutoff,),
+    )
+    return [
+        {
+            "model": r[0] or "unknown",
+            "runs": r[1],
+            "total_cost": round(r[2], 8),
+            "avg_cost": round(r[3], 8),
+            "total_input_tokens": r[4],
+            "total_output_tokens": r[5],
+            "last_run": r[6],
+        }
+        for r in cursor.fetchall()
+    ]
+
+
+def query_trends(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
+    """Return daily cost and run-count trend."""
+    conn = get_conn(db_path)
+    cutoff = time.time() - (days * 86400)
+
+    cursor = conn.execute(
+        """
+        SELECT date(run_time, 'unixepoch') AS day,
+               count(*) AS runs,
+               COALESCE(SUM(estimated_cost_usd), 0) AS cost,
+               COALESCE(SUM(input_tokens), 0) AS input_tokens,
+               COALESCE(SUM(output_tokens), 0) AS output_tokens
+        FROM cron_runs
+        WHERE run_time >= ?
+        GROUP BY day
+        ORDER BY day ASC
+        """,
+        (cutoff,),
+    )
+    return [
+        {
+            "day": r[0],
+            "runs": r[1],
+            "cost": round(r[2], 8),
+            "input_tokens": r[3],
+            "output_tokens": r[4],
+        }
+        for r in cursor.fetchall()
+    ]

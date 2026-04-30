@@ -2,17 +2,70 @@
 
 Mounted by the dashboard server at /api/plugins/cron-insights/.
 All endpoints serve JSON for the frontend slot components.
+
+NOTE: This module is loaded via importlib as a standalone module, so
+       relative imports (from .. import X) will not work. We dynamically
+       load sibling modules from the plugin directory to avoid that.
 """
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Query
+import importlib.util
+import json
+import sys
+from pathlib import Path
 from typing import Any
 
-from .. import facts, scanner
-from ..config import FACT_DB, STATE_DB, WATERMARK_FILE
+from fastapi import APIRouter, HTTPException, Query
 
-router = APIRouter()
+# ---------------------------------------------------------------------------
+# Load sibling plugin modules via importlib (no package context)
+# ---------------------------------------------------------------------------
+
+_plugin_api_dir = Path(__file__).resolve().parent
+_plugin_dir = _plugin_api_dir.parent
+
+
+def _load_module(name: str):
+    """Load a .py file from the plugin root as a namespaced module."""
+    mod_name = f"croninsights_auto_{name}"
+    path = _plugin_dir / f"{name}.py"
+    spec = importlib.util.spec_from_file_location(mod_name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Cannot load {path}")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[mod_name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+_facts_mod = _load_module("facts")
+_config_mod = _load_module("config")
+
+FACT_DB = _config_mod.FACT_DB
+STATE_DB = _config_mod.STATE_DB
+WATERMARK_FILE = _config_mod.WATERMARK_FILE
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _get_status() -> dict[str, Any]:
+    """Read watermark file to report last sync timestamp."""
+    try:
+        data = json.loads(WATERMARK_FILE.read_text())
+        return {
+            "last_watermark": data.get("last_watermark"),
+            "last_scan_ts": data.get("last_scan_ts"),
+            "rows_synced": data.get("rows_synced", 0),
+        }
+    except Exception:
+        return {
+            "last_watermark": None,
+            "last_scan_ts": None,
+            "rows_synced": 0,
+        }
 
 
 def _api_wrap(data: dict[str, Any]) -> dict[str, Any]:
@@ -20,11 +73,18 @@ def _api_wrap(data: dict[str, Any]) -> dict[str, Any]:
     return {"plugin": "cron-insights", **data}
 
 
+# ---------------------------------------------------------------------------
+# Router
+# ---------------------------------------------------------------------------
+
+router = APIRouter()
+
+
 @router.get("/health")
 async def health() -> dict[str, Any]:
     """Plugin status, fact DB health, and last sync watermark."""
-    db_health = facts.query_health(FACT_DB)
-    sync_status = scanner.get_status(WATERMARK_FILE)
+    db_health = _facts_mod.query_health(FACT_DB)
+    sync_status = _get_status()
     return _api_wrap(
         {
             "status": "ok",
@@ -40,7 +100,7 @@ async def summary(
     days: int = Query(default=7, ge=1, le=90),
 ) -> dict[str, Any]:
     """Aggregated stats for cron runs over the last N days."""
-    return _api_wrap(facts.query_summary(FACT_DB, days=days))
+    return _api_wrap(_facts_mod.query_summary(FACT_DB, days=days))
 
 
 @router.get("/jobs")
@@ -51,7 +111,7 @@ async def jobs(
     return _api_wrap(
         {
             "days": days,
-            "jobs": facts.query_jobs(FACT_DB, days=days),
+            "jobs": _facts_mod.query_jobs(FACT_DB, days=days),
         }
     )
 
@@ -62,7 +122,7 @@ async def job_runs(
     limit: int = Query(default=50, ge=1, le=500),
 ) -> dict[str, Any]:
     """Individual run history for a specific job."""
-    rows = facts.query_job_runs(FACT_DB, job_id=job_id, limit=limit)
+    rows = _facts_mod.query_job_runs(FACT_DB, job_id=job_id, limit=limit)
     if not rows:
         raise HTTPException(status_code=404, detail=f"No runs found for job {job_id}")
     return _api_wrap(
@@ -74,17 +134,27 @@ async def job_runs(
     )
 
 
-@router.post("/sync")
-async def sync() -> dict[str, Any]:
-    """Trigger reconciliation scanner on demand."""
-    result = scanner.run_sync(
-        state_db=STATE_DB,
-        fact_db=FACT_DB,
-        watermark_path=WATERMARK_FILE,
-    )
+@router.get("/models")
+async def models(
+    days: int = Query(default=7, ge=1, le=90),
+) -> dict[str, Any]:
+    """Per-model usage aggregates."""
     return _api_wrap(
         {
-            "triggered": True,
-            **result,
+            "days": days,
+            "models": _facts_mod.query_models(FACT_DB, days=days),
+        }
+    )
+
+
+@router.get("/trends")
+async def trends(
+    days: int = Query(default=7, ge=1, le=90),
+) -> dict[str, Any]:
+    """Daily cost trend."""
+    return _api_wrap(
+        {
+            "days": days,
+            "trend": _facts_mod.query_trends(FACT_DB, days=days),
         }
     )
