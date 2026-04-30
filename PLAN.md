@@ -289,7 +289,7 @@ docs(readme): add installation instructions
 | Phase | Status | Completed | Remaining |
 |-------|--------|-----------|-----------|
 | 0: Skeleton | ✅ Complete | 3/3 | 0 |
-| 1: Ingestion | 🔴 Not started | 0/7 | 7 |
+| 1: Ingestion | 🟡 In progress | 0/7 | 7 |
 | 2: Scanner | 🔴 Not started | 0/8 | 8 |
 | 3: API | 🔴 Not started | 0/4 | 4 |
 | 4: Frontend | 🔴 Not started | 0/5 | 5 |

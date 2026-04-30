@@ -13,6 +13,9 @@ build/
 # Watermark (generated at runtime)
 watermark.json
 
+# Pending queue backing file (generated at runtime)
+pending.jsonl
+
 # Test artifacts
 .pytest_cache/
 .coverage

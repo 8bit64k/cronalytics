@@ -149,8 +149,12 @@ Every cron run creates a session row with `source = 'cron'`. The `sessions` tabl
 | `started_at` / `ended_at` | Duration calculation |
 | `input_tokens` / `output_tokens` | Token attribution |
 | `reasoning_tokens` | Reasoning model cost |
+| `cache_read_tokens` / `cache_write_tokens` | Cache token accounting |
 | `estimated_cost_usd` | Primary cost metric |
 | `actual_cost_usd` | Ground-truth when available |
+| `cost_status` | Cost validity flag |
+| `cost_source` | Provider that returned cost |
+| `billing_provider` | Backend billing provider ID |
 | `model` | Model attribution |
 | `api_call_count` | Iteration depth |
 | `message_count` / `tool_call_count` | Activity depth |
@@ -176,8 +180,13 @@ CREATE TABLE IF NOT EXISTS cron_runs (
     input_tokens INTEGER DEFAULT 0,
     output_tokens INTEGER DEFAULT 0,
     reasoning_tokens INTEGER DEFAULT 0,
+    cache_read_tokens INTEGER DEFAULT 0,
+    cache_write_tokens INTEGER DEFAULT 0,
     estimated_cost_usd REAL,               -- primary metric
     actual_cost_usd REAL,
+    cost_status TEXT,                      -- e.g. "pending", "confirmed"
+    cost_source TEXT,                      -- provider that returned cost
+    billing_provider TEXT,
     api_call_count INTEGER DEFAULT 0,
     message_count INTEGER DEFAULT 0,
     tool_call_count INTEGER DEFAULT 0,
