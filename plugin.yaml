@@ -1,0 +1,5 @@
+name: cron-insights
+version: 0.1.0
+description: Cost and operational observability for Hermes cron jobs
+provides_hooks:
+  - on_session_end

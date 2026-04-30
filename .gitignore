@@ -1,0 +1,28 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# Facts DB (generated at runtime)
+*.db
+*.db-journal
+
+# Watermark (generated at runtime)
+watermark.json
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node artifacts (dashboard build)
+node_modules/
