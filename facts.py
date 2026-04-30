@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import sqlite3
 import threading
+import time
 from pathlib import Path
 from typing import Any
 
@@ -221,3 +222,170 @@ def row_exists(db_path: Path, session_id: str) -> bool:
         (session_id,),
     )
     return cursor.fetchone() is not None
+
+
+# ---------------------------------------------------------------------------
+# Aggregation queries (Phase 3 API)
+# ---------------------------------------------------------------------------
+
+def query_summary(db_path: Path, days: int = 7) -> dict[str, Any]:
+    """Return aggregate stats for cron runs in the last N days."""
+    conn = get_conn(db_path)
+    cutoff = time.time() - (days * 86400)
+
+    cursor = conn.execute(
+        """
+        SELECT count(*),
+               COALESCE(SUM(estimated_cost_usd), 0),
+               COALESCE(SUM(actual_cost_usd), 0),
+               COALESCE(SUM(input_tokens), 0),
+               COALESCE(SUM(output_tokens), 0)
+        FROM cron_runs
+        WHERE run_time >= ?
+        """,
+        (cutoff,),
+    )
+    total_runs, total_est_cost, total_act_cost, total_in, total_out = cursor.fetchone()
+
+    # Cost by model (only rows with estimated_cost_usd > 0)
+    cursor = conn.execute(
+        """
+        SELECT model, count(*) AS runs, SUM(estimated_cost_usd) AS cost
+        FROM cron_runs
+        WHERE run_time >= ? AND estimated_cost_usd > 0
+        GROUP BY model
+        ORDER BY cost DESC
+        """,
+        (cutoff,),
+    )
+    by_model = [
+        {"model": r[0] or "unknown", "runs": r[1], "total_cost": round(r[2], 8)}
+        for r in cursor.fetchall()
+    ]
+
+    # Previous period for trend
+    prev_cutoff = cutoff - (days * 86400)
+    cursor = conn.execute(
+        """
+        SELECT count(*), COALESCE(SUM(estimated_cost_usd), 0)
+        FROM cron_runs
+        WHERE run_time >= ? AND run_time < ?
+        """,
+        (prev_cutoff, cutoff),
+    )
+    prev_runs, prev_cost = cursor.fetchone()
+
+    trend = "→"
+    if prev_cost > 0:
+        delta = (total_est_cost - prev_cost) / prev_cost
+        if delta > 0.05:
+            trend = "↑"
+        elif delta < -0.05:
+            trend = "↓"
+
+    return {
+        "days": days,
+        "total_runs": total_runs,
+        "total_estimated_cost": round(total_est_cost or 0, 8),
+        "total_actual_cost": round(total_act_cost or 0, 8),
+        "total_input_tokens": total_in or 0,
+        "total_output_tokens": total_out or 0,
+        "cost_by_model": by_model,
+        "previous_period": {
+            "runs": prev_runs or 0,
+            "cost": round(prev_cost or 0, 8),
+        },
+        "trend": trend,
+    }
+
+
+def query_jobs(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
+    """Return per-job aggregates."""
+    conn = get_conn(db_path)
+    cutoff = time.time() - (days * 86400)
+
+    cursor = conn.execute(
+        """
+        SELECT job_id,
+               count(*) AS runs,
+               COALESCE(SUM(estimated_cost_usd), 0) AS total_cost,
+               COALESCE(AVG(estimated_cost_usd), 0) AS avg_cost,
+               MAX(run_time) AS last_run,
+               COALESCE(MIN(run_time), 0) AS first_run,
+               MAX(model) AS last_model
+        FROM cron_runs
+        WHERE run_time >= ?
+        GROUP BY job_id
+        ORDER BY total_cost DESC
+        """,
+        (cutoff,),
+    )
+    return [
+        {
+            "job_id": r[0],
+            "runs": r[1],
+            "total_cost": round(r[2], 8),
+            "avg_cost": round(r[3], 8),
+            "last_run": r[4],
+            "first_run": r[5],
+            "last_model": r[6] or "unknown",
+        }
+        for r in cursor.fetchall()
+    ]
+
+
+def query_job_runs(
+    db_path: Path, job_id: str, limit: int = 50
+) -> list[dict[str, Any]]:
+    """Return individual run history for a specific job."""
+    conn = get_conn(db_path)
+    cursor = conn.execute(
+        """
+        SELECT session_id, job_id, run_time, ended_at,
+               duration_seconds, model,
+               input_tokens, output_tokens, reasoning_tokens,
+               cache_read_tokens, cache_write_tokens,
+               estimated_cost_usd, actual_cost_usd,
+               cost_status, billing_provider,
+               end_reason, success
+        FROM cron_runs
+        WHERE job_id = ?
+        ORDER BY run_time DESC
+        LIMIT ?
+        """,
+        (job_id, limit),
+    )
+    cols = [
+        "session_id", "job_id", "run_time", "ended_at",
+        "duration_seconds", "model",
+        "input_tokens", "output_tokens", "reasoning_tokens",
+        "cache_read_tokens", "cache_write_tokens",
+        "estimated_cost_usd", "actual_cost_usd",
+        "cost_status", "billing_provider",
+        "end_reason", "success",
+    ]
+    return [dict(zip(cols, r)) for r in cursor.fetchall()]
+
+
+def query_health(db_path: Path) -> dict[str, Any]:
+    """Quick health stats for the fact DB."""
+    conn = get_conn(db_path)
+    cursor = conn.execute("SELECT count(*) FROM cron_runs")
+    total = cursor.fetchone()[0]
+
+    cursor = conn.execute(
+        "SELECT MAX(ingested_at), MAX(run_time) FROM cron_runs"
+    )
+    last_ingested, last_run = cursor.fetchone()
+
+    cursor = conn.execute(
+        "SELECT count(DISTINCT job_id) FROM cron_runs"
+    )
+    unique_jobs = cursor.fetchone()[0]
+
+    return {
+        "total_runs": total,
+        "unique_jobs": unique_jobs,
+        "last_ingested_at": last_ingested,
+        "last_run_time": last_run,
+    }

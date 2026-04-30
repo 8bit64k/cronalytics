@@ -1,0 +1,15 @@
+{
+  "name": "cron-insights",
+  "label": "Cron Insights",
+  "description": "Cost and operational observability for Hermes cron jobs",
+  "icon": "Clock",
+  "version": "0.1.0",
+  "tab": {
+    "path": "/cron",
+    "position": "end",
+    "hidden": false
+  },
+  "slots": ["header-right", "pre-main", "post-main"],
+  "entry": "dist/index.js",
+  "api": "plugin_api.py"
+}
