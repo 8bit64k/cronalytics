@@ -289,7 +289,7 @@ docs(readme): add installation instructions
 | Phase | Status | Completed | Remaining |
 |-------|--------|-----------|-----------|
 | 0: Skeleton | ✅ Complete | 3/3 | 0 |
-| 1: Ingestion | 🟡 In progress | 0/7 | 7 |
+| 1: Ingestion | ✅ Complete | 7/7 | 0 |
 | 2: Scanner | 🔴 Not started | 0/8 | 8 |
 | 3: API | 🔴 Not started | 0/4 | 4 |
 | 4: Frontend | 🔴 Not started | 0/5 | 5 |
@@ -299,4 +299,4 @@ docs(readme): add installation instructions
 ---
 
 *Last updated: 2026-04-29*
-*Next step: Phase 1 — Fact DB & Real-Time Ingestion*
+*Next step: Phase 2 — Reconciliation Scanner*
