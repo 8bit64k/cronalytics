@@ -16,6 +16,9 @@ watermark.json
 # Pending queue backing file (generated at runtime)
 pending.jsonl
 
+# Auto-checkpoint state (generated at runtime)
+cron-insights-checkpoint.json
+
 # Test artifacts
 .pytest_cache/
 .coverage
