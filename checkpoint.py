@@ -22,6 +22,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import pwd
 import time
 from pathlib import Path
 from typing import Any
@@ -37,7 +38,13 @@ logger = logging.getLogger("cron-insights.checkpoint")
 CHECKPOINT_ENV_VAR = "CRON_INSIGHTS_CHECKPOINT"
 
 # Where the checkpoint lives. Outside the git repo so it isn't committed.
-DEFAULT_CHECKPOINT_PATH: Path = Path.home() / ".hermes" / "sessions" / "cron-insights-checkpoint.json"
+# NOTE: Path.home() returns ~/.hermes/home inside a Hermes profile, so we
+# resolve the real POSIX home via pwd to guarantee the file is always at the
+# same absolute path regardless of how the script is invoked.
+def _real_home() -> Path:
+    return Path(pwd.getpwuid(os.getuid()).pw_dir)
+
+DEFAULT_CHECKPOINT_PATH: Path = _real_home() / ".hermes" / "sessions" / "cron-insights-checkpoint.json"
 
 
 # ---------------------------------------------------------------------------
