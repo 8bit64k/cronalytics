@@ -128,16 +128,16 @@ def get_conn(db_path: Path) -> sqlite3.Connection:
 
 
 def _make_job_id(session_id: str) -> str | None:
-    """Parse cron_{job_id}_{timestamp} -> job_id."""
+    """Parse cron_{job_id}_{YYYYMMDD}_{HHMMSS} -> job_id."""
     if not session_id.startswith("cron_"):
         return None
     parts = session_id.split("_")
-    # Expected: cron_<job_id>_<timestamp> where job_id may contain underscores
-    # but the final part is always the timestamp. So we drop 'cron_' and the last
-    # element to recover the original job_id.
-    if len(parts) < 3:
+    # Expected: cron_<job_id>_<YYYYMMDD>_<HHMMSS>
+    # job_id may contain underscores. We drop 'cron_' and the final two
+    # elements (date + time) to recover the original job_id.
+    if len(parts) < 4:
         return None
-    return "_".join(parts[1:-1])
+    return "_".join(parts[1:-2])
 
 
 def ingest_row(
@@ -237,8 +237,8 @@ def query_summary(db_path: Path, days: int = 7) -> dict[str, Any]:
     cursor = conn.execute(
         """
         SELECT count(*),
-               COALESCE(SUM(estimated_cost_usd), 0),
-               COALESCE(SUM(actual_cost_usd), 0),
+               SUM(estimated_cost_usd),
+               SUM(actual_cost_usd),
                COALESCE(SUM(input_tokens), 0),
                COALESCE(SUM(output_tokens), 0)
         FROM cron_runs
@@ -248,19 +248,19 @@ def query_summary(db_path: Path, days: int = 7) -> dict[str, Any]:
     )
     total_runs, total_est_cost, total_act_cost, total_in, total_out = cursor.fetchone()
 
-    # Cost by model (only rows with estimated_cost_usd > 0)
+    # Cost by model (only rows with known cost)
     cursor = conn.execute(
         """
         SELECT model, count(*) AS runs, SUM(estimated_cost_usd) AS cost
         FROM cron_runs
-        WHERE run_time >= ? AND estimated_cost_usd > 0
+        WHERE run_time >= ? AND estimated_cost_usd IS NOT NULL
         GROUP BY model
         ORDER BY cost DESC
         """,
         (cutoff,),
     )
     by_model = [
-        {"model": r[0] or "unknown", "runs": r[1], "total_cost": round(r[2], 8)}
+        {"model": r[0] or "unknown", "runs": r[1], "total_cost": round(r[2], 8) if r[2] is not None else None}
         for r in cursor.fetchall()
     ]
 
@@ -268,7 +268,7 @@ def query_summary(db_path: Path, days: int = 7) -> dict[str, Any]:
     prev_cutoff = cutoff - (days * 86400)
     cursor = conn.execute(
         """
-        SELECT count(*), COALESCE(SUM(estimated_cost_usd), 0)
+        SELECT count(*), SUM(estimated_cost_usd)
         FROM cron_runs
         WHERE run_time >= ? AND run_time < ?
         """,
@@ -277,7 +277,7 @@ def query_summary(db_path: Path, days: int = 7) -> dict[str, Any]:
     prev_runs, prev_cost = cursor.fetchone()
 
     trend = "→"
-    if prev_cost > 0:
+    if prev_cost is not None and prev_cost > 0 and total_est_cost is not None:
         delta = (total_est_cost - prev_cost) / prev_cost
         if delta > 0.05:
             trend = "↑"
@@ -287,14 +287,14 @@ def query_summary(db_path: Path, days: int = 7) -> dict[str, Any]:
     return {
         "days": days,
         "total_runs": total_runs,
-        "total_estimated_cost": round(total_est_cost or 0, 8),
-        "total_actual_cost": round(total_act_cost or 0, 8),
+        "total_estimated_cost": round(total_est_cost, 8) if total_est_cost is not None else None,
+        "total_actual_cost": round(total_act_cost, 8) if total_act_cost is not None else None,
         "total_input_tokens": total_in or 0,
         "total_output_tokens": total_out or 0,
         "cost_by_model": by_model,
         "previous_period": {
             "runs": prev_runs or 0,
-            "cost": round(prev_cost or 0, 8),
+            "cost": round(prev_cost, 8) if prev_cost is not None else None,
         },
         "trend": trend,
     }
@@ -309,8 +309,8 @@ def query_jobs(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
         """
         SELECT job_id,
                count(*) AS runs,
-               COALESCE(SUM(estimated_cost_usd), 0) AS total_cost,
-               COALESCE(AVG(estimated_cost_usd), 0) AS avg_cost,
+               SUM(estimated_cost_usd) AS total_cost,
+               AVG(estimated_cost_usd) AS avg_cost,
                MAX(run_time) AS last_run,
                COALESCE(MIN(run_time), 0) AS first_run,
                MAX(model) AS last_model
@@ -325,8 +325,8 @@ def query_jobs(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
         {
             "job_id": r[0],
             "runs": r[1],
-            "total_cost": round(r[2], 8),
-            "avg_cost": round(r[3], 8),
+            "total_cost": round(r[2], 8) if r[2] is not None else None,
+            "avg_cost": round(r[3], 8) if r[3] is not None else None,
             "last_run": r[4],
             "first_run": r[5],
             "last_model": r[6] or "unknown",
@@ -401,8 +401,8 @@ def query_models(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
         """
         SELECT model,
                count(*) AS runs,
-               COALESCE(SUM(estimated_cost_usd), 0) AS total_cost,
-               COALESCE(AVG(estimated_cost_usd), 0) AS avg_cost,
+               SUM(estimated_cost_usd) AS total_cost,
+               AVG(estimated_cost_usd) AS avg_cost,
                COALESCE(SUM(input_tokens), 0) AS total_input,
                COALESCE(SUM(output_tokens), 0) AS total_output,
                MAX(run_time) AS last_run
@@ -417,8 +417,8 @@ def query_models(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
         {
             "model": r[0] or "unknown",
             "runs": r[1],
-            "total_cost": round(r[2], 8),
-            "avg_cost": round(r[3], 8),
+            "total_cost": round(r[2], 8) if r[2] is not None else None,
+            "avg_cost": round(r[3], 8) if r[3] is not None else None,
             "total_input_tokens": r[4],
             "total_output_tokens": r[5],
             "last_run": r[6],
@@ -436,7 +436,7 @@ def query_trends(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
         """
         SELECT date(run_time, 'unixepoch') AS day,
                count(*) AS runs,
-               COALESCE(SUM(estimated_cost_usd), 0) AS cost,
+               SUM(estimated_cost_usd) AS cost,
                COALESCE(SUM(input_tokens), 0) AS input_tokens,
                COALESCE(SUM(output_tokens), 0) AS output_tokens
         FROM cron_runs
@@ -450,7 +450,7 @@ def query_trends(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
         {
             "day": r[0],
             "runs": r[1],
-            "cost": round(r[2], 8),
+            "cost": round(r[2], 8) if r[2] is not None else None,
             "input_tokens": r[3],
             "output_tokens": r[4],
         }

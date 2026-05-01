@@ -9,9 +9,12 @@ build/
 # Facts DB (generated at runtime)
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 
 # Watermark (generated at runtime)
 watermark.json
+watermark_test_*.json
 
 # Pending queue backing file (generated at runtime)
 pending.jsonl

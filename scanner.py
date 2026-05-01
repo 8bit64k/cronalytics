@@ -18,31 +18,53 @@ import time
 from pathlib import Path
 from typing import Any
 
-from . import facts
-from .logger import logger
+try:
+    from . import facts
+    from .logger import logger
+except ImportError:
+    # Running as standalone (importlib) — load sibling modules dynamically.
+    import importlib.util
+    import sys
+
+    _scanner_dir = Path(__file__).resolve().parent
+
+    def _load_module(name: str):
+        mod_name = f"croninsights_scanner_{name}"
+        path = _scanner_dir / f"{name}.py"
+        spec = importlib.util.spec_from_file_location(mod_name, path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"Cannot load {path}")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[mod_name] = mod
+        spec.loader.exec_module(mod)
+        return mod
+
+    facts = _load_module("facts")
+    logger = logging.getLogger("cron-insights")
 
 # ---------------------------------------------------------------------------
 # Watermark I/O
 # ---------------------------------------------------------------------------
 
-Watermark = dict[str, Any]  # {"last_ended_at": float, "last_sync": str}
+Watermark = dict[str, Any]  # {"last_ended_at": float, "last_sync": str, "rows_synced": int}
 
 
 def _read_watermark(path: Path) -> Watermark:
     if not path.exists():
-        return {"last_ended_at": 0.0, "last_sync": None}
+        return {"last_ended_at": 0.0, "last_sync": None, "rows_synced": 0}
     try:
         with open(path, "r", encoding="utf-8") as fh:
             return json.load(fh)
     except Exception:
         logger.warning("[scanner] Corrupt watermark, resetting")
-        return {"last_ended_at": 0.0, "last_sync": None}
+        return {"last_ended_at": 0.0, "last_sync": None, "rows_synced": 0}
 
 
-def _write_watermark(path: Path, last_ended_at: float) -> None:
+def _write_watermark(path: Path, last_ended_at: float, rows_synced: int) -> None:
     payload: Watermark = {
         "last_ended_at": last_ended_at,
         "last_sync": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "rows_synced": rows_synced,
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as fh:
@@ -132,6 +154,7 @@ def run_sync(
     rows = _fetch_new_sessions(state_db, since)
     if not rows:
         logger.info("[scanner] No new cron sessions found")
+        _write_watermark(watermark_path, since, wm.get("rows_synced", 0))
         return {
             "inserted": 0,
             "skipped": 0,
@@ -145,7 +168,7 @@ def run_sync(
         *(float(r["ended_at"] or 0) for r in rows),
     )
 
-    _write_watermark(watermark_path, new_watermark)
+    _write_watermark(watermark_path, new_watermark, inserted + skipped)
 
     elapsed = time.time() - started
     logger.info(
@@ -169,6 +192,7 @@ def get_status(watermark_path: Path) -> dict[str, Any]:
     return {
         "last_sync": wm.get("last_sync"),
         "last_ended_at": wm.get("last_ended_at"),
+        "rows_synced": wm.get("rows_synced", 0),
         "watermark_file_exists": watermark_path.exists(),
         "watermark_file_path": str(watermark_path),
     }

@@ -1,4 +1,4 @@
-"""Cron Insights — dashboard API router (Phase 3).
+"""Cron Insights — dashboard API router (Phase 3 + Phase 2.5).
 
 Mounted by the dashboard server at /api/plugins/cron-insights/.
 All endpoints serve JSON for the frontend slot components.
@@ -41,10 +41,37 @@ def _load_module(name: str):
 
 _facts_mod = _load_module("facts")
 _config_mod = _load_module("config")
+_scanner_mod = _load_module("scanner")
 
 FACT_DB = _config_mod.FACT_DB
 STATE_DB = _config_mod.STATE_DB
 WATERMARK_FILE = _config_mod.WATERMARK_FILE
+HERMES_HOME = _config_mod.HERMES_HOME
+
+# ---------------------------------------------------------------------------
+# Job name resolution (Phase 2.5)
+# ---------------------------------------------------------------------------
+
+_JOBS_PATH = HERMES_HOME / "cron" / "jobs.json"
+
+
+def _load_job_names() -> dict[str, str]:
+    """Read ~/.hermes/cron/jobs.json and build {job_id: name} mapping."""
+    try:
+        data = json.loads(_JOBS_PATH.read_text())
+    except Exception:
+        return {}
+    return {j["id"]: j.get("name", j["id"]) for j in data.get("jobs", [])}
+
+
+def _enrich_jobs_with_names(job_list: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Attach human-readable name to each job aggregate."""
+    names = _load_job_names()
+    for j in job_list:
+        job_id = j.get("job_id", "")
+        j["name"] = names.get(job_id, job_id)
+    return job_list
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -52,18 +79,13 @@ WATERMARK_FILE = _config_mod.WATERMARK_FILE
 
 
 def _get_status() -> dict[str, Any]:
-    """Read watermark file to report last sync timestamp."""
+    """Delegate to scanner.get_status() for canonical health values."""
     try:
-        data = json.loads(WATERMARK_FILE.read_text())
-        return {
-            "last_watermark": data.get("last_watermark"),
-            "last_scan_ts": data.get("last_scan_ts"),
-            "rows_synced": data.get("rows_synced", 0),
-        }
+        return _scanner_mod.get_status(WATERMARK_FILE)
     except Exception:
         return {
-            "last_watermark": None,
-            "last_scan_ts": None,
+            "last_ended_at": None,
+            "last_sync": None,
             "rows_synced": 0,
         }
 
@@ -95,6 +117,18 @@ async def health() -> dict[str, Any]:
     )
 
 
+@router.post("/sync")
+async def sync() -> dict[str, Any]:
+    """Trigger a manual reconciliation pass and return summary."""
+    result = _scanner_mod.run_sync(STATE_DB, FACT_DB, WATERMARK_FILE)
+    return _api_wrap(
+        {
+            "synced": True,
+            "result": result,
+        }
+    )
+
+
 @router.get("/summary")
 async def summary(
     days: int = Query(default=7, ge=1, le=90),
@@ -108,10 +142,12 @@ async def jobs(
     days: int = Query(default=7, ge=1, le=90),
 ) -> dict[str, Any]:
     """Per-job aggregates: runs, total cost, avg cost, last run."""
+    raw_jobs = _facts_mod.query_jobs(FACT_DB, days=days)
+    enriched = _enrich_jobs_with_names(raw_jobs)
     return _api_wrap(
         {
             "days": days,
-            "jobs": _facts_mod.query_jobs(FACT_DB, days=days),
+            "jobs": enriched,
         }
     )
 

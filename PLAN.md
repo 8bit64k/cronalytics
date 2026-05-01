@@ -194,6 +194,12 @@ dashboard/
 
 **Status:** Partial. The two biggest real-world failure modes (relative imports, route collision) were discovered and fixed during Phase 3 development. Remaining tasks are traditional QA/backlog.
 
+**Done this session:**
+- [x] Gateway restart recovery: `__init__.py` auto-starts scanner on plugin load
+- [x] Plugin disable/enable: same scanner bootstrap covers gaps
+- [x] Cost NULL handling: removed `COALESCE(..., 0)`, dashboard shows `"\u2014"` for null
+- [x] Timezone handling: `fmtTime` includes `timeZoneName: "short"`
+
 ---
 
 ## Phase 6: Documentation & Release Prep
@@ -241,8 +247,78 @@ dashboard/
 | 2: Scanner | ✅ Core complete | 6/8 | 2 (sync wiring, periodic/auto-run) |
 | 3: API | ✅ Complete | 7/7 | 0 |
 | 4: Frontend | ✅ MVP complete | 5/9 | 4 (sort, expand, highlight, mobile) |
-| 5: Hardening | 🟡 Partial | 2/8 | 6 |
+| 2.5: Data Correction | ✅ Complete | 9/9 | 0 |
+| 2.6: Sync Endpoint | ✅ Complete | 9/9 | 0 |
+| 5: Hardening | 🟡 Partial | 6/10 | 4 (schema resilience, error logging, config validation, perf) |
 | 6: Docs | ⚫ Not started | 0/6 | 6 |
+
+---
+
+## Phase 2.5: Data Model Correction — Job ID Parsing & Human-Readable Names
+
+**Goal:** Fix the `job_id` parser so it correctly maps to the stable job definition ID (e.g. `841aee933270`), and enrich dashboard surfaces with human-readable job names so users see "phosphor-daily-backup" instead of a hex string.
+
+**Background:** The original `_make_job_id()` incorrectly included the datestamp in the job ID because session IDs are `cron_<job_id>_<YYYYMMDD>_<HHMMSS>` (4 segments), not `cron_<job_id>_<timestamp>` (3 segments). This fragmented per-job aggregation: every daily run of the same job appeared as a different job. Additionally, job IDs are opaque to users — they never see them unless they read `jobs.json` or output files directly. Without the job name, the dashboard is not useful at a glance.
+
+**Files touched:**
+```
+facts.py                          -- Fix _make_job_id() parser
+plugin_api.py                     -- Enrich /jobs with name from jobs.json
+dashboard/dist/index.js           -- Render job name in table, fallback to truncated id
+```
+
+**Deliverables:**
+- [x] `_make_job_id()` drops the final **two** underscore segments (`YYYYMMDD_HHMMSS`) instead of one
+- [x] Parser unit tested with sample session IDs (underscore-less id, underscore id, edge cases)
+- [x] `_load_job_names()` helper reads `~/.hermes/cron/jobs.json` and resolves `job_id` → `name`
+- [x] `/jobs` API response includes `name` field per job (null-safe fallback)
+- [x] Jobs table renders `name` as primary label, with `job_id` as secondary mono detail
+- [x] Fact DB rebuilt from source of truth (`state.db` backfill) to correct historical rows
+- [x] Watermark reset and scanner run to repopulate with clean job IDs
+- [x] Header badge and summary unaffected (Operates on run count, not job name)
+- [ ] (Optional, Phase 2.5 follow-up) Prompt caching strategy: decide whether to capture job prompts for historical drift tracking
+
+**Design note — session_id vs job_id semantics after fix:**
+- `session_id` = row-level unique key identifying a single run instance (`cron_841aee933270_20260429_222224`)
+- `job_id` = stable grouping key matching the job definition in `jobs.json` (`841aee933270`)
+- `name` = user-facing label resolved at query time from `jobs.json` (`"phosphor-daily-backup"`)
+
+This distinction enables both per-instance cost analysis and rolled-up per-job cost analysis natively in the same schema.
+
+**Status:** ✅ Complete. Planned as standalone iteration before resuming Phase 5/6.
+
+---
+
+## Phase 2.6: Scanner Importlib Refactor, Sync Endpoint & Frontend Button
+
+**Goal:** Make the reconciliation scanner importlib-safe so `plugin_api.py` can load it dynamically, wire a `POST /sync` endpoint that actually runs the scanner, fix health metadata (`rows_synced`), and add a "Sync Now" button to the dashboard for on-demand backfills.
+
+**Background:** `scanner.py` currently uses relative package imports (`from . import facts`, `from .logger import logger`) that work in the gateway context but fail when loaded via importlib by the dashboard server. This prevents the API from calling `scanner.run_sync()` directly. Additionally, `rows_synced` is never written to the watermark file, so the health endpoint always reports `0` even after successful backfills. Users have no way to trigger a sync from the UI.
+
+**Files touched:**
+```
+scanner.py                          -- Replace relative imports with importlib-safe loading; include rows_synced in watermark
+plugin_api.py                       -- Add POST /sync route; delegate _get_status() to scanner.get_status()
+dashboard/dist/index.js             -- Add "Sync Now" button with loading state and last-sync timestamp
+```
+
+**Deliverables:**
+- [x] `scanner.py` uses importlib-safe module loading (mirrors `plugin_api.py` `_load_module` pattern)
+- [x] `POST /api/plugins/cron-insights/sync` returns `{ inserted, skipped, elapsed_ms, new_watermark }`
+- [x] `_get_status()` in `plugin_api.py` delegates to `scanner.get_status()` (removes duplicate watermark-reading logic)
+- [x] Scanner writes `rows_synced` (inserted + skipped) to watermark file
+- [x] Frontend "Sync Now" button added to jobs table
+- [x] Button shows last sync timestamp + elapsed time
+- [x] Empty state: if `facts.db` is empty or never built, UI shows guidance to click "Sync Now"
+- [x] On-demand sync verified end-to-end (click button → curl /sync → verify DB count increased)
+- [x] Health `/status` returns accurate `rows_synced` after manual sync
+
+**Out of scope for this iteration:**
+- Auto-trigger on dashboard load (covered by manual button for now)
+- Periodic/auto-run scheduler (still Phase 2 backlog)
+- Test infrastructure (separate pass)
+
+**Status:** ✅ Complete. All deliverables verified. Button visibility fixed in follow-up session (Omatchy CSS variable fix).
 
 ---
 
@@ -256,5 +332,5 @@ dashboard/
 ---
 
 *Last updated: 2026-04-30*
-*Current commit: `3e55493`*
-*Next step: Wire POST /sync back to actual scanner.py; then decide whether to tackle Phase 5 hardening or Phase 6 docs.*
+*Current commit: `d08b638`*
+*Phase 5 in progress (6/10 complete). Next: Phase 5 remaining tasks OR Phase 6 docs.*
