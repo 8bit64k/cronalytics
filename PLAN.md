@@ -207,6 +207,29 @@ dashboard/dist/index.js           -- Two-tone cost display (stacked bar, pill ba
 
 ---
 
+## Phase 4.6: Per-Job Token Attribution in Jobs Table
+
+**Goal:** Close the gap between the summary token headline and the jobs table by adding per-job token aggregates, so users can identify which specific job is consuming input/output tokens.
+
+**Background:** The dashboard currently shows "Tokens: in XX / out YY" as a summary card, but the jobs table only lists runs, total cost, avg cost, and model per job. The natural diagnostic question — *which job is eating all those tokens?* — has no answer. Cost and tokens aren't perfectly correlated across models and pricing tiers, so token bloat and cost bloat are separate signals.
+
+**Files:**
+```
+facts.py                          -- Add SUM(input_tokens), SUM(output_tokens), AVG(input_tokens) to query_jobs()
+plugin_api.py                     -- Expose new fields in /jobs response (no API change needed if /jobs already forwards)
+dashboard/dist/index.js           -- Add compact token column to jobs table (e.g. "234K ↓ 89K" or single "Total tokens")
+```
+
+**Deliverables:**
+- [ ] `query_jobs()` aggregates `SUM(input_tokens)`, `SUM(output_tokens)`, and optionally `AVG(input_tokens)` per job
+- [ ] Frontend jobs table gains a compact token column (stacked in/out, horizontally if width permits)
+- [ ] Column is sortable (future Phase 4 backlog) or at least surfaces high-token jobs visually
+- [ ] iPad width check: if table is too crowded, use tooltip/hover expansion or collapse to single "Total Tokens" number
+
+**Status:** Design-only. Staged as follow-up to Phase 4.5.
+
+---
+
 ## Phase 5: Integration & Edge Cases
 
 **Goal:** Harden the plugin against real-world failure modes.
