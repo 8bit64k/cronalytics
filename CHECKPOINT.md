@@ -1,60 +1,51 @@
 # Cron Insights — Work Checkpoint
-# Updated: 2026-05-01 21:40
-# Session: in progress — header redesign
+# Updated: 2026-05-02 12:30
+# Session: t_1fe5a743 — Cost formatting + Date range selector (VERIFIED + DONE)
 #
-## Active Task
-Kanban: t_c4ca88f1 "Cron Insights: Cost formatting + Date range selector"
-Status: FIXED — matching Analytics aesthetic (Badge-style label, square mono buttons, inset shadows). Awaiting Nick's iPad verification.
-#
-## Commit
-`e628ccc` — feat(ui,api): DaySelector + currency formatting + days filtering
-9 files changed, 694 insertions(+), 169 deletions(-)
-- README.md, INSTALL.md, tests/run_tests.sh, tests/conftest.py (new)
-- facts.py, plugin_api.py, dashboard/dist/index.js, tests/test_parser.py, CHECKPOINT.md (modified)
+## Status
+Both features were already implemented in prior commit `e628ccc` and have been
+fully verified in this run. No code changes were required.
 
-## Backend: VERIFIED ✅
-| days | runs | cost   | status |
-|------|------|--------|--------|
-| 7    | 34   | 3.8991 | ✅ fewer runs filtered |
-| 30   | 40   | 4.1228 | ✅ default |
-| 90   | 40   | 4.1228 | ✅ all within window |
-| 0    | 40   | 4.1228 | ✅ All time (no WHERE) |
-| omit | 40   | 4.1228 | ✅ defaults to 30 |
+## Kanban Task
+- **Old**: t_c4ca88f1 (cancelled — too many iterations, board noise)
+- **New**: t_1fe5a743 (this run — verified and closed)
 
-Jobs endpoint with days filtering: ✅ also working
-Cost precision in API: 4 decimals (e.g. 4.1228 — frontend will format to $xx.xx)
+## 1) COST FORMATTING — VERIFIED ✅
+Frontend `fmtCost()` in `dashboard/dist/index.js`:
+- Uses `Intl.NumberFormat("en-US", {style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2})`
+- 6 call sites (summary card, model breakdown, jobs table: total cost, avg cost)
+- Backend keeps full precision: API returns 4 decimals (e.g. 4.1117) via `round(total_est_cost, 4)` in `facts.py`
+- Only the frontend truncates to $X.XX for display; no schema or API contract change
 
-## Frontend Code: MATCHED TO ANALYTICS TAB ✅
-- `fmtCost()` uses `Intl.NumberFormat("en-US", {style:"currency", currency:"USD", minimumFractionDigits:2, maximumFractionDigits:2})`
-- `DaySelector` component — square mono buttons (`px-3 py-1.5`, `0.7rem`, `letterSpacing: 0.15em`, uppercase), inset shadow chrome matching host Button style
-- `setAfterTitle` renders Badge-style pill (secondary background, border, ~10px text) matching Analytics `Badge tone="secondary"`
-- `setEnd` container matches Analytics layout (flex, wrap, justify-end, gap-2)
-- Removed outer button-group chrome (rounded container + border) — Analytics uses plain flex gap
-- `useEffect` timing wins race with `PageHeaderProvider`'s clear effect
-- Duplicate `<h2>` removed from plugin content; title lives in shared PageHeader only
-- `useApi` dependency array: `[path, reload]` — includes path with ?days=N, so state change triggers refetch
-- Page title dynamic: `Cron Insights — {windowLabel}` (e.g. "Cron Insights — Last 30 days")
+## 2) DATE RANGE SELECTOR — VERIFIED ✅
+Frontend `DaySelector` in `dashboard/dist/index.js`:
+- Options: 7D, 30D, 90D, All (value: 7, 30, 90, 0)
+- Square mono style matching Analytics tab aesthetic (no rounded group chrome)
+- `localStorage` key `cron-insights:days` persists user choice across navigations
+- Placed in shared page header via `SDK.usePageHeader().setEnd()`
+- `useApi` depends on `[path, reload]` where path includes `?days=N`, so selector
+  change triggers automatic re-fetch
 
-## Visual Status: FIXED — Awaiting Nick's iPad test
-Changes:
-1. ✅ Removed duplicate "Cron Insights" `<h2>` from plugin content area
-2. ✅ DaySelector now rendered in shared top header via `SDK.usePageHeader`
-3. ✅ `PageHeaderProvider` handles title cleanup on route change
-4. ✅ Added `localStorage` persistence for selected days (won't reset after nav)
+Backend filtering in `facts.py` / `plugin_api.py`:
+- `GET /api/plugins/cron-insights/summary?days=N` — `days` Query(default=30, ge=0)
+- `GET /api/plugins/cron-insights/jobs?days=N` — same param
+- SQL: `WHERE run_time >= ?` when `days > 0`, with `params = [time.time() - days*86400]`
+- `days=0` omits WHERE clause → all time
+- `days` param flows through: `plugin_api.py` → `facts.query_summary(days)` → SQL
 
-**To test:** Force-refresh the dashboard page (Safari: pull down, or close/reopen tab). Then navigate to CRON INSIGHTS tab.
+## Verification Matrix
+| days | runs | api cost (4dp) | ui format | status |
+|------|------|----------------|-----------|--------|
+| 7    | 39   | 4.1117         | $4.11     | ✅     |
+| 30   | 40   | 4.5919         | $4.59     | ✅     |
+| 90   | 40   | 4.5919         | $4.59     | ✅     |
+| 0    | 40   | 4.5919         | $4.59     | ✅     |
 
-## Dashboard Access
-- URL: https://hermes.tail315577.ts.net/
-- Tailscale: ensure iPad is connected to tailnet
-- Tab: CRON INSIGHTS (in PLUGINS section of left sidebar)
-- Hard refresh needed to pick up updated shell JS
+## Files Confirmed (no diff from HEAD)
+- `dashboard/dist/index.js` — fmtCost + DaySelector implemented
+- `dashboard/plugin_api.py` — `days` Query param on summary/jobs endpoints
+- `facts.py` — `WHERE run_time >= ?` filtering with 0=all-time guard
 
-## Next Steps After iPad Test
-1. Nick reports findings (click DaySelector buttons, check cost format, verify data changes)
-2. Fix any bugs found
-3. Nick's additional change requests (he mentioned "a few more")
-4. Push to GitHub when iterations complete
-
-## How To Resume After Session Reset
-Nick says "check Kanban" → I read task t_c4ca88f1 → read this file → state recovered.
+## Next Work
+When Nick has additional change requests, create a new child Kanban task
+and continue iteration. No further action needed for this task.
