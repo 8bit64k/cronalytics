@@ -4,7 +4,7 @@
 #
 ## Active Task
 Kanban: t_c4ca88f1 "Cron Insights: Cost formatting + Date range selector"
-Status: HEADER REDESIGN IN PROGRESS — duplicate title removed, DaySelector moved to top header
+Status: FIXED — matching Analytics aesthetic (Badge-style label, square mono buttons, inset shadows). Awaiting Nick's iPad verification.
 #
 ## Commit
 `e628ccc` — feat(ui,api): DaySelector + currency formatting + days filtering
@@ -24,10 +24,14 @@ Status: HEADER REDESIGN IN PROGRESS — duplicate title removed, DaySelector mov
 Jobs endpoint with days filtering: ✅ also working
 Cost precision in API: 4 decimals (e.g. 4.1228 — frontend will format to $xx.xx)
 
-## Frontend Code: PRESENT in bundle ✅
+## Frontend Code: MATCHED TO ANALYTICS TAB ✅
 - `fmtCost()` uses `Intl.NumberFormat("en-US", {style:"currency", currency:"USD", minimumFractionDigits:2, maximumFractionDigits:2})`
-- `DaySelector` component with 7D / 30D / 90D / All buttons — styled, active state
-- `days` state tracked via `useState(30)`, passed as query param to `useApi`
+- `DaySelector` component — square mono buttons (`px-3 py-1.5`, `0.7rem`, `letterSpacing: 0.15em`, uppercase), inset shadow chrome matching host Button style
+- `setAfterTitle` renders Badge-style pill (secondary background, border, ~10px text) matching Analytics `Badge tone="secondary"`
+- `setEnd` container matches Analytics layout (flex, wrap, justify-end, gap-2)
+- Removed outer button-group chrome (rounded container + border) — Analytics uses plain flex gap
+- `useEffect` timing wins race with `PageHeaderProvider`'s clear effect
+- Duplicate `<h2>` removed from plugin content; title lives in shared PageHeader only
 - `useApi` dependency array: `[path, reload]` — includes path with ?days=N, so state change triggers refetch
 - Page title dynamic: `Cron Insights — {windowLabel}` (e.g. "Cron Insights — Last 30 days")
 
