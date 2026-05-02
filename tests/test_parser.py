@@ -1,16 +1,30 @@
 """Unit tests for _make_job_id parser.
 
 Run: uv run --with pytest python3 -m pytest tests/test_parser.py -v
+
+NOTE: The plugin directory name 'cron-insights' contains a hyphen, which
+makes it an invalid Python package name. We load the facts module via
+importlib (same pattern used by the dashboard server) to avoid package
+import issues.
 """
 
-import pytest
-import sys
+import importlib.util
 from pathlib import Path
+import pytest
 
-# Add plugin root to path so we can import facts module standalone.
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from facts import _make_job_id
+def _load_facts():
+    """Load facts.py dynamically via importlib (no package context needed)."""
+    plugin_root = Path(__file__).resolve().parent.parent
+    path = plugin_root / "facts.py"
+    spec = importlib.util.spec_from_file_location("croninsights_test_facts", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+_facts = _load_facts()
+_make_job_id = _facts._make_job_id
 
 
 class TestMakeJobId:

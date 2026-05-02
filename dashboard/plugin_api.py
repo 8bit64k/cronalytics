@@ -131,17 +131,17 @@ async def sync() -> dict[str, Any]:
 
 @router.get("/summary")
 async def summary(
-    days: int = Query(default=7, ge=1, le=90),
+    days: int = Query(default=30, ge=0),
 ) -> dict[str, Any]:
-    """Aggregated stats for cron runs over the last N days."""
+    """Aggregated stats for cron runs over the last N days (0 = all time)."""
     return _api_wrap(_facts_mod.query_summary(FACT_DB, days=days))
 
 
 @router.get("/jobs")
 async def jobs(
-    days: int = Query(default=7, ge=1, le=90),
+    days: int = Query(default=30, ge=0),
 ) -> dict[str, Any]:
-    """Per-job aggregates: runs, total cost, avg cost, last run."""
+    """Per-job aggregates: runs, total cost, avg cost, last run (0 = all time)."""
     raw_jobs = _facts_mod.query_jobs(FACT_DB, days=days)
     enriched = _enrich_jobs_with_names(raw_jobs)
     return _api_wrap(
@@ -156,15 +156,17 @@ async def jobs(
 async def job_runs(
     job_id: str,
     limit: int = Query(default=50, ge=1, le=500),
+    days: int = Query(default=0, ge=0),
 ) -> dict[str, Any]:
-    """Individual run history for a specific job."""
-    rows = _facts_mod.query_job_runs(FACT_DB, job_id=job_id, limit=limit)
+    """Individual run history for a specific job (0 = all time)."""
+    rows = _facts_mod.query_job_runs(FACT_DB, job_id=job_id, limit=limit, days=days)
     if not rows:
         raise HTTPException(status_code=404, detail=f"No runs found for job {job_id}")
     return _api_wrap(
         {
             "job_id": job_id,
             "limit": limit,
+            "days": days,
             "runs": rows,
         }
     )
@@ -172,9 +174,9 @@ async def job_runs(
 
 @router.get("/models")
 async def models(
-    days: int = Query(default=7, ge=1, le=90),
+    days: int = Query(default=30, ge=0),
 ) -> dict[str, Any]:
-    """Per-model usage aggregates."""
+    """Per-model usage aggregates (0 = all time)."""
     return _api_wrap(
         {
             "days": days,
@@ -185,9 +187,9 @@ async def models(
 
 @router.get("/trends")
 async def trends(
-    days: int = Query(default=7, ge=1, le=90),
+    days: int = Query(default=30, ge=0),
 ) -> dict[str, Any]:
-    """Daily cost trend."""
+    """Daily cost trend (0 = all time)."""
     return _api_wrap(
         {
             "days": days,

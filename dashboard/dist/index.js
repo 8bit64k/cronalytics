@@ -9,10 +9,16 @@
   const { fetchJSON } = SDK;
   const { Card, CardHeader, CardTitle, CardContent, Badge } = SDK.components;
 
+  // ── Currency formatter: 2 decimals with smart truncation ─────────
   function fmtCost(n) {
     if (n == null) return "—";
     if (n === 0) return "$0.00";
-    return "$" + parseFloat(n).toFixed(6);
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(n);
   }
 
   function fmtTime(ts) {
@@ -38,15 +44,50 @@
     return { data, loading, error, refetch: () => setReload(r => r + 1) };
   }
 
+  // ── Day selector control ─────────────────────────────────────────
+  function DaySelector({ selected, onChange }) {
+    const days = [
+      { label: "7D", value: 7 },
+      { label: "30D", value: 30 },
+      { label: "90D", value: 90 },
+      { label: "All", value: 0 },
+    ];
+    return React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: "0.25rem",
+        background: "rgba(255,255,255,0.03)",
+        padding: "0.2rem",
+        borderRadius: "0.375rem",
+        border: "1px solid var(--color-border, rgba(255,255,255,0.08))",
+        fontSize: "0.72rem",
+        fontWeight: 500,
+      }
+    }, days.map(d => React.createElement("button", {
+      key: d.value,
+      onClick: () => onChange(d.value),
+      style: {
+        padding: "0.2rem 0.6rem",
+        borderRadius: "0.2rem",
+        border: "none",
+        background: selected === d.value ? "var(--foreground-base, var(--foreground))" : "transparent",
+        color: selected === d.value ? "var(--background-base, var(--background, #111))" : "var(--foreground-base, var(--foreground))",
+        cursor: "pointer",
+        fontWeight: selected === d.value ? 600 : 500,
+        fontSize: "0.72rem",
+      }
+    }, d.label)));
+  }
+
   // ── Main /cron tab ──────────────────────────────────────────────
   function CronTab() {
-    const summary = useApi("/api/plugins/cron-insights/summary?days=7");
-    const jobs = useApi("/api/plugins/cron-insights/jobs?days=7");
+    const [days, setDays] = useState(30);
+    const summary = useApi("/api/plugins/cron-insights/summary?days=" + days);
+    const jobs = useApi("/api/plugins/cron-insights/jobs?days=" + days);
     const [syncing, setSyncing] = useState(false);
     const [syncInfo, setSyncInfo] = useState(null);
 
     useEffect(() => {
-      // Fetch sync status once on mount for last-sync metadata
       fetchJSON("/api/plugins/cron-insights/health")
         .then(d => {
           if (d && d.sync) {
@@ -64,9 +105,7 @@
       setSyncing(true);
       let cancelled = false;
       fetchJSON("/api/plugins/cron-insights/sync", { method: "POST" })
-        .then(d => {
-          if (cancelled) return;
-          // Refetch health to get authoritative watermark after sync finishes
+        .then(() => {
           fetchJSON("/api/plugins/cron-insights/health")
             .then(d2 => {
               if (d2 && d2.sync) {
@@ -86,7 +125,6 @@
         .finally(() => {
           if (!cancelled) setSyncing(false);
         });
-      return () => { cancelled = true; };
     };
 
     if (summary.loading || jobs.loading) {
@@ -101,10 +139,19 @@
 
     const s = summary.data || {};
     const jobList = (jobs.data && jobs.data.jobs) ? jobs.data.jobs : [];
+    const windowLabel = days === 0 ? "All time" : "Last " + days + " days";
+    const prevLabel = s.previous_period && s.previous_period.cost !== undefined
+      ? " (prev " + fmtCost(s.previous_period.cost) + ")"
+      : "";
 
     return React.createElement("div", { style: { padding: "1rem", color: "var(--foreground-base, var(--foreground))" } },
-      // Page title
-      React.createElement("h2", { style: { marginBottom: "0.5rem", fontSize: "1.125rem", fontWeight: 600 } }, "Cron Insights"),
+      // Title row
+      React.createElement("div", {
+        style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }
+      },
+        React.createElement("h2", { style: { margin: 0, fontSize: "1.125rem", fontWeight: 600 } }, "Cron Insights"),
+        React.createElement(DaySelector, { selected: days, onChange: setDays })
+      ),
 
       // Summary cards
       React.createElement("div", {
@@ -119,7 +166,7 @@
           React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Total Runs")),
           React.createElement(CardContent, null,
             React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700 } }, s.total_runs || 0),
-            React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6 } }, "Last 7 days")
+            React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6 } }, windowLabel)
           )
         ),
         React.createElement(Card, null,
@@ -127,8 +174,7 @@
           React.createElement(CardContent, null,
             React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700 } }, fmtCost(s.total_estimated_cost)),
             React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6 } },
-              "Trend: ", s.trend || "→",
-              s.previous_period ? " (prev " + fmtCost(s.previous_period.cost) + ")" : ""
+              "Trend: ", s.trend || "→", prevLabel
             )
           )
         ),
@@ -195,14 +241,14 @@
               syncing
                 ? "Syncing cron sessions..."
                 : (syncInfo && syncInfo.lastSync
-                  ? "No jobs in the last 7 days. Last sync: " + syncInfo.lastSync.split("T").join(" ").slice(0, 19) + " UTC"
+                  ? "No jobs in " + windowLabel.toLowerCase() + ". Last sync: " + syncInfo.lastSync.split("T").join(" ").slice(0, 19) + " UTC"
                   : "No cron jobs captured. Click Sync Now to backfill from state.db.")
             )
             : React.createElement("div", { style: { overflow: "auto" } },
               React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
                 React.createElement("thead", null,
                   React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
-                      ["Job", "Runs", "Total Cost", "Avg Cost", "Last Run", "Model"].map(h =>
+                    ["Job", "Runs", "Total Cost", "Avg Cost", "Last Run", "Model"].map(h =>
                       React.createElement("th", {
                         key: h,
                         style: { textAlign: h === "Job ID" || h === "Model" || h === "Last Run" ? "left" : "right", padding: "0.5rem 0.35rem" }

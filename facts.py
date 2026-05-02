@@ -229,84 +229,86 @@ def row_exists(db_path: Path, session_id: str) -> bool:
 # Aggregation queries (Phase 3 API)
 # ---------------------------------------------------------------------------
 
-def query_summary(db_path: Path, days: int = 7) -> dict[str, Any]:
-    """Return aggregate stats for cron runs in the last N days."""
+def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
+    """Return aggregate stats for cron runs in the last N days (0 = all time)."""
     conn = get_conn(db_path)
-    cutoff = time.time() - (days * 86400)
+    cutoff_clause = " WHERE run_time >= ?"
+    params = [time.time() - (days * 86400)] if days > 0 else []
+    where = cutoff_clause if days > 0 else ""
 
     cursor = conn.execute(
-        """
+        f"""
         SELECT count(*),
                SUM(estimated_cost_usd),
                SUM(actual_cost_usd),
                COALESCE(SUM(input_tokens), 0),
                COALESCE(SUM(output_tokens), 0)
-        FROM cron_runs
-        WHERE run_time >= ?
+        FROM cron_runs{where}
         """,
-        (cutoff,),
+        params,
     )
     total_runs, total_est_cost, total_act_cost, total_in, total_out = cursor.fetchone()
 
     # Cost by model (only rows with known cost)
+    cost_where = where + (" AND " if days > 0 else " WHERE ") + "estimated_cost_usd IS NOT NULL"
+
     cursor = conn.execute(
-        """
+        f"""
         SELECT model, count(*) AS runs, SUM(estimated_cost_usd) AS cost
-        FROM cron_runs
-        WHERE run_time >= ? AND estimated_cost_usd IS NOT NULL
+        FROM cron_runs{cost_where}
         GROUP BY model
         ORDER BY cost DESC
         """,
-        (cutoff,),
+        params,
     )
     by_model = [
-        {"model": r[0] or "unknown", "runs": r[1], "total_cost": round(r[2], 8) if r[2] is not None else None}
+        {"model": r[0] or "unknown", "runs": r[1], "total_cost": round(r[2], 4) if r[2] is not None else None}
         for r in cursor.fetchall()
     ]
 
     # Previous period for trend
-    prev_cutoff = cutoff - (days * 86400)
-    cursor = conn.execute(
-        """
-        SELECT count(*), SUM(estimated_cost_usd)
-        FROM cron_runs
-        WHERE run_time >= ? AND run_time < ?
-        """,
-        (prev_cutoff, cutoff),
-    )
-    prev_runs, prev_cost = cursor.fetchone()
-
+    prev_info = {}
     trend = "→"
-    if prev_cost is not None and prev_cost > 0 and total_est_cost is not None:
-        delta = (total_est_cost - prev_cost) / prev_cost
-        if delta > 0.05:
-            trend = "↑"
-        elif delta < -0.05:
-            trend = "↓"
+    if days > 0:
+        prev_cutoff = time.time() - (2 * days * 86400)
+        cursor = conn.execute(
+            "SELECT count(*), SUM(estimated_cost_usd) FROM cron_runs WHERE run_time >= ? AND run_time < ?",
+            (prev_cutoff, params[0] if params else time.time()),
+        )
+        prev_runs, prev_cost = cursor.fetchone()
+        prev_info = {
+            "runs": prev_runs or 0,
+            "cost": round(prev_cost, 4) if prev_cost is not None else None,
+        }
+        if prev_cost is not None and prev_cost > 0 and total_est_cost is not None:
+            delta = (total_est_cost - prev_cost) / prev_cost
+            if delta > 0.05:
+                trend = "↑"
+            elif delta < -0.05:
+                trend = "↓"
 
     return {
         "days": days,
         "total_runs": total_runs,
-        "total_estimated_cost": round(total_est_cost, 8) if total_est_cost is not None else None,
-        "total_actual_cost": round(total_act_cost, 8) if total_act_cost is not None else None,
+        "total_estimated_cost": round(total_est_cost, 4) if total_est_cost is not None else None,
+        "total_actual_cost": round(total_act_cost, 4) if total_act_cost is not None else None,
         "total_input_tokens": total_in or 0,
         "total_output_tokens": total_out or 0,
         "cost_by_model": by_model,
-        "previous_period": {
-            "runs": prev_runs or 0,
-            "cost": round(prev_cost, 8) if prev_cost is not None else None,
-        },
-        "trend": trend,
+        "previous_period": prev_info if days > 0 else {},
+        "trend": trend if days > 0 else "→",
     }
 
 
-def query_jobs(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
-    """Return per-job aggregates."""
+def query_jobs(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
+    """Return per-job aggregates (0 = all time)."""
     conn = get_conn(db_path)
-    cutoff = time.time() - (days * 86400)
+    cutoff_clause = " WHERE run_time >= ?"
+    params = [time.time() - (days * 86400)] if days > 0 else []
+    where = cutoff_clause if days > 0 else ""
 
     cursor = conn.execute(
-        """
+        f"""
         SELECT job_id,
                count(*) AS runs,
                SUM(estimated_cost_usd) AS total_cost,
@@ -314,19 +316,18 @@ def query_jobs(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
                MAX(run_time) AS last_run,
                COALESCE(MIN(run_time), 0) AS first_run,
                MAX(model) AS last_model
-        FROM cron_runs
-        WHERE run_time >= ?
+        FROM cron_runs{where}
         GROUP BY job_id
         ORDER BY total_cost DESC
         """,
-        (cutoff,),
+        params,
     )
     return [
         {
             "job_id": r[0],
             "runs": r[1],
-            "total_cost": round(r[2], 8) if r[2] is not None else None,
-            "avg_cost": round(r[3], 8) if r[3] is not None else None,
+            "total_cost": round(r[2], 4) if r[2] is not None else None,
+            "avg_cost": round(r[3], 4) if r[3] is not None else None,
             "last_run": r[4],
             "first_run": r[5],
             "last_model": r[6] or "unknown",
@@ -336,12 +337,18 @@ def query_jobs(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
 
 
 def query_job_runs(
-    db_path: Path, job_id: str, limit: int = 50
+    db_path: Path, job_id: str, limit: int = 50, days: int = 0
 ) -> list[dict[str, Any]]:
-    """Return individual run history for a specific job."""
+    """Return individual run history for a specific job (0 = all time)."""
     conn = get_conn(db_path)
+    cutoff_clause = " AND run_time >= ?"
+    params = [job_id]
+    if days > 0:
+        params.append(time.time() - (days * 86400))
+    where = cutoff_clause if days > 0 else ""
+
     cursor = conn.execute(
-        """
+        f"""
         SELECT session_id, job_id, run_time, ended_at,
                duration_seconds, model,
                input_tokens, output_tokens, reasoning_tokens,
@@ -350,11 +357,11 @@ def query_job_runs(
                cost_status, billing_provider,
                end_reason, success
         FROM cron_runs
-        WHERE job_id = ?
+        WHERE job_id = ?{where}
         ORDER BY run_time DESC
         LIMIT ?
         """,
-        (job_id, limit),
+        params + [limit],
     )
     cols = [
         "session_id", "job_id", "run_time", "ended_at",
@@ -392,13 +399,15 @@ def query_health(db_path: Path) -> dict[str, Any]:
     }
 
 
-def query_models(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
-    """Return per-model usage aggregates."""
+def query_models(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
+    """Return per-model usage aggregates (0 = all time)."""
     conn = get_conn(db_path)
-    cutoff = time.time() - (days * 86400)
+    cutoff_clause = " WHERE run_time >= ?"
+    params = [time.time() - (days * 86400)] if days > 0 else []
+    where = cutoff_clause if days > 0 else ""
 
     cursor = conn.execute(
-        """
+        f"""
         SELECT model,
                count(*) AS runs,
                SUM(estimated_cost_usd) AS total_cost,
@@ -406,19 +415,18 @@ def query_models(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
                COALESCE(SUM(input_tokens), 0) AS total_input,
                COALESCE(SUM(output_tokens), 0) AS total_output,
                MAX(run_time) AS last_run
-        FROM cron_runs
-        WHERE run_time >= ?
+        FROM cron_runs{where}
         GROUP BY model
         ORDER BY total_cost DESC
         """,
-        (cutoff,),
+        params,
     )
     return [
         {
             "model": r[0] or "unknown",
             "runs": r[1],
-            "total_cost": round(r[2], 8) if r[2] is not None else None,
-            "avg_cost": round(r[3], 8) if r[3] is not None else None,
+            "total_cost": round(r[2], 4) if r[2] is not None else None,
+            "avg_cost": round(r[3], 4) if r[3] is not None else None,
             "total_input_tokens": r[4],
             "total_output_tokens": r[5],
             "last_run": r[6],
@@ -427,30 +435,31 @@ def query_models(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
     ]
 
 
-def query_trends(db_path: Path, days: int = 7) -> list[dict[str, Any]]:
-    """Return daily cost and run-count trend."""
+def query_trends(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
+    """Return daily cost and run-count trend (0 = all time)."""
     conn = get_conn(db_path)
-    cutoff = time.time() - (days * 86400)
+    cutoff_clause = " WHERE run_time >= ?"
+    params = [time.time() - (days * 86400)] if days > 0 else []
+    where = cutoff_clause if days > 0 else ""
 
     cursor = conn.execute(
-        """
+        f"""
         SELECT date(run_time, 'unixepoch') AS day,
                count(*) AS runs,
                SUM(estimated_cost_usd) AS cost,
                COALESCE(SUM(input_tokens), 0) AS input_tokens,
                COALESCE(SUM(output_tokens), 0) AS output_tokens
-        FROM cron_runs
-        WHERE run_time >= ?
+        FROM cron_runs{where}
         GROUP BY day
         ORDER BY day ASC
         """,
-        (cutoff,),
+        params,
     )
     return [
         {
             "day": r[0],
             "runs": r[1],
-            "cost": round(r[2], 8) if r[2] is not None else None,
+            "cost": round(r[2], 4) if r[2] is not None else None,
             "input_tokens": r[3],
             "output_tokens": r[4],
         }
