@@ -99,7 +99,9 @@
 
     const pageHeader = SDK.usePageHeader ? SDK.usePageHeader() : null;
 
-    useLayoutEffect(() => {
+    // Use useEffect (not useLayoutEffect) so this runs AFTER
+    // PageHeaderProvider's layout effect clears slots on route change.
+    useEffect(() => {
       if (!pageHeader) return;
       const windowLabel = days === 0 ? "All time" : "Last " + days + " days";
       pageHeader.setAfterTitle(
@@ -183,6 +185,14 @@
       : "";
 
     return React.createElement("div", { style: { padding: "1rem", color: "var(--foreground-base, var(--foreground))" } },
+      // Fallback inline header when SDK doesn't expose usePageHeader
+      !pageHeader && React.createElement("div", {
+        style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }
+      },
+        React.createElement("h2", { style: { margin: 0, fontSize: "1.125rem", fontWeight: 600 } }, "Cron Insights"),
+        React.createElement(DaySelector, { selected: days, onChange: setDays })
+      ),
+
       // Summary cards
       React.createElement("div", {
         style: {
