@@ -55,26 +55,35 @@
     return React.createElement("div", {
       style: {
         display: "flex",
-        gap: "0.25rem",
-        background: "rgba(255,255,255,0.03)",
-        padding: "0.2rem",
-        borderRadius: "0.375rem",
-        border: "1px solid var(--color-border, rgba(255,255,255,0.08))",
-        fontSize: "0.72rem",
-        fontWeight: 500,
+        flexWrap: "wrap",
+        alignItems: "center",
+        gap: "0.375rem",
       }
     }, days.map(d => React.createElement("button", {
       key: d.value,
+      type: "button",
       onClick: () => onChange(d.value),
       style: {
-        padding: "0.2rem 0.6rem",
-        borderRadius: "0.2rem",
-        border: "none",
-        background: selected === d.value ? "var(--foreground-base, var(--foreground))" : "transparent",
-        color: selected === d.value ? "var(--background-base, var(--background, #111))" : "var(--foreground-base, var(--foreground))",
+        padding: "0.375rem 0.75rem",
+        borderRadius: "0",
+        border: selected === d.value ? "none" : "none",
+        background: selected === d.value
+          ? "var(--foreground-base, var(--foreground))"
+          : "transparent",
+        color: selected === d.value
+          ? "var(--background-base, var(--background, #111))"
+          : "var(--foreground-base, var(--foreground))",
         cursor: "pointer",
-        fontWeight: selected === d.value ? 600 : 500,
-        fontSize: "0.72rem",
+        fontWeight: selected === d.value ? 700 : 400,
+        fontSize: "0.7rem",
+        letterSpacing: "0.15em",
+        textTransform: "uppercase",
+        fontFamily: "monospace",
+        lineHeight: 1,
+        // Subtle inset shadow for inactive buttons (outlined look)
+        boxShadow: selected === d.value
+          ? "inset -1px -1px 0 0 rgba(0,0,0,0.5), inset 1px 1px 0 0 rgba(255,255,255,0.5)"
+          : "inset -1px -1px 0 0 rgba(0,0,0,0.5), inset 1px 1px 0 0 rgba(255,255,255,0.5)",
       }
     }, d.label)));
   }
@@ -106,17 +115,33 @@
       const windowLabel = days === 0 ? "All time" : "Last " + days + " days";
       pageHeader.setAfterTitle(
         React.createElement("span", {
-          style: {
-            fontSize: "0.7rem",
-            opacity: 0.6,
-            fontWeight: 500,
-            letterSpacing: "0.02em",
-          }
-        }, windowLabel)
+          style: { display: "flex", alignItems: "center", gap: "0.5rem" }
+        },
+          React.createElement("span", {
+            style: {
+              fontSize: "0.625rem",
+              fontWeight: 500,
+              letterSpacing: "0.02em",
+              padding: "0.15rem 0.5rem",
+              borderRadius: "0.25rem",
+              background: "var(--secondary, rgba(255,255,255,0.06))",
+              color: "var(--foreground-base, var(--foreground))",
+              border: "1px solid var(--border, rgba(255,255,255,0.08))",
+            }
+          }, windowLabel)
+        )
       );
       pageHeader.setEnd(
         React.createElement("div", {
-          style: { display: "flex", alignItems: "center", gap: "0.5rem" }
+          style: {
+            display: "flex",
+            width: "100%",
+            minWidth: 0,
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            gap: "0.5rem",
+          }
         },
           React.createElement(DaySelector, { selected: days, onChange: setDays })
         )
