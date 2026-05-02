@@ -176,6 +176,37 @@ dashboard/
 
 ---
 
+## Phase 4.5: Success/Failure Cost Split & Dashboard Honesty
+
+**Goal:** Surface per-status cost breakdown in the dashboard so users can distinguish "cron wrapper completed" spend from true failure spend, without claiming to measure job-level success.
+
+**Background:** The `success` boolean in `facts.py` is derived from `end_reason` (`cron_complete`/`complete` → 1, else 0). However, this measures the *wrapper's* exit status, not the *payload's* actual outcome. A script that errors internally but returns a clean exit will show as `success=1`. Worse, the 7 cron sessions in `state.db` with `ended_at = NULL` are entirely invisible to the fact DB because the scanner filters them out. These "abandoned" sessions (gateway crash, killed process, stuck job) may represent the most important failure signal of all.
+
+**Files:**
+```
+facts.py                          -- Add status-split aggregates to query_summary() and query_jobs()
+plugin_api.py                     -- Expose new fields in /summary and /jobs responses
+dashboard/dist/index.js           -- Two-tone cost display (stacked bar, pill badge, or tooltip)
+```
+
+**Deliverables:**
+- [ ] `query_summary()` returns `successful_cost` + `failed_cost` (wrapper-completed vs. wrapper-failed)
+- [ ] `query_jobs()` returns per-job `successful_cost` + `failed_cost`
+- [ ] Frontend renders split without claiming "job success" — label as "Completed" / "Failed to finish"
+- [ ] Decision: add `abandoned_cost` (sessions with `ended_at IS NULL`) or keep out of scope
+  - *Option A:* Teach scanner to ingest `ended_at = NULL` rows into a separate `cron_runs_abandoned` table
+  - *Option B:* Compute abandoned cost on the fly from `state.db` in a new endpoint
+  - *Option C:* Defer; focus on completed-session split first
+- [ ] Design review: should the split be a headline metric, a detail-on-hover, or a sparkline?
+
+**Status:** Design-only. Blocked on decision re: abandoned sessions and UI treatment (headline vs. detail). See FEATURES.md §9 for data context.
+
+**Out of scope for this iteration:**
+- True payload-level success detection (would require parsing tool outputs, model-dependent)
+- Auto-alerting on failure cost thresholds
+
+---
+
 ## Phase 5: Integration & Edge Cases
 
 **Goal:** Harden the plugin against real-world failure modes.
