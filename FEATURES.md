@@ -280,6 +280,7 @@
 | 9.1   | **Success/failure cost split in dashboard**                   | 📋     | `success` field exists in DB but is **not surfaced** in `/summary` or `/jobs` aggregates. Requires SQL changes in `facts.py` (`SUM(CASE WHEN success=1 ...)` + inverse) and frontend two-tone display. See PLAN.md Phase 4.5. |
 | 9.2   | **Abandoned/hanging session visibility**                      | 📋     | Scanner filters `ended_at IS NOT NULL`, so 7 cron sessions with `ended_at = NULL` are invisible in fact DB. These may represent true failures (gateway crash, killed process, stuck job). Consider a separate "abandoned" tracker or scanner option. |
 | 9.3   | **Per-job token columns in jobs table**                       | 📋     | Summary shows total tokens, but jobs table has no attribution. Need `SUM(input_tokens)` / `SUM(output_tokens)` added to `query_jobs()` and a compact column in the frontend table. See PLAN.md Phase 4.6. |
+| 9.4   | **Cost projections (30d / 90d / 1yr) + frequency drift**        | 📋     | Rear-view metric is useful; forward-looking budget is better. Augment `query_jobs()` with `scheduled_runs_{horizon}` and `projected_cost_{horizon}` using cron parser (e.g. `croniter`). Expose "Projected monthly spend" summary card and per-job drift ratio. See PLAN.md Phase 4.7. |
 
 ### 9.1 Design Context — Why the split matters
 

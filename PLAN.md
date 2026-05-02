@@ -230,6 +230,43 @@ dashboard/dist/index.js           -- Add compact token column to jobs table (e.g
 
 ---
 
+## Phase 4.7: Cost Projections & Schedule-Aware Budgeting
+
+**Goal:** Turn the dashboard from a rear-view mirror into a forward-looking budgeting tool by projecting future spend based on actual per-run cost multiplied by scheduled frequency.
+
+**Background:** Right now the dashboard tells Nick what cron jobs *have* cost. The natural next question — *what will this cost me next month at current pace?* — has no answer. Because we already read `~/.hermes/cron/jobs.json` for human-readable names, the cron expression (`schedule.cron`) is already available. Combined with `avg_cost_per_run` from `query_jobs()`, we can calculate projected spend at any horizon.
+
+**Projection models:**
+1. **Schedule-based** (fixed cron): `avg_cost_per_run × occurrences(schedule_cron, horizon)`
+   - Example: daily at 8am → 365 runs/yr. If avg cost is $0.04/run → $14.60/yr projected.
+2. **Trend-based** (irregular/no schedule): `(last_30d_cost / 30 × projection_days)`
+   - Honest about uncertainty; labeled as "at current pace" rather than "scheduled."
+3. **Frequency drift** (the most valuable signal): `observed_runs_last_window / scheduled_runs_last_window`
+   - A job scheduled daily but observed 42 times in 30 days = +40% drift. The projection should show both the *nominal* schedule cost ($14.60/yr) and the *trend-adjusted* cost ($51.00/yr). Drift flags misconfigured schedules, retries, or external triggers.
+
+**Files:**
+```
+config.py or utils.py                -- Add cron schedule parser (croniter or equivalent)
+facts.py                             -- Add projection aggregates to query_jobs() and query_summary()
+plugin_api.py                          -- Expose projected_cost_30d, projected_cost_90d, projected_cost_1yr
+dashboard/dist/index.js                -- Summary "Projected monthly spend" headline + per-job click-to-expand detail
+cron/jobs.json (read-only)            -- Source of schedule expressions and definitions
+```
+
+**Deliverables:**
+- [ ] Parse `~/.hermes/cron/jobs.json` to resolve each `job_id` → `schedule.cron` and interval definitions
+- [ ] `query_jobs()` returns `scheduled_runs_30d`, `scheduled_runs_90d`, `scheduled_runs_1yr` per job
+- [ ] `query_jobs()` returns `projected_cost_{30d,90d,1yr}` per job (nominal schedule-based where cron exists)
+- [ ] `query_jobs()` returns `drift_ratio` per job, or `over_scheduled_runs` count
+- [ ] Summary card: "Projected {days}d spend at current pace: $XX.XX" (uses last window's cost/run × current scheduled frequency)
+- [ ] Per-job expand/collapse detail: show scheduled frequency, observed frequency, nominal projection, trend projection, drift warning if significant
+- [ ] Edge case: interval schedules (e.g., "every 6 hours") normalized alongside standard cron expressions
+- [ ] Edge case: jobs with no fixed schedule or unknown cron → fallback to pure trend projection with explicit uncertainty label
+
+**Status:** Design-only. Candidate for next priority after Phase 4.6 or considered alongside it depending on user interest.
+
+---
+
 ## Phase 5: Integration & Edge Cases
 
 **Goal:** Harden the plugin against real-world failure modes.
