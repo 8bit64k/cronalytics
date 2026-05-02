@@ -7,7 +7,7 @@
   const { React } = SDK;
   const { useState, useEffect, useLayoutEffect } = SDK.hooks;
   const { fetchJSON } = SDK;
-  const { Card, CardHeader, CardTitle, CardContent, Badge } = SDK.components;
+  const { Card, CardHeader, CardTitle, CardContent, Badge, Button } = SDK.components;
 
   // ── Currency formatter: 2 decimals with smart truncation ─────────
   function fmtCost(n) {
@@ -66,7 +66,9 @@
       style: {
         padding: "0.375rem 0.75rem",
         borderRadius: "0",
-        border: selected === d.value ? "none" : "none",
+        border: selected === d.value
+          ? "none"
+          : "1px solid rgba(255,255,255,0.15)",
         background: selected === d.value
           ? "var(--foreground-base, var(--foreground))"
           : "transparent",
@@ -80,10 +82,6 @@
         textTransform: "uppercase",
         fontFamily: "monospace",
         lineHeight: 1,
-        // Subtle inset shadow for inactive buttons (outlined look)
-        boxShadow: selected === d.value
-          ? "inset -1px -1px 0 0 rgba(0,0,0,0.5), inset 1px 1px 0 0 rgba(255,255,255,0.5)"
-          : "inset -1px -1px 0 0 rgba(0,0,0,0.5), inset 1px 1px 0 0 rgba(255,255,255,0.5)",
       }
     }, d.label)));
   }
@@ -121,12 +119,13 @@
             style: {
               fontSize: "0.625rem",
               fontWeight: 500,
-              letterSpacing: "0.02em",
-              padding: "0.15rem 0.5rem",
+              letterSpacing: "0.2em",
+              padding: "0.25rem 0.5rem",
               borderRadius: "0.25rem",
-              background: "var(--secondary, rgba(255,255,255,0.06))",
-              color: "var(--foreground-base, var(--foreground))",
-              border: "1px solid var(--border, rgba(255,255,255,0.08))",
+              background: "rgba(255,255,255,0.06)",
+              color: "var(--midground, rgba(255,255,255,0.6))",
+              border: "1px solid rgba(255,255,255,0.04)",
+              textTransform: "uppercase",
             }
           }, windowLabel)
         )
@@ -143,14 +142,24 @@
             gap: "0.5rem",
           }
         },
-          React.createElement(DaySelector, { selected: days, onChange: setDays })
+          React.createElement(DaySelector, { selected: days, onChange: setDays }),
+          React.createElement(Button, {
+            type: "button",
+            size: "sm",
+            outlined: true,
+            disabled: summary.loading || jobs.loading,
+            onClick: () => {
+              summary.refetch();
+              jobs.refetch();
+            }
+          }, summary.loading || jobs.loading ? "…" : "Refresh")
         )
       );
       return () => {
         pageHeader.setAfterTitle(null);
         pageHeader.setEnd(null);
       };
-    }, [days, pageHeader]);
+    }, [days, pageHeader, summary.loading, jobs.loading]);
 
     useEffect(() => {
       fetchJSON("/api/plugins/cron-insights/health")
