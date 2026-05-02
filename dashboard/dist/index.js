@@ -5,7 +5,7 @@
   if (!SDK || !PLUGINS) return;
 
   const { React } = SDK;
-  const { useState, useEffect } = SDK.hooks;
+  const { useState, useEffect, useLayoutEffect } = SDK.hooks;
   const { fetchJSON } = SDK;
   const { Card, CardHeader, CardTitle, CardContent, Badge } = SDK.components;
 
@@ -81,11 +81,49 @@
 
   // ── Main /cron tab ──────────────────────────────────────────────
   function CronTab() {
-    const [days, setDays] = useState(30);
+    const [days, setDaysRaw] = useState(() => {
+      try {
+        const saved = localStorage.getItem("cron-insights:days");
+        if (saved !== null) return Number(saved);
+      } catch {}
+      return 30;
+    });
+    const setDays = (v) => {
+      try { localStorage.setItem("cron-insights:days", String(v)); } catch {}
+      setDaysRaw(v);
+    };
     const summary = useApi("/api/plugins/cron-insights/summary?days=" + days);
     const jobs = useApi("/api/plugins/cron-insights/jobs?days=" + days);
     const [syncing, setSyncing] = useState(false);
     const [syncInfo, setSyncInfo] = useState(null);
+
+    const pageHeader = SDK.usePageHeader ? SDK.usePageHeader() : null;
+
+    useLayoutEffect(() => {
+      if (!pageHeader) return;
+      const windowLabel = days === 0 ? "All time" : "Last " + days + " days";
+      pageHeader.setAfterTitle(
+        React.createElement("span", {
+          style: {
+            fontSize: "0.7rem",
+            opacity: 0.6,
+            fontWeight: 500,
+            letterSpacing: "0.02em",
+          }
+        }, windowLabel)
+      );
+      pageHeader.setEnd(
+        React.createElement("div", {
+          style: { display: "flex", alignItems: "center", gap: "0.5rem" }
+        },
+          React.createElement(DaySelector, { selected: days, onChange: setDays })
+        )
+      );
+      return () => {
+        pageHeader.setAfterTitle(null);
+        pageHeader.setEnd(null);
+      };
+    }, [days, pageHeader]);
 
     useEffect(() => {
       fetchJSON("/api/plugins/cron-insights/health")
@@ -145,14 +183,6 @@
       : "";
 
     return React.createElement("div", { style: { padding: "1rem", color: "var(--foreground-base, var(--foreground))" } },
-      // Title row
-      React.createElement("div", {
-        style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }
-      },
-        React.createElement("h2", { style: { margin: 0, fontSize: "1.125rem", fontWeight: 600 } }, "Cron Insights"),
-        React.createElement(DaySelector, { selected: days, onChange: setDays })
-      ),
-
       // Summary cards
       React.createElement("div", {
         style: {
