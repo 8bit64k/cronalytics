@@ -117,6 +117,8 @@
     const [syncing, setSyncing] = useState(false);
     const [syncInfo, setSyncInfo] = useState(null);
 
+    const [expandedId, setExpandedId] = useState(null);
+
     const pageHeader = SDK.usePageHeader ? SDK.usePageHeader() : null;
 
     // Use useEffect (not useLayoutEffect) so this runs AFTER
