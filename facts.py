@@ -287,6 +287,19 @@ def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
             elif delta < -0.05:
                 trend = "↓"
 
+    # Total span for all-time trend pacing
+    cursor = conn.execute(
+        f"SELECT COALESCE(MIN(run_time), 0), COALESCE(MAX(run_time), 0) FROM cron_runs{where}",
+        params,
+    )
+    first_run, last_run = cursor.fetchone()
+    span_days = max(1, (last_run - first_run) / 86400.0) if first_run and last_run else 0
+
+    # Projected monthly pace
+    projected_monthly = None
+    if span_days > 0 and total_est_cost is not None:
+        projected_monthly = round((total_est_cost / span_days) * 30, 4)
+
     return {
         "days": days,
         "total_runs": total_runs,
@@ -297,6 +310,8 @@ def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
         "cost_by_model": by_model,
         "previous_period": prev_info if days > 0 else {},
         "trend": trend if days > 0 else "→",
+        "projected_monthly_pace": projected_monthly,
+        "observed_window_days": round(span_days, 1) if span_days > 0 else None,
     }
 
 
@@ -315,7 +330,9 @@ def query_jobs(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
                AVG(estimated_cost_usd) AS avg_cost,
                MAX(run_time) AS last_run,
                COALESCE(MIN(run_time), 0) AS first_run,
-               MAX(model) AS last_model
+               MAX(model) AS last_model,
+               COALESCE(SUM(input_tokens), 0) AS total_input_tokens,
+               COALESCE(SUM(output_tokens), 0) AS total_output_tokens
         FROM cron_runs{where}
         GROUP BY job_id
         ORDER BY total_cost DESC
@@ -331,6 +348,8 @@ def query_jobs(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
             "last_run": r[4],
             "first_run": r[5],
             "last_model": r[6] or "unknown",
+            "total_input_tokens": r[7],
+            "total_output_tokens": r[8],
         }
         for r in cursor.fetchall()
     ]

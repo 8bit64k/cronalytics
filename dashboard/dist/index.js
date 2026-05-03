@@ -22,10 +22,23 @@
   }
 
   function fmtTime(ts) {
-    if (!ts) return "—";
+    if (!ts) return "\u2014";
     const d = new Date(ts * 1000);
     const opts = { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZoneName: "short" };
     return new Intl.DateTimeFormat(undefined, opts).format(d);
+  }
+
+  function fmtRel(iso) {
+    if (!iso) return "\u2014";
+    const d = new Date(iso);
+    const now = new Date();
+    const diffMs = d - now;
+    if (diffMs < 0) return "Overdue";
+    const h = Math.floor(diffMs / (1000 * 60 * 60));
+    const d2 = Math.floor(h / 24);
+    if (h < 1) return Math.floor(diffMs / (1000 * 60)) + "m";
+    if (d2 > 0) return d2 + "d " + (h % 24) + "h";
+    return h + "h";
   }
 
   function useApi(path) {
@@ -322,19 +335,20 @@
               React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
                 React.createElement("thead", null,
                   React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
-                    ["Job", "Runs", "Total Cost", "Avg Cost", "Last Run", "Model"].map(h =>
+                    ["Job", "Runs", "Total Cost", "Avg Cost", "Monthly", "Next Run"].map(h =>
                       React.createElement("th", {
                         key: h,
-                        style: { textAlign: h === "Job ID" || h === "Model" || h === "Last Run" ? "left" : "right", padding: "0.5rem 0.35rem" }
+                        style: { textAlign: h === "Job" || h === "Next Run" ? "left" : "right", padding: "0.5rem 0.35rem" }
                       }, h)
                     )
                   )
                 ),
                 React.createElement("tbody", null,
-                  jobList.map(j =>
+                  jobList.map(j => [
                     React.createElement("tr", {
                       key: j.job_id,
-                      style: { borderBottom: "1px solid rgba(255,255,255,0.04)" }
+                      style: { borderBottom: "1px solid rgba(255,255,255,0.04)", cursor: "pointer" },
+                      onClick: () => setExpandedId(expandedId === j.job_id ? null : j.job_id)
                     },
                       React.createElement("td", { style: { padding: "0.4rem 0.35rem" } },
                         React.createElement("div", { style: { fontSize: "0.78rem", fontWeight: 500 } }, j.name || j.job_id),
@@ -343,10 +357,48 @@
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, j.runs),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.total_cost)),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.avg_cost)),
-                      React.createElement("td", { style: { padding: "0.4rem 0.35rem", fontSize: "0.7rem" } }, fmtTime(j.last_run)),
-                      React.createElement("td", { style: { padding: "0.4rem 0.35rem" } }, j.last_model)
+                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontWeight: 500 } },
+                        j.projections && j.projections.trend_projected_cost_30d != null
+                          ? fmtCost(j.projections.trend_projected_cost_30d) + "/mo"
+                          : "\u2014"
+                      ),
+                      React.createElement("td", { style: { padding: "0.4rem 0.35rem", fontSize: "0.72rem", color: "var(--midground, rgba(255,255,255,0.65))" } },
+                        j.projections && j.projections.next_run_at
+                          ? fmtRel(j.projections.next_run_at)
+                          : "\u2014"
+                      )
+                    ),
+                    expandedId === j.job_id && React.createElement("tr", { key: j.job_id + "_detail" },
+                      React.createElement("td", { colSpan: 6, style: { padding: "0.6rem 0.35rem 0.6rem 0.75rem", background: "rgba(255,255,255,0.02)", fontSize: "0.72rem" } },
+                        React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.3rem" } },
+                          React.createElement("div", null,
+                            React.createElement("span", { style: { opacity: 0.6 } }, "Schedule: "),
+                            j.projections && j.projections.schedule_display ? j.projections.schedule_display : "No schedule"
+                          ),
+                          React.createElement("div", null,
+                            "This job last ran at ",
+                            React.createElement("strong", null, fmtTime(j.last_run)),
+                            " using ",
+                            React.createElement("strong", null, j.last_model)
+                          ),
+                          j.projections && React.createElement("div", null,
+                            React.createElement("span", { style: { opacity: 0.6 } }, "Nominal: "),
+                            fmtCost(j.projections.projected_cost_30d), "/mo  ",
+                            React.createElement("span", { style: { opacity: 0.6 } }, "Trend: "),
+                            fmtCost(j.projections.trend_projected_cost_30d), "/mo  ",
+                            React.createElement("span", { style: { opacity: 0.6 } }, "Drift: "),
+                            j.projections.drift_ratio != null
+                              ? (j.projections.drift_ratio * 100).toFixed(0) + "%"
+                              : "\u2014"
+                          ),
+                          React.createElement("div", { style: { opacity: 0.55 } },
+                            "Tokens: ", (j.total_input_tokens || 0).toLocaleString(),
+                            " in / ", (j.total_output_tokens || 0).toLocaleString(), " out"
+                          )
+                        )
+                      )
                     )
-                  )
+                  ]).flat()
                 )
               )
             )

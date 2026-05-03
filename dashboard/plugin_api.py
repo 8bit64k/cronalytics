@@ -28,7 +28,7 @@ _plugin_dir = _plugin_api_dir.parent
 
 def _load_module(name: str):
     """Load a .py file from the plugin root as a namespaced module."""
-    mod_name = f"croninsights_auto_{name}"
+    mod_name = f"cronalytics_auto_{name}"
     path = _plugin_dir / f"{name}.py"
     spec = importlib.util.spec_from_file_location(mod_name, path)
     if spec is None or spec.loader is None:
@@ -42,6 +42,7 @@ def _load_module(name: str):
 _facts_mod = _load_module("facts")
 _config_mod = _load_module("config")
 _scanner_mod = _load_module("scanner")
+_schedule_mod = _load_module("schedule")
 
 FACT_DB = _config_mod.FACT_DB
 STATE_DB = _config_mod.STATE_DB
@@ -140,10 +141,26 @@ async def summary(
 @router.get("/jobs")
 async def jobs(
     days: int = Query(default=30, ge=0),
+    skip_projections: bool = Query(default=False, description="Set true to omit schedule-aware projections (faster)"),
 ) -> dict[str, Any]:
-    """Per-job aggregates: runs, total cost, avg cost, last run (0 = all time)."""
+    """Per-job aggregates: runs, total cost, avg cost, projections (0 = all time)."""
     raw_jobs = _facts_mod.query_jobs(FACT_DB, days=days)
     enriched = _enrich_jobs_with_names(raw_jobs)
+
+    if not skip_projections:
+        for j in enriched:
+            proj = _schedule_mod.get_job_projections(
+                job_id=j["job_id"],
+                avg_cost=j.get("avg_cost"),
+                total_cost=j.get("total_cost"),
+                runs=j.get("runs", 0),
+                first_run=j.get("first_run", 0),
+                last_run=j.get("last_run", 0),
+                days_filter=days,
+                jobs_json_path=_JOBS_PATH,
+            )
+            j["projections"] = proj
+
     return _api_wrap(
         {
             "days": days,
