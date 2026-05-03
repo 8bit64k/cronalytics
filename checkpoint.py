@@ -27,7 +27,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cron-insights.checkpoint")
+logger = logging.getLogger("cronalytics.checkpoint")
 
 # ---------------------------------------------------------------------------
 # Config
@@ -44,7 +44,7 @@ CHECKPOINT_ENV_VAR = "CRON_INSIGHTS_CHECKPOINT"
 def _real_home() -> Path:
     return Path(pwd.getpwuid(os.getuid()).pw_dir)
 
-DEFAULT_CHECKPOINT_PATH: Path = _real_home() / ".hermes" / "sessions" / "cron-insights-checkpoint.json"
+DEFAULT_CHECKPOINT_PATH: Path = _real_home() / ".hermes" / "sessions" / "cronalytics-checkpoint.json"
 
 
 # ---------------------------------------------------------------------------
@@ -59,13 +59,13 @@ def checkpoint_enabled() -> bool:
 def checkpoint_enable() -> None:
     """Enable auto-checkpointing for this project."""
     os.environ[CHECKPOINT_ENV_VAR] = "1"
-    logger.info("[checkpoint] Auto-checkpointing ENABLED for cron-insights")
+    logger.info("[checkpoint] Auto-checkpointing ENABLED for cronalytics")
 
 
 def checkpoint_disable() -> None:
     """Disable auto-checkpointing for this project."""
     os.environ[CHECKPOINT_ENV_VAR] = "0"
-    logger.info("[checkpoint] Auto-checkpointing DISABLED for cron-insights")
+    logger.info("[checkpoint] Auto-checkpointing DISABLED for cronalytics")
 
 
 def checkpoint_save(
@@ -92,7 +92,7 @@ def checkpoint_save(
     target.parent.mkdir(parents=True, exist_ok=True)
 
     payload = {
-        "project": "cron-insights",
+        "project": "cronalytics",
         "timestamp": time.time(),
         "iso_time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "state": state,

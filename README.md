@@ -1,8 +1,8 @@
-# Cron Insights
+# Cronalytics
 
 **Cost and operational observability for Hermes cron jobs.**
 
-Cron Insights is a dashboard plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are actually costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them in the Hermes dashboard via a dedicated `/cron-insights` tab and a header-right badge.
+Cronalytics is a dashboard plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are actually costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them in the Hermes dashboard via a dedicated `/cronalytics` tab and a header-right badge.
 
 > Turn hidden automation into visible spend.
 
@@ -28,7 +28,7 @@ Cron Insights is a dashboard plugin that attributes session-level usage and esti
 
 ```bash
 mkdir -p ~/.hermes/plugins
-cp -r /path/to/cron-insights ~/.hermes/plugins/cron-insights
+cp -r /path/to/cronalytics ~/.hermes/plugins/cronalytics
 ```
 
 2. Restart the Hermes dashboard server so the plugin API routes are mounted and the frontend bundle is picked up:
@@ -39,7 +39,7 @@ hermes dashboard
 
 3. Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear any cached JS bundle.
 
-4. Open the **Cron Insights** tab in the dashboard sidebar, or look for the cron run count badge in the header-right area.
+4. Open the **Cronalytics** tab in the dashboard sidebar, or look for the cron run count badge in the header-right area.
 
 ---
 
@@ -50,7 +50,7 @@ hermes dashboard
 The plugin manifest registers the hook it needs:
 
 ```yaml
-name: cron-insights
+name: cronalytics
 version: 0.1.0
 description: Cost and operational observability for Hermes cron jobs
 provides_hooks:
@@ -69,15 +69,15 @@ All current settings are hardcoded defaults in `config.py`. There is no user-edi
 
 Paths are resolved automatically:
 - `STATE_DB`: `~/.hermes/state.db` (Hermes core session store — source of truth)
-- `FACT_DB`: `~/.hermes/plugins/cron-insights/facts.db` (plugin-owned SQLite)
-- `WATERMARK_FILE`: `~/.hermes/plugins/cron-insights/watermark.json`
-- `PENDING_FILE`: `~/.hermes/plugins/cron-insights/pending.jsonl`
+- `FACT_DB`: `~/.hermes/plugins/cronalytics/facts.db` (plugin-owned SQLite)
+- `WATERMARK_FILE`: `~/.hermes/plugins/cronalytics/watermark.json`
+- `PENDING_FILE`: `~/.hermes/plugins/cronalytics/pending.jsonl`
 
 ---
 
 ## What the Dashboard Shows
 
-### Summary Cards (`/cron-insights` tab)
+### Summary Cards (`/cronalytics` tab)
 
 - **Total Runs** — number of cron job executions in the selected period
 - **Est. Cost** — sum of `estimated_cost_usd` with an up/down/neutral trend arrow comparing to the previous period
@@ -106,7 +106,7 @@ If the fact database is empty, the UI shows guidance to click **Sync Now** to po
 
 ### Header-Right Badge
 
-A small badge in the dashboard header polls `/api/plugins/cron-insights/health` every 30 seconds and displays the total number of captured cron runs.
+A small badge in the dashboard header polls `/api/plugins/cronalytics/health` every 30 seconds and displays the total number of captured cron runs.
 
 ---
 
@@ -116,17 +116,17 @@ A small badge in the dashboard header polls `/api/plugins/cron-insights/health` 
 - **On plugin load**: a bootstrap scanner thread runs automatically when the gateway loads the plugin, backfilling any sessions that completed while the gateway was down or the plugin was disabled.
 
 ### Manual sync
-- **Dashboard UI**: click the **Sync Now** button in the `/cron-insights` tab.
-- **API**: `POST /api/plugins/cron-insights/sync`
+- **Dashboard UI**: click the **Sync Now** button in the `/cronalytics` tab.
+- **API**: `POST /api/plugins/cronalytics/sync`
 
 ```bash
-curl -X POST http://localhost:9119/api/plugins/cron-insights/sync
+curl -X POST http://localhost:9119/api/plugins/cronalytics/sync
 ```
 
 Response:
 ```json
 {
-  "plugin": "cron-insights",
+  "plugin": "cronalytics",
   "inserted": 12,
   "skipped": 3,
   "elapsed_ms": 420,
@@ -140,13 +140,13 @@ Response:
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/plugins/cron-insights/health` | `GET` | Plugin health + sync metadata |
-| `/api/plugins/cron-insights/summary?days=N` | `GET` | Aggregated totals for N days (1–90) |
-| `/api/plugins/cron-insights/jobs?days=N` | `GET` | Per-job rolled-up stats |
-| `/api/plugins/cron-insights/jobs/{job_id}/runs` | `GET` | Individual runs for a specific job |
-| `/api/plugins/cron-insights/models?days=N` | `GET` | Cost breakdown by model |
-| `/api/plugins/cron-insights/trends?days=N` | `GET` | Period-over-period trends |
-| `/api/plugins/cron-insights/sync` | `POST` | Run reconciliation scanner manually |
+| `/api/plugins/cronalytics/health` | `GET` | Plugin health + sync metadata |
+| `/api/plugins/cronalytics/summary?days=N` | `GET` | Aggregated totals for N days (1–90) |
+| `/api/plugins/cronalytics/jobs?days=N` | `GET` | Per-job rolled-up stats |
+| `/api/plugins/cronalytics/jobs/{job_id}/runs` | `GET` | Individual runs for a specific job |
+| `/api/plugins/cronalytics/models?days=N` | `GET` | Cost breakdown by model |
+| `/api/plugins/cronalytics/trends?days=N` | `GET` | Period-over-period trends |
+| `/api/plugins/cronalytics/sync` | `POST` | Run reconciliation scanner manually |
 
 ---
 
@@ -201,7 +201,7 @@ Dashboard queries fact.db via plugin API
 - **Mobile layout unverified.** The dashboard UI has not been validated on narrow viewports.
 - **Schema resilience partial.** If `state.db` columns are added or removed in future Hermes versions, some queries may need updates.
 - **Actual cost is often null.** Most runs only populate `estimated_cost_usd`; `actual_cost_usd` depends on provider billing data availability.
-- **Plugin directory is a static copy.** Changes in the build directory are not automatically reflected in `~/.hermes/plugins/cron-insights/` unless manually copied or symlinked.
+- **Plugin directory is a static copy.** Changes in the build directory are not automatically reflected in `~/.hermes/plugins/cronalytics/` unless manually copied or symlinked.
 - **Dashboard server caches plugins per-process.** Changes to `manifest.json` or `plugin_api.py` require a full dashboard restart.
 
 ---
@@ -232,6 +232,6 @@ Dashboard queries fact.db via plugin API
 
 ---
 
-*Plugin path: `~/.hermes/plugins/cron-insights/`*  
-*Fact DB: `~/.hermes/plugins/cron-insights/facts.db`*  
-*API base: `/api/plugins/cron-insights/`*
+*Plugin path: `~/.hermes/plugins/cronalytics/`*  
+*Fact DB: `~/.hermes/plugins/cronalytics/facts.db`*  
+*API base: `/api/plugins/cronalytics/`*

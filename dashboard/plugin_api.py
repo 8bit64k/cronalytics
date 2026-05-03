@@ -1,6 +1,6 @@
-"""Cron Insights — dashboard API router (Phase 3 + Phase 2.5).
+"""Cronalytics — dashboard API router (Phase 3 + Phase 2.5).
 
-Mounted by the dashboard server at /api/plugins/cron-insights/.
+Mounted by the dashboard server at /api/plugins/cronalytics/.
 All endpoints serve JSON for the frontend slot components.
 
 NOTE: This module is loaded via importlib as a standalone module, so
@@ -92,7 +92,7 @@ def _get_status() -> dict[str, Any]:
 
 def _api_wrap(data: dict[str, Any]) -> dict[str, Any]:
     """Wrap response with plugin name for client sanity."""
-    return {"plugin": "cron-insights", **data}
+    return {"plugin": "cronalytics", **data}
 
 
 # ---------------------------------------------------------------------------

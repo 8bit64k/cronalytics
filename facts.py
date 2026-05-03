@@ -1,4 +1,4 @@
-"""Cron Insights — fact database operations.
+"""Cronalytics — fact database operations.
 
 Thin SQLite wrapper around cron_runs table. Owns schema creation,
 single-row inserts, and basic query primitives.
@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import logging
-logger = logging.getLogger("cron-insights")
+logger = logging.getLogger("cronalytics")
 
 # Reused connection per thread (SQLite is fine with this for our
 # write-light, read-medium workload).

@@ -90,17 +90,17 @@
   function CronTab() {
     const [days, setDaysRaw] = useState(() => {
       try {
-        const saved = localStorage.getItem("cron-insights:days");
+        const saved = localStorage.getItem("cronalytics:days");
         if (saved !== null) return Number(saved);
       } catch {}
       return 30;
     });
     const setDays = (v) => {
-      try { localStorage.setItem("cron-insights:days", String(v)); } catch {}
+      try { localStorage.setItem("cronalytics:days", String(v)); } catch {}
       setDaysRaw(v);
     };
-    const summary = useApi("/api/plugins/cron-insights/summary?days=" + days);
-    const jobs = useApi("/api/plugins/cron-insights/jobs?days=" + days);
+    const summary = useApi("/api/plugins/cronalytics/summary?days=" + days);
+    const jobs = useApi("/api/plugins/cronalytics/jobs?days=" + days);
     const [syncing, setSyncing] = useState(false);
     const [syncInfo, setSyncInfo] = useState(null);
 
@@ -162,7 +162,7 @@
     }, [days, pageHeader, summary.loading, jobs.loading]);
 
     useEffect(() => {
-      fetchJSON("/api/plugins/cron-insights/health")
+      fetchJSON("/api/plugins/cronalytics/health")
         .then(d => {
           if (d && d.sync) {
             setSyncInfo({
@@ -178,9 +178,9 @@
       if (syncing) return;
       setSyncing(true);
       let cancelled = false;
-      fetchJSON("/api/plugins/cron-insights/sync", { method: "POST" })
+      fetchJSON("/api/plugins/cronalytics/sync", { method: "POST" })
         .then(() => {
-          fetchJSON("/api/plugins/cron-insights/health")
+          fetchJSON("/api/plugins/cronalytics/health")
             .then(d2 => {
               if (d2 && d2.sync) {
                 setSyncInfo({
@@ -223,7 +223,7 @@
       !pageHeader && React.createElement("div", {
         style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }
       },
-        React.createElement("h2", { style: { margin: 0, fontSize: "1.125rem", fontWeight: 600 } }, "Cron Insights"),
+        React.createElement("h2", { style: { margin: 0, fontSize: "1.125rem", fontWeight: 600 } }, "Cronalytics"),
         React.createElement(DaySelector, { selected: days, onChange: setDays })
       ),
 
@@ -361,11 +361,11 @@
 
     React.useEffect(() => {
       let cancelled = false;
-      fetchJSON("/api/plugins/cron-insights/health")
+      fetchJSON("/api/plugins/cronalytics/health")
         .then(d => { if (!cancelled) setStatus(d); })
         .catch(() => {});
       const id = setInterval(() => {
-        fetchJSON("/api/plugins/cron-insights/health")
+        fetchJSON("/api/plugins/cronalytics/health")
           .then(d => { if (!cancelled) setStatus(d); })
           .catch(() => {});
       }, 30000);
@@ -375,11 +375,11 @@
     if (!status || !status.fact_db) return null;
 
     const total = status.fact_db.total_runs || 0;
-    const label = total > 0 ? total + " cron runs" : "Cron Insights";
+    const label = total > 0 ? total + " cron runs" : "Cronalytics";
 
     return React.createElement(Badge, { variant: "outline" }, label);
   }
 
-  PLUGINS.register("cron-insights", CronTab);
-  PLUGINS.registerSlot("cron-insights", "header-right", HeaderBadge);
+  PLUGINS.register("cronalytics", CronTab);
+  PLUGINS.registerSlot("cronalytics", "header-right", HeaderBadge);
 })();

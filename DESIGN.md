@@ -1,7 +1,7 @@
-# Cron Insights
+# Cronalytics
 ## A Hermes Dashboard Plugin for Cron Cost & Operational Visibility
 
-> **One-liner:** Turn hidden automation into visible spend. Cron Insights attributes session-level cost, model, and frequency data to every cron-originated run, surfacing what your scheduled jobs are actually costing you.
+> **One-liner:** Turn hidden automation into visible spend. Cronalytics attributes session-level cost, model, and frequency data to every cron-originated run, surfacing what your scheduled jobs are actually costing you.
 
 ---
 
@@ -33,7 +33,7 @@ You run a daily digest cron at 2 PM ET. You evaluate workflows over ~1 week. But
 
 ## 2. The Solution
 
-**Cron Insights** is a dashboard plugin that attributes session-level usage and estimated cost to cron-originated runs. It lives inside `hermes dashboard` as slot-based augmentations to the existing `/cron` page.
+**Cronalytics** is a dashboard plugin that attributes session-level usage and estimated cost to cron-originated runs. It lives inside `hermes dashboard` as slot-based augmentations to the existing `/cron` page.
 
 ### Core Promise
 
@@ -57,7 +57,7 @@ You run a daily digest cron at 2 PM ET. You evaluate workflows over ~1 week. But
 │                              session_id="cron_{id}_{ts}"   │            │
 │                                                           ▼            │
 │                                              ┌─────────────────────┐   │
-│                                              │  Cron Insights      │   │
+│                                              │  Cronalytics      │   │
 │                                              │  Hook Handler       │   │
 │                                              │  (PluginContext)    │   │
 │                                              └──────────┬──────────┘   │
@@ -165,7 +165,7 @@ Every cron run creates a session row with `source = 'cron'`. The `sessions` tabl
 **NOT the operational state.db.** The fact DB is a separate SQLite file owned entirely by the plugin:
 
 ```
-~/.hermes/plugins/cron-insights/facts.db
+~/.hermes/plugins/cronalytics/facts.db
 ```
 
 Schema:
@@ -210,7 +210,7 @@ CREATE INDEX idx_cron_runs_ingested ON cron_runs(ingested_at);
 
 A lazy backfill process triggered by:
 1. Dashboard load (first visit after plugin install)
-2. Explicit API call (`POST /api/plugins/cron-insights/sync`)
+2. Explicit API call (`POST /api/plugins/cronalytics/sync`)
 3. Periodic check (configurable, default: every 6 hours)
 
 **Algorithm:**
@@ -236,7 +236,7 @@ update_watermark(max(ended_at for session in new_sessions))
 ### 4.6 Plugin Structure
 
 ```
-~/.hermes/plugins/cron-insights/
+~/.hermes/plugins/cronalytics/
 ├── plugin.yaml                    -- Plugin manifest
 ├── __init__.py                    -- register(ctx) entrypoint
 ├── facts.py                       -- Fact DB operations
@@ -254,8 +254,8 @@ update_watermark(max(ended_at for session in new_sessions))
 
 ```json
 {
-  "name": "cron-insights",
-  "label": "Cron Insights",
+  "name": "cronalytics",
+  "label": "Cronalytics",
   "description": "Cost and operational visibility for Hermes cron jobs",
   "version": "0.1.0",
   "tab": {"hidden": true},

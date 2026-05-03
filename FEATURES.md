@@ -1,9 +1,9 @@
 # # Kimi 2.6
 
-# FEATURES.md — Cron Insights Feature Inventory
+# FEATURES.md — Cronalytics Feature Inventory
 
 > **Version:** 0.1.0 MVP  
-> **Source:** Derived from direct inspection of `/home/nick/builds/cron-insights/` as of 2026-04-30  
+> **Source:** Derived from direct inspection of `/home/nick/builds/cronalytics/` as of 2026-04-30  
 > **Status:** Living document — update before each release
 
 ---
@@ -130,13 +130,13 @@
 
 | Endpoint                                        | Method | Status | Evidence                                                          |
 | ----------------------------------------------- | ------ | ------ | ----------------------------------------------------------------- |
-| `/api/plugins/cron-insights/health`             | GET    | ✅      | `dashboard/plugin_api.py` L83-95                                  |
-| `/api/plugins/cron-insights/summary?days=N`     | GET    | ✅      | `dashboard/plugin_api.py` L98-103                                 |
-| `/api/plugins/cron-insights/jobs?days=N`        | GET    | ✅      | `dashboard/plugin_api.py` L106-116                                |
-| `/api/plugins/cron-insights/jobs/{job_id}/runs` | GET    | ✅      | `dashboard/plugin_api.py` L119-134                                |
-| `/api/plugins/cron-insights/models?days=N`      | GET    | ✅      | `dashboard/plugin_api.py` L137-147                                |
-| `/api/plugins/cron-insights/trends?days=N`      | GET    | ✅      | `dashboard/plugin_api.py` L150-160                                |
-| `/api/plugins/cron-insights/sync`               | POST   | ❌      | **Missing** — PLAN.md Phase 2 says this should exist but does not |
+| `/api/plugins/cronalytics/health`             | GET    | ✅      | `dashboard/plugin_api.py` L83-95                                  |
+| `/api/plugins/cronalytics/summary?days=N`     | GET    | ✅      | `dashboard/plugin_api.py` L98-103                                 |
+| `/api/plugins/cronalytics/jobs?days=N`        | GET    | ✅      | `dashboard/plugin_api.py` L106-116                                |
+| `/api/plugins/cronalytics/jobs/{job_id}/runs` | GET    | ✅      | `dashboard/plugin_api.py` L119-134                                |
+| `/api/plugins/cronalytics/models?days=N`      | GET    | ✅      | `dashboard/plugin_api.py` L137-147                                |
+| `/api/plugins/cronalytics/trends?days=N`      | GET    | ✅      | `dashboard/plugin_api.py` L150-160                                |
+| `/api/plugins/cronalytics/sync`               | POST   | ❌      | **Missing** — PLAN.md Phase 2 says this should exist but does not |
 
 ### 4.2 Endpoint Details
 
@@ -144,7 +144,7 @@
 | ----- | ------------------------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 4.2.1 | `days` parameter with bounds `1 <= days <= 90`         | ✅          | `plugin_api.py` L100, L108, etc.                                                                                                                                                    |
 | 4.2.2 | Returns 404 for missing job_id                         | ✅          | `plugin_api.py` L127                                                                                                                                                                |
-| 4.2.3 | Wraps response with `{"plugin": "cron-insights", ...}` | ✅          | `plugin_api.py` L71-73                                                                                                                                                              |
+| 4.2.3 | Wraps response with `{"plugin": "cronalytics", ...}` | ✅          | `plugin_api.py` L71-73                                                                                                                                                              |
 | 4.2.4 | `_get_status()` reads watermark for health             | ⚠️ **BUG** | Reads keys `last_watermark`, `last_scan_ts`, `rows_synced` but scanner.py writes `last_ended_at`, `last_sync` — mismatch means sync metadata in health response is empty/misleading |
 | 4.2.5 | Dynamic importlib loading of sibling modules           | ✅          | `plugin_api.py` L29-39, L42-48                                                                                                                                                      |
 
@@ -156,12 +156,12 @@
 
 | #     | Feature                      | Status | Evidence                                           |
 | ----- | ---------------------------- | ------ | -------------------------------------------------- |
-| 5.1.1 | Tab route `/cron-insights`   | ✅      | `dashboard/manifest.json` L8                       |
+| 5.1.1 | Tab route `/cronalytics`   | ✅      | `dashboard/manifest.json` L8                       |
 | 5.1.2 | Header-right slot badge      | ✅      | `dashboard/manifest.json` L12, `index.js` L158-181 |
 | 5.1.3 | Entry bundle `dist/index.js` | ✅      | `dashboard/manifest.json` L13                      |
 | 5.1.4 | API module reference         | ✅      | `dashboard/manifest.json` L14                      |
 
-### 5.2 Tab Content (`/cron-insights`)
+### 5.2 Tab Content (`/cronalytics`)
 
 | #     | Feature                                                         | Status | Evidence                                 |
 | ----- | --------------------------------------------------------------- | ------ | ---------------------------------------- |
@@ -187,7 +187,7 @@
 | Design Spec                                      | Actual                                         | Rationale                                                                                                  |
 | ------------------------------------------------ | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | Slots: `cron:top`, `cron:bottom`, `header-right` | Slots: `header-right`, `pre-main`, `post-main` | `/cron` built-in collision — pragmatic pivot to standalone tab acceptable for MVP but should be documented |
-| Tab `hidden: true`                               | Tab `hidden: false`                            | Route changed from `/cron` to `/cron-insights`                                                             |
+| Tab `hidden: true`                               | Tab `hidden: false`                            | Route changed from `/cron` to `/cronalytics`                                                             |
 
 ---
 
@@ -217,7 +217,7 @@
 | 7.7  | CHANGELOG                                     | ❌      | Not present                              |
 | 7.8  | CONTRIBUTING                                  | ❌      | Not present                              |
 | 7.9  | `.gitignore` misses `*.db-wal` and `*.db-shm` | ⚠️     | Repo currently dirty with these files    |
-| 7.10 | Git repo at `/home/nick/builds/cron-insights` | ✅      | Branch `main`, commit `3e55493`          |
+| 7.10 | Git repo at `/home/nick/builds/cronalytics` | ✅      | Branch `main`, commit `3e55493`          |
 | 7.11 | Deployed copy synced with build dir           | ✅      | diff clean (excluding runtime artifacts) |
 
 ---
@@ -269,7 +269,7 @@
 ### 🟢 Medium (quality of life)
 
 7. Add `*.db-wal` and `*.db-shm` to `.gitignore`.
-8. Update DESIGN.md to reflect actual slot architecture (`/cron-insights` tab vs `cron:top`/`cron:bottom`).
+8. Update DESIGN.md to reflect actual slot architecture (`/cronalytics` tab vs `cron:top`/`cron:bottom`).
 9. Implement scanner auto-run on first dashboard visit and periodic background sync.
 10. Phase 6: README, CHANGELOG, install instructions.
 

@@ -1,8 +1,8 @@
-# Cron Insights — Development Plan
+# Cronalytics — Development Plan
 
 ## Overview
 
-Phased implementation of the Cron Insights dashboard plugin. Each phase is a vertical slice that produces working, testable functionality. Phases build on each other but are designed so that each one could be demoed independently.
+Phased implementation of the Cronalytics dashboard plugin. Each phase is a vertical slice that produces working, testable functionality. Phases build on each other but are designed so that each one could be demoed independently.
 
 ---
 
@@ -12,7 +12,7 @@ Phased implementation of the Cron Insights dashboard plugin. Each phase is a ver
 
 **Files:**
 ```
-~/.hermes/plugins/cron-insights/
+~/.hermes/plugins/cronalytics/
 ├── plugin.yaml                      -- Manifest: name, version, hooks
 ├── __init__.py                      -- register(ctx) → ctx.on_session_end(handler)
 ├── ingester.py                      -- Handler: filter platform=="cron", log session_id
@@ -22,7 +22,7 @@ Phased implementation of the Cron Insights dashboard plugin. Each phase is a ver
 **Deliverables:**
 - [x] Plugin discovered by `hermes_cli.plugins.discover_plugins()`
 - [x] Plugin loads without errors on gateway startup
-- [x] When a cron job runs, a log line appears: `[cron-insights] Captured: cron_abc123_20260429_143022`
+- [x] When a cron job runs, a log line appears: `[cronalytics] Captured: cron_abc123_20260429_143022`
 - [x] When a CLI chat session ends, nothing is logged (platform != "cron")
 
 **Key decisions validated:**
@@ -46,7 +46,7 @@ Phased implementation of the Cron Insights dashboard plugin. Each phase is a ver
 ```
 
 **Deliverables:**
-- [x] Fact DB schema created on first load (`~/.hermes/plugins/cron-insights/facts.db`)
+- [x] Fact DB schema created on first load (`~/.hermes/plugins/cronalytics/facts.db`)
 - [x] Hook handler writes session_id to `pending.jsonl`
 - [x] Background worker processes pending.jsonl with 5-second initial delay
 - [x] Worker queries `state.db` for session row by `id`
@@ -69,7 +69,7 @@ Phased implementation of the Cron Insights dashboard plugin. Each phase is a ver
 ```
 
 **Deliverables:**
-- [x] Checkpoint file saved after each session (`~/.hermes/sessions/cron-insights-checkpoint.json`)
+- [x] Checkpoint file saved after each session (`~/.hermes/sessions/cronalytics-checkpoint.json`)
 - [x] Uses `pwd.getpwuid(os.getuid()).pw_dir` instead of `Path.home()` to avoid Hermes profile path bug
 - [x] Captures phase, commit, touched files, and next step
 
@@ -91,10 +91,10 @@ Phased implementation of the Cron Insights dashboard plugin. Each phase is a ver
 - [x] Scanner queries `state.db` for all `source='cron'` sessions with `ended_at > watermark`
 - [x] Inserts missing sessions into fact DB in batch (transaction)
 - [x] Updates watermark to max `ended_at` processed
-- [x] Watermark persisted to JSON file (`~/.hermes/sessions/cron-insights-watermark.json`)
+- [x] Watermark persisted to JSON file (`~/.hermes/sessions/cronalytics-watermark.json`)
 - [x] Deduplication via `facts.row_exists(session_id)` before insert
 - [x] Backfill verified: 28 historical sessions inserted (1 already present, skipped)
-- [ ] `/api/plugins/cron-insights/sync` endpoint triggers scanner on demand
+- [ ] `/api/plugins/cronalytics/sync` endpoint triggers scanner on demand
   - *NOTE:* POST /sync exists in API but currently uses an inline `_get_status()` helper rather than importing `scanner.py` (due to importlib dynamic-loading constraints; `scanner.py` still uses relative imports and cannot be loaded as a standalone module). Needs refactor.
 - [ ] Scanner runs automatically on first dashboard load after install
 - [ ] Scanner runs periodically (configurable, default 6 hours) if gateway stays up
@@ -119,13 +119,13 @@ dashboard/
 
 | Endpoint | Status |
 |----------|--------|
-| `GET  /api/plugins/cron-insights/health`                  | ✅ |
-| `GET  /api/plugins/cron-insights/summary?days=7`        | ✅ |
-| `GET  /api/plugins/cron-insights/jobs?days=7`            | ✅ |
-| `GET  /api/plugins/cron-insights/jobs/{job_id}/runs`    | ✅ |
-| `GET  /api/plugins/cron-insights/models?days=7`         | ✅ (unplanned bonus) |
-| `GET  /api/plugins/cron-insights/trends?days=7`         | ✅ (unplanned bonus) |
-| `POST /api/plugins/cron-insights/sync`                  | ✅ (see Phase 2 note) |
+| `GET  /api/plugins/cronalytics/health`                  | ✅ |
+| `GET  /api/plugins/cronalytics/summary?days=7`        | ✅ |
+| `GET  /api/plugins/cronalytics/jobs?days=7`            | ✅ |
+| `GET  /api/plugins/cronalytics/jobs/{job_id}/runs`    | ✅ |
+| `GET  /api/plugins/cronalytics/models?days=7`         | ✅ (unplanned bonus) |
+| `GET  /api/plugins/cronalytics/trends?days=7`         | ✅ (unplanned bonus) |
+| `POST /api/plugins/cronalytics/sync`                  | ✅ (see Phase 2 note) |
 
 **Deliverables:**
 - [x] All endpoints return JSON with correct aggregation
@@ -136,7 +136,7 @@ dashboard/
 
 **Key fixes required during implementation:**
 - Dashboard server loads plugin API files via `importlib` as standalone modules. Relative imports (`from .. import facts`) fail silently, causing routes to not mount at all. Fixed by using dynamic `importlib.util` loading in `plugin_api.py`.
-- `facts.py` originally used `from .logger import logger` — also failed under dynamic load. Fixed by inlining `logging.getLogger("cron-insights")`.
+- `facts.py` originally used `from .logger import logger` — also failed under dynamic load. Fixed by inlining `logging.getLogger("cronalytics")`.
 
 **Status:** Complete. All endpoints verified returning JSON.
 
@@ -156,14 +156,14 @@ dashboard/
 ```
 
 **What was built:**
-- **Tab route `/cron-insights`** — Full page showing aggregated summary cards, cost-by-model list, and per-job table.
+- **Tab route `/cronalytics`** — Full page showing aggregated summary cards, cost-by-model list, and per-job table.
 - **Header-right badge** — "31 CRON RUNS" rendered in dashboard sidebar (polls `/health` every 30s).
 - **Summary cards** — Total Runs, Est. Cost (with trend ↑/↓), Tokens in/out.
 - **Jobs table** — Job ID, Runs, Total Cost, Avg Cost, Last Run, Model.
 
 **Deliverables:**
 - [x] Dashboard loads plugin JS bundle (verified in browser)
-- [x] Tab renders on `/cron-insights` (route changed from `/cron` to avoid built-in collision)
+- [x] Tab renders on `/cronalytics` (route changed from `/cron` to avoid built-in collision)
 - [x] Header-right slot renders correctly
 - [x] Data refreshes on page visit
 - [x] Empty state handled ("No cron jobs captured in the last 7 days")
@@ -273,14 +273,14 @@ cron/jobs.json (read-only)            -- Source of schedule expressions and defi
 
 **Tasks:**
 - [x] Importlib-safe loading — fixed relative imports that silently broke API route mounting
-- [x] Route collision — discovered `/cron` built-in tab conflict, moved to `/cron-insights`
+- [x] Route collision — discovered `/cron` built-in tab conflict, moved to `/cronalytics`
 - [ ] Gateway restart scenario: verify scanner catches runs missed during restart
 - [ ] Plugin disable/enable: watermark survives disable; scanner backfills gap
 - [ ] `state.db` schema change: graceful degradation if columns are missing
 - [ ] Large backfill: test scanner with 1000+ historical sessions (performance)
 - [ ] Timezone handling: ensure `run_time` displays in user's local timezone
 - [ ] Cost precision: handle `estimated_cost_usd = NULL` gracefully
-- [ ] Error logging: all plugin errors log to `~/.hermes/logs/agent.log` with `[cron-insights]` prefix
+- [ ] Error logging: all plugin errors log to `~/.hermes/logs/agent.log` with `[cronalytics]` prefix
 - [ ] Config validation: validate `config.yaml` plugin section on load
 
 **Status:** Partial. The two biggest real-world failure modes (relative imports, route collision) were discovered and fixed during Phase 3 development. Remaining tasks are traditional QA/backlog.
@@ -395,7 +395,7 @@ dashboard/dist/index.js             -- Add "Sync Now" button with loading state 
 
 **Deliverables:**
 - [x] `scanner.py` uses importlib-safe module loading (mirrors `plugin_api.py` `_load_module` pattern)
-- [x] `POST /api/plugins/cron-insights/sync` returns `{ inserted, skipped, elapsed_ms, new_watermark }`
+- [x] `POST /api/plugins/cronalytics/sync` returns `{ inserted, skipped, elapsed_ms, new_watermark }`
 - [x] `_get_status()` in `plugin_api.py` delegates to `scanner.get_status()` (removes duplicate watermark-reading logic)
 - [x] Scanner writes `rows_synced` (inserted + skipped) to watermark file
 - [x] Frontend "Sync Now" button added to jobs table
@@ -416,8 +416,8 @@ dashboard/dist/index.js             -- Add "Sync Now" button with loading state 
 ## Architecture Notes (learned during build)
 
 1. **Dashboard plugin API files are loaded via `importlib`** as standalone modules with no package context. Any `from . import X` or `from .. import Y` will fail silently, preventing routes from mounting. Always use `importlib.util` to load sibling modules dynamically, or inline dependencies.
-2. **Tab path collision:** The manifest `"path": "/cron"` collides with Hermes's built-in cron tab. Use a unique path (e.g. `/cron-insights`) or the built-in page will override the plugin.
-3. **Plugin directory replication:** `~/.hermes/plugins/cron-insights/` is a static directory copy, not a symlink to the build directory. Changes in `/home/nick/builds/cron-insights/` are NOT automatically reflected unless manually synced or symlinked.
+2. **Tab path collision:** The manifest `"path": "/cron"` collides with Hermes's built-in cron tab. Use a unique path (e.g. `/cronalytics`) or the built-in page will override the plugin.
+3. **Plugin directory replication:** `~/.hermes/plugins/cronalytics/` is a static directory copy, not a symlink to the build directory. Changes in `/home/nick/builds/cronalytics/` are NOT automatically reflected unless manually synced or symlinked.
 4. **Dashboard server caches plugins per-process.** Any change to `manifest.json` or `plugin_api.py` requires a full `hermes dashboard` restart to take effect.
 
 ---

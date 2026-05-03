@@ -1,4 +1,4 @@
-# Cron Insights — Work Checkpoint
+# Cronalytics — Work Checkpoint
 # Updated: 2026-05-02 12:30
 # Session: t_1fe5a743 — Cost formatting + Date range selector (VERIFIED + DONE)
 #
@@ -21,14 +21,14 @@ Frontend `fmtCost()` in `dashboard/dist/index.js`:
 Frontend `DaySelector` in `dashboard/dist/index.js`:
 - Options: 7D, 30D, 90D, All (value: 7, 30, 90, 0)
 - Square mono style matching Analytics tab aesthetic (no rounded group chrome)
-- `localStorage` key `cron-insights:days` persists user choice across navigations
+- `localStorage` key `cronalytics:days` persists user choice across navigations
 - Placed in shared page header via `SDK.usePageHeader().setEnd()`
 - `useApi` depends on `[path, reload]` where path includes `?days=N`, so selector
   change triggers automatic re-fetch
 
 Backend filtering in `facts.py` / `plugin_api.py`:
-- `GET /api/plugins/cron-insights/summary?days=N` — `days` Query(default=30, ge=0)
-- `GET /api/plugins/cron-insights/jobs?days=N` — same param
+- `GET /api/plugins/cronalytics/summary?days=N` — `days` Query(default=30, ge=0)
+- `GET /api/plugins/cronalytics/jobs?days=N` — same param
 - SQL: `WHERE run_time >= ?` when `days > 0`, with `params = [time.time() - days*86400]`
 - `days=0` omits WHERE clause → all time
 - `days` param flows through: `plugin_api.py` → `facts.query_summary(days)` → SQL

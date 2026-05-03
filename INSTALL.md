@@ -7,20 +7,20 @@ Hermes plugins are static directories. No package manager required.
 ```bash
 # 1. Copy the plugin into your Hermes plugins directory
 mkdir -p ~/.hermes/plugins
-cp -r /path/to/cron-insights ~/.hermes/plugins/cron-insights
+cp -r /path/to/cronalytics ~/.hermes/plugins/cronalytics
 
 # 2. Restart the Hermes dashboard server
 hermes dashboard --no-open
 
 # 3. Hard-refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)
 
-# 4. Open the Cron Insights tab in the sidebar
+# 4. Open the Cronalytics tab in the sidebar
 ```
 
 ## Structure After Install
 
 ```
-~/.hermes/plugins/cron-insights/
+~/.hermes/plugins/cronalytics/
 ├── plugin.yaml              # Plugin manifest (hooks, version)
 ├── __init__.py              # Register hook + bootstrap scanner
 ├── facts.py                 # SQLite fact database
@@ -31,7 +31,7 @@ hermes dashboard --no-open
 ├── checkpoint.py            # Session state persistence
 ├── dashboard/
 │   ├── manifest.json        # Slot registration + routes
-│   ├── plugin_api.py        # REST API mounted at /api/plugins/cron-insights/
+│   ├── plugin_api.py        # REST API mounted at /api/plugins/cronalytics/
 │   └── dist/
 │       └── index.js         # Bundled React frontend
 ├── tests/                   # Unit tests (run with pytest)
@@ -46,7 +46,7 @@ After install, the plugin needs data.
 2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard, or run:
 
 ```bash
-curl -X POST http://localhost:9119/api/plugins/cron-insights/sync
+curl -X POST http://localhost:9119/api/plugins/cronalytics/sync
 ```
 
 If the dashboard shows "No cron jobs captured," click **Sync Now**.
@@ -60,7 +60,7 @@ If the dashboard shows "No cron jobs captured," click **Sync Now**.
 ## Uninstall
 
 ```bash
-rm -rf ~/.hermes/plugins/cron-insights
+rm -rf ~/.hermes/plugins/cronalytics
 ```
 
-Remove `cron-insights` from `plugins.enabled` in `~/.hermes/config.yaml` if listed there, then restart the dashboard.
+Remove `cronalytics` from `plugins.enabled` in `~/.hermes/config.yaml` if listed there, then restart the dashboard.

@@ -1,4 +1,4 @@
-"""Cron Insights — plugin configuration.
+"""Cronalytics — plugin configuration.
 
 Static settings and path resolution. No user-editable config file yet (v0.2);
 all values are hardcoded defaults.

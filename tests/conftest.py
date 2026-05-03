@@ -1,6 +1,6 @@
-"""Pytest configuration for cron-insights plugin tests.
+"""Pytest configuration for cronalytics plugin tests.
 
-The cron-insights plugin files are loaded dynamically by both Hermes gateway
+The cronalytics plugin files are loaded dynamically by both Hermes gateway
 (via package imports) and the dashboard server (via importlib as standalone
 modules). This conftest enables pytest to run tests that import plugin modules
 correctly regardless of load context.

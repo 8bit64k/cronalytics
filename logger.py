@@ -1,5 +1,5 @@
-"""Simple namespaced logger for the cron-insights plugin."""
+"""Simple namespaced logger for the cronalytics plugin."""
 
 import logging
 
-logger = logging.getLogger("cron-insights")
+logger = logging.getLogger("cronalytics")

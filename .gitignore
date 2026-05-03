@@ -20,7 +20,7 @@ watermark_test_*.json
 pending.jsonl
 
 # Auto-checkpoint state (generated at runtime)
-cron-insights-checkpoint.json
+cronalytics-checkpoint.json
 
 # Test artifacts
 .pytest_cache/

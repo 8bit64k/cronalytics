@@ -2,7 +2,7 @@
 
 Run: uv run --with pytest python3 -m pytest tests/test_parser.py -v
 
-NOTE: The plugin directory name 'cron-insights' contains a hyphen, which
+NOTE: The plugin directory name "cronalytics" contains a hyphen, which
 makes it an invalid Python package name. We load the facts module via
 importlib (same pattern used by the dashboard server) to avoid package
 import issues.

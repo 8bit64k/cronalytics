@@ -1,10 +1,10 @@
-"""Cron Insights — session ingestion handler (Phase 1 + crash recovery).
+"""Cronalytics — session ingestion handler (Phase 1 + crash recovery).
 
 Fires on every on_session_end, filters for platform=="cron", persists
 the session_id to a durable pending file, then a background worker retries
 state.db lookup with exponential-backoff-like delays and capped jitter.
 
-The pending file (~/.hermes/plugins/cron-insights/pending.jsonl) survives
+The pending file (~/.hermes/plugins/cronalytics/pending.jsonl) survives
 gateway restarts so no captured session is lost between plugin reloads.
 """
 
@@ -266,7 +266,7 @@ def _ensure_worker() -> None:
     _worker_stop.clear()
     _worker_thread = threading.Thread(
         target=_worker_loop,
-        name="cron-insights-ingester",
+        name="cronalytics-ingester",
         daemon=True,
     )
     _worker_thread.start()

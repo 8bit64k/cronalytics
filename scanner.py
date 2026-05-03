@@ -1,11 +1,11 @@
-"""Cron Insights — reconciliation scanner (Phase 2).
+"""Cronalytics — reconciliation scanner (Phase 2).
 
 Backfills historical cron sessions from state.db into facts.db.
 Uses a timestamp watermark to track progress and avoid duplicate work.
 
 Called:
   - On first dashboard load after install
-  - On explicit POST /api/plugins/cron-insights/sync
+  - On explicit POST /api/plugins/cronalytics/sync
   - Periodically (default every 6h) while gateway stays up
 """
 
@@ -40,7 +40,7 @@ except ImportError:
         return mod
 
     facts = _load_module("facts")
-    logger = logging.getLogger("cron-insights")
+    logger = logging.getLogger("cronalytics")
 
 # ---------------------------------------------------------------------------
 # Watermark I/O

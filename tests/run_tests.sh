@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Run cron-insights tests standalone, bypassing pytest package discovery.
+# Run cronalytics tests standalone, bypassing pytest package discovery.
 #
-# The plugin directory name 'cron-insights' contains a hyphen, which makes
+# The plugin directory name "cronalytics" contains a hyphen, which makes
 # it an invalid Python package name. pytest tries to import __init__.py as
 # a package root and fails on relative imports.
 #
@@ -13,7 +13,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(dirname "$SCRIPT_DIR")"
 
-echo "Running cron-insights tests..."
+echo "Running cronalytics tests..."
 echo "Plugin root: $PLUGIN_ROOT"
 
 cd "$PLUGIN_ROOT"
