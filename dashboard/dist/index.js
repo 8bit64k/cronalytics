@@ -268,6 +268,15 @@
           )
         ),
         React.createElement(Card, null,
+          React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Monthly Pace")),
+          React.createElement(CardContent, null,
+            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700 } }, fmtCost(s.projected_monthly_pace)),
+            React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6 } },
+              "~$" + (s.projected_monthly_pace / 30).toFixed(2) + "/day projected"
+            )
+          )
+        ),
+        React.createElement(Card, null,
           React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Tokens")),
           React.createElement(CardContent, null,
             React.createElement("div", { style: { fontSize: "0.8rem" } }, "In: " + (s.total_input_tokens || 0).toLocaleString()),
