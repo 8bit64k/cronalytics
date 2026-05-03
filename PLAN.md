@@ -172,7 +172,15 @@ dashboard/
 - [ ] Click row to expand last 5 individual runs — not implemented
 - [ ] Mobile layout verified — not verified
 
-**Status:** MVP complete. Cut from original 3-slot model (top, bottom, header-right) to a single tab + header-right badge for vertical-slice delivery. Table sorting, row expansion, and mobile polish are backlog.
+**Status:** MVP complete + Pace redesign. Cut from original 3-slot model (top, bottom, header-right) to a single tab + header-right badge for vertical-slice delivery. Table sorting, row expansion (for individual runs), and mobile polish are backlog.
+
+**Pace redesign (May 2026):**
+- Summary cards reordered: actuals left (Total Runs, Est Cost, Tokens), projections right (Pace)
+- Jobs table expanded from 6 to 7 columns with Nominal/mo, Trend/mo, Pace
+- Fixed-window projection math replaces data-span denominators
+- Color-coded Pace ratios with background tints
+- Expandable detail rows show Schedule, Last run+model, Nominal/Trend/Pace/Drift, Tokens, Next run
+- Native `title` tooltips on column headers
 
 ---
 
@@ -254,16 +262,27 @@ cron/jobs.json (read-only)            -- Source of schedule expressions and defi
 ```
 
 **Deliverables:**
-- [ ] Parse `~/.hermes/cron/jobs.json` to resolve each `job_id` → `schedule.cron` and interval definitions
-- [ ] `query_jobs()` returns `scheduled_runs_30d`, `scheduled_runs_90d`, `scheduled_runs_1yr` per job
-- [ ] `query_jobs()` returns `projected_cost_{30d,90d,1yr}` per job (nominal schedule-based where cron exists)
-- [ ] `query_jobs()` returns `drift_ratio` per job, or `over_scheduled_runs` count
-- [ ] Summary card: "Projected {days}d spend at current pace: $XX.XX" (uses last window's cost/run × current scheduled frequency)
-- [ ] Per-job expand/collapse detail: show scheduled frequency, observed frequency, nominal projection, trend projection, drift warning if significant
-- [ ] Edge case: interval schedules (e.g., "every 6 hours") normalized alongside standard cron expressions
-- [ ] Edge case: jobs with no fixed schedule or unknown cron → fallback to pure trend projection with explicit uncertainty label
+- [x] `query_summary()` computes aggregate values by summing per-job fixed-window projections
+- [x] `query_jobs()` returns `scheduled_runs_30d` per job (via `croniter` in `schedule.py`)
+- [x] `query_jobs()` returns `projected_cost_{30d,90d,1yr}` per job (nominal schedule-based)
+- [x] `query_jobs()` returns `trend_projected_cost_{30d,90d,1yr}` per job (fixed-window based)
+- [x] `query_jobs()` returns `pace` per job (`trend / nominal`) with null-safe fallback
+- [x] `query_jobs()` returns `drift_ratio` per job (observed runs vs scheduled runs in window)
+- [x] Summary card: "Pace" with colored ratio + "Scheduled $X/mo" + "Projected $Y/mo" sub-lines
+- [x] Jobs table: columns Job | Runs | Total Cost | Avg Cost | Nominal/mo | Trend/mo | Pace
+- [x] Pace column: color-coded (cyan <0.85, white 0.85-1.15, amber 1.15-1.50, red >1.50)
+- [x] Expandable detail rows: Schedule, Last run + model, Nominal/Trend/Pace/Drift, Tokens, Next run
+- [x] Native `title` tooltips on column headers for Nominal/mo, Trend/mo, Pace
+- [x] Edge case: interval schedules (e.g., "every 6 hours") normalized alongside cron
+- [x] Edge case: jobs with no schedule show "No schedule" and "—" for projections
 
-**Status:** Design-only. Candidate for next priority after Phase 4.6 or considered alongside it depending on user interest.
+**Design decisions:**
+- Fixed-window math: denominator = selected filter days (not data span). Ensures per-job trends sum to aggregate trend.
+- Color scale: under-spend (<0.85) = cyan/informative, on-track (0.85-1.15) = neutral, warm (1.15-1.50) = amber, over (>1.50) = red
+- Pace terminology replaces "burn rate" — pace is a ratio, burn rate implies absolute $/time
+- Next Run moved from table column into expandable detail row (saves width, keeps pace visible)
+
+**Status:** ✅ Complete. Live in commit `747ceab` (backend) + `e9aadaf09` (host web cache-busting). Verified API returns correct data; awaiting Nick's iPad verification.
 
 ---
 
@@ -324,7 +343,7 @@ cron/jobs.json (read-only)            -- Source of schedule expressions and defi
 | 6: Docs | 3-4 | 0 |
 
 **Total estimated: ~26-35 hours**
-**Actual so far: ~19 hours across 4-5 sessions**
+**Actual so far: ~22 hours across 5-6 sessions**
 
 ---
 
@@ -337,11 +356,16 @@ cron/jobs.json (read-only)            -- Source of schedule expressions and defi
 | 1.5: Checkpoint | ✅ Complete | 1/1 | 0 |
 | 2: Scanner | ✅ Core complete | 6/8 | 2 (sync wiring, periodic/auto-run) |
 | 3: API | ✅ Complete | 7/7 | 0 |
-| 4: Frontend | ✅ MVP complete | 5/9 | 4 (sort, expand, highlight, mobile) |
+| 4: Frontend | ✅ MVP complete + Pace redesign | 10/14 | 4 (sort, individual run expand, highlight, mobile) |
+| 4.5: Success/Failure Split | 🟡 Design-only | 0/4 | 4 |
+| 4.6: Token Columns | 🟡 Design-only | 0/4 | 4 |
+| 4.7: Projections + Pace | ✅ Complete | 12/12 | 0 |
 | 2.5: Data Correction | ✅ Complete | 9/9 | 0 |
 | 2.6: Sync Endpoint | ✅ Complete | 9/9 | 0 |
 | 5: Hardening | 🟡 Partial | 6/10 | 4 (schema resilience, error logging, config validation, perf) |
 | 6: Docs | ⚫ Not started | 0/6 | 6 |
+
+**Next priority:** Nick's iPad verification + verbiage tweaks.
 
 ---
 
