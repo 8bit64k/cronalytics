@@ -1,51 +1,43 @@
 # Cronalytics — Work Checkpoint
-# Updated: 2026-05-02 12:30
-# Session: t_1fe5a743 — Cost formatting + Date range selector (VERIFIED + DONE)
+# Updated: 2026-05-02 21:15
 #
-## Status
-Both features were already implemented in prior commit `e628ccc` and have been
-fully verified in this run. No code changes were required.
+## Current Commit
+`850ccf4` (master) — "fix(ui): restore missing expandedId useState — fixes white screen"
+Prior: `c248452` — Phase 4.7 Cost Projections, Schedule-Aware Budgeting
+Prior: `4204cba` — rename: cron-insights → cronalytics (full sweep)
 
-## Kanban Task
-- **Old**: t_c4ca88f1 (cancelled — too many iterations, board noise)
-- **New**: t_1fe5a743 (this run — verified and closed)
+## What Works Now
+1. Dashboard loads; Cronalytics tab renders without white screen
+2. Backend: `/summary` and `/jobs` APIs return projection data + token columns
+3. Frontend: header uses shared `PageHeader` pattern (title, afterTitle badge, end slot)
+4. Day selector (7D/30D/90D/All) — uniform solid borders, no bevel
+5. Refresh button — right side of header, works
+6. Summary cards: Total Runs, Est. Cost, Tokens
+7. Cost by Model card renders
+8. Jobs table: columns = Job | Runs | Total Cost | Avg Cost | Monthly | Next Run
+9. Row expansion: click any job row → detail row opens below (schedule, last run+model, nominal/trend/drift, tokens)
+10. Row expansion synced by `expandedId` state (fixed in `850ccf4`)
 
-## 1) COST FORMATTING — VERIFIED ✅
-Frontend `fmtCost()` in `dashboard/dist/index.js`:
-- Uses `Intl.NumberFormat("en-US", {style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2})`
-- 6 call sites (summary card, model breakdown, jobs table: total cost, avg cost)
-- Backend keeps full precision: API returns 4 decimals (e.g. 4.1117) via `round(total_est_cost, 4)` in `facts.py`
-- Only the frontend truncates to $X.XX for display; no schema or API contract change
+## How We Got Here
+- Phase 4.7 implemented backend projections via `croniter` in new `schedule.py`, merged into `facts.py` + `plugin_api.py`
+- Frontend table refactored to show projection columns + expandable detail rows
+- `Button` component needed by plugin, but SDK wasn't rebuilt → plugin threw `TypeError` on missing `Button`
+- Rebuilt host web app (`npm run build` in `~/.hermes/hermes-agent/web`) → `Button` now exported in bundled SDK
+- Then discovered `expandedId` `useState` was accidentally dropped during frontend refactor → `ReferenceError` → white screen
+- Fixed, force-committed (`dashboard/dist` is gitignored), reloaded dashboard, verified in browser
 
-## 2) DATE RANGE SELECTOR — VERIFIED ✅
-Frontend `DaySelector` in `dashboard/dist/index.js`:
-- Options: 7D, 30D, 90D, All (value: 7, 30, 90, 0)
-- Square mono style matching Analytics tab aesthetic (no rounded group chrome)
-- `localStorage` key `cronalytics:days` persists user choice across navigations
-- Placed in shared page header via `SDK.usePageHeader().setEnd()`
-- `useApi` depends on `[path, reload]` where path includes `?days=N`, so selector
-  change triggers automatic re-fetch
+## Known Issues / Needs Feedback
+- Nick reviewing on iPad; will write up thoughts tomorrow
+- Summary card trend arrow (`→`) was temporarily replaced with `…` if loading; may need polish
+- Last run + Model in expandable detail row — open to layout/viz preferences
+- Drift values are fractional for short windows (expected but may need friendlier label)
+- 632A8F13661E job has no schedule → "—" next run; may need manual schedule config or smarter fallback
 
-Backend filtering in `facts.py` / `plugin_api.py`:
-- `GET /api/plugins/cronalytics/summary?days=N` — `days` Query(default=30, ge=0)
-- `GET /api/plugins/cronalytics/jobs?days=N` — same param
-- SQL: `WHERE run_time >= ?` when `days > 0`, with `params = [time.time() - days*86400]`
-- `days=0` omits WHERE clause → all time
-- `days` param flows through: `plugin_api.py` → `facts.query_summary(days)` → SQL
+## Pending Commits
+None. Working tree is clean on master.
 
-## Verification Matrix
-| days | runs | api cost (4dp) | ui format | status |
-|------|------|----------------|-----------|--------|
-| 7    | 39   | 4.1117         | $4.11     | ✅     |
-| 30   | 40   | 4.5919         | $4.59     | ✅     |
-| 90   | 40   | 4.5919         | $4.59     | ✅     |
-| 0    | 40   | 4.5919         | $4.59     | ✅     |
-
-## Files Confirmed (no diff from HEAD)
-- `dashboard/dist/index.js` — fmtCost + DaySelector implemented
-- `dashboard/plugin_api.py` — `days` Query param on summary/jobs endpoints
-- `facts.py` — `WHERE run_time >= ?` filtering with 0=all-time guard
-
-## Next Work
-When Nick has additional change requests, create a new child Kanban task
-and continue iteration. No further action needed for this task.
+## Rejoin Instructions
+- Tab open at `https://hermes.tail315577.ts.net/`
+- Plugin loaded from `~/.hermes/plugins/cronalytics` symlink
+- Dashboard process: background (Hermes CLI serves built `web_dist/` via `hermes dashboard --port 9119 --host 0.0.0.0 --insecure --no-open`)
+- Next session: likely aesthetic, info-density, or new feature work based on Nick's review

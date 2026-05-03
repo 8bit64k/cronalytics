@@ -134,8 +134,45 @@ async def sync() -> dict[str, Any]:
 async def summary(
     days: int = Query(default=30, ge=0),
 ) -> dict[str, Any]:
-    """Aggregated stats for cron runs over the last N days (0 = all time)."""
-    return _api_wrap(_facts_mod.query_summary(FACT_DB, days=days))
+    """Aggregated stats for cron runs over the last N days (0 = all time).
+
+    Includes schedule-aware projections: nominal (if running exactly on schedule),
+    trend (if current pace continues), and pace (the ratio of the two).
+    """
+    raw_summary = _facts_mod.query_summary(FACT_DB, days=days)
+    raw_jobs = _facts_mod.query_jobs(FACT_DB, days=days)
+
+    nominal_total = 0.0
+    trend_total = 0.0
+    for j in raw_jobs:
+        proj = _schedule_mod.get_job_projections(
+            job_id=j["job_id"],
+            avg_cost=j.get("avg_cost"),
+            total_cost=j.get("total_cost"),
+            runs=j.get("runs", 0),
+            first_run=j.get("first_run", 0),
+            last_run=j.get("last_run", 0),
+            days_filter=days,
+            jobs_json_path=_JOBS_PATH,
+        )
+        j["projections"] = proj
+        if proj["projected_cost_30d"] is not None:
+            nominal_total += proj["projected_cost_30d"]
+        if proj["trend_projected_cost_30d"] is not None:
+            trend_total += proj["trend_projected_cost_30d"]
+
+    pace = None
+    if nominal_total > 0:
+        pace = round(trend_total / nominal_total, 2)
+
+    return _api_wrap(
+        {
+            **raw_summary,
+            "nominal_monthly_total": round(nominal_total, 4) if nominal_total else None,
+            "trend_monthly_total": round(trend_total, 4) if trend_total else None,
+            "pace": pace,
+        }
+    )
 
 
 @router.get("/jobs")

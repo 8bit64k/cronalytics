@@ -41,6 +41,22 @@
     return h + "h";
   }
 
+  function paceColor(pace) {
+    if (pace == null) return "var(--foreground-base, var(--foreground))";
+    if (pace < 0.85) return "#4ecdc4";
+    if (pace < 1.15) return "var(--foreground-base, var(--foreground))";
+    if (pace < 1.50) return "#f0a500";
+    return "#ff6b6b";
+  }
+
+  function paceBg(pace) {
+    if (pace == null) return "transparent";
+    if (pace < 0.85) return "rgba(78,205,196,0.08)";
+    if (pace < 1.15) return "transparent";
+    if (pace < 1.50) return "rgba(240,165,0,0.08)";
+    return "rgba(255,107,107,0.08)";
+  }
+
   function useApi(path) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -268,19 +284,22 @@
           )
         ),
         React.createElement(Card, null,
-          React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Monthly Pace")),
-          React.createElement(CardContent, null,
-            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700 } }, fmtCost(s.projected_monthly_pace)),
-            React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6 } },
-              "~$" + (s.projected_monthly_pace / 30).toFixed(2) + "/day projected"
-            )
-          )
-        ),
-        React.createElement(Card, null,
           React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Tokens")),
           React.createElement(CardContent, null,
             React.createElement("div", { style: { fontSize: "0.8rem" } }, "In: " + (s.total_input_tokens || 0).toLocaleString()),
             React.createElement("div", { style: { fontSize: "0.8rem" } }, "Out: " + (s.total_output_tokens || 0).toLocaleString())
+          )
+        ),
+        React.createElement(Card, null,
+          React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Pace")),
+          React.createElement(CardContent, null,
+            React.createElement("div", {
+              style: { fontSize: "1.5rem", fontWeight: 700, color: paceColor(s.pace) }
+            }, s.pace != null ? s.pace.toFixed(2) + "×" : "—"),
+            React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6, display: "flex", flexDirection: "column", gap: "0.1rem" } },
+              React.createElement("span", null, "Scheduled: " + fmtCost(s.nominal_monthly_total) + "/mo"),
+              React.createElement("span", null, "Projected: " + fmtCost(s.trend_monthly_total) + "/mo")
+            )
           )
         )
       ),
@@ -346,12 +365,18 @@
               React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
                 React.createElement("thead", null,
                   React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
-                    ["Job", "Runs", "Total Cost", "Avg Cost", "Monthly", "Next Run"].map(h =>
-                      React.createElement("th", {
+                    ["Job", "Runs", "Total Cost", "Avg Cost", "Nominal/mo", "Trend/mo", "Pace"].map(h => {
+                      const _tt = {
+                        "Nominal/mo": "Cost if job ran exactly on schedule at current avg cost",
+                        "Trend/mo": "Cost if current spending pace continues for 30 days",
+                        "Pace": "How actual spend compares to scheduled expectation",
+                      };
+                      return React.createElement("th", {
                         key: h,
-                        style: { textAlign: h === "Job" || h === "Next Run" ? "left" : "right", padding: "0.5rem 0.35rem" }
-                      }, h)
-                    )
+                        title: _tt[h] || "",
+                        style: { textAlign: h === "Job" ? "left" : "right", padding: "0.5rem 0.35rem", cursor: _tt[h] ? "help" : "default" }
+                      }, h);
+                    })
                   )
                 ),
                 React.createElement("tbody", null,
@@ -368,19 +393,24 @@
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, j.runs),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.total_cost)),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.avg_cost)),
+                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } },
+                        j.projections && j.projections.projected_cost_30d != null
+                          ? fmtCost(j.projections.projected_cost_30d) + "/mo"
+                          : "\u2014"
+                      ),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontWeight: 500 } },
                         j.projections && j.projections.trend_projected_cost_30d != null
                           ? fmtCost(j.projections.trend_projected_cost_30d) + "/mo"
                           : "\u2014"
                       ),
-                      React.createElement("td", { style: { padding: "0.4rem 0.35rem", fontSize: "0.72rem", color: "var(--midground, rgba(255,255,255,0.65))" } },
-                        j.projections && j.projections.next_run_at
-                          ? fmtRel(j.projections.next_run_at)
+                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontWeight: 700, color: paceColor(j.projections && j.projections.pace), background: paceBg(j.projections && j.projections.pace), borderRadius: "0.25rem" } },
+                        j.projections && j.projections.pace != null
+                          ? j.projections.pace.toFixed(2) + "×"
                           : "\u2014"
                       )
                     ),
                     expandedId === j.job_id && React.createElement("tr", { key: j.job_id + "_detail" },
-                      React.createElement("td", { colSpan: 6, style: { padding: "0.6rem 0.35rem 0.6rem 0.75rem", background: "rgba(255,255,255,0.02)", fontSize: "0.72rem" } },
+                      React.createElement("td", { colSpan: 7, style: { padding: "0.6rem 0.35rem 0.6rem 0.75rem", background: "rgba(255,255,255,0.02)", fontSize: "0.72rem" } },
                         React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.3rem" } },
                           React.createElement("div", null,
                             React.createElement("span", { style: { opacity: 0.6 } }, "Schedule: "),
@@ -392,19 +422,33 @@
                             " using ",
                             React.createElement("strong", null, j.last_model)
                           ),
-                          j.projections && React.createElement("div", null,
-                            React.createElement("span", { style: { opacity: 0.6 } }, "Nominal: "),
-                            fmtCost(j.projections.projected_cost_30d), "/mo  ",
-                            React.createElement("span", { style: { opacity: 0.6 } }, "Trend: "),
-                            fmtCost(j.projections.trend_projected_cost_30d), "/mo  ",
-                            React.createElement("span", { style: { opacity: 0.6 } }, "Drift: "),
-                            j.projections.drift_ratio != null
-                              ? (j.projections.drift_ratio * 100).toFixed(0) + "%"
-                              : "\u2014"
+                          j.projections && React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" } },
+                            React.createElement("span", null,
+                              React.createElement("span", { style: { opacity: 0.6 } }, "Nominal: "),
+                              fmtCost(j.projections.projected_cost_30d), "/mo"
+                            ),
+                            React.createElement("span", null,
+                              React.createElement("span", { style: { opacity: 0.6 } }, "Trend: "),
+                              fmtCost(j.projections.trend_projected_cost_30d), "/mo"
+                            ),
+                            React.createElement("span", {
+                              style: { color: paceColor(j.projections.pace), fontWeight: 600, background: paceBg(j.projections.pace), padding: "0.05rem 0.3rem", borderRadius: "0.2rem" }
+                            },
+                              React.createElement("span", { style: { opacity: 0.6, fontWeight: 400 } }, "Pace: "),
+                              j.projections.pace != null ? j.projections.pace.toFixed(2) + "×" : "\u2014"
+                            ),
+                            React.createElement("span", null,
+                              React.createElement("span", { style: { opacity: 0.6 } }, "Drift: "),
+                              j.projections.drift_ratio != null
+                                ? (j.projections.drift_ratio * 100).toFixed(0) + "%"
+                                : "\u2014"
+                            )
                           ),
-                          React.createElement("div", { style: { opacity: 0.55 } },
-                            "Tokens: ", (j.total_input_tokens || 0).toLocaleString(),
-                            " in / ", (j.total_output_tokens || 0).toLocaleString(), " out"
+                          React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "0.75rem", opacity: 0.55 } },
+                            React.createElement("span", null, "Tokens: " + (j.total_input_tokens || 0).toLocaleString() + " in / " + (j.total_output_tokens || 0).toLocaleString() + " out"),
+                            React.createElement("span", null,
+                              "Next run: " + (j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014")
+                            )
                           )
                         )
                       )

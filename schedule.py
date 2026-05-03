@@ -149,6 +149,13 @@ def get_job_projections(
         for d in horizon_days:
             trend_proj[f"{d}d"] = None
 
+    # ---- Pace ratio (actual vs scheduled) --------------------------------
+    pace: float | None = None
+    nominal_30 = nominal_proj.get("30d")
+    trend_30 = trend_proj.get("30d")
+    if nominal_30 is not None and nominal_30 > 0 and trend_30 is not None:
+        pace = round(trend_30 / nominal_30, 2)
+
     # ---- Drift ratio ------------------------------------------------------
     drift_ratio: float | None = None
     if observed_window > 0 and kind:
@@ -171,6 +178,7 @@ def get_job_projections(
         "trend_projected_cost_30d": trend_proj.get("30d"),
         "trend_projected_cost_90d": trend_proj.get("90d"),
         "trend_projected_cost_1yr": trend_proj.get("365d"),
+        "pace": pace,
         "drift_ratio": drift_ratio,
         "observed_window_days": round(observed_window, 1) if observed_window > 0 else None,
     }
