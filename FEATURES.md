@@ -1,6 +1,6 @@
 # FEATURES.md — Cronalytics Feature Inventory
 
-> **Version:** 0.2.0 (Pace Redesign)  
+> **Version:** 0.3.0 (Polish — Badge, Labels, Detail Row)  
 > **Source:** Derived from direct inspection of `/home/nick/builds/cronalytics/` as of 2026-05-03  
 > **Status:** Living document — update before each release
 
@@ -166,14 +166,14 @@
 
 | #     | Feature                                                            | Status | Evidence                                 |
 | ----- | ------------------------------------------------------------------ | ------ | ---------------------------------------- |
-| 5.2.1 | Summary cards: Total Runs, Est. Cost, Tokens, Pace                 | ✅      | `index.js` — 4-card grid                 |
-| 5.2.2 | Pace card: colored ratio with Scheduled + Projected sub-lines      | ✅      | `index.js` — `paceColor(s.pace)`         |
+| 5.2.1 | Summary cards: Total Runs, Cost (estimated), Tokens, Pace | ✅ | `index.js` — 4-card grid |
+| 5.2.2 | Pace card: colored ratio with Nominal + Trend sub-lines | ✅ | `index.js` — `paceColor(s.pace)` |
 | 5.2.3 | Cost trend arrow (↑/↓/→) with previous period                    | ✅      | `index.js`                               |
 | 5.2.4 | Cost by model list                                               | ✅      | `index.js`                               |
 | 5.2.5 | Jobs table: Job | Runs | Total Cost | Avg Cost | Nominal/mo | Trend/mo | Pace | ✅ | `index.js` |
 | 5.2.6 | Pace column: colored text + background tint (cyan/white/amber/red) | ✅      | `paceColor()` + `paceBg()` helpers       |
 | 5.2.7 | Expandable detail rows (colSpan 7)                                 | ✅      | `index.js` L420+                         |
-| 5.2.8 | Detail row content: Schedule, Last run + model, Nominal/Trend/Pace/Drift, Tokens, Next run | ✅ | `index.js` L440+ |
+| 5.2.8 | Detail row content: Tokens, single-line cron schedule (Last run / Next run) | ✅ | `index.js` L440+ |
 | 5.2.9 | Native `title` tooltips on table headers                             | ✅      | `index.js` L370-374                      |
 | 5.2.10 | Sync Now button in Jobs card                                        | ✅      | `index.js` L348-352                       |
 | 5.2.11 | Empty state message                                                 | ✅      | `index.js`                               |
@@ -225,7 +225,7 @@
 | 7.7  | CHANGELOG                                     | ❌      | Not present                              |
 | 7.8  | CONTRIBUTING                                  | ❌      | Not present                              |
 | 7.9  | `.gitignore` misses `*.db-wal` and `*.db-shm` | ⚠️      | Repo currently dirty with these files    |
-| 7.10 | Git repo at `/home/nick/builds/cronalytics`  | ✅      | Branch `master`, commit `747ceab`        |
+| 7.10 | Git repo at `/home/nick/builds/cronalytics`  | ✅      | Branch `master`, commit `6c4fefe`       |
 | 7.11 | Deployed copy synced with build dir           | ✅      | diff clean (excluding runtime artifacts) |
 
 ---
@@ -273,6 +273,7 @@ Cronalytics now uses **fixed-window projections** rather than data-span denomina
 | 9.2 | **Abandoned/hanging session visibility**                      | 📋     | Scanner filters `ended_at IS NOT NULL`, so 7 cron sessions with `ended_at = NULL` are invisible in fact DB. These may represent true failures (gateway crash, killed process, stuck job). Consider a separate "abandoned" tracker. |
 | 9.3 | **Per-job token columns in jobs table**                       | 📋     | Summary shows total tokens, but jobs table has no attribution. Need `SUM(input_tokens)` / `SUM(output_tokens)` added to `query_jobs()` and a compact column in the frontend table. |
 | 9.4 | **Cost projections + Pace (30d / 90d / 1yr) + frequency drift** | ✅      | **IMPLEMENTED** — Fixed-window math, per-job + aggregate pace, color-coded indicators, expandable detail rows. See Section 8. |
+| 9.5 | **CLI: `cronalytics` standalone command**                     | 🚧     | Prototype planned — mirrors `hermes insights` format with Rich tables. `--days` flag, subcommands: `summary`, `trends`, `models`, `runs`, `health`. Nick calls this "most value + polish for V1.0 release". |
 
 ---
 
