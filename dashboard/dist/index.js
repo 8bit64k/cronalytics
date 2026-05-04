@@ -286,8 +286,14 @@
         React.createElement(Card, null,
           React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Tokens")),
           React.createElement(CardContent, null,
-            React.createElement("div", { style: { fontSize: "0.8rem" } }, "In: " + (s.total_input_tokens || 0).toLocaleString()),
-            React.createElement("div", { style: { fontSize: "0.8rem" } }, "Out: " + (s.total_output_tokens || 0).toLocaleString())
+            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700 } },
+              (s.total_tokens || 0).toLocaleString()
+            ),
+            React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6, display: "flex", flexDirection: "column", gap: "0.1rem" } },
+              React.createElement("span", null, "In: " + (s.total_input_tokens || 0).toLocaleString()),
+              React.createElement("span", null, "Out: " + (s.total_output_tokens || 0).toLocaleString()),
+              React.createElement("span", null, "Cached: " + (s.total_cache_read_tokens || 0).toLocaleString())
+            )
           )
         ),
         React.createElement(Card, null,
@@ -445,7 +451,12 @@
                             )
                           ),
                           React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "0.75rem", opacity: 0.55 } },
-                            React.createElement("span", null, "Tokens: " + (j.total_input_tokens || 0).toLocaleString() + " in / " + (j.total_output_tokens || 0).toLocaleString() + " out"),
+                            React.createElement("span", null,
+                              "Tokens: " + (j.total_tokens || 0).toLocaleString() + " total "
+                                + "(" + (j.total_input_tokens || 0).toLocaleString() + " in / "
+                                + (j.total_output_tokens || 0).toLocaleString() + " out / "
+                                + (j.total_cache_read_tokens || 0).toLocaleString() + " cached)"
+                            ),
                             React.createElement("span", null,
                               "Next run: " + (j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014")
                             )

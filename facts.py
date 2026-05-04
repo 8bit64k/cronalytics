@@ -242,12 +242,15 @@ def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
                SUM(estimated_cost_usd),
                SUM(actual_cost_usd),
                COALESCE(SUM(input_tokens), 0),
-               COALESCE(SUM(output_tokens), 0)
+               COALESCE(SUM(output_tokens), 0),
+               COALESCE(SUM(cache_read_tokens), 0),
+               COALESCE(SUM(cache_write_tokens), 0)
         FROM cron_runs{where}
         """,
         params,
     )
-    total_runs, total_est_cost, total_act_cost, total_in, total_out = cursor.fetchone()
+    total_runs, total_est_cost, total_act_cost, total_in, total_out, total_cr, total_cw = cursor.fetchone()
+    total_tokens = (total_in or 0) + (total_out or 0) + (total_cr or 0) + (total_cw or 0)
 
     # Cost by model (only rows with known cost)
     cost_where = where + (" AND " if days > 0 else " WHERE ") + "estimated_cost_usd IS NOT NULL"
@@ -292,8 +295,11 @@ def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
         "total_runs": total_runs,
         "total_estimated_cost": round(total_est_cost, 4) if total_est_cost is not None else None,
         "total_actual_cost": round(total_act_cost, 4) if total_act_cost is not None else None,
+        "total_tokens": total_tokens,
         "total_input_tokens": total_in or 0,
         "total_output_tokens": total_out or 0,
+        "total_cache_read_tokens": total_cr or 0,
+        "total_cache_write_tokens": total_cw or 0,
         "cost_by_model": by_model,
         "previous_period": prev_info if days > 0 else {},
         "trend": trend if days > 0 else "→",
@@ -317,7 +323,9 @@ def query_jobs(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
                COALESCE(MIN(run_time), 0) AS first_run,
                MAX(model) AS last_model,
                COALESCE(SUM(input_tokens), 0) AS total_input_tokens,
-               COALESCE(SUM(output_tokens), 0) AS total_output_tokens
+               COALESCE(SUM(output_tokens), 0) AS total_output_tokens,
+               COALESCE(SUM(cache_read_tokens), 0) AS total_cache_read_tokens,
+               COALESCE(SUM(cache_write_tokens), 0) AS total_cache_write_tokens
         FROM cron_runs{where}
         GROUP BY job_id
         ORDER BY total_cost DESC
@@ -335,6 +343,9 @@ def query_jobs(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
             "last_model": r[6] or "unknown",
             "total_input_tokens": r[7],
             "total_output_tokens": r[8],
+            "total_cache_read_tokens": r[9],
+            "total_cache_write_tokens": r[10],
+            "total_tokens": (r[7] or 0) + (r[8] or 0) + (r[9] or 0) + (r[10] or 0),
         }
         for r in cursor.fetchall()
     ]
