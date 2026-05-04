@@ -141,7 +141,7 @@
     // PageHeaderProvider's layout effect clears slots on route change.
     useEffect(() => {
       if (!pageHeader) return;
-      const windowLabel = days === 0 ? "All time" : "Last " + days + " days";
+      const badgeLabel = days === 0 ? "All" : days + "D";
       pageHeader.setAfterTitle(
         React.createElement("span", {
           style: { display: "flex", alignItems: "center", gap: "0.5rem" }
@@ -158,7 +158,7 @@
               border: "1px solid rgba(255,255,255,0.04)",
               textTransform: "uppercase",
             }
-          }, windowLabel)
+          }, badgeLabel)
         )
       );
       pageHeader.setEnd(
@@ -303,8 +303,8 @@
               style: { fontSize: "1.5rem", fontWeight: 700, color: paceColor(s.pace) }
             }, s.pace != null ? s.pace.toFixed(2) + "×" : "—"),
             React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6, display: "flex", flexDirection: "column", gap: "0.1rem" } },
-              React.createElement("span", null, "Scheduled: " + fmtCost(s.nominal_monthly_total) + "/mo"),
-              React.createElement("span", null, "Projected: " + fmtCost(s.trend_monthly_total) + "/mo")
+              React.createElement("span", null, "Nominal: " + fmtCost(s.nominal_monthly_total) + "/mo"),
+              React.createElement("span", null, "Trend: " + fmtCost(s.trend_monthly_total) + "/mo")
             )
           )
         )
@@ -419,47 +419,18 @@
                       React.createElement("td", { colSpan: 7, style: { padding: "0.6rem 0.35rem 0.6rem 0.75rem", background: "rgba(255,255,255,0.02)", fontSize: "0.72rem" } },
                         React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.3rem" } },
                           React.createElement("div", null,
-                            React.createElement("span", { style: { opacity: 0.6 } }, "Schedule: "),
-                            j.projections && j.projections.schedule_display ? j.projections.schedule_display : "No schedule"
+                            "Tokens: " + (j.total_tokens || 0).toLocaleString() + " total "
+                              + "(" + (j.total_input_tokens || 0).toLocaleString() + " in / "
+                              + (j.total_output_tokens || 0).toLocaleString() + " out / "
+                              + (j.total_cache_read_tokens || 0).toLocaleString() + " cached)"
                           ),
-                          React.createElement("div", null,
-                            "This job last ran at ",
-                            React.createElement("strong", null, fmtTime(j.last_run)),
-                            " using ",
-                            React.createElement("strong", null, j.last_model)
-                          ),
-                          j.projections && React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" } },
-                            React.createElement("span", null,
-                              React.createElement("span", { style: { opacity: 0.6 } }, "Nominal: "),
-                              fmtCost(j.projections.projected_cost_30d), "/mo"
-                            ),
-                            React.createElement("span", null,
-                              React.createElement("span", { style: { opacity: 0.6 } }, "Trend: "),
-                              fmtCost(j.projections.trend_projected_cost_30d), "/mo"
-                            ),
-                            React.createElement("span", {
-                              style: { color: paceColor(j.projections.pace), fontWeight: 600, background: paceBg(j.projections.pace), padding: "0.05rem 0.3rem", borderRadius: "0.2rem" }
-                            },
-                              React.createElement("span", { style: { opacity: 0.6, fontWeight: 400 } }, "Pace: "),
-                              j.projections.pace != null ? j.projections.pace.toFixed(2) + "×" : "\u2014"
-                            ),
-                            React.createElement("span", null,
-                              React.createElement("span", { style: { opacity: 0.6 } }, "Drift: "),
-                              j.projections.drift_ratio != null
-                                ? (j.projections.drift_ratio * 100).toFixed(0) + "%"
-                                : "\u2014"
-                            )
-                          ),
-                          React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "0.75rem", opacity: 0.55 } },
-                            React.createElement("span", null,
-                              "Tokens: " + (j.total_tokens || 0).toLocaleString() + " total "
-                                + "(" + (j.total_input_tokens || 0).toLocaleString() + " in / "
-                                + (j.total_output_tokens || 0).toLocaleString() + " out / "
-                                + (j.total_cache_read_tokens || 0).toLocaleString() + " cached)"
-                            ),
-                            React.createElement("span", null,
-                              "Next run: " + (j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014")
-                            )
+                          React.createElement("div", {
+                            style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7 }
+                          },
+                            (j.projections && j.projections.schedule_display ? j.projections.schedule_display : "No schedule"),
+                            "     Last: ", fmtTime(j.last_run),
+                            j.last_model ? " using " + j.last_model : "",
+                            "     Next: ", j.projections && j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014"
                           )
                         )
                       )
@@ -473,31 +444,5 @@
     );
   }
 
-  // ── Header-right badge (sidebar) ────────────────────────────────
-  function HeaderBadge() {
-    const [status, setStatus] = React.useState(null);
-
-    React.useEffect(() => {
-      let cancelled = false;
-      fetchJSON("/api/plugins/cronalytics/health")
-        .then(d => { if (!cancelled) setStatus(d); })
-        .catch(() => {});
-      const id = setInterval(() => {
-        fetchJSON("/api/plugins/cronalytics/health")
-          .then(d => { if (!cancelled) setStatus(d); })
-          .catch(() => {});
-      }, 30000);
-      return () => { cancelled = true; clearInterval(id); };
-    }, []);
-
-    if (!status || !status.fact_db) return null;
-
-    const total = status.fact_db.total_runs || 0;
-    const label = total > 0 ? total + " cron runs" : "Cronalytics";
-
-    return React.createElement(Badge, { variant: "outline" }, label);
-  }
-
   PLUGINS.register("cronalytics", CronTab);
-  PLUGINS.registerSlot("cronalytics", "header-right", HeaderBadge);
 })();
