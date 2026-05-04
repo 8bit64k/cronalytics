@@ -2,8 +2,9 @@
 # Updated: 2026-05-03 23:20
 #
 ## Current Commit
-`6c4fefe` (master) — "ui: 'Cost' header + '(estimated)' tag inline next to headline"
-Prior: `734e573` — "ui: [XD] badge, Nominal/Trend labels, slim detail row, drop header-right badge"
+`61ddc6e` (master) — "feat(cli): standalone cronalytics CLI with summary/jobs/runs/models/trends/health subcommands"
+Prior: `1e59353` — "docs: update CHECKPOINT and FEATURES for 0.3.0 polish + CLI prototype plan"
+Prior: `6c4fefe` — "ui: 'Cost' header + '(estimated)' tag inline next to headline"
 Prior: `e249ed9` — "fix(tokens): surface cache tokens — total_tokens headline, breakdown in sub-lines"
 Prior: `747ceab` — "feat(projections): fixed-window Pace redesign — per-job + aggregate pace, color indicators, detail rows"
 
@@ -45,6 +46,19 @@ Prior: `747ceab` — "feat(projections): fixed-window Pace redesign — per-job 
 - Fixed-window redesign: removed data-span `projected_monthly_pace` from `query_summary()`, added per-job `pace` in `get_job_projections()`, computed aggregate `nominal_monthly_total` + `trend_monthly_total` + `pace` in `/summary` endpoint
 - Frontend: `paceColor()` and `paceBg()` helpers, table restructured, detail rows expanded
 - Commits: `e9aadaf09` (host web cache-busting), `747ceab` → `6c4fefe` (cronalytics)
+
+## Phase 7 Progress: CLI Prototype (Working)
+- **File**: `cli.py` (standalone, imports `facts.py` + `schedule.py` directly)
+- **Commands implemented**:
+  - `summary` — headline: runs, est cost, actual cost, tokens (total + In/Out/Cached), trend arrow
+  - `jobs` — table: Job ID, Runs, Cost, Tokens, Pace (with projection math via `get_job_projections`)
+  - `runs --job ID` — 50 most recent runs: Time, Duration, Cost, Tokens, Model
+  - `models` — per-model: Model, Runs, Cost, Tokens
+  - `trends` — daily bar chart (sparkline) with runs + cost
+  - `health` — total runs, unique jobs, last ingested, last run time
+- **--days** flag available on every command (default 30, 0 = all time)
+- **Style**: ASCII box headers matching `hermes insights` format; compact tables aligned with monospace columns
+- **Tested**: all commands run against live `facts.db`; output verified
 
 ## Known Issues / Needs Feedback
 - Tooltips not showing on Chrome MacBook or iPad Safari (desktop hover works, tap/click does not). `title` attribute may need replacement approach (modal?)

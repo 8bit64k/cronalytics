@@ -446,6 +446,44 @@ dashboard/dist/index.js             -- Add "Sync Now" button with loading state 
 
 ---
 
-*Last updated: 2026-04-30*
-*Current commit: `d08b638`*
-*Phase 5 in progress (6/10 complete). Next: Phase 5 remaining tasks OR Phase 6 docs.*
+## Phase 7: Standalone CLI Prototype (Nick's Top Priority)
+
+**Goal:** A `cronalytics` CLI command that mirrors `hermes insights` terminal output format, dumping cron run data without requiring Hermes core changes.
+
+**Commands:**
+- `summary` — Aggregate headline: runs, cost, tokens (total + In/Out/Cached), trend arrow
+- `jobs` — Per-job table: Job ID, Runs, Cost, Tokens, Pace (with projection math)
+- `runs --job ID` — Individual run history: Time, Duration, Cost, Tokens, Model
+- `models` — Per-model cost breakdown
+- `trends` — Daily sparkline bar chart (runs + cost per day)
+- `health` — Fact DB health: total runs, unique jobs, last ingested, last run
+
+**Shared flag:** `--days N` (default 30, 0 = all time)
+
+**Files:**
+```
+cli.py                          -- Standalone entry point, argparse subcommands, ASCII formatting
+```
+
+**Deliverables:**
+- [x] `cli.py` created with all 6 subcommands
+- [x] `--days` flag wired to every query
+- [x] ASCII box headers matching `hermes insights` style
+- [x] Compact monospace tables with aligned columns
+- [x] Token formatting with K/M suffixes; cost with `$` + 2 decimals
+- [x] `jobs` command integrates `get_job_projections()` for Nominal/Trend/Pace math
+- [x] All commands tested against live `facts.db`
+
+**Next (awaiting Nick after AM meetings):**
+- Iterate on output layout and density
+- Decide on Rich tables vs ASCII boxes
+- Add `--json` flag for machine-readable output
+- Consider `hermes cronalytics` core wiring (deferred)
+
+**Status:** ✅ Prototype working. Awaiting user iteration.
+
+---
+
+*Last updated: 2026-05-04*
+*Current commit: `61ddc6e`*
+*Phase 6 dashboard complete, Phase 7 CLI prototype working. Next: iterate CLI with Nick.*
