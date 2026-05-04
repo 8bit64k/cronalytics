@@ -275,7 +275,7 @@
           )
         ),
         React.createElement(Card, null,
-          React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Est. Cost")),
+          React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Estimated Cost")),
           React.createElement(CardContent, null,
             React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700 } }, fmtCost(s.total_estimated_cost)),
             React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6 } },
