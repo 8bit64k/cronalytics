@@ -275,9 +275,12 @@
           )
         ),
         React.createElement(Card, null,
-          React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Estimated Cost")),
+          React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Cost")),
           React.createElement(CardContent, null,
-            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700 } }, fmtCost(s.total_estimated_cost)),
+            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700 } },
+              fmtCost(s.total_estimated_cost),
+              React.createElement("span", { style: { fontSize: "0.65rem", fontWeight: 400, opacity: 0.5, marginLeft: "0.35rem", verticalAlign: "middle" } }, "(estimated)")
+            ),
             React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6 } },
               "Trend: ", s.trend || "→", prevLabel
             )
