@@ -222,14 +222,14 @@
         React.createElement(Card, null,
           React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Total Runs")),
           React.createElement(CardContent, null,
-            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700 } }, s.total_runs || 0),
+            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } }, (s.total_runs || 0).toLocaleString()),
             React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6 } }, windowLabel)
           )
         ),
         React.createElement(Card, null,
           React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Cost")),
           React.createElement(CardContent, null,
-            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700 } },
+            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
               fmtCost(s.total_estimated_cost),
               React.createElement("span", { style: { fontSize: "0.65rem", fontWeight: 400, opacity: 0.5, marginLeft: "0.35rem", verticalAlign: "middle" } }, "(estimated)")
             ),
@@ -241,7 +241,7 @@
         React.createElement(Card, null,
           React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Tokens")),
           React.createElement(CardContent, null,
-            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700 } },
+            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
               (s.total_tokens || 0).toLocaleString()
             ),
             React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6, display: "flex", flexDirection: "column", gap: "0.1rem" } },
@@ -255,7 +255,7 @@
           React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Pace")),
           React.createElement(CardContent, null,
             React.createElement("div", {
-              style: { fontSize: "1.5rem", fontWeight: 700, color: paceColor(s.pace) }
+              style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(s.pace) }
             }, s.pace != null ? s.pace.toFixed(2) + "×" : "—"),
             React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6, display: "flex", flexDirection: "column", gap: "0.1rem" } },
               React.createElement("span", null, "Nominal: " + fmtCost(s.nominal_monthly_total) + "/mo"),
@@ -277,7 +277,7 @@
                   style: { display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }
                 },
                   React.createElement("span", null, m.model),
-                  React.createElement("span", null, fmtCost(m.total_cost) + " (" + m.runs + " runs)")
+                  React.createElement("span", null, fmtCost(m.total_cost) + " (" + (m.runs || 0).toLocaleString() + " runs)")
                 )
               )
             )
@@ -351,7 +351,7 @@
                         React.createElement("div", { style: { fontSize: "0.78rem", fontWeight: 500 } }, j.name || j.job_id),
                         React.createElement("div", { style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.65rem", opacity: 0.5 } }, j.job_id)
                       ),
-                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, j.runs),
+                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, (j.runs || 0).toLocaleString()),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.total_cost)),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.avg_cost)),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } },
@@ -373,7 +373,9 @@
                     expandedId === j.job_id && React.createElement("tr", { key: j.job_id + "_detail" },
                       React.createElement("td", { colSpan: 7, style: { padding: "0.6rem 0.35rem 0.6rem 0.75rem", background: "rgba(255,255,255,0.02)", fontSize: "0.72rem" } },
                         React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.3rem" } },
-                          React.createElement("div", null,
+                          React.createElement("div", {
+                            style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.72rem" }
+                          },
                             "Tokens: " + (j.total_tokens || 0).toLocaleString() + " total "
                               + "(" + (j.total_input_tokens || 0).toLocaleString() + " in / "
                               + (j.total_output_tokens || 0).toLocaleString() + " out / "
