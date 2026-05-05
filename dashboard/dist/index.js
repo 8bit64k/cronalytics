@@ -41,6 +41,15 @@
     return h + "h";
   }
 
+  function fmtCompact(n) {
+    if (n == null || n === 0) return "0";
+    const abs = Math.abs(n);
+    if (abs >= 1_000_000_000) return (n / 1_000_000_000).toFixed(2) + "B";
+    if (abs >= 1_000_000) return (n / 1_000_000).toFixed(2) + "M";
+    if (abs >= 1_000) return (n / 1_000).toFixed(1) + "K";
+    return n.toLocaleString();
+  }
+
   function paceColor(pace) {
     if (pace == null) return "var(--foreground-base, var(--foreground))";
     if (pace < 0.85) return "#4ecdc4";
@@ -242,12 +251,12 @@
           React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Tokens")),
           React.createElement(CardContent, null,
             React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
-              (s.total_tokens || 0).toLocaleString()
+              fmtCompact(s.total_tokens)
             ),
             React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6, display: "flex", flexDirection: "column", gap: "0.1rem" } },
-              React.createElement("span", null, "In: " + (s.total_input_tokens || 0).toLocaleString()),
-              React.createElement("span", null, "Out: " + (s.total_output_tokens || 0).toLocaleString()),
-              React.createElement("span", null, "Cached: " + (s.total_cache_read_tokens || 0).toLocaleString())
+              React.createElement("span", null, "In: " + fmtCompact(s.total_input_tokens)),
+              React.createElement("span", null, "Out: " + fmtCompact(s.total_output_tokens)),
+              React.createElement("span", null, "Cached: " + fmtCompact(s.total_cache_read_tokens))
             )
           )
         ),
@@ -376,10 +385,10 @@
                           React.createElement("div", {
                             style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.72rem" }
                           },
-                            "Tokens: " + (j.total_tokens || 0).toLocaleString() + " total "
-                              + "(" + (j.total_input_tokens || 0).toLocaleString() + " in / "
-                              + (j.total_output_tokens || 0).toLocaleString() + " out / "
-                              + (j.total_cache_read_tokens || 0).toLocaleString() + " cached)"
+                            "Tokens: " + fmtCompact(j.total_tokens) + " total "
+                              + "(" + fmtCompact(j.total_input_tokens) + " in / "
+                              + fmtCompact(j.total_output_tokens) + " out / "
+                              + fmtCompact(j.total_cache_read_tokens) + " cached)"
                           ),
                           React.createElement("div", {
                             style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7, whiteSpace: "pre" }
