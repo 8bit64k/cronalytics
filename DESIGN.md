@@ -1,366 +1,307 @@
-# Cronalytics
-## A Hermes Dashboard Plugin for Cron Cost & Operational Visibility
+# Design — Cronalytics
+> A Hermes dashboard plugin for cron cost & operational visibility.
 
-> **One-liner:** Turn hidden automation into visible spend. Cronalytics attributes session-level cost, model, and frequency data to every cron-originated run, surfacing what your scheduled jobs are actually costing you.
+**One-liner:** *Turn hidden automation into visible spend.*
+Cronalytics attributes session-level cost, model, and frequency data to every cron-originated run so you can see which scheduled jobs are driving your token spend.
 
 ---
 
-## 1. The Problem
+## 1. Problem
 
 Hermes makes scheduled automation easy to create and run, but ongoing cron cost is hard to attribute and manage:
 
-- Cron jobs execute repeatedly as fresh isolated agent sessions — no chat context, no persistent history
-- Users can create recurring jobs, then forget about them once they run reliably
-- A user may understand total Hermes usage without realizing scheduled background work is responsible for a large share of token and model spend
-- There is no cron-specific cost lens in the existing Insights/Analytics views
-- The result: automation is easy to start, but ongoing cron cost compounds quietly through frequency, model choice, and long-lived schedules
+- Cron jobs execute repeatedly as fresh isolated agent sessions — no chat context, no persistent history.
+- Users create recurring jobs, then forget about them once they run reliably.
+- Total Hermes usage is visible, but there is no cron-specific cost lens.
+- A daily digest at $0.05 per run is $1.50/month. A 5-minute monitor at $0.08 per run is $70/month. Without per-job visibility, the second one hides inside the first.
 
-### Real pain from the community
-
-GitHub issue #17071 (Apr 2026): *"Cron job stage persistence + partial retry mechanism — Real world case: 2 million tokens wasted due to push failures"*
-
-A Hermes user burned 2M tokens on a cron job that failed at the delivery stage, with no visibility into when it ran, what it cost, or why it failed. They only found out after the fact.
-
-### Pain in your own usage
-
-You run a daily digest cron at 2 PM ET. You evaluate workflows over ~1 week. But:
-- You cannot see at a glance whether yesterday's digest succeeded or how much it cost
-- You have no history of past digests to compare cost trends
-- You cannot tell which cron jobs are driving your monthly spend
-- You cannot identify which model choice for a cron job is burning tokens inefficiently
+The result: automation is easy to start, but ongoing cron cost compounds quietly through frequency, model choice, and long-lived schedules.
 
 ---
 
-## 2. The Solution
+## 2. Solution
 
-**Cronalytics** is a dashboard plugin that attributes session-level usage and estimated cost to cron-originated runs. It lives inside `hermes dashboard` as slot-based augmentations to the existing `/cron` page.
+Cronalytics is a **dashboard plugin** (plus a standalone CLI) that attributes session-level usage and estimated cost to cron-originated runs. It lives inside `hermes dashboard` as a standalone tab at `/cronalytics`.
+
+> **Terminology (as of Hermes 2026-05):**
+> - **Hermes Agent plugin** — Has a `plugin.yaml`, registers hooks (e.g. `on_session_end`), runs inside the gateway process. Cronalytics is this.
+> - **Dashboard plugin** — An agent plugin that also has a `dashboard/` directory with `manifest.json`. The dashboard process discovers it, loads its API module, and serves its JS bundle. Cronalytics is also this.
+> - **Dashboard extension** — Pure frontend addon with `dashboard/manifest.json` but **no** `plugin.yaml`. No gateway hook, no backend code. Lives entirely in the dashboard process (e.g. Kanban, Omatchy).
 
 ### Core Promise
-
-> *"Every scheduled job you have — how often it runs, what it costs, which model it uses, and which jobs are driving the most spend — visible in one place."*
+> Every scheduled job you have — how often it runs, what it costs, which model it uses, and whether your actual spend is outpacing your schedule — visible in one place.
 
 ---
 
-## 3. Architecture Overview
+## 3. Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          HERMES GATEWAY PROCESS                         │
-│  (long-running daemon — cron ticker + chat gateway)                     │
-│                                                                         │
-│  ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐  │
-│  │   Cron Job      │────▶│  Agent Session  │────▶│  on_session_end │  │
-│  │   (scheduler)   │     │  (run_agent.py) │     │    hook fires   │  │
-│  └─────────────────┘     └─────────────────┘     └────────┬────────┘  │
-│                                                           │            │
-│                              platform="cron"               │            │
-│                              session_id="cron_{id}_{ts}"   │            │
-│                                                           ▼            │
-│                                              ┌─────────────────────┐   │
-│                                              │  Cronalytics      │   │
-│                                              │  Hook Handler       │   │
-│                                              │  (PluginContext)    │   │
-│                                              └──────────┬──────────┘   │
-│                                                         │              │
-│                              Immediate return           │              │
-│                              (non-blocking)             ▼              │
-│                                              ┌─────────────────────┐   │
-│                                              │  Deferred Queue     │   │
-│                                              │  (in-memory +       │   │
-│                                              │   file-backed)      │   │
-│                                              └──────────┬──────────┘   │
-│                                                         │              │
-│                              Retry w/ exponential       │              │
-│                              backoff, 5-10s delay       ▼              │
-│                                              ┌─────────────────────┐   │
-│                                              │  Session DB Query   │   │
-│                                              │  (state.db sqlite)  │   │
-│                                              │  SELECT * FROM      │   │
-│                                              │  sessions WHERE     │   │
-│                                              │  id = session_id    │   │
-│                                              └──────────┬──────────┘   │
-│                                                         │              │
-│                              Extract cost, tokens,      │              │
-│                              model, duration, etc.      ▼              │
-│                                              ┌─────────────────────┐   │
-│                                              │  Fact DB Write      │   │
-│                                              │  (plugin-owned      │   │
-│                                              │   SQLite, append)   │   │
-│                                              └─────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    │ (API reads)
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                      HERMES DASHBOARD PROCESS                           │
-│  (FastAPI + Vite/React — started by `hermes dashboard`)                 │
-│                                                                         │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │  Existing /cron page (built-in CRUD)                              │  │
-│  │                                                                   │  │
-│  │  ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐ │  │
-│  │  │  cron:top slot  │   │   Job list      │   │ cron:bottom slot│ │  │
-│  │  │  (aggregates)   │   │   (built-in)    │   │  (per-job       │ │  │
-│  │  │                 │   │                 │   │   history)      │ │  │
-│  │  └─────────────────┘   └─────────────────┘   └─────────────────┘ │  │
-│  │                                                                   │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                                                         │
-│  ┌─────────────────┐                                                    │
-│  │ header-right    │  Health badge: next run alert, failure count,     │
-│  │ slot            │  cost indicator                                    │
-│  └─────────────────┘                                                    │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    HERMES GATEWAY PROCESS                   │
+│                                                             │
+│  ┌─────────────┐    ┌──────────────┐    ┌──────────────┐  │
+│  │  Cron Tick  │───▶│ Agent Session│───▶│on_session_end│  │
+│  │ (scheduler) │    │(run_agent.py)│    │   hook fires │  │
+│  └─────────────┘    └──────────────┘    └──────┬───────┘  │
+│                                                 │           │
+│                              platform="cron"     │           │
+│                              session_id=         │           │
+│                                cron_{id}_{ts}    │           │
+│                                                 ▼           │
+│                                        ┌──────────────┐    │
+│                                        │  Enqueue to  │    │
+│                                        │ pending.jsonl│    │
+│                                        └──────┬───────┘    │
+│                                               │             │
+│                              ┌────────────────┘             │
+│                              ▼                              │
+│                    ┌─────────────────┐                      │
+│                    │ Background      │                      │
+│                    │ Worker Thread   │                      │
+│                    │ (retry w/ jitter│                      │
+│                    │  up to 3x)      │                      │
+│                    └────────┬────────┘                      │
+│                             │                               │
+│              Query state.db │ (sessions table)              │
+│                             ▼                               │
+│                    ┌─────────────────┐                      │
+│                    │  Fact DB Write  │                      │
+│                    │  (append-only)  │                      │
+│                    └─────────────────┘                      │
+│                             │                               │
+│         ┌───────────────────┘                               │
+│         ▼                                                   │
+│  ┌─────────────────┐     ┌─────────────────┐               │
+│  │ Reconciliation  │     │  Bootstrap      │               │
+│  │ Scanner         │     │  on plugin load │               │
+│  │ (watermark +    │     │  (catches gaps) │               │
+│  │  batch insert)  │     │                 │               │
+│  └─────────────────┘     └─────────────────┘               │
+└─────────────────────────────────────────────────────────────┘
+                              │
+           API reads          │
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  HERMES DASHBOARD PROCESS                   │
+│                                                             │
+│  ┌────────────────────────────────────────┐  │
+│  │            /cronalytics tab                     │  │
+│  │                                                 │  │
+│  │  Summary cards                                  │  │
+│  │  Jobs table (7 columns)                         │  │
+│  │  Expandable detail rows                          │  │
+│  │  Day filter / Refresh / Sync Now                 │  │
+│  └────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## 4. Technical Decisions
 
-### 4.1 Hook Choice: `on_session_end`
+### 4.1 Hook: `on_session_end`
 
-**NOT `on_session_finalize`**. `on_session_finalize` only fires in the CLI (`platform="cli"`) and gateway chat session eviction paths. It does NOT fire for cron jobs.
+**Not `on_session_finalize`.** That hook fires only in CLI chat sessions and gateway eviction paths. It does **not** fire for cron jobs. `on_session_end` fires at the end of every `run_conversation()`, which is exactly what `run_job()` calls inside the scheduler.
 
-`on_session_end` fires at the end of every `run_conversation()` call, which is exactly what `run_job()` invokes inside the cron scheduler. It provides:
-- `session_id`: `cron_{job_id}_{timestamp}` — parseable to extract job_id
-- `platform`: `"cron"` — our filter
-- `model`: the model used for this run
-- `completed`: boolean — whether the agent loop finished normally
-- `interrupted`: boolean — whether the job was interrupted
+We deliberately chose **non-blocking** ingestion: the hook writes the `session_id` to `pending.jsonl` and returns immediately. A background worker processes the queue so the gateway scheduler never waits on disk I/O.
 
-### 4.2 Timing Safety: Deferred Async Queue
+### 4.2 Deferred Queue + Crash Recovery
 
-`on_session_end` fires *inside* `run_conversation()`, but the session DB `end_session()` call happens in the `finally:` block of `run_job()`, which wraps `run_conversation()`. The session data is not flushed when the hook fires.
+`on_session_end` fires *inside* `run_conversation()`, but `end_session()` (which flushes the row to `state.db`) happens in the `finally:` block of `run_job()`. The session data may not exist when the hook fires.
 
-**Solution:** The hook handler immediately enqueues the session_id and returns. A background worker in the plugin processes the queue with:
-- Initial delay: 5-10 seconds
-- Retry with exponential backoff (up to 3 attempts)
-- If session row not found after retries, drop the event (rare — log for debugging)
+**Solution:**
+- Hook persists to `pending.jsonl` (disk-first durability).
+- In-memory queue is drained by a daemon thread.
+- Worker waits 3–17 seconds (base delay + jitter) before querying `state.db`.
+- Up to 3 retries with exponential backoff.
+- Gateway restart? `ingester.start()` replays `pending.jsonl` on plugin load.
 
-### 4.3 Data Source: `state.db` (SQLite Session Store)
+### 4.3 Fact DB: Plugin-Owned, Append-Only SQLite
 
-Every cron run creates a session row with `source = 'cron'`. The `sessions` table captures:
-
-| Column | Use |
-|--------|-----|
-| `id` | `cron_{job_id}_{timestamp}` — natural key |
-| `source` | `"cron"` — filter |
-| `started_at` / `ended_at` | Duration calculation |
-| `input_tokens` / `output_tokens` | Token attribution |
-| `reasoning_tokens` | Reasoning model cost |
-| `cache_read_tokens` / `cache_write_tokens` | Cache token accounting |
-| `estimated_cost_usd` | Primary cost metric |
-| `actual_cost_usd` | Ground-truth when available |
-| `cost_status` | Cost validity flag |
-| `cost_source` | Provider that returned cost |
-| `billing_provider` | Backend billing provider ID |
-| `model` | Model attribution |
-| `api_call_count` | Iteration depth |
-| `message_count` / `tool_call_count` | Activity depth |
-| `end_reason` | `"cron_complete"` vs failure modes |
-
-### 4.4 Fact DB: Plugin-Owned SQLite
-
-**NOT the operational state.db.** The fact DB is a separate SQLite file owned entirely by the plugin:
+**NotHermes `state.db`.** The fact DB is a separate SQLite file owned by the plugin:
 
 ```
 ~/.hermes/plugins/cronalytics/facts.db
 ```
 
-Schema:
+Why separate?
+- `state.db` is operational. It may be purged, migrated, or schema-migrated by Hermes core.
+- Fact DB rows are **INSERT-only**. No updates, no deletes. If upstream data changes, the snapshot remains.
+- `ON CONFLICT(session_id) DO NOTHING` handles duplicate ingestion from both real-time hooks and scanner backfill.
+
+Schema (simplified):
 ```sql
-CREATE TABLE IF NOT EXISTS cron_runs (
-    session_id TEXT PRIMARY KEY,          -- immutable natural key
-    job_id TEXT NOT NULL,                  -- parsed from session_id
-    run_time REAL NOT NULL,                -- started_at from state.db
-    ended_at REAL,                         -- ended_at from state.db
-    duration_seconds REAL,                 -- computed
-    model TEXT,                            -- model used
+CREATE TABLE cron_runs (
+    session_id TEXT PRIMARY KEY,
+    job_id TEXT NOT NULL,
+    run_time REAL NOT NULL,
+    ended_at REAL,
+    duration_seconds REAL,
+    model TEXT,
     input_tokens INTEGER DEFAULT 0,
     output_tokens INTEGER DEFAULT 0,
     reasoning_tokens INTEGER DEFAULT 0,
     cache_read_tokens INTEGER DEFAULT 0,
     cache_write_tokens INTEGER DEFAULT 0,
-    estimated_cost_usd REAL,               -- primary metric
+    estimated_cost_usd REAL,
     actual_cost_usd REAL,
-    cost_status TEXT,                      -- e.g. "pending", "confirmed"
-    cost_source TEXT,                      -- provider that returned cost
+    cost_status TEXT,
+    cost_source TEXT,
     billing_provider TEXT,
     api_call_count INTEGER DEFAULT 0,
     message_count INTEGER DEFAULT 0,
     tool_call_count INTEGER DEFAULT 0,
     end_reason TEXT,
-    success BOOLEAN,                       -- derived from end_reason
-    ingested_at REAL DEFAULT (unixepoch()) -- when we wrote it
+    success BOOLEAN,
+    ingested_at REAL DEFAULT (unixepoch())
 );
-
-CREATE INDEX idx_cron_runs_job_id ON cron_runs(job_id);
-CREATE INDEX idx_cron_runs_run_time ON cron_runs(run_time DESC);
-CREATE INDEX idx_cron_runs_ingested ON cron_runs(ingested_at);
 ```
 
-**Immutability guarantees:**
-- Rows are INSERT-only. No UPDATES, no DELETES.
-- If upstream `state.db` purges sessions, fact DB retains the snapshot.
-- Only explicit plugin archive/purge operations remove data.
-- `ON CONFLICT(session_id) DO NOTHING` handles duplicate ingestion gracefully.
+### 4.4 Reconciliation Scanner
 
-### 4.5 Reconciliation Scanner
-
-A lazy backfill process triggered by:
-1. Dashboard load (first visit after plugin install)
-2. Explicit API call (`POST /api/plugins/cronalytics/sync`)
-3. Periodic check (configurable, default: every 6 hours)
+The scanner exists because hooks can crash, the plugin can be disabled, or the gateway can restart. It is **not** the primary data path — hooks capture ~99% of events in real time — but it is the safety net.
 
 **Algorithm:**
-```python
-last_watermark = read_watermark()  -- last synced ended_at
-new_sessions = query_state_db(
-    "SELECT * FROM sessions 
-     WHERE source = 'cron' 
-     AND ended_at > ?",
-    last_watermark
-)
-for session in new_sessions:
-    insert_into_fact_db(session)  -- ON CONFLICT IGNORE
-update_watermark(max(ended_at for session in new_sessions))
-```
+1. Read watermark JSON (`last_ended_at`).
+2. Query `state.db` for `source='cron'` rows with `ended_at > watermark`.
+3. Batch-insert new rows into fact DB.
+4. Write new watermark = `max(ended_at)`.
 
-**Why this is sufficient:**
-- The real-time hook captures 99% of events
-- The scanner handles: initial install backfill, plugin-disabled periods, rare hook crashes
-- `ended_at > last_watermark` is a simple, correct filter
-- Session IDs are unique — no risk of double-counting
+**Trigger sources:**
+- Bootstrap thread on every plugin load (catches gaps from downtime).
+- Manual `POST /api/plugins/cronalytics/sync` ("Sync Now" button).
 
-### 4.6 Plugin Structure
+### 4.5 Standalone `/cronalytics` Tab
 
-```
-~/.hermes/plugins/cronalytics/
-├── plugin.yaml                    -- Plugin manifest
-├── __init__.py                    -- register(ctx) entrypoint
-├── facts.py                       -- Fact DB operations
-├── ingester.py                    -- Hook handler + queue + worker
-├── scanner.py                     -- Reconciliation scanner
-├── api.py                         -- FastAPI router for dashboard
-└── dashboard/
-    ├── manifest.json              -- Dashboard plugin manifest
-    ├── dist/
-    │   └── index.js               -- Frontend bundle (slots)
-    └── ...
-```
+The original design specified three slots (`cron:top`, `cron:bottom`) injected into the built-in `/cron` page. We pivoted to a standalone tab (`/cronalytics`) because:
 
-### 4.7 Slot Manifest
+1. Route collision: the built-in `/cron` tab renders before plugin slots mount. Plugin content was being overwritten.
+2. Vertical slice delivery: a full page is faster to build and test than coordinating multiple slot injections.
+3. Navigation clarity: users expect "Cronalytics" as a distinct view, not a patch on top of the scheduler CRUD.
 
-```json
-{
-  "name": "cronalytics",
-  "label": "Cronalytics",
-  "description": "Cost and operational visibility for Hermes cron jobs",
-  "version": "0.1.0",
-  "tab": {"hidden": true},
-  "slots": ["cron:top", "cron:bottom", "header-right"],
-  "api": "api.py",
-  "entry": "dist/index.js"
-}
-```
+The manifest no longer claims any sidebar slots. The `/cronalytics` tab is the sole UI surface.
 
----
+### 4.6 Fixed-Window Projection Math
 
-## 5. What It DOES (MVP)
+Early versions used the *data span* (actual days between first and last run) as the denominator for trend calculations. This broke an algebraic invariant: the sum of per-job trends did not equal the aggregate trend, because each job had a different data span.
 
-### v0.1 — Cost Attribution Dashboard
+**Decision:** Use the user's selected filter window (7D, 30D, 90D, All) as the fixed denominator for all trend math.
 
-**cron:top slot** — Aggregated banner:
-- Total cron runs in last 7 days
-- Total estimated cron cost in last 7 days
-- Cost by model (bar chart or list)
-- Trend line: cron cost vs. total cost (if total available)
+| Metric | Formula |
+|--------|---------|
+| Daily cost | `total_cost / days_filter` *(or all-time span if days=0)* |
+| Trend 30d | `daily_cost × 30` |
+| Nominal 30d | `avg_cost × scheduled_runs_30d` *(from croniter)* |
+| Pace | `trend_30d / nominal_30d` |
+| Drift | `observed_runs / scheduled_runs_in_window` *(API only; not surfaced in UI yet)* |
 
-**cron:bottom slot** — Per-job drilldown:
-- Sortable table: job name, run count, total cost, avg cost, last run
-- Top 5 most expensive jobs
-- Model used most frequently per job
+Why fixed-window?
+- **Summation invariant:** `Σ job.trend_30d == aggregate.trend_30d` always holds.
+- **Comparability:** A job with 2 runs in 7 days and a job with 20 runs in 7 days share the same denominator.
+- **Honesty:** A job that hasn't run in the window shows `$0` trend, not a stale historical average.
 
-**header-right slot** — Health badge:
-- Next upcoming job countdown
-- Failure indicator (jobs with errors in last 24h)
-- Cost alert (if daily cron spend exceeds configurable threshold)
+### 4.7 Importlib-Safe Module Loading
 
-### v0.2+ (Future, Not MVP)
-- Tool-level cost attribution (correlate with session messages)
-- Schedule optimization recommendations ("This job runs every 5 min but only produces output 10% of the time")
-- Budget thresholds with alerts
-- Per-job model comparison ("Switching from Claude-Opus to Sonnet would save $X/month")
+The dashboard server loads plugin API files as **standalone scripts**, not as part of a Python package. That means `from . import facts` (a relative import) fails silently, which prevents API routes from mounting at all.
+
+Our workaround: `plugin_api.py` and `scanner.py` both use a small `_load_module()` helper that loads sibling `.py` files by absolute disk path. It is slightly ugly but harmless — no runtime side effects, no performance cost, and no risk beyond "if you move files around, update the path helper."
+
+Relative imports remain fine in `__init__.py` and `ingester.py` because those run inside the gateway process where normal Python package context exists.
+
+### 4.8 Human-Readable Job Names
+
+Job IDs in the fact DB are stable hex strings (`841aee933270`). The dashboard resolves these to names at query time by reading `~/.hermes/cron/jobs.json` and mapping `id → name`. This is read-only; Cronalytics never writes to `jobs.json`.
+
+### 4.9 Dashboard Dev Cache Busting *(Internal)*
+
+During active development, the browser, Tailscale proxy, and disk cache all aggressively cache `dashboard/dist/index.js`. We temporarily patched `serve_plugin_asset` in the host dashboard server to emit `Cache-Control: no-store` for plugin assets. This is a **local development convenience only** — it is not part of the Cronalytics repo and will need to be re-applied after any `hermes update` that touches the dashboard server. It is documented here solely as a reminder.
+
+### 4.10 Tooltips: Decision and Reversion
+
+We explored ⓘ icons with click-to-toggle `position: fixed` tooltips for column headers (Nominal/mo, Trend/mo, Pace). The implementation worked on desktop but viewport-edge positioning on iPad Safari produced clipped/wonky popups. Rather than chase responsive tooltip layout gymnastics, we reverted to native `title` attributes. This is a known trade-off: desktop users get hover-after-delay, mobile users get tap-and-hold (browser-dependent). A custom modal or portal-based tooltip is reserved for a future polish pass.
+
+**Metrics education is an open design problem.** Pace, Nominal, Trend, and Drift are not self-evident to a first-time user. Native `title` is the bare minimum. A proper solution — inline microcopy, a "What's this?" expander, or a dedicated help panel — needs design work before V1.0.
 
 ---
 
-## 6. What It Does NOT Do
-
-Explicit boundaries:
-- **No job creation** — the built-in `/cron` page handles this
-- **No schedule editing** — users edit via the existing CRUD UI
-- **No live log streaming** — output files exist at `~/.hermes/cron/output/`, but streaming is out of scope
-- **No job execution control** — no Pause/Trigger/Delete (built-in UI has these)
-- **No replacement of the scheduler** — we observe, we do not control
-- **No external database dependency** — everything is local SQLite/JSONL
-
----
-
-## 7. Data Flow & Lifecycle
+## 5. Data Flow
 
 ```
 Cron Job Due
     │
     ▼
-Scheduler tick() ────────────────────────┐
-    │                                     │
-    ▼                                     │
-run_job() spawns AIAgent                 │
-    │                                     │
-    ▼                                     │
-agent.run_conversation() ───┐            │
-    │                       │            │
-    ▼                       │            │
-Hook: on_session_end()      │            │
-    │ (platform="cron")     │            │
-    ▼                       │            │
-Enqueue session_id ─────────┘            │
-    │                                     │
-    ▼                                     │
-Deferred worker retries ─────────────────┤
-    │  (wait for flush)                   │
-    ▼                                     │
-Query state.db ──────────────────────────┤
-    │  (sessions table)                   │
-    ▼                                     │
-Insert into fact.db ─────────────────────┘
+Scheduler tick()
     │
     ▼
-Dashboard queries fact.db via plugin API
+run_job() ──▶ run_conversation() ──▶ on_session_end(platform="cron")
+                                          │
+                                          ▼
+                                    Write session_id to pending.jsonl
+                                          │
+                                          ▼
+                                    Background worker (after delay)
+                                          │
+                          ┌─────────────┴─────────────┐
+                          ▼                           ▼
+                   state.db found               state.db not found
+                          │                           │
+                          ▼                           ▼
+                   Insert into fact.db          Retry (up to 3x)
+                                                          │
+                                                          ▼
+                                                    Max retries ──▶ Drop + log
 ```
 
 ---
 
-## 8. Success Metrics
+## 6. Boundaries
 
-Early success indicators:
-- Share of total Hermes spend attributable to cron (visible in dashboard)
-- Number of expensive jobs identified by users
-- Number of jobs tuned or disabled after visibility review
-- Reduction in unnecessary cron spend after users review the dashboard
+### What Cronalytics Does
+- Observe cron job runs and attribute cost, tokens, model, and duration per run.
+- Surface aggregates (total cost, runs, tokens, pace) in a dashboard tab.
+- Project future spend based on schedule (nominal) and current pace (trend).
+- Provide a standalone CLI for terminal-based inspection.
 
----
-
-## 9. Positioning
-
-> **Turn hidden automation into visible spend.**
-
-> See what your cron jobs are costing before background automation becomes background waste.
-
-The problem is not cron itself — it's the lack of cost visibility around unattended execution.
+### What Cronalytics Does NOT Do
+- **Create or edit jobs** — use the built-in `/cron` page.
+- **Control execution** — no Pause/Trigger/Delete.
+- **Stream logs** — output files live at `~/.hermes/cron/output/`; streaming is out of scope.
+- **Replace the scheduler** — we observe, we do not control.
+- **External DB** — everything is local SQLite/JSONL.
+- **True payload-level success detection** — we track whether the *wrapper* completed (`end_reason`), not whether the *agent task* succeeded. This is a known limitation.
 
 ---
 
-*Last updated: 2026-04-29*
-*Architecture locked. Ready for development planning.*
+## 7. File Layout
+
+```
+cronalytics/
+├── plugin.yaml              -- Manifest: name, version, hooks
+├── __init__.py              -- register(ctx): schema, recovery, hook, bootstrap scanner
+├── config.py                -- Paths, retry delays, jitter
+├── facts.py                 -- Fact DB: schema, insert, queries
+├── ingester.py              -- Hook handler, pending.jsonl, background worker
+├── scanner.py               -- Reconciliation scanner + watermark I/O
+├── schedule.py              -- Cron parsing, projection math (croniter)
+├── cli.py                   -- Standalone terminal interface
+├── logger.py                -- Simple prefixed logger
+├── checkpoint.py            -- Session state serialization for multi-session dev
+├── dashboard/
+│   ├── manifest.json        -- Dashboard plugin manifest
+│   ├── plugin_api.py        -- FastAPI router (importlib-safe)
+│   └── dist/
+│       └── index.js         -- Frontend bundle (React + HERMES_PLUGIN_SDK)
+```
+
+---
+
+## 8. Positioning
+
+> Turn hidden automation into visible spend.
+
+See what your cron jobs are costing before background automation becomes background waste. The problem is not cron itself — it's the lack of cost visibility around unattended execution.
+
+---
+
+*Version: 0.3.0 (Design refresh)*
+*Last updated: 2026-05-04*

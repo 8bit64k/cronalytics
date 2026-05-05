@@ -24,7 +24,7 @@ from typing import Any
 _HERE = Path(__file__).parent.resolve()
 sys.path.insert(0, str(_HERE))
 
-from config import FACT_DB
+import config
 from facts import (
     get_conn,
     query_health,
@@ -76,7 +76,7 @@ def _bar_chart(values: list[int], max_width: int = 20) -> list[str]:
 
 def cmd_summary(args: argparse.Namespace) -> int:
     days: int = args.days
-    data = query_summary(FACT_DB, days=days)
+    data = query_summary(config.FACT_DB, days=days)
 
     period = f"Last {days} days" if days > 0 else "All time"
     lines: list[str] = [
@@ -119,7 +119,7 @@ def cmd_summary(args: argparse.Namespace) -> int:
 
 def cmd_jobs(args: argparse.Namespace) -> int:
     days: int = args.days
-    jobs = query_jobs(FACT_DB, days=days)
+    jobs = query_jobs(config.FACT_DB, days=days)
     if not jobs:
         print(f"  No cron jobs found in the last {days} days.")
         return 0
@@ -167,7 +167,7 @@ def cmd_jobs(args: argparse.Namespace) -> int:
 def cmd_runs(args: argparse.Namespace) -> int:
     days: int = args.days
     job_id: str = args.job
-    runs = query_job_runs(FACT_DB, job_id=job_id, limit=50, days=days)
+    runs = query_job_runs(config.FACT_DB, job_id=job_id, limit=50, days=days)
     if not runs:
         print(f"  No runs found for job '{job_id}' in the last {days} days.")
         return 0
@@ -201,7 +201,7 @@ def cmd_runs(args: argparse.Namespace) -> int:
 
 def cmd_models(args: argparse.Namespace) -> int:
     days: int = args.days
-    models = query_models(FACT_DB, days=days)
+    models = query_models(config.FACT_DB, days=days)
     if not models:
         print(f"  No model data found in the last {days} days.")
         return 0
@@ -231,7 +231,7 @@ def cmd_models(args: argparse.Namespace) -> int:
 
 def cmd_trends(args: argparse.Namespace) -> int:
     days: int = args.days
-    trends = query_trends(FACT_DB, days=days)
+    trends = query_trends(config.FACT_DB, days=days)
     if not trends:
         print(f"  No trend data found in the last {days} days.")
         return 0
@@ -259,7 +259,7 @@ def cmd_trends(args: argparse.Namespace) -> int:
 
 
 def cmd_health(_args: argparse.Namespace) -> int:
-    h = query_health(FACT_DB)
+    h = query_health(config.FACT_DB)
     lines: list[str] = [
         "",
         "  ╔══════════════════════════════════════════════════════════╗",
@@ -285,6 +285,12 @@ def main(argv: list[str] | None = None) -> int:
         prog="cronalytics",
         description="Cronalytics CLI — dump cron run insights to the terminal",
     )
+    parser.add_argument(
+        "--db",
+        type=Path,
+        default=None,
+        help="Path to fact DB (default: facts.db)",
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     for name, help_text in (
@@ -301,6 +307,12 @@ def main(argv: list[str] | None = None) -> int:
             default=30,
             help="Number of days to look back (default: 30, 0 = all time)",
         )
+        p.add_argument(
+            "--db",
+            type=Path,
+            default=None,
+            help="Path to fact DB (default: facts.db)",
+        )
 
     runs_parser = subparsers.add_parser("runs", help="Individual runs for a job")
     runs_parser.add_argument(
@@ -310,11 +322,22 @@ def main(argv: list[str] | None = None) -> int:
         help="Number of days to look back (default: 30, 0 = all time)",
     )
     runs_parser.add_argument("--job", required=True, help="Job ID filter")
+    runs_parser.add_argument(
+        "--db",
+        type=Path,
+        default=None,
+        help="Path to fact DB (default: facts.db)",
+    )
 
     args = parser.parse_args(argv)
 
+    db_path = args.db or config.FACT_DB
+
     # Ensure DB exists / schema up-to-date
-    get_conn(FACT_DB)
+    get_conn(db_path)
+
+    # Redirect all command handlers to use the specified DB
+    config.FACT_DB = db_path
 
     handler = {
         "summary": cmd_summary,

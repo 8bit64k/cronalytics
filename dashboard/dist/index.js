@@ -5,7 +5,7 @@
   if (!SDK || !PLUGINS) return;
 
   const { React } = SDK;
-  const { useState, useEffect, useLayoutEffect } = SDK.hooks;
+  const { useState, useEffect } = SDK.hooks;
   const { fetchJSON } = SDK;
   const { Card, CardHeader, CardTitle, CardContent, Badge, Button } = SDK.components;
 
@@ -115,82 +115,25 @@
     }, d.label)));
   }
 
-  // ── Main /cron tab ──────────────────────────────────────────────
-  function CronTab() {
-    const [days, setDaysRaw] = useState(() => {
-      try {
-        const saved = localStorage.getItem("cronalytics:days");
-        if (saved !== null) return Number(saved);
-      } catch {}
-      return 30;
-    });
-    const setDays = (v) => {
-      try { localStorage.setItem("cronalytics:days", String(v)); } catch {}
-      setDaysRaw(v);
-    };
-    const summary = useApi("/api/plugins/cronalytics/summary?days=" + days);
-    const jobs = useApi("/api/plugins/cronalytics/jobs?days=" + days);
-    const [syncing, setSyncing] = useState(false);
-    const [syncInfo, setSyncInfo] = useState(null);
-
-    const [expandedId, setExpandedId] = useState(null);
-
-    const pageHeader = SDK.usePageHeader ? SDK.usePageHeader() : null;
-
-    // Use useEffect (not useLayoutEffect) so this runs AFTER
-    // PageHeaderProvider's layout effect clears slots on route change.
-    useEffect(() => {
-      if (!pageHeader) return;
-      const badgeLabel = days === 0 ? "All" : days + "D";
-      pageHeader.setAfterTitle(
-        React.createElement("span", {
-          style: { display: "flex", alignItems: "center", gap: "0.5rem" }
-        },
-          React.createElement("span", {
-            style: {
-              fontSize: "0.625rem",
-              fontWeight: 500,
-              letterSpacing: "0.2em",
-              padding: "0.25rem 0.5rem",
-              borderRadius: "0.25rem",
-              background: "rgba(255,255,255,0.06)",
-              color: "var(--midground, rgba(255,255,255,0.6))",
-              border: "1px solid rgba(255,255,255,0.04)",
-              textTransform: "uppercase",
-            }
-          }, badgeLabel)
-        )
-      );
-      pageHeader.setEnd(
-        React.createElement("div", {
-          style: {
-            display: "flex",
-            width: "100%",
-            minWidth: 0,
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            gap: "0.5rem",
-          }
-        },
-          React.createElement(DaySelector, { selected: days, onChange: setDays }),
-          React.createElement(Button, {
-            type: "button",
-            size: "sm",
-            outlined: true,
-            disabled: summary.loading || jobs.loading,
-            onClick: () => {
-              summary.refetch();
-              jobs.refetch();
-            }
-          }, summary.loading || jobs.loading ? "…" : "Refresh")
-        )
-      );
-      return () => {
-        pageHeader.setAfterTitle(null);
-        pageHeader.setEnd(null);
+    // ── Main /cron tab ──────────────────────────────────────────────
+    function CronTab() {
+      const [days, setDaysRaw] = useState(() => {
+        try {
+          const saved = localStorage.getItem("cronalytics:days");
+          if (saved !== null) return Number(saved);
+        } catch {}
+        return 30;
+      });
+      const setDays = (v) => {
+        try { localStorage.setItem("cronalytics:days", String(v)); } catch {}
+        setDaysRaw(v);
       };
-    }, [days, pageHeader, summary.loading, jobs.loading]);
+      const summary = useApi("/api/plugins/cronalytics/summary?days=" + days);
+      const jobs = useApi("/api/plugins/cronalytics/jobs?days=" + days);
+      const [syncing, setSyncing] = useState(false);
+      const [syncInfo, setSyncInfo] = useState(null);
+
+      const [expandedId, setExpandedId] = useState(null);
 
     useEffect(() => {
       fetchJSON("/api/plugins/cronalytics/health")
@@ -233,7 +176,7 @@
     };
 
     if (summary.loading || jobs.loading) {
-      return React.createElement("div", { style: { padding: "1rem", color: "var(--foreground-base, var(--foreground))" } }, "Loading cron insights...");
+      return React.createElement("div", { style: { padding: "1rem", color: "var(--foreground-base, var(--foreground))" } }, "Loading Cronalytics…");
     }
 
     if (summary.error || jobs.error) {
@@ -250,12 +193,21 @@
       : "";
 
     return React.createElement("div", { style: { padding: "1rem", color: "var(--foreground-base, var(--foreground))" } },
-      // Fallback inline header when SDK doesn't expose usePageHeader
-      !pageHeader && React.createElement("div", {
+      // Inline toolbar: day selector + badge
+      React.createElement("div", {
         style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }
       },
         React.createElement("h2", { style: { margin: 0, fontSize: "1.125rem", fontWeight: 600 } }, "Cronalytics"),
-        React.createElement(DaySelector, { selected: days, onChange: setDays })
+        React.createElement("div", { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
+          React.createElement(DaySelector, { selected: days, onChange: setDays }),
+          React.createElement(Button, {
+            type: "button",
+            size: "sm",
+            outlined: true,
+            disabled: summary.loading || jobs.loading,
+            onClick: () => { summary.refetch(); jobs.refetch(); }
+          }, summary.loading || jobs.loading ? "\u2026" : "Refresh")
+        )
       ),
 
       // Summary cards
@@ -428,12 +380,12 @@
                               + (j.total_cache_read_tokens || 0).toLocaleString() + " cached)"
                           ),
                           React.createElement("div", {
-                            style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7 }
+                            style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7, whiteSpace: "pre" }
                           },
                             (j.projections && j.projections.schedule_display ? j.projections.schedule_display : "No schedule"),
-                            "     Last: ", fmtTime(j.last_run),
-                            j.last_model ? " using " + j.last_model : "",
-                            "     Next: ", j.projections && j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014"
+                            "   Last: ", fmtTime(j.last_run),
+                            j.last_model ? "   using " + j.last_model : "",
+                            "   Next: ", j.projections && j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014"
                           )
                         )
                       )

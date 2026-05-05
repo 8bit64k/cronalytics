@@ -59,7 +59,8 @@ _JOBS_PATH = HERMES_HOME / "cron" / "jobs.json"
 def _load_job_names() -> dict[str, str]:
     """Read ~/.hermes/cron/jobs.json and build {job_id: name} mapping."""
     try:
-        data = json.loads(_JOBS_PATH.read_text())
+        raw = _JOBS_PATH.read_text()
+        data = json.loads(raw)
     except Exception:
         return {}
     return {j["id"]: j.get("name", j["id"]) for j in data.get("jobs", [])}
