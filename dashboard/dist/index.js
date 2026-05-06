@@ -66,6 +66,54 @@
     return "rgba(255,107,107,0.08)";
   }
 
+  function CpuIcon(size) {
+    return React.createElement("svg", {
+      width: size || 16, height: size || 16, viewBox: "0 0 24 24",
+      fill: "none", stroke: "currentColor", strokeWidth: 2,
+      strokeLinecap: "round", strokeLinejoin: "round",
+      style: { display: "inline-block", verticalAlign: "middle" }
+    },
+      React.createElement("path", { d: "M12 20v2" }),
+      React.createElement("path", { d: "M12 2v2" }),
+      React.createElement("path", { d: "M17 20v2" }),
+      React.createElement("path", { d: "M17 2v2" }),
+      React.createElement("path", { d: "M2 12h2" }),
+      React.createElement("path", { d: "M2 17h2" }),
+      React.createElement("path", { d: "M2 7h2" }),
+      React.createElement("path", { d: "M20 12h2" }),
+      React.createElement("path", { d: "M20 17h2" }),
+      React.createElement("path", { d: "M20 7h2" }),
+      React.createElement("path", { d: "M7 20v2" }),
+      React.createElement("path", { d: "M7 2v2" }),
+      React.createElement("rect", { x: "4", y: "4", width: "16", height: "16", rx: 2 }),
+      React.createElement("rect", { x: "8", y: "8", width: "8", height: "8", rx: 1 })
+    );
+  }
+  function ClockIcon(size) {
+    return React.createElement("svg", {
+      width: size || 16, height: size || 16, viewBox: "0 0 24 24",
+      fill: "none", stroke: "currentColor", strokeWidth: 2,
+      strokeLinecap: "round", strokeLinejoin: "round",
+      style: { display: "inline-block", verticalAlign: "middle" }
+    },
+      React.createElement("circle", { cx: 12, cy: 12, r: 10 }),
+      React.createElement("path", { d: "M12 6v6l4 2" })
+    );
+  }
+  function RefreshCwIcon(size) {
+    return React.createElement("svg", {
+      width: size || 14, height: size || 14, viewBox: "0 0 24 24",
+      fill: "none", stroke: "currentColor", strokeWidth: 2,
+      strokeLinecap: "round", strokeLinejoin: "round",
+      style: { display: "inline-block", verticalAlign: "middle" }
+    },
+      React.createElement("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
+      React.createElement("path", { d: "M21 3v5h-5" }),
+      React.createElement("path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" }),
+      React.createElement("path", { d: "M8 16H3v5" })
+    );
+  }
+
   function useApi(path) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -198,7 +246,13 @@
             disabled: summary.loading || jobs.loading,
             onClick: () => { summary.refetch(); jobs.refetch(); },
             style: { minWidth: "5.5rem" }
-          }, summary.loading || jobs.loading ? "\u2026" : "Refresh")
+          }, summary.loading || jobs.loading
+            ? "\u2026"
+            : React.createElement("span", { style: { display: "flex", alignItems: "center", gap: "0.25rem" } },
+                RefreshCwIcon(14),
+                "Refresh"
+              )
+          )
         )
       ),
 
@@ -257,29 +311,13 @@
         )
       ),
 
-      // Cost by model
-      s.cost_by_model && s.cost_by_model.length > 0 &&
-        React.createElement(Card, { style: { marginBottom: "1.5rem" } },
-          React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Cost by Model")),
-          React.createElement(CardContent, null,
-            React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.35rem" } },
-              s.cost_by_model.map(m =>
-                React.createElement("div", {
-                  key: m.model,
-                  style: { display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }
-                },
-                  React.createElement("span", null, m.model),
-                  React.createElement("span", null, fmtCost(m.total_cost) + " (" + (m.runs || 0).toLocaleString() + " runs)")
-                )
-              )
-            )
-          )
-        ),
-
-      // Jobs table
-      React.createElement(Card, null,
+      // Jobs Breakdown
+      React.createElement(Card, { style: { marginBottom: "1.5rem" } },
         React.createElement(CardHeader, null,
-          React.createElement(CardTitle, null, "Jobs"),
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem" } },
+            ClockIcon(16),
+            React.createElement(CardTitle, null, "Jobs Breakdown")
+          ),
           React.createElement("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center" } },
             syncInfo && syncInfo.lastSync &&
               React.createElement("span", {
@@ -288,20 +326,11 @@
                 "Synced " + fmtTime(new Date(syncInfo.lastSync).getTime() / 1000) +
                 (syncInfo.rowsSynced != null ? " · " + syncInfo.rowsSynced + " rows" : "")
               ),
-            React.createElement("button", {
-              onClick: onSync,
+            React.createElement(Button, {
+              size: "sm",
+              outlined: true,
               disabled: syncing,
-              style: {
-                fontSize: "0.68rem",
-                padding: "0.25rem 0.55rem",
-                border: "1px solid var(--foreground-base, var(--foreground))",
-                borderRadius: "0.25rem",
-                background: syncing ? "transparent" : "var(--foreground-base, var(--foreground))",
-                color: syncing ? "var(--foreground-base, var(--foreground))" : "var(--background-base, var(--background, #111))",
-                cursor: syncing ? "not-allowed" : "pointer",
-                opacity: syncing ? 0.5 : 1,
-                fontWeight: 600,
-              }
+              onClick: onSync,
             }, syncing ? "Syncing..." : "Sync Now")
           )
         ),
@@ -336,7 +365,9 @@
                   jobList.map(j => [
                     React.createElement("tr", {
                       key: j.job_id,
-                      style: { borderBottom: "1px solid rgba(255,255,255,0.04)", cursor: "pointer" },
+                      style: { borderBottom: "1px solid rgba(255,255,255,0.04)", cursor: "pointer", transition: "background 0.12s ease" },
+                      onMouseEnter: e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; },
+                      onMouseLeave: e => { e.currentTarget.style.background = "transparent"; },
                       onClick: () => setExpandedId(expandedId === j.job_id ? null : j.job_id)
                     },
                       React.createElement("td", { style: { padding: "0.4rem 0.35rem" } },
@@ -356,10 +387,22 @@
                           ? fmtCost(j.projections.trend_projected_cost_30d) + "/mo"
                           : "\u2014"
                       ),
-                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontWeight: 700, color: paceColor(j.projections && j.projections.pace), background: paceBg(j.projections && j.projections.pace), borderRadius: "0.25rem" } },
-                        j.projections && j.projections.pace != null
-                          ? j.projections.pace.toFixed(2) + "×"
-                          : "\u2014"
+                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } },
+                        React.createElement("span", {
+                          style: {
+                            fontWeight: 700,
+                            color: paceColor(j.projections && j.projections.pace),
+                            background: paceBg(j.projections && j.projections.pace),
+                            borderRadius: "0.25rem",
+                            padding: "0.15rem 0.4rem",
+                            display: "inline-block",
+                            fontFamily: "var(--theme-font-mono, monospace)",
+                          }
+                        },
+                          j.projections && j.projections.pace != null
+                            ? j.projections.pace.toFixed(2) + "\u00d7"
+                            : "\u2014"
+                        )
                       )
                     ),
                     expandedId === j.job_id && React.createElement("tr", { key: j.job_id + "_detail" },
@@ -389,7 +432,31 @@
               )
             )
         )
-      )
+      ),
+
+      // Cost Per-Model Breakdown
+      s.cost_by_model && s.cost_by_model.length > 0 &&
+        React.createElement(Card, null,
+          React.createElement(CardHeader, null,
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem" } },
+              CpuIcon(16),
+              React.createElement(CardTitle, null, "Cost Per-Model Breakdown")
+            )
+          ),
+          React.createElement(CardContent, null,
+            React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.35rem" } },
+              s.cost_by_model.map(m =>
+                React.createElement("div", {
+                  key: m.model,
+                  style: { display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }
+                },
+                  React.createElement("span", null, m.model),
+                  React.createElement("span", null, fmtCost(m.total_cost) + " (" + (m.runs || 0).toLocaleString() + " runs)")
+                )
+              )
+            )
+          )
+        )
     );
   }
 
