@@ -53,7 +53,7 @@
   function paceColor(pace) {
     if (pace == null) return "var(--foreground-base, var(--foreground))";
     if (pace < 1.0) return "#4ade80";   // green
-    if (pace < 2.0) return "#facc15";   // yellow
+    if (pace < 2.0) return null;        // neutral — normal zone, inherit default text color
     return "#ef4444";                   // red
   }
 
