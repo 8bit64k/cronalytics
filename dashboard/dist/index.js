@@ -184,7 +184,8 @@
         });
     };
 
-    if (summary.loading || jobs.loading) {
+    const firstLoad = summary.loading && !summary.data && jobs.loading && !jobs.data;
+    if (firstLoad) {
       return React.createElement("div", { style: { padding: "1rem", color: "var(--foreground-base, var(--foreground))" } }, "Loading Cronalytics…");
     }
 
@@ -196,12 +197,29 @@
 
     const s = summary.data || {};
     const jobList = (jobs.data && jobs.data.jobs) ? jobs.data.jobs : [];
+    const isRefreshing = summary.loading || jobs.loading;
     const windowLabel = days === 0 ? "All time" : "Last " + days + " days";
     const prevLabel = s.previous_period && s.previous_period.cost !== undefined
       ? " (prev " + fmtCost(s.previous_period.cost) + ")"
       : "";
 
-    return React.createElement("div", { style: { padding: "1rem", color: "var(--foreground-base, var(--foreground))" } },
+    return React.createElement("div", { style: { padding: "1rem", color: "var(--foreground-base, var(--foreground))", position: "relative" } },
+      isRefreshing && React.createElement("div", {
+        style: {
+          position: "absolute",
+          top: 0,
+          right: 0,
+          padding: "0.25rem 0.5rem",
+          fontSize: "0.65rem",
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          color: "var(--foreground-base, var(--foreground))",
+          opacity: 0.5,
+          fontFamily: "monospace",
+          zIndex: 10,
+          pointerEvents: "none",
+        }
+      }, "Refreshing…"),
       // Inline toolbar: day selector + badge
       React.createElement("div", {
         style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }
