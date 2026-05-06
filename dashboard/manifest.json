@@ -2,7 +2,7 @@
   "name": "cronalytics",
   "label": "Cronalytics",
   "description": "Cost and operational observability for Hermes cron jobs",
-  "icon": "ChartPie",
+  "icon": "PieChart",
   "version": "0.1.0",
   "tab": {
     "path": "/cronalytics",
