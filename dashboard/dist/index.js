@@ -52,18 +52,14 @@
 
   function paceColor(pace) {
     if (pace == null) return "var(--foreground-base, var(--foreground))";
-    if (pace < 0.85) return "#4ecdc4";
-    if (pace < 1.15) return "var(--foreground-base, var(--foreground))";
-    if (pace < 1.50) return "#f0a500";
-    return "#ff6b6b";
+    if (pace < 1.0) return "#4ade80";   // green
+    if (pace < 2.0) return "#facc15";   // yellow
+    return "#ef4444";                   // red
   }
 
   function paceBg(pace) {
-    if (pace == null) return "transparent";
-    if (pace < 0.85) return "rgba(78,205,196,0.08)";
-    if (pace < 1.15) return "transparent";
-    if (pace < 1.50) return "rgba(240,165,0,0.08)";
-    return "rgba(255,107,107,0.08)";
+    // Pace no longer uses background pills (font color only)
+    return "transparent";
   }
 
   function CpuIcon(size) {
@@ -219,6 +215,7 @@
       const [syncInfo, setSyncInfo] = useState(null);
 
       const [expandedId, setExpandedId] = useState(null);
+      const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
     useEffect(() => {
       fetchJSON("/api/plugins/cronalytics/health")
@@ -278,6 +275,29 @@
       ? " (prev " + fmtCost(s.previous_period.cost) + ")"
       : "";
 
+    const getSortValue = (j, key) => {
+      switch (key) {
+        case "Job": return j.name || j.job_id;
+        case "Runs": return j.runs || 0;
+        case "Total Cost": return j.total_cost || 0;
+        case "Avg Cost": return j.avg_cost || 0;
+        case "Nominal/mo": return j.projections && j.projections.projected_cost_30d != null ? j.projections.projected_cost_30d : -Infinity;
+        case "Trend/mo": return j.projections && j.projections.trend_projected_cost_30d != null ? j.projections.trend_projected_cost_30d : -Infinity;
+        case "Pace": return j.projections && j.projections.pace != null ? j.projections.pace : -Infinity;
+        default: return 0;
+      }
+    };
+
+    const sortedJobs = [...jobList].sort((a, b) => {
+      if (!sortConfig.key) return 0;
+      const va = getSortValue(a, sortConfig.key);
+      const vb = getSortValue(b, sortConfig.key);
+      if (typeof va === "string" && typeof vb === "string") {
+        return sortConfig.direction === "asc" ? va.localeCompare(vb) : vb.localeCompare(va);
+      }
+      return sortConfig.direction === "asc" ? va - vb : vb - va;
+    });
+
     return React.createElement("div", { style: { padding: "1rem", color: "var(--foreground-base, var(--foreground))" } },
       // Inline toolbar: day selector + refresh (right-aligned, title is in page header)
       React.createElement("div", {
@@ -331,7 +351,7 @@
             )
           ),
           React.createElement(CardContent, null,
-            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
+            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
               fmtCost(s.total_estimated_cost),
               React.createElement("span", { style: { fontSize: "0.65rem", fontWeight: 400, opacity: 0.5, marginLeft: "0.35rem", verticalAlign: "middle" } }, "(estimated)")
             ),
@@ -348,13 +368,31 @@
             )
           ),
           React.createElement(CardContent, null,
-            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
+            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
               fmtCompact(s.total_tokens)
             ),
-            React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6, display: "flex", flexDirection: "column", gap: "0.1rem" } },
-              React.createElement("span", null, "In: " + fmtCompact(s.total_input_tokens)),
-              React.createElement("span", null, "Out: " + fmtCompact(s.total_output_tokens)),
-              React.createElement("span", null, "Cached: " + fmtCompact(s.total_cache_read_tokens))
+            React.createElement("div", { style: { marginTop: "0.4rem", display: "flex", flexDirection: "column", gap: "0.2rem" } },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
+                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.65rem", color: "#ffe6cb" } }, "In"),
+                React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
+                  React.createElement("div", { style: { width: Math.min(100, ((s.total_input_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: "#ffe6cb", height: "100%" } })
+                ),
+                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.65rem", fontFamily: "var(--theme-font-mono, monospace)", color: "#ffe6cb" } }, fmtCompact(s.total_input_tokens))
+              ),
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
+                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.65rem", color: "#34d399" } }, "Out"),
+                React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
+                  React.createElement("div", { style: { width: Math.min(100, ((s.total_output_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: "#34d399", height: "100%" } })
+                ),
+                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.65rem", fontFamily: "var(--theme-font-mono, monospace)", color: "#34d399" } }, fmtCompact(s.total_output_tokens))
+              ),
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
+                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.65rem", color: "#f472b6" } }, "Cached"),
+                React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
+                  React.createElement("div", { style: { width: Math.min(100, ((s.total_cache_read_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: "#f472b6", height: "100%" } })
+                ),
+                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.65rem", fontFamily: "var(--theme-font-mono, monospace)", color: "#f472b6" } }, fmtCompact(s.total_cache_read_tokens))
+              )
             )
           )
         ),
@@ -391,7 +429,7 @@
                   style: { fontSize: "0.65rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)" }
                 },
                   "Synced " + fmtTime(new Date(syncInfo.lastSync).getTime() / 1000) +
-                  (syncInfo.rowsSynced != null ? " · " + syncInfo.rowsSynced + " rows" : "")
+                  (syncInfo.rowsSynced != null ? " · " + syncInfo.rowsSynced + " jobs" : "")
                 ),
               React.createElement(Button, {
                 size: "sm",
@@ -416,21 +454,28 @@
                 React.createElement("thead", null,
                   React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
                     ["Job", "Runs", "Total Cost", "Avg Cost", "Nominal/mo", "Trend/mo", "Pace"].map(h => {
-                      const _tt = {
-                        "Nominal/mo": "Cost if job ran exactly on schedule at current avg cost",
-                        "Trend/mo": "Cost if current spending pace continues for 30 days",
-                        "Pace": "How actual spend compares to scheduled expectation",
-                      };
+                      const isActive = sortConfig.key === h;
                       return React.createElement("th", {
                         key: h,
-                        title: _tt[h] || "",
-                        style: { textAlign: h === "Job" ? "left" : "right", padding: "0.5rem 0.35rem", cursor: _tt[h] ? "help" : "default" }
-                      }, h);
+                        onClick: () => setSortConfig(prev => ({
+                          key: h,
+                          direction: prev.key === h && prev.direction === "asc" ? "desc" : "asc"
+                        })),
+                        style: {
+                          textAlign: h === "Job" ? "left" : "right",
+                          padding: "0.5rem 0.35rem",
+                          cursor: "pointer",
+                          fontFamily: "var(--theme-font-mono, monospace)",
+                          fontWeight: 600,
+                          userSelect: "none",
+                          borderBottom: "2px solid var(--color-border)",
+                        }
+                      }, h + (isActive ? (sortConfig.direction === "asc" ? " \u2191" : " \u2193") : ""));
                     })
                   )
                 ),
                 React.createElement("tbody", null,
-                  jobList.map(j => [
+                  sortedJobs.map(j => [
                     React.createElement("tr", {
                       key: j.job_id,
                       style: { borderBottom: "1px solid rgba(255,255,255,0.04)", cursor: "pointer", transition: "background 0.12s ease" },
@@ -439,8 +484,7 @@
                       onClick: () => setExpandedId(expandedId === j.job_id ? null : j.job_id)
                     },
                       React.createElement("td", { style: { padding: "0.4rem 0.35rem" } },
-                        React.createElement("div", { style: { fontSize: "0.78rem", fontWeight: 500 } }, j.name || j.job_id),
-                        React.createElement("div", { style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.65rem", opacity: 0.5 } }, j.job_id)
+                        React.createElement("div", { style: { fontSize: "0.78rem", fontWeight: 500 } }, j.name || j.job_id)
                       ),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, (j.runs || 0).toLocaleString()),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.total_cost)),
