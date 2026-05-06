@@ -314,24 +314,26 @@
       // Jobs Breakdown
       React.createElement(Card, { style: { marginBottom: "1.5rem" } },
         React.createElement(CardHeader, null,
-          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem" } },
-            ClockIcon(16),
-            React.createElement(CardTitle, null, "Jobs Breakdown")
-          ),
-          React.createElement("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center" } },
-            syncInfo && syncInfo.lastSync &&
-              React.createElement("span", {
-                style: { fontSize: "0.65rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)" }
-              },
-                "Synced " + fmtTime(new Date(syncInfo.lastSync).getTime() / 1000) +
-                (syncInfo.rowsSynced != null ? " · " + syncInfo.rowsSynced + " rows" : "")
-              ),
-            React.createElement(Button, {
-              size: "sm",
-              outlined: true,
-              disabled: syncing,
-              onClick: onSync,
-            }, syncing ? "Syncing..." : "Sync Now")
+          React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" } },
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem" } },
+              ClockIcon(16),
+              React.createElement(CardTitle, null, "Jobs Breakdown")
+            ),
+            React.createElement("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center" } },
+              syncInfo && syncInfo.lastSync &&
+                React.createElement("span", {
+                  style: { fontSize: "0.65rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)" }
+                },
+                  "Synced " + fmtTime(new Date(syncInfo.lastSync).getTime() / 1000) +
+                  (syncInfo.rowsSynced != null ? " · " + syncInfo.rowsSynced + " rows" : "")
+                ),
+              React.createElement(Button, {
+                size: "sm",
+                outlined: true,
+                disabled: syncing,
+                onClick: onSync,
+              }, syncing ? "Syncing..." : "Sync Now")
+            )
           )
         ),
         React.createElement(CardContent, null,
@@ -440,7 +442,7 @@
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem" } },
               CpuIcon(16),
-              React.createElement(CardTitle, null, "Cost Per-Model Breakdown")
+              React.createElement(CardTitle, null, "Per-Model Breakdown")
             )
           ),
           React.createElement(CardContent, null,
