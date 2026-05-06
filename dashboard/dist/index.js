@@ -185,11 +185,10 @@
       : "";
 
     return React.createElement("div", { style: { padding: "1rem", color: "var(--foreground-base, var(--foreground))" } },
-      // Inline toolbar: day selector + badge
+      // Inline toolbar: day selector + refresh (right-aligned, title is in page header)
       React.createElement("div", {
-        style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }
+        style: { display: "flex", justifyContent: "flex-end", alignItems: "center", marginBottom: "0.5rem" }
       },
-        React.createElement("h2", { style: { margin: 0, fontSize: "1.125rem", fontWeight: 600 } }, "Cronalytics"),
         React.createElement("div", { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
           React.createElement(DaySelector, { selected: days, onChange: setDays }),
           React.createElement(Button, {
