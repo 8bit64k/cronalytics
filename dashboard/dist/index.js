@@ -82,7 +82,7 @@
     return { data, loading, error, refetch: () => setReload(r => r + 1) };
   }
 
-  // ── Day selector control ─────────────────────────────────────────
+  // ── Day selector control (uses SDK Button to match Analytics tab) ─
   function DaySelector({ selected, onChange }) {
     const days = [
       { label: "7D", value: 7 },
@@ -97,30 +97,12 @@
         alignItems: "center",
         gap: "0.375rem",
       }
-    }, days.map(d => React.createElement("button", {
+    }, days.map(d => React.createElement(Button, {
       key: d.value,
       type: "button",
+      size: "sm",
+      outlined: selected !== d.value,
       onClick: () => onChange(d.value),
-      style: {
-        padding: "0.375rem 0.75rem",
-        borderRadius: "0",
-        border: selected === d.value
-          ? "none"
-          : "1px solid rgba(255,255,255,0.15)",
-        background: selected === d.value
-          ? "var(--foreground-base, var(--foreground))"
-          : "transparent",
-        color: selected === d.value
-          ? "var(--background-base, var(--background, #111))"
-          : "var(--foreground-base, var(--foreground))",
-        cursor: "pointer",
-        fontWeight: selected === d.value ? 700 : 400,
-        fontSize: "0.7rem",
-        letterSpacing: "0.15em",
-        textTransform: "uppercase",
-        fontFamily: "monospace",
-        lineHeight: 1,
-      }
     }, d.label)));
   }
 
