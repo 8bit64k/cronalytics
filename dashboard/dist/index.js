@@ -275,6 +275,13 @@
       ? " (prev " + fmtCost(s.previous_period.cost) + ")"
       : "";
 
+    const costPct = s.previous_period && s.previous_period.cost != null && s.previous_period.cost !== 0
+      ? ((s.total_estimated_cost - s.previous_period.cost) / s.previous_period.cost) * 100
+      : null;
+    const runPct = s.previous_period && s.previous_period.runs != null && s.previous_period.runs !== 0
+      ? ((s.total_runs - s.previous_period.runs) / s.previous_period.runs) * 100
+      : null;
+
     const getSortValue = (j, key) => {
       switch (key) {
         case "Job": return j.name || j.job_id;
@@ -340,7 +347,12 @@
           ),
           React.createElement(CardContent, null,
             React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } }, (s.total_runs || 0).toLocaleString()),
-            React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6 } }, windowLabel)
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85 } },
+              runPct != null ? (runPct > 0 ? "↑ " : "↓ ") + Math.abs(runPct).toFixed(0) + "%" : "—"
+            ),
+            React.createElement("div", { style: { fontSize: "0.65rem", opacity: 0.5, marginTop: "0.1rem" } },
+              "vs prior ", days === 0 ? "period" : days + "d"
+            )
           )
         ),
         React.createElement(Card, null,
@@ -352,11 +364,16 @@
           ),
           React.createElement(CardContent, null,
             React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
-              fmtCost(s.total_estimated_cost),
-              React.createElement("span", { style: { fontSize: "0.65rem", fontWeight: 400, opacity: 0.5, marginLeft: "0.35rem", verticalAlign: "middle" } }, "(estimated)")
+              fmtCost(s.total_estimated_cost)
             ),
-            React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6 } },
-              "Trend: ", s.trend || "→", prevLabel
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: costPct != null ? (costPct > 0 ? "#ef4444" : "#4ade80") : null } },
+              costPct != null ? (costPct > 0 ? "↑ " : "↓ ") + Math.abs(costPct).toFixed(0) + "%" : "—"
+            ),
+            React.createElement("div", { style: { fontSize: "0.65rem", opacity: 0.5, marginTop: "0.1rem" } },
+              "vs prior ", days === 0 ? "period" : days + "d"
+            ),
+            React.createElement("div", { style: { fontSize: "0.65rem", opacity: 0.45, marginTop: "0.3rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.25rem" } },
+              "Actual: ", s.total_actual_cost != null ? fmtCost(s.total_actual_cost) : "—"
             )
           )
         ),
