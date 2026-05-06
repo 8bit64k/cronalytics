@@ -113,6 +113,52 @@
       React.createElement("path", { d: "M8 16H3v5" })
     );
   }
+  function BanknoteIcon(size) {
+    return React.createElement("svg", {
+      width: size || 16, height: size || 16, viewBox: "0 0 24 24",
+      fill: "none", stroke: "currentColor", strokeWidth: 2,
+      strokeLinecap: "round", strokeLinejoin: "round",
+      style: { display: "inline-block", verticalAlign: "middle" }
+    },
+      React.createElement("rect", { width: 20, height: 12, x: 2, y: 6, rx: 2 }),
+      React.createElement("circle", { cx: 12, cy: 12, r: 2 }),
+      React.createElement("path", { d: "M6 12h.01M18 12h.01" })
+    );
+  }
+  function BlocksIcon(size) {
+    return React.createElement("svg", {
+      width: size || 16, height: size || 16, viewBox: "0 0 24 24",
+      fill: "none", stroke: "currentColor", strokeWidth: 2,
+      strokeLinecap: "round", strokeLinejoin: "round",
+      style: { display: "inline-block", verticalAlign: "middle" }
+    },
+      React.createElement("path", { d: "M10 22V7a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5a1 1 0 0 0-1-1H2" }),
+      React.createElement("rect", { x: 14, y: 2, width: 8, height: 8, rx: 1 })
+    );
+  }
+  function MetronomeIcon(size) {
+    return React.createElement("svg", {
+      width: size || 16, height: size || 16, viewBox: "0 0 24 24",
+      fill: "none", stroke: "currentColor", strokeWidth: 2,
+      strokeLinecap: "round", strokeLinejoin: "round",
+      style: { display: "inline-block", verticalAlign: "middle" }
+    },
+      React.createElement("path", { d: "M12 11.4V9.1" }),
+      React.createElement("path", { d: "m12 17 6.59-6.59" }),
+      React.createElement("path", { d: "m15.05 5.7-.218-.691a3 3 0 0 0-5.663 0L4.418 19.695A1 1 0 0 0 5.37 21h13.253a1 1 0 0 0 .951-1.31L18.45 16.2" }),
+      React.createElement("circle", { cx: 20, cy: 9, r: 2 })
+    );
+  }
+  function ZapIcon(size) {
+    return React.createElement("svg", {
+      width: size || 16, height: size || 16, viewBox: "0 0 24 24",
+      fill: "none", stroke: "currentColor", strokeWidth: 2,
+      strokeLinecap: "round", strokeLinejoin: "round",
+      style: { display: "inline-block", verticalAlign: "middle" }
+    },
+      React.createElement("path", { d: "M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" })
+    );
+  }
 
   function useApi(path) {
     const [data, setData] = useState(null);
@@ -266,14 +312,24 @@
         }
       },
         React.createElement(Card, null,
-          React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Total Runs")),
+          React.createElement(CardHeader, null,
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+              ZapIcon(14),
+              React.createElement(CardTitle, null, "Job Runs")
+            )
+          ),
           React.createElement(CardContent, null,
             React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } }, (s.total_runs || 0).toLocaleString()),
             React.createElement("div", { style: { fontSize: "0.7rem", opacity: 0.6 } }, windowLabel)
           )
         ),
         React.createElement(Card, null,
-          React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Cost")),
+          React.createElement(CardHeader, null,
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+              BanknoteIcon(14),
+              React.createElement(CardTitle, null, "Cost")
+            )
+          ),
           React.createElement(CardContent, null,
             React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
               fmtCost(s.total_estimated_cost),
@@ -285,7 +341,12 @@
           )
         ),
         React.createElement(Card, null,
-          React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Tokens")),
+          React.createElement(CardHeader, null,
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+              BlocksIcon(14),
+              React.createElement(CardTitle, null, "Tokens")
+            )
+          ),
           React.createElement(CardContent, null,
             React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
               fmtCompact(s.total_tokens)
@@ -298,7 +359,12 @@
           )
         ),
         React.createElement(Card, null,
-          React.createElement(CardHeader, null, React.createElement(CardTitle, null, "Pace")),
+          React.createElement(CardHeader, null,
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+              MetronomeIcon(14),
+              React.createElement(CardTitle, null, "Pace")
+            )
+          ),
           React.createElement(CardContent, null,
             React.createElement("div", {
               style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(s.pace) }
