@@ -215,7 +215,8 @@
             size: "sm",
             outlined: true,
             disabled: summary.loading || jobs.loading,
-            onClick: () => { summary.refetch(); jobs.refetch(); }
+            onClick: () => { summary.refetch(); jobs.refetch(); },
+            style: { minWidth: "5.5rem" }
           }, summary.loading || jobs.loading ? "\u2026" : "Refresh")
         )
       ),
