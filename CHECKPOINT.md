@@ -2,7 +2,7 @@
 # Updated: 2026-05-07 14:00
 #
 ## Current Commit
-`f3540b0` (layout-grid-2x4) — "ui(v2): theme-compatibility overhaul - silver icons, mono sublines, Top X titles, Pace bars, leader spacing"
+`69f5316` (layout-grid-2x4) — "feat(modals): add educational modals for Runs, Cost, Tokens, and all 4 Leader cards"
 
 ## What Works Now
 1. Dashboard loads; Cronalytics tab renders without white screen
@@ -29,6 +29,7 @@
 17. Sync Now button works end-to-end
 18. Stale-while-revalidate: no flash on day switch, only blank on first mount
 19. Theme compatibility: hardcoded accent colors removed from Summary/Leader text; silver icons; mono sub-lines; neutral token bars
+20. **M7 — Educational Modals (all 8 cards):** click any card → modal opens with detailed metric info, formula explanation, and live worked examples. Sparkle hover effect + Info icon (ⓘ) in top-right of every card. Escape or backdrop click to close.
 
 ## Nick's UI Polish Round (confirmed)
 - `[Last 30 days]` badge → `[30D]` (or `[7D]`, `[90D]`, `[All]`)
@@ -73,7 +74,6 @@
 - **Tested**: all commands run against live `facts.db`; output verified
 
 ## Known Issues / Needs Feedback
-- Tooltips not showing on Chrome MacBook or iPad Safari (desktop hover works, tap/click does not). `title` attribute may need replacement approach (modal?)
 - Detail row layout may need visual polish at tablet width
 
 ## Next Priority
