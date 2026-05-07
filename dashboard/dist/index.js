@@ -341,16 +341,16 @@
         React.createElement(Card, null,
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-              ZapIcon(14),
+              React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, ZapIcon(14)),
               React.createElement(CardTitle, null, "Job Runs")
             )
           ),
           React.createElement(CardContent, null,
             React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } }, (s.total_runs || 0).toLocaleString()),
-            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85 } },
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
               runPct != null ? (runPct > 0 ? "↑ " : "↓ ") + Math.abs(runPct).toFixed(0) + "%" : "—"
             ),
-            React.createElement("div", { style: { fontSize: "0.65rem", opacity: 0.5, marginTop: "0.1rem" } },
+            React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.1rem" } },
               "vs prior ", days === 0 ? "period" : days + "d"
             )
           )
@@ -358,7 +358,7 @@
         React.createElement(Card, null,
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-              BanknoteIcon(14),
+              React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, BanknoteIcon(14)),
               React.createElement(CardTitle, null, "Cost")
             )
           ),
@@ -366,13 +366,13 @@
             React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
               fmtCost(s.total_estimated_cost)
             ),
-            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "0.9rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: costPct != null ? (costPct > 0 ? "#ef4444" : "#4ade80") : null } },
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: costPct != null ? (costPct > 0 ? "#ef4444" : "#4ade80") : null } },
               costPct != null ? (costPct > 0 ? "↑ " : "↓ ") + Math.abs(costPct).toFixed(0) + "%" : "—"
             ),
-            React.createElement("div", { style: { fontSize: "0.65rem", opacity: 0.5, marginTop: "0.1rem" } },
+            React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.1rem" } },
               "vs prior ", days === 0 ? "period" : days + "d"
             ),
-            React.createElement("div", { style: { fontSize: "0.65rem", opacity: 0.45, marginTop: "0.3rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.25rem" } },
+            React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.3rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.25rem" } },
               "Actual: ", s.total_actual_cost != null ? fmtCost(s.total_actual_cost) : "—"
             )
           )
@@ -380,7 +380,7 @@
         React.createElement(Card, null,
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-              BlocksIcon(14),
+              React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, BlocksIcon(14)),
               React.createElement(CardTitle, null, "Tokens")
             )
           ),
@@ -390,53 +390,70 @@
             ),
             React.createElement("div", { style: { marginTop: "0.4rem", display: "flex", flexDirection: "column", gap: "0.2rem" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.65rem", color: "#ffe6cb" } }, "In"),
+                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "In"),
                 React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
-                  React.createElement("div", { style: { width: Math.min(100, ((s.total_input_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: "#ffe6cb", height: "100%" } })
+                  React.createElement("div", { style: { width: Math.min(100, ((s.total_input_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
                 ),
-                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.65rem", fontFamily: "var(--theme-font-mono, monospace)", color: "#ffe6cb" } }, fmtCompact(s.total_input_tokens))
+                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_input_tokens))
               ),
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.65rem", color: "#34d399" } }, "Out"),
+                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Out"),
                 React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
-                  React.createElement("div", { style: { width: Math.min(100, ((s.total_output_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: "#34d399", height: "100%" } })
+                  React.createElement("div", { style: { width: Math.min(100, ((s.total_output_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
                 ),
-                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.65rem", fontFamily: "var(--theme-font-mono, monospace)", color: "#34d399" } }, fmtCompact(s.total_output_tokens))
+                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_output_tokens))
               ),
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.65rem", color: "#f472b6" } }, "Cached"),
+                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Cached"),
                 React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
-                  React.createElement("div", { style: { width: Math.min(100, ((s.total_cache_read_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: "#f472b6", height: "100%" } })
+                  React.createElement("div", { style: { width: Math.min(100, ((s.total_cache_read_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
                 ),
-                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.65rem", fontFamily: "var(--theme-font-mono, monospace)", color: "#f472b6" } }, fmtCompact(s.total_cache_read_tokens))
+                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_cache_read_tokens))
               )
             )
           )
         ),
-        React.createElement(Card, null,
-          React.createElement(CardHeader, null,
-            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-              MetronomeIcon(14),
-              React.createElement(CardTitle, null, "Pace")
+        (function() {
+          const nominalPace = s.nominal_monthly_total || 0;
+          const trendPace = s.trend_monthly_total || 0;
+          const maxPace = Math.max(nominalPace, trendPace, 1);
+          return React.createElement(Card, null,
+            React.createElement(CardHeader, null,
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, MetronomeIcon(14)),
+                React.createElement(CardTitle, null, "Pace")
+              )
+            ),
+            React.createElement(CardContent, null,
+              React.createElement("div", {
+                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(s.pace) }
+              }, s.pace != null ? s.pace.toFixed(2) + "×" : "—"),
+              React.createElement("div", { style: { marginTop: "0.4rem", display: "flex", flexDirection: "column", gap: "0.2rem" } },
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
+                  React.createElement("span", { style: { width: "3.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Nominal"),
+                  React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
+                    React.createElement("div", { style: { width: (Math.min(100, (nominalPace / maxPace) * 100)) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
+                  ),
+                  React.createElement("span", { style: { width: "4.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCost(nominalPace))
+                ),
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
+                  React.createElement("span", { style: { width: "3.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Trend"),
+                  React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
+                    React.createElement("div", { style: { width: (Math.min(100, (trendPace / maxPace) * 100)) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
+                  ),
+                  React.createElement("span", { style: { width: "4.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCost(trendPace))
+                )
+              )
             )
-          ),
-          React.createElement(CardContent, null,
-            React.createElement("div", {
-              style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(s.pace) }
-            }, s.pace != null ? s.pace.toFixed(2) + "×" : "—"),
-            React.createElement("div", { style: { fontSize: "0.75rem", fontWeight: 600, opacity: 0.85, display: "flex", flexDirection: "column", gap: "0.1rem" } },
-              React.createElement("span", null, "Nominal: " + fmtCost(s.nominal_monthly_total) + "/mo"),
-              React.createElement("span", null, "Trend: " + fmtCost(s.trend_monthly_total) + "/mo")
-            )
-          )
-        ),
+          );
+        })(),
         (() => {
           const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.runs || 0) > (a.runs || 0) ? b : a, jobList[0]) : null;
           const label = j ? (j.name || j.job_id) : "—";
           return React.createElement(Card, null,
             React.createElement(CardHeader, null,
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", color: "#ff5722" } },
-                ZapIcon(13), React.createElement(CardTitle, null, "Most Runs")
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, ZapIcon(13)), React.createElement(CardTitle, null, "Top Runs")
               )
             ),
             React.createElement(CardContent, null,
@@ -444,10 +461,10 @@
                 style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
               }, j ? (j.runs || 0).toLocaleString() : "—"),
               React.createElement("div", {
-                style: { fontSize: "0.75rem", fontWeight: 600, opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
                 title: label
               }, label),
-              React.createElement("div", { style: { marginBottom: "0.4rem" } })
+              React.createElement("div", { style: { height: "3rem" } })
             )
           );
         })(),
@@ -456,8 +473,8 @@
           const label = j ? (j.name || j.job_id) : "—";
           return React.createElement(Card, null,
             React.createElement(CardHeader, null,
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", color: "#ff5722" } },
-                BanknoteIcon(13), React.createElement(CardTitle, null, "Highest Cost")
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BanknoteIcon(13)), React.createElement(CardTitle, null, "Top Cost")
               )
             ),
             React.createElement(CardContent, null,
@@ -465,10 +482,10 @@
                 style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#f5a623", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
               }, j ? fmtCost(j.total_cost) : "—"),
               React.createElement("div", {
-                style: { fontSize: "0.75rem", fontWeight: 600, opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
                 title: label
               }, label),
-              React.createElement("div", { style: { marginBottom: "0.4rem" } })
+              React.createElement("div", { style: { height: "3rem" } })
             )
           );
         })(),
@@ -477,8 +494,8 @@
           const label = j ? (j.name || j.job_id) : "—";
           return React.createElement(Card, null,
             React.createElement(CardHeader, null,
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", color: "#ff5722" } },
-                BlocksIcon(13), React.createElement(CardTitle, null, "Most Tokens")
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BlocksIcon(13)), React.createElement(CardTitle, null, "Top Tokens")
               )
             ),
             React.createElement(CardContent, null,
@@ -486,10 +503,10 @@
                 style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#5b8def", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
               }, j ? fmtCompact(j.total_tokens) : "—"),
               React.createElement("div", {
-                style: { fontSize: "0.75rem", fontWeight: 600, opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
                 title: label
               }, label),
-              React.createElement("div", { style: { marginBottom: "0.4rem" } })
+              React.createElement("div", { style: { height: "3rem" } })
             )
           );
         })(),
@@ -505,8 +522,8 @@
           const p = j && j.projections && j.projections.pace != null ? j.projections.pace : null;
           return React.createElement(Card, null,
             React.createElement(CardHeader, null,
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", color: "#ff5722" } },
-                MetronomeIcon(13), React.createElement(CardTitle, null, "Highest Pace")
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, MetronomeIcon(13)), React.createElement(CardTitle, null, "Top Pace")
               )
             ),
             React.createElement(CardContent, null,
@@ -514,10 +531,10 @@
                 style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: p != null ? paceColor(p) : null, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
               }, p != null ? p.toFixed(2) + "×" : "—"),
               React.createElement("div", {
-                style: { fontSize: "0.75rem", fontWeight: 600, opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
                 title: label
               }, label),
-              React.createElement("div", { style: { marginBottom: "0.4rem" } })
+              React.createElement("div", { style: { height: "3rem" } })
             )
           );
         })(),
