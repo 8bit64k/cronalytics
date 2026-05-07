@@ -1,6 +1,6 @@
 # Features — Cronalytics
 
-> **Version:** 0.3.0
+> **Version:** 0.3.1
 > **Scope:** Living catalog of all implemented functionality.
 
 This document lists every implemented feature, the rationale for its inclusion, and the formulas or data sources it relies on. If something is not listed here, it is not implemented.
@@ -187,6 +187,9 @@ The `days` parameter accepts `0` (all time) or `1–90`.
   - `0.85–1.15` — white (on track)
   - `1.15–1.50` — amber (warm)
   - `> 1.50` — red (over-spending)
+- **Top Jobs** — single card with two stacked sections:
+  - *Most Run* — job name + run count (no "Last X days" label; clean name+number).
+  - *Highest Cost* — job name + cost in amber. Sections divided by thin rule.
 
 #### Cost by Model
 A simple list showing model name, run count, and total cost for the selected window.
@@ -352,5 +355,5 @@ These are **intentional boundaries or acknowledged gaps**, not bugs.
 
 ---
 
-*Version: 0.3.0*
-*Last updated: 2026-05-04*
+*Version: 0.3.1*
+*Last updated: 2026-05-06*

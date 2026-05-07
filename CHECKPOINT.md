@@ -1,12 +1,8 @@
 # Cronalytics — Work Checkpoint
-# Updated: 2026-05-03 23:20
+# Updated: 2026-05-06 17:15
 #
 ## Current Commit
 `61ddc6e` (master) — "feat(cli): standalone cronalytics CLI with summary/jobs/runs/models/trends/health subcommands"
-Prior: `1e59353` — "docs: update CHECKPOINT and FEATURES for 0.3.0 polish + CLI prototype plan"
-Prior: `6c4fefe` — "ui: 'Cost' header + '(estimated)' tag inline next to headline"
-Prior: `e249ed9` — "fix(tokens): surface cache tokens — total_tokens headline, breakdown in sub-lines"
-Prior: `747ceab` — "feat(projections): fixed-window Pace redesign — per-job + aggregate pace, color indicators, detail rows"
 
 ## What Works Now (Nick verified — "absolutely fantastic")
 1. Dashboard loads; Cronalytics tab renders without white screen
@@ -14,18 +10,20 @@ Prior: `747ceab` — "feat(projections): fixed-window Pace redesign — per-job 
 3. Backend `/jobs`: per-job `pace = trend / nominal` in projections object
 4. Frontend header: shared PageHeader (title, afterTitle badge `[30D]`, day selector + refresh)
 5. Day selector: uniform solid borders, no bevel
-6. Summary cards (left→right): Total Runs | Cost (estimated) | Tokens | Pace
+6. Summary cards (left→right): Total Runs | Cost (estimated) | Tokens | Pace | **Top Runner** | **Top Spender**
 7. Cost card: `$XX` headline with `(estimated)` subscript tag inline; "Trend" sub-line
 8. Pace card: colored ratio (cyan &lt;0.85, white 0.85–1.15, amber 1.15–1.50, red &gt;1.50); sub-lines labeled Nominal / Trend
 9. Tokens card: `total_tokens` large headline + In / Out / Cached sub-lines
-10. Cost by Model card renders
-11. Jobs table columns: Job | Runs | Total Cost | Avg Cost | Nominal/mo | Trend/mo | Pace
-12. Pace column cells: colored text + background tint at extreme values
-13. Expandable detail rows: Tokens breakdown, single-line cron schedule + last run + next run — Nominal/Trend/Pace/Drift removed (duplicates table columns)
-14. Native `title` tooltips on table headers for Nominal/mo, Trend/mo, Pace
-15. Fixed-window math: both per-job and aggregate use selected `days` filter as denominator
-16. Plugin script URL cache-busting in host web app (per-load nonce)
-17. Sync Now button works end-to-end
+10. **Top Runner card**: job name (ellipsized) + run count; context label shows selected window
+11. **Top Spender card**: job name (ellipsized) + cost in amber; context label shows selected window
+12. Cost by Model card renders
+13. Jobs table columns: Job | Runs | Total Cost | Avg Cost | Nominal/mo | Trend/mo | Pace
+14. Pace column cells: colored text + background tint at extreme values
+15. Expandable detail rows: Tokens breakdown, single-line cron schedule + last run + next run — Nominal/Trend/Pace/Drift removed (duplicates table columns)
+16. Native `title` tooltips on table headers for Nominal/mo, Trend/mo, Pace
+17. Fixed-window math: both per-job and aggregate use selected `days` filter as denominator
+18. Plugin script URL cache-busting in host web app (per-load nonce)
+19. Sync Now button works end-to-end
 
 ## Nick's UI Polish Round (confirmed)
 - `[Last 30 days]` badge → `[30D]` (or `[7D]`, `[90D]`, `[All]`)
@@ -34,6 +32,16 @@ Prior: `747ceab` — "feat(projections): fixed-window Pace redesign — per-job 
 - Removed header-right sidebar badge (was not adding value)
 - `Est. Cost` → `Cost` with `(estimated)` tag next to headline number
 - All changes verified on iPad and Chrome MacBook; heights align, no droop
+
+## New: At-a-Glance Summary Cards (2026-05-06)
+- **Top Jobs** (single card, two stacked sections):
+  - *Most Run*: highest `runs` from `jobList`; job name + run count.
+  - *Highest Cost*: highest `total_cost` from `jobList`; job name + cost in amber `#f5a623`.
+  - Sections divided by thin `rgba(255,255,255,0.06)` rule.
+  - No "Last X days" label — clean name+number only.
+  - Uses `ShieldAlertIcon` in header (shield with alert mark).
+- Job names truncate with `text-overflow: ellipsis` to prevent layout breakage on long names.
+- No backend changes — pure client-side derivation from existing `/jobs` data.
 
 ## Key Math (7D filter)
 - Total est cost: $4.89
@@ -64,13 +72,8 @@ Prior: `747ceab` — "feat(projections): fixed-window Pace redesign — per-job 
 - Tooltips not showing on Chrome MacBook or iPad Safari (desktop hover works, tap/click does not). `title` attribute may need replacement approach (modal?)
 - Detail row layout may need visual polish at tablet width
 
-## Next Priority: CLI Prototype (Phase 7)
-Standalone `cronalytics` CLI command that mirrors `hermes insights` format:
-- `cronalytics --days N` (default 30)
-- Subcommands: `summary`, `trends`, `models`, `runs`, `health`
-- Rich tables, same data points as dashboard
-- Uses `facts.py` directly; no Hermes core changes needed
-- Nick calls this "most value + polish for V1.0 release"
+## Next Priority
+- See PLAN.md for V1.0 backlog.
 
 ## Rejoin Instructions
 - Tab open at `https://hermes.tail315577.ts.net/`

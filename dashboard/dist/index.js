@@ -333,7 +333,7 @@
       React.createElement("div", {
         style: {
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+          gridTemplateColumns: "repeat(4, 1fr)",
           gap: "1rem",
           marginBottom: "1.5rem"
         }
@@ -429,9 +429,146 @@
               React.createElement("span", null, "Trend: " + fmtCost(s.trend_monthly_total) + "/mo")
             )
           )
-        )
+        ),
+        (() => {
+          const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.runs || 0) > (a.runs || 0) ? b : a, jobList[0]) : null;
+          const label = j ? (j.name || j.job_id) : "—";
+          return React.createElement(Card, null,
+            React.createElement(CardHeader, null,
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", color: "#ff5722" } },
+                ZapIcon(13), React.createElement(CardTitle, null, "Most Runs")
+              )
+            ),
+            React.createElement(CardContent, null,
+              React.createElement("div", {
+                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
+              }, j ? (j.runs || 0).toLocaleString() : "—"),
+              React.createElement("div", {
+                style: { fontSize: "0.75rem", fontWeight: 600, opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                title: label
+              }, label)
+            )
+          );
+        })(),
+        (() => {
+          const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.total_cost || 0) > (a.total_cost || 0) ? b : a, jobList[0]) : null;
+          const label = j ? (j.name || j.job_id) : "—";
+          return React.createElement(Card, null,
+            React.createElement(CardHeader, null,
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", color: "#ff5722" } },
+                BanknoteIcon(13), React.createElement(CardTitle, null, "Highest Cost")
+              )
+            ),
+            React.createElement(CardContent, null,
+              React.createElement("div", {
+                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#f5a623", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
+              }, j ? fmtCost(j.total_cost) : "—"),
+              React.createElement("div", {
+                style: { fontSize: "0.75rem", fontWeight: 600, opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                title: label
+              }, label)
+            )
+          );
+        })(),
+        (() => {
+          const j = jobList.length > 0 ? jobList.reduce((a, b) => ((b.total_tokens || 0) > (a.total_tokens || 0) ? b : a), jobList[0]) : null;
+          const label = j ? (j.name || j.job_id) : "—";
+          return React.createElement(Card, null,
+            React.createElement(CardHeader, null,
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", color: "#ff5722" } },
+                BlocksIcon(13), React.createElement(CardTitle, null, "Most Tokens")
+              )
+            ),
+            React.createElement(CardContent, null,
+              React.createElement("div", {
+                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#5b8def", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
+              }, j ? fmtCompact(j.total_tokens) : "—"),
+              React.createElement("div", {
+                style: { fontSize: "0.75rem", fontWeight: 600, opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                title: label
+              }, label)
+            )
+          );
+        })(),
+        (() => {
+          const j = jobList.length > 0
+            ? jobList.reduce((a, b) => {
+                const aVal = (a.projections && a.projections.trend_projected_cost_30d) || 0;
+                const bVal = (b.projections && b.projections.trend_projected_cost_30d) || 0;
+                return bVal > aVal ? b : a;
+              }, jobList[0])
+            : null;
+          const label = j ? (j.name || j.job_id) : "—";
+          const trendVal = j && j.projections && j.projections.trend_projected_cost_30d != null ? j.projections.trend_projected_cost_30d : null;
+          const nominalVal = j && j.projections && j.projections.projected_cost_30d != null ? j.projections.projected_cost_30d : null;
+          let trendColor = null;
+          if (trendVal != null && nominalVal != null && nominalVal > 0) {
+            const ratio = trendVal / nominalVal;
+            if (ratio < 1.0) trendColor = "#4ade80";
+            else if (ratio < 2.0) trendColor = null;
+            else trendColor = "#ef4444";
+          }
+          return React.createElement(Card, null,
+            React.createElement(CardHeader, null,
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", color: "#ff5722" } },
+                MetronomeIcon(13), React.createElement(CardTitle, null, "Top Trend")
+              )
+            ),
+            React.createElement(CardContent, null,
+              React.createElement("div", {
+                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: trendColor || "var(--foreground-base, var(--foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
+              }, trendVal != null ? fmtCost(trendVal) + "/mo" : "—"),
+              React.createElement("div", {
+                style: { fontSize: "0.75rem", fontWeight: 600, opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                title: label
+              }, label)
+            )
+          );
+        })(),
       ),
-
+      s.cost_by_model && s.cost_by_model.length > 0 && (() => {
+        const topModels = s.cost_by_model.slice(0, 5);
+        const remaining = s.cost_by_model.length - 5;
+        const maxCost = (topModels[0] && topModels[0].total_cost) || 1;
+        return React.createElement(Card, null,
+          React.createElement(CardHeader, null,
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem" } },
+              CpuIcon(16),
+              React.createElement(CardTitle, null, "Per-Model Breakdown")
+            )
+          ),
+          React.createElement(CardContent, null,
+            React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.15rem" } },
+              topModels.map(m => React.createElement("div", {
+                key: m.model,
+                style: { display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.25rem 0", borderRadius: "0.25rem", cursor: "default", transition: "background 0.15s ease" },
+                onMouseEnter: e => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; },
+                onMouseLeave: e => { e.currentTarget.style.background = "transparent"; },
+              },
+                React.createElement("span", {
+                  style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", flexShrink: 0, width: "38%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
+                }, m.model),
+                React.createElement("div", {
+                  style: { flex: 1, background: "rgba(255,255,255,0.04)", height: "0.4rem", borderRadius: "0.2rem", overflow: "hidden" }
+                },
+                  React.createElement("div", {
+                    style: { width: (Math.min(100, ((m.total_cost || 0) / maxCost) * 100)) + "%", background: "#f5a623", height: "100%", borderRadius: "0.2rem", transition: "width 0.5s ease" }
+                  })
+                ),
+                React.createElement("span", {
+                  style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", flexShrink: 0, textAlign: "right", whiteSpace: "nowrap" }
+                },
+                  React.createElement("span", { style: { color: "#f5a623" } }, fmtCost(m.total_cost)),
+                  React.createElement("span", { style: { opacity: 0.45, marginLeft: "0.35rem" } }, "· ", (m.runs || 0).toLocaleString())
+                )
+              )),
+              remaining > 0 && React.createElement("div", {
+                style: { textAlign: "center", fontSize: "0.65rem", opacity: 0.35, marginTop: "0.3rem", fontFamily: "var(--theme-font-mono, monospace)" }
+              }, "and " + remaining + " more")
+            )
+          )
+        );
+      })(),
       // Jobs Breakdown
       React.createElement(Card, { style: { marginBottom: "1.5rem" } },
         React.createElement(CardHeader, null,
@@ -562,30 +699,6 @@
             )
         )
       ),
-
-      // Cost Per-Model Breakdown
-      s.cost_by_model && s.cost_by_model.length > 0 &&
-        React.createElement(Card, null,
-          React.createElement(CardHeader, null,
-            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem" } },
-              CpuIcon(16),
-              React.createElement(CardTitle, null, "Per-Model Breakdown")
-            )
-          ),
-          React.createElement(CardContent, null,
-            React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.35rem" } },
-              s.cost_by_model.map(m =>
-                React.createElement("div", {
-                  key: m.model,
-                  style: { display: "flex", justifyContent: "space-between", fontSize: "0.8rem" }
-                },
-                  React.createElement("span", null, m.model),
-                  React.createElement("span", null, fmtCost(m.total_cost) + " (" + (m.runs || 0).toLocaleString() + " runs)")
-                )
-              )
-            )
-          )
-        )
     );
   }
 
