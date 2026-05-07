@@ -178,18 +178,21 @@ The `days` parameter accepts `0` (all time) or `1–90`.
 
 ### 5.2 `/cronalytics` Tab
 
-#### Summary Cards (top row)
-- **Total Runs** — count of runs in the selected window.
-- **Est. Cost** — sum of `estimated_cost_usd` with trend arrow (↑/↓/→) comparing to the previous period of equal length.
-- **Tokens** — total tokens broken down as `In / Out / Cached`.
-- **Pace** — aggregate `trend_monthly_total / nominal_monthly_total` with color coding:
-  - `< 0.85` — cyan (under-spending vs schedule)
-  - `0.85–1.15` — white (on track)
-  - `1.15–1.50` — amber (warm)
-  - `> 1.50` — red (over-spending)
-- **Top Jobs** — single card with two stacked sections:
-  - *Most Run* — job name + run count (no "Last X days" label; clean name+number).
-  - *Highest Cost* — job name + cost in amber. Sections divided by thin rule.
+#### Row 1 — Summary Board
+- **Job Runs** — total run count in selected window vs. prior period delta (↑/↓ %).
+- **Cost** — total `estimated_cost_usd` in amber `#f5a623`; vs-prior delta + Actual cost sub-line.
+- **Tokens** — total tokens in blue `#5b8def`; 3-row micro proportion bars (In `#ffe6cb`, Out `#34d399`, Cached `#f472b6`).
+- **Pace** — aggregate `trend_monthly_total / nominal_monthly_total`; font-only color:
+  - `< 1.0×` — green `#4ade80` (under nominal)
+  - `< 2.0×` — yellow `#facc15` (warm)
+  - `≥ 2.0×` — red `#ef4444` (over nominal)
+
+#### Row 2 — Leader Board
+Four spotlight cards derived live from `jobList`, icon accent `#ff5722`:
+- **Most Runs** — highest `runs` job; white headline.
+- **Highest Cost** — highest `total_cost` job; amber headline `#f5a623`.
+- **Most Tokens** — highest `total_tokens` job (In+Out+Cached); blue headline `#5b8def`.
+- **Highest Pace** — highest `projections.pace` job; font-colored headline via `paceColor()`. Surfaces the job most at risk of exceeding its nominal budget.
 
 #### Cost by Model
 A simple list showing model name, run count, and total cost for the selected window.
