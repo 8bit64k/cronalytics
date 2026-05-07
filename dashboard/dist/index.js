@@ -723,7 +723,7 @@
       ),
       // ── Pace Modal (educational drill-down) ──────────────────────────
       React.createElement(Modal, { isOpen: paceModal.isOpen, onClose: paceModal.close },
-        React.createElement("div", { style: { padding: "1.5rem" } },
+        React.createElement("div", { style: { padding: "1.5rem", fontFamily: "var(--theme-font-mono, monospace)" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" } },
             React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(s.pace) } },
               s.pace != null ? s.pace.toFixed(2) + "\u00d7" : "\u2014"
