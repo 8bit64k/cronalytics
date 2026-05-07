@@ -211,7 +211,7 @@
       onClick: (e) => { if (e.target === backdropRef.current) onClose(); },
       style: {
         position: "fixed", inset: 0,
-        background: "rgba(0,0,0,0.55)",
+        background: "rgba(0,0,0,0.78)",
         zIndex: 100,
         display: "flex", alignItems: "center", justifyContent: "center",
         padding: "1rem",
@@ -234,11 +234,16 @@
         "aria-label": "Close",
         onClick: onClose,
         style: {
-          position: "absolute", top: "0.5rem", right: "0.5rem",
-          background: "transparent", border: "none",
-          color: "var(--foreground)", fontSize: "1.25rem",
+          position: "absolute", top: "0.6rem", right: "0.6rem",
+          width: "2rem", height: "2rem",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "0.35rem",
+          color: "var(--foreground-base, var(--foreground))", fontSize: "1.25rem",
           cursor: "pointer", lineHeight: 1,
-        }
+          transition: "background 0.15s ease",
+        },
+        onMouseEnter: (e) => { e.currentTarget.style.background = "rgba(255,255,255,0.16)"; },
+        onMouseLeave: (e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; },
       }, "\u00d7"),
       children
     ));
@@ -415,13 +420,14 @@
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
           gap: "1rem",
-          marginBottom: "1.5rem"
+          marginBottom: "1.5rem",
+          alignItems: "stretch"
         }
       },
         React.createElement("div", {
-            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
             onClick: runsModal.open,
-            onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+            onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
             onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
           },
           React.createElement("div", {
@@ -448,9 +454,9 @@
           )
         ),
         React.createElement("div", {
-          style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+          style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
           onClick: costModal.open,
-          onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+          onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
           onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
         },
           React.createElement("div", {
@@ -482,9 +488,9 @@
           )
         ),
         React.createElement("div", {
-            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
             onClick: tokensModal.open,
-            onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+            onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
             onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
           },
           React.createElement("div", {
@@ -534,9 +540,9 @@
           const trendPace = s.trend_monthly_total || 0;
           const maxPace = Math.max(nominalPace, trendPace, 1);
           return React.createElement("div", {
-              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
               onClick: paceModal.open,
-              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
               onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
             },
             React.createElement("div", {
@@ -579,9 +585,9 @@
           const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.runs || 0) > (a.runs || 0) ? b : a, jobList[0]) : null;
           const label = j ? (j.name || j.job_id) : "—";
           return React.createElement("div", {
-              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
               onClick: topRunsModal.open,
-              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
               onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
             },
             React.createElement("div", {
@@ -612,9 +618,9 @@
           const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.total_cost || 0) > (a.total_cost || 0) ? b : a, jobList[0]) : null;
           const label = j ? (j.name || j.job_id) : "—";
           return React.createElement("div", {
-              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
               onClick: topCostModal.open,
-              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
               onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
             },
             React.createElement("div", {
@@ -645,9 +651,9 @@
           const j = jobList.length > 0 ? jobList.reduce((a, b) => ((b.total_tokens || 0) > (a.total_tokens || 0) ? b : a), jobList[0]) : null;
           const label = j ? (j.name || j.job_id) : "—";
           return React.createElement("div", {
-              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
               onClick: topTokensModal.open,
-              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
               onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
             },
             React.createElement("div", {
@@ -685,9 +691,9 @@
           const label = j ? (j.name || j.job_id) : "—";
           const p = j && j.projections && j.projections.pace != null ? j.projections.pace : null;
           return React.createElement("div", {
-              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
               onClick: topPaceModal.open,
-              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
               onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
             },
             React.createElement("div", {
