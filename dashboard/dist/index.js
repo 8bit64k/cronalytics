@@ -425,7 +425,7 @@
         }
       },
         React.createElement("div", {
-            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
+            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
             onClick: runsModal.open,
             onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
             onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
@@ -435,7 +435,7 @@
             onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
             onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
           }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
-          React.createElement(Card, null,
+          React.createElement(Card, { style: { flex: 1 } },
             React.createElement(CardHeader, null,
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
                 React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, ZapIcon(14)),
@@ -454,7 +454,7 @@
           )
         ),
         React.createElement("div", {
-          style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
+          style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
           onClick: costModal.open,
           onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
           onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
@@ -464,7 +464,7 @@
             onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
             onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
           }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
-          React.createElement(Card, null,
+          React.createElement(Card, { style: { flex: 1 } },
             React.createElement(CardHeader, null,
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
                 React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, BanknoteIcon(14)),
@@ -488,7 +488,7 @@
           )
         ),
         React.createElement("div", {
-            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
+            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
             onClick: tokensModal.open,
             onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
             onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
@@ -498,7 +498,7 @@
             onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
             onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
           }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
-          React.createElement(Card, null,
+          React.createElement(Card, { style: { flex: 1 } },
             React.createElement(CardHeader, null,
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
                 React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, BlocksIcon(14)),
@@ -540,7 +540,7 @@
           const trendPace = s.trend_monthly_total || 0;
           const maxPace = Math.max(nominalPace, trendPace, 1);
           return React.createElement("div", {
-              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
               onClick: paceModal.open,
               onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
               onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
@@ -550,7 +550,7 @@
               onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
               onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
             }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
-            React.createElement(Card, null,
+            React.createElement(Card, { style: { flex: 1 } },
               React.createElement(CardHeader, null,
                 React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
                   React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, MetronomeIcon(14)),
@@ -585,7 +585,7 @@
           const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.runs || 0) > (a.runs || 0) ? b : a, jobList[0]) : null;
           const label = j ? (j.name || j.job_id) : "—";
           return React.createElement("div", {
-              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
               onClick: topRunsModal.open,
               onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
               onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
@@ -595,7 +595,7 @@
               onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
               onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
             }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
-            React.createElement(Card, null,
+            React.createElement(Card, { style: { flex: 1 } },
               React.createElement(CardHeader, null,
                 React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
                   React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, ZapIcon(13)), React.createElement(CardTitle, null, "Top Runs")
@@ -618,7 +618,7 @@
           const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.total_cost || 0) > (a.total_cost || 0) ? b : a, jobList[0]) : null;
           const label = j ? (j.name || j.job_id) : "—";
           return React.createElement("div", {
-              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
               onClick: topCostModal.open,
               onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
               onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
@@ -628,7 +628,7 @@
               onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
               onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
             }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
-            React.createElement(Card, null,
+            React.createElement(Card, { style: { flex: 1 } },
               React.createElement(CardHeader, null,
                 React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
                   React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BanknoteIcon(13)), React.createElement(CardTitle, null, "Top Cost")
@@ -651,7 +651,7 @@
           const j = jobList.length > 0 ? jobList.reduce((a, b) => ((b.total_tokens || 0) > (a.total_tokens || 0) ? b : a), jobList[0]) : null;
           const label = j ? (j.name || j.job_id) : "—";
           return React.createElement("div", {
-              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
               onClick: topTokensModal.open,
               onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
               onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
@@ -661,7 +661,7 @@
               onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
               onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
             }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
-            React.createElement(Card, null,
+            React.createElement(Card, { style: { flex: 1 } },
               React.createElement(CardHeader, null,
                 React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
                   React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BlocksIcon(13)), React.createElement(CardTitle, null, "Top Tokens")
@@ -691,7 +691,7 @@
           const label = j ? (j.name || j.job_id) : "—";
           const p = j && j.projections && j.projections.pace != null ? j.projections.pace : null;
           return React.createElement("div", {
-              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%" },
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
               onClick: topPaceModal.open,
               onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
               onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
@@ -701,7 +701,7 @@
               onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
               onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
             }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
-            React.createElement(Card, null,
+            React.createElement(Card, { style: { flex: 1 } },
               React.createElement(CardHeader, null,
                 React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
                   React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, MetronomeIcon(13)), React.createElement(CardTitle, null, "Top Pace")
