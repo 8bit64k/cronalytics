@@ -775,17 +775,7 @@
                 React.createElement("span", null, "Red (\u2265 2.0\u00d7) \u2014 Over budget. Actual spend is double (or more) the nominal rate.")
               )
             ),
-            (s.nominal_monthly_total || 0) > 0 && (s.trend_monthly_total || 0) > 0 && React.createElement("div", null,
-              React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Your data, right now"),
-              React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
-                React.createElement("div", null, "Nominal = " + fmtCost(s.nominal_monthly_total) + "/mo"),
-                React.createElement("div", null, "Trend     = " + fmtCost(s.trend_monthly_total) + "/mo"),
-                React.createElement("div", { style: { marginTop: "0.25rem" } },
-                  "Pace      = " + fmtCost(s.trend_monthly_total) + " / " + fmtCost(s.nominal_monthly_total) + " = ",
-                  React.createElement("span", { style: { color: paceColor(s.pace), fontWeight: 700 } }, (s.pace || 0).toFixed(2) + "\u00d7")
-                )
-              )
-            )
+
           )
         )
       ),
