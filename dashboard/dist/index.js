@@ -5,7 +5,7 @@
   if (!SDK || !PLUGINS) return;
 
   const { React } = SDK;
-  const { useState, useEffect } = SDK.hooks;
+  const { useState, useEffect, useRef } = SDK.hooks;
   const { fetchJSON } = SDK;
   const { Card, CardHeader, CardTitle, CardContent, Badge, Button } = SDK.components;
 
@@ -156,6 +156,21 @@
     );
   }
 
+  function InfoIcon(props) {
+    const { size, style } = props || {};
+    return React.createElement("svg", {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: size || 16, height: size || 16, viewBox: "0 0 24 24",
+      fill: "none", stroke: "currentColor", strokeWidth: 2,
+      strokeLinecap: "round", strokeLinejoin: "round",
+      style: Object.assign({ display: "inline-block", verticalAlign: "middle", cursor: "pointer" }, style || {})
+    },
+      React.createElement("circle", { cx: 12, cy: 12, r: 10 }),
+      React.createElement("path", { d: "M12 16v-4" }),
+      React.createElement("path", { d: "M12 8h.01" })
+    );
+  }
+
   function useApi(path) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -170,6 +185,63 @@
       return () => { cancelled = true; };
     }, [path, reload]);
     return { data, loading, error, refetch: () => setReload(r => r + 1) };
+  }
+
+  function useModal() {
+    const [isOpen, setOpen] = useState(false);
+    const open = () => setOpen(true);
+    const close = () => setOpen(false);
+    return { isOpen, open, close };
+  }
+
+  // ── Modal overlay for card drill-down ──────────────────────────────
+  function Modal({ isOpen, onClose, children }) {
+    const backdropRef = useRef(null);
+    useEffect(() => {
+      if (!isOpen) return;
+      const onKey = (e) => { if (e.key === "Escape") onClose(); };
+      document.addEventListener("keydown", onKey);
+      return () => document.removeEventListener("keydown", onKey);
+    }, [isOpen, onClose]);
+    if (!isOpen) return null;
+    return React.createElement("div", {
+      ref: backdropRef,
+      role: "dialog",
+      "aria-modal": true,
+      onClick: (e) => { if (e.target === backdropRef.current) onClose(); },
+      style: {
+        position: "fixed", inset: 0,
+        background: "rgba(0,0,0,0.55)",
+        zIndex: 100,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "1rem",
+      }
+    }, React.createElement("div", {
+      style: {
+        background: "var(--background)",
+        color: "var(--foreground-base, var(--foreground))",
+        border: "1px solid var(--color-border)",
+        borderRadius: "0.5rem",
+        width: "100%", maxWidth: "28rem",
+        maxHeight: "85vh",
+        overflow: "auto",
+        boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)",
+        position: "relative",
+      }
+    },
+      React.createElement("button", {
+        type: "button",
+        "aria-label": "Close",
+        onClick: onClose,
+        style: {
+          position: "absolute", top: "0.5rem", right: "0.5rem",
+          background: "transparent", border: "none",
+          color: "var(--foreground)", fontSize: "1.25rem",
+          cursor: "pointer", lineHeight: 1,
+        }
+      }, "\u00d7"),
+      children
+    ));
   }
 
   // ── Day selector control (uses SDK Button to match Analytics tab) ─
@@ -216,6 +288,7 @@
 
       const [expandedId, setExpandedId] = useState(null);
       const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+      const paceModal = useModal();
 
     useEffect(() => {
       fetchJSON("/api/plugins/cronalytics/health")
@@ -417,31 +490,43 @@
           const nominalPace = s.nominal_monthly_total || 0;
           const trendPace = s.trend_monthly_total || 0;
           const maxPace = Math.max(nominalPace, trendPace, 1);
-          return React.createElement(Card, null,
-            React.createElement(CardHeader, null,
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, MetronomeIcon(14)),
-                React.createElement(CardTitle, null, "Pace")
-              )
-            ),
-            React.createElement(CardContent, null,
-              React.createElement("div", {
-                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(s.pace) }
-              }, s.pace != null ? s.pace.toFixed(2) + "×" : "—"),
-              React.createElement("div", { style: { marginTop: "0.4rem", display: "flex", flexDirection: "column", gap: "0.2rem" } },
-                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                  React.createElement("span", { style: { width: "3.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Nominal"),
-                  React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
-                    React.createElement("div", { style: { width: (Math.min(100, (nominalPace / maxPace) * 100)) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
+          return React.createElement("div", {
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+              onClick: paceModal.open,
+              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+              onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
+            },
+            React.createElement("div", {
+              style: { position: "absolute", top: "0.35rem", right: "0.35rem", zIndex: 2, opacity: 0.4, transition: "opacity 0.2s ease" },
+              onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
+              onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
+            }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
+            React.createElement(Card, null,
+              React.createElement(CardHeader, null,
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                  React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, MetronomeIcon(14)),
+                  React.createElement(CardTitle, null, "Pace")
+                )
+              ),
+              React.createElement(CardContent, null,
+                React.createElement("div", {
+                  style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(s.pace) }
+                }, s.pace != null ? s.pace.toFixed(2) + "×" : "—"),
+                React.createElement("div", { style: { marginTop: "0.4rem", display: "flex", flexDirection: "column", gap: "0.2rem" } },
+                  React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
+                    React.createElement("span", { style: { width: "3.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Nominal"),
+                    React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
+                      React.createElement("div", { style: { width: (Math.min(100, (nominalPace / maxPace) * 100)) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
+                    ),
+                    React.createElement("span", { style: { width: "4.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCost(nominalPace))
                   ),
-                  React.createElement("span", { style: { width: "4.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCost(nominalPace))
-                ),
-                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                  React.createElement("span", { style: { width: "3.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Trend"),
-                  React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
-                    React.createElement("div", { style: { width: (Math.min(100, (trendPace / maxPace) * 100)) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
-                  ),
-                  React.createElement("span", { style: { width: "4.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCost(trendPace))
+                  React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
+                    React.createElement("span", { style: { width: "3.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Trend"),
+                    React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
+                      React.createElement("div", { style: { width: (Math.min(100, (trendPace / maxPace) * 100)) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
+                    ),
+                    React.createElement("span", { style: { width: "4.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCost(trendPace))
+                  )
                 )
               )
             )
@@ -538,6 +623,74 @@
             )
           );
         })(),
+      ),
+      // ── Pace Modal (educational drill-down) ──────────────────────────
+      React.createElement(Modal, { isOpen: paceModal.isOpen, onClose: paceModal.close },
+        React.createElement("div", { style: { padding: "1.5rem" } },
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" } },
+            React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(s.pace) } },
+              s.pace != null ? s.pace.toFixed(2) + "\u00d7" : "\u2014"
+            ),
+            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.6 } }, "Pace")
+          ),
+          React.createElement("div", { style: { marginBottom: "1rem" } },
+            React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.2rem" } },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
+                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Nominal"),
+                React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
+                  React.createElement("div", { style: { width: (Math.min(100, ((s.nominal_monthly_total || 1) / Math.max(s.nominal_monthly_total || 1, s.trend_monthly_total || 1, 1)) * 100)) + "%", background: "#4ade80", height: "100%", opacity: 0.8 } })
+                ),
+                React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)", color: "#4ade80" } }, fmtCost(s.nominal_monthly_total) + "/mo")
+              ),
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
+                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Trend"),
+                React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
+                  React.createElement("div", { style: { width: (Math.min(100, ((s.trend_monthly_total || 1) / Math.max(s.nominal_monthly_total || 1, s.trend_monthly_total || 1, 1)) * 100)) + "%", background: "#ef4444", height: "100%", opacity: 0.8 } })
+                ),
+                React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)", color: "#ef4444" } }, fmtCost(s.trend_monthly_total) + "/mo")
+              )
+            )
+          ),
+          React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "What this means"),
+            React.createElement("p", { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85, marginBottom: "0.75rem" } },
+              "Pace compares your actual spending trend against the budget you set in your cron job definitions. It answers: \u2018At this rate, am I over or under budget?\u2019"
+            ),
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "How it\u2019s calculated"),
+            React.createElement("div", { style: { fontSize: "0.78rem", fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
+              React.createElement("div", null, "Nominal = scheduled runs \u00d7 estimated cost per run"),
+              React.createElement("div", null, "Trend     = actual runs \u00d7 average cost per run"),
+              React.createElement("div", null, "Pace      = Trend / Nominal"),
+              React.createElement("div", { style: { marginTop: "0.25rem", opacity: 0.6 } }, "All scaled to a 30\u2011day month using the selected window.")
+            ),
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "Color guide"),
+            React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.35rem", fontSize: "0.78rem", marginBottom: "0.75rem" } },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                React.createElement("span", { style: { display: "inline-block", width: "0.6rem", height: "0.6rem", borderRadius: "50%", background: "#4ade80" } }),
+                React.createElement("span", null, "Green (< 1.0\u00d7) \u2014 Under budget. Spending less than scheduled.")
+              ),
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                React.createElement("span", { style: { display: "inline-block", width: "0.6rem", height: "0.6rem", borderRadius: "50%", background: "var(--foreground)" } }),
+                React.createElement("span", null, "Neutral (1.0\u20132.0\u00d7) \u2014 On track. Slight variance within normal range.")
+              ),
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                React.createElement("span", { style: { display: "inline-block", width: "0.6rem", height: "0.6rem", borderRadius: "50%", background: "#ef4444" } }),
+                React.createElement("span", null, "Red (\u2265 2.0\u00d7) \u2014 Over budget. Actual spend is double (or more) the nominal rate.")
+              )
+            ),
+            (s.nominal_monthly_total || 0) > 0 && (s.trend_monthly_total || 0) > 0 && React.createElement("div", null,
+              React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "Your data, right now"),
+              React.createElement("div", { style: { fontSize: "0.78rem", fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
+                React.createElement("div", null, "Nominal = " + fmtCost(s.nominal_monthly_total) + "/mo"),
+                React.createElement("div", null, "Trend     = " + fmtCost(s.trend_monthly_total) + "/mo"),
+                React.createElement("div", { style: { marginTop: "0.25rem" } },
+                  "Pace      = " + fmtCost(s.trend_monthly_total) + " / " + fmtCost(s.nominal_monthly_total) + " = ",
+                  React.createElement("span", { style: { color: paceColor(s.pace), fontWeight: 700 } }, (s.pace || 0).toFixed(2) + "\u00d7")
+                )
+              )
+            )
+          )
+        )
       ),
       s.cost_by_model && s.cost_by_model.length > 0 && (() => {
         const topModels = s.cost_by_model.slice(0, 5);
