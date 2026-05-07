@@ -2,28 +2,30 @@
 # Updated: 2026-05-06 17:15
 #
 ## Current Commit
-`61ddc6e` (master) — "feat(cli): standalone cronalytics CLI with summary/jobs/runs/models/trends/health subcommands"
+`05574e1` (layout-grid-2x4) — "ui(tweaks): Highest Pace card, leader card height balance, Pace subtitle readability, Per-Model spacing"
 
-## What Works Now (Nick verified — "absolutely fantastic")
+## What Works Now
 1. Dashboard loads; Cronalytics tab renders without white screen
 2. Backend `/summary`: `nominal_monthly_total`, `trend_monthly_total`, `pace` (fixed-window math)
 3. Backend `/jobs`: per-job `pace = trend / nominal` in projections object
-4. Frontend header: shared PageHeader (title, afterTitle badge `[30D]`, day selector + refresh)
-5. Day selector: uniform solid borders, no bevel
-6. Summary cards (left→right): Total Runs | Cost (estimated) | Tokens | Pace | **Top Runner** | **Top Spender**
-7. Cost card: `$XX` headline with `(estimated)` subscript tag inline; "Trend" sub-line
-8. Pace card: colored ratio (cyan &lt;0.85, white 0.85–1.15, amber 1.15–1.50, red &gt;1.50); sub-lines labeled Nominal / Trend
-9. Tokens card: `total_tokens` large headline + In / Out / Cached sub-lines
-10. **Top Runner card**: job name (ellipsized) + run count; context label shows selected window
-11. **Top Spender card**: job name (ellipsized) + cost in amber; context label shows selected window
-12. Cost by Model card renders
-13. Jobs table columns: Job | Runs | Total Cost | Avg Cost | Nominal/mo | Trend/mo | Pace
-14. Pace column cells: colored text + background tint at extreme values
-15. Expandable detail rows: Tokens breakdown, single-line cron schedule + last run + next run — Nominal/Trend/Pace/Drift removed (duplicates table columns)
-16. Native `title` tooltips on table headers for Nominal/mo, Trend/mo, Pace
-17. Fixed-window math: both per-job and aggregate use selected `days` filter as denominator
-18. Plugin script URL cache-busting in host web app (per-load nonce)
-19. Sync Now button works end-to-end
+4. Frontend: inline toolbar (day selector + refresh) inside tab content; no `usePageHeader` dependency
+5. Day selector: SDK `<Button>` component (matches Analytics tab native style)
+6. **Row 1 — Summary Board:** 4 cards (Job Runs, Cost, Tokens, Pace)
+7. **Row 2 — Leader Board:** 4 spotlight cards (Most Runs, Highest Cost, Most Tokens, Highest Pace)
+   - All leader icons use orange/red accent `#ff5722` for visual grouping
+   - Headline colors match summary palette: runs=white, cost=amber `#f5a623`, tokens=blue `#5b8def`, pace=paceColor()
+   - Job names truncated with ellipsis; native browser `title` tooltip on hover
+8. Cost card: `$XX` headline amber; vs-prior delta + Actual sub-line
+9. Pace card: font-only color `<1.0×` green, `<2.0×` neutral, `≥2.0×` red; Nominal/Trend sub-lines
+10. Tokens card: blue headline `total_tokens` + In/Out/Cached micro proportion bars
+11. Per-Model Breakdown: full-width horizontal proportional bar chart (amber `#f5a623` fill), top 5 cap, fade remainder
+12. Jobs table columns: Job | Runs | Total Cost | Avg Cost | Nominal/mo | Trend/mo | Pace — all sortable ↑/↓
+13. Row hover highlights on both tables
+14. Expandable detail rows: Tokens breakdown, single-line cron schedule + last run + next run
+15. Pace font-only color logic — no background pills
+16. Fixed-window math: both per-job and aggregate use selected `days` filter as denominator
+17. Sync Now button works end-to-end
+18. Stale-while-revalidate: no flash on day switch, only blank on first mount
 
 ## Nick's UI Polish Round (confirmed)
 - `[Last 30 days]` badge → `[30D]` (or `[7D]`, `[90D]`, `[All]`)
