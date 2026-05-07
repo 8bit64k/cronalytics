@@ -728,39 +728,39 @@
             React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(s.pace) } },
               s.pace != null ? s.pace.toFixed(2) + "\u00d7" : "\u2014"
             ),
-            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.6 } }, "Pace")
+            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Pace")
           ),
           React.createElement("div", { style: { marginBottom: "1rem" } },
             React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.2rem" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Nominal"),
+                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.8rem" } }, "Nominal"),
                 React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
                   React.createElement("div", { style: { width: (Math.min(100, ((s.nominal_monthly_total || 1) / Math.max(s.nominal_monthly_total || 1, s.trend_monthly_total || 1, 1)) * 100)) + "%", background: "#4ade80", height: "100%", opacity: 0.8 } })
                 ),
-                React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)", color: "#4ade80" } }, fmtCost(s.nominal_monthly_total) + "/mo")
+                React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", color: "#4ade80" } }, fmtCost(s.nominal_monthly_total) + "/mo")
               ),
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Trend"),
+                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.8rem" } }, "Trend"),
                 React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
                   React.createElement("div", { style: { width: (Math.min(100, ((s.trend_monthly_total || 1) / Math.max(s.nominal_monthly_total || 1, s.trend_monthly_total || 1, 1)) * 100)) + "%", background: "#ef4444", height: "100%", opacity: 0.8 } })
                 ),
-                React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)", color: "#ef4444" } }, fmtCost(s.trend_monthly_total) + "/mo")
+                React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", color: "#ef4444" } }, fmtCost(s.trend_monthly_total) + "/mo")
               )
             )
           ),
           React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "What this means"),
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "What this means"),
             React.createElement("p", { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85, marginBottom: "0.75rem" } },
               "Pace compares your actual spending trend against the budget you set in your cron job definitions. It answers: \u2018At this rate, am I over or under budget?\u2019"
             ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "How it\u2019s calculated"),
-            React.createElement("div", { style: { fontSize: "0.78rem", fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
-              React.createElement("div", null, "Nominal = scheduled runs \u00d7 estimated cost per run"),
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "How it\u2019s calculated"),
+            React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
+              React.createElement("div", null, "Nominal = scheduled runs \u00d7 average cost per run"),
               React.createElement("div", null, "Trend     = actual runs \u00d7 average cost per run"),
               React.createElement("div", null, "Pace      = Trend / Nominal"),
               React.createElement("div", { style: { marginTop: "0.25rem", opacity: 0.6 } }, "All scaled to a 30\u2011day month using the selected window.")
             ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "Color guide"),
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Color guide"),
             React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.35rem", fontSize: "0.78rem", marginBottom: "0.75rem" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
                 React.createElement("span", { style: { display: "inline-block", width: "0.6rem", height: "0.6rem", borderRadius: "50%", background: "#4ade80" } }),
@@ -776,8 +776,8 @@
               )
             ),
             (s.nominal_monthly_total || 0) > 0 && (s.trend_monthly_total || 0) > 0 && React.createElement("div", null,
-              React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "Your data, right now"),
-              React.createElement("div", { style: { fontSize: "0.78rem", fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
+              React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Your data, right now"),
+              React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
                 React.createElement("div", null, "Nominal = " + fmtCost(s.nominal_monthly_total) + "/mo"),
                 React.createElement("div", null, "Trend     = " + fmtCost(s.trend_monthly_total) + "/mo"),
                 React.createElement("div", { style: { marginTop: "0.25rem" } },
@@ -796,29 +796,24 @@
             React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
               (s.total_runs || 0).toLocaleString()
             ),
-            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.6 } }, "Job Runs")
+            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Job Runs")
           ),
           runPct != null && React.createElement("div", { style: { marginBottom: "1rem" } },
-            React.createElement("div", { style: { fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)", color: runPct > 0 ? "#ef4444" : "#4ade80" } },
+            React.createElement("div", { style: { fontSize: "0.8rem", color: runPct > 0 ? "#ef4444" : "#4ade80" } },
               (runPct > 0 ? "↑ " : "↓ ") + Math.abs(runPct).toFixed(0) + "% vs prior " + (days === 0 ? "period" : days + "d")
             )
           ),
           React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "What this means"),
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "What this means"),
             React.createElement("p", { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85, marginBottom: "0.75rem" } },
               "Total number of cron job executions recorded in the selected window. Each run triggers your scheduled task—whether it succeeds, fails, or retries."
             ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "Trend calculation"),
-            React.createElement("div", { style: { fontSize: "0.78rem", fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Trend calculation"),
+            React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
               React.createElement("div", null, "Trend % = ((current runs \u2212 prior runs) / prior runs) \u00d7 100"),
               React.createElement("div", { style: { marginTop: "0.25rem", opacity: 0.6 } }, "Positive = more runs than the prior window. Negative = fewer runs."),
-              React.createElement("div", null, "Example: " + (s.total_runs || 0).toLocaleString() + " \u2212 " + (s.previous_period ? (s.previous_period.runs || 0).toLocaleString() : "0") + " = ",
-                React.createElement("span", { style: { color: runPct != null ? (runPct > 0 ? "#ef4444" : "#4ade80") : "var(--foreground)", fontWeight: 700 } },
-                  runPct != null ? (runPct > 0 ? "+" : "") + runPct.toFixed(0) + "%" : "\u2014"
-                )
-              )
             ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "Window context"),
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Window context"),
             React.createElement("p", { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85 } },
               "Showing ", React.createElement("strong", null, windowLabel), ". The prior comparison window is the same duration shifted back in time."
             )
@@ -832,31 +827,26 @@
             React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
               fmtCost(s.total_estimated_cost)
             ),
-            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.6 } }, "Estimated Cost")
+            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Estimated Cost")
           ),
-          s.total_actual_cost != null && React.createElement("div", { style: { marginBottom: "0.75rem", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85 } },
+          s.total_actual_cost != null && React.createElement("div", { style: { marginBottom: "0.75rem", fontSize: "0.8rem", opacity: 0.85 } },
             "Actual: ", React.createElement("span", { style: { fontWeight: 700 } }, fmtCost(s.total_actual_cost))
           ),
           costPct != null && React.createElement("div", { style: { marginBottom: "1rem" } },
-            React.createElement("div", { style: { fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)", color: costPct > 0 ? "#ef4444" : "#4ade80" } },
+            React.createElement("div", { style: { fontSize: "0.8rem", color: costPct > 0 ? "#ef4444" : "#4ade80" } },
               (costPct > 0 ? "↑ " : "↓ ") + Math.abs(costPct).toFixed(0) + "% vs prior " + (days === 0 ? "period" : days + "d")
             )
           ),
           React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "What this means"),
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "What this means"),
             React.createElement("p", { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85, marginBottom: "0.75rem" } },
               "Estimated cost is calculated from token usage and model pricing. Actual cost may differ slightly depending on provider billing granularity."
             ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "Trend calculation"),
-            React.createElement("div", { style: { fontSize: "0.78rem", fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Trend calculation"),
+            React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
               React.createElement("div", null, "Trend % = ((current cost \u2212 prior cost) / prior cost) \u00d7 100"),
-              React.createElement("div", null, "Example: " + fmtCost(s.total_estimated_cost) + " \u2212 " + fmtCost(s.previous_period ? s.previous_period.cost : 0) + " = ",
-                React.createElement("span", { style: { color: costPct != null ? (costPct > 0 ? "#ef4444" : "#4ade80") : "var(--foreground)", fontWeight: 700 } },
-                  costPct != null ? (costPct > 0 ? "+" : "") + costPct.toFixed(0) + "%" : "\u2014"
-                )
-              )
             ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "Window context"),
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Window context"),
             React.createElement("p", { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85 } },
               "Showing ", React.createElement("strong", null, windowLabel), ". The prior comparison window is the same duration shifted back in time."
             )
@@ -870,38 +860,38 @@
             React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
               fmtCompact(s.total_tokens)
             ),
-            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.6 } }, "Tokens")
+            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Tokens")
           ),
           React.createElement("div", { style: { marginBottom: "1rem", display: "flex", flexDirection: "column", gap: "0.2rem" } },
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-              React.createElement("span", { style: { width: "4rem", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "In"),
+              React.createElement("span", { style: { width: "4rem", fontSize: "0.8rem" } }, "In"),
               React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
                 React.createElement("div", { style: { width: Math.min(100, ((s.total_input_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: "#5b8def", height: "100%", opacity: 0.8 } })
               ),
-              React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_input_tokens))
+              React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem" } }, fmtCompact(s.total_input_tokens))
             ),
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-              React.createElement("span", { style: { width: "4rem", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Out"),
+              React.createElement("span", { style: { width: "4rem", fontSize: "0.8rem" } }, "Out"),
               React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
                 React.createElement("div", { style: { width: Math.min(100, ((s.total_output_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: "#5b8def", height: "100%", opacity: 0.8 } })
               ),
-              React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_output_tokens))
+              React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem" } }, fmtCompact(s.total_output_tokens))
             ),
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-              React.createElement("span", { style: { width: "4rem", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Cached"),
+              React.createElement("span", { style: { width: "4rem", fontSize: "0.8rem" } }, "Cached"),
               React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
                 React.createElement("div", { style: { width: Math.min(100, ((s.total_cache_read_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: "#5b8def", height: "100%", opacity: 0.8 } })
               ),
-              React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_cache_read_tokens))
+              React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem" } }, fmtCompact(s.total_cache_read_tokens))
             )
           ),
           React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "What this means"),
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "What this means"),
             React.createElement("p", { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85, marginBottom: "0.75rem" } },
               "Tokens are the currency of LLM usage. Input tokens are your prompts + context. Output tokens are the model's response. Cached tokens come from repeated prompts with identical prefixes (cheaper)."
             ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "Breakdown"),
-            React.createElement("div", { style: { fontSize: "0.78rem", fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
+            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Breakdown"),
+            React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
               React.createElement("div", null, "Input:  " + fmtCompact(s.total_input_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_input_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)"),
               React.createElement("div", null, "Output: " + fmtCompact(s.total_output_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_output_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)"),
               React.createElement("div", null, "Cached: " + fmtCompact(s.total_cache_read_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_cache_read_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)")
@@ -921,11 +911,11 @@
                 React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
                   j ? (j.runs || 0).toLocaleString() : "\u2014"
                 ),
-                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.6 } }, "runs")
+                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "runs")
               ),
               j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-                React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "Job details"),
-                React.createElement("div", { style: { fontSize: "0.78rem", fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
+                React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
+                React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
                   React.createElement("div", null, "Schedule: " + (j.schedule || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                   React.createElement("div", null, "Next run: " + fmtTime(j.next_run)),
@@ -949,11 +939,11 @@
                 React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
                   j ? fmtCost(j.total_cost) : "\u2014"
                 ),
-                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.6 } }, "total cost")
+                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "total cost")
               ),
               j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-                React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "Job details"),
-                React.createElement("div", { style: { fontSize: "0.78rem", fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
+                React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
+                React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
                   React.createElement("div", null, "Schedule: " + (j.schedule || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                   React.createElement("div", null, "Next run: " + fmtTime(j.next_run)),
@@ -977,11 +967,11 @@
                 React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
                   j ? fmtCompact(j.total_tokens) : "\u2014"
                 ),
-                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.6 } }, "tokens")
+                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "tokens")
               ),
               j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-                React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "Job details"),
-                React.createElement("div", { style: { fontSize: "0.78rem", fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
+                React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
+                React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
                   React.createElement("div", null, "Schedule: " + (j.schedule || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                   React.createElement("div", null, "Next run: " + fmtTime(j.next_run)),
@@ -1012,29 +1002,29 @@
                 React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(p) } },
                   p != null ? p.toFixed(2) + "\u00d7" : "\u2014"
                 ),
-                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.6 } }, "pace")
+                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "pace")
               ),
               React.createElement("div", { style: { marginBottom: "1rem" } },
                 React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.2rem" } },
                   React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                    React.createElement("span", { style: { width: "5rem", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Nominal/mo"),
+                    React.createElement("span", { style: { width: "5rem", fontSize: "0.8rem" } }, "Nominal/mo"),
                     React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
                       React.createElement("div", { style: { width: Math.min(100, ((j && j.projections && j.projections.projected_cost_30d || 1) / Math.max((j && j.projections && j.projections.projected_cost_30d) || 1, (j && j.projections && j.projections.trend_projected_cost_30d) || 1, 1)) * 100) + "%", background: "#4ade80", height: "100%", opacity: 0.8 } })
                     ),
-                    React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)", color: "#4ade80" } }, fmtCost(j && j.projections ? j.projections.projected_cost_30d : null) + "/mo")
+                    React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", color: "#4ade80" } }, fmtCost(j && j.projections ? j.projections.projected_cost_30d : null) + "/mo")
                   ),
                   React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                    React.createElement("span", { style: { width: "5rem", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Trend/mo"),
+                    React.createElement("span", { style: { width: "5rem", fontSize: "0.8rem" } }, "Trend/mo"),
                     React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
                       React.createElement("div", { style: { width: Math.min(100, ((j && j.projections && j.projections.trend_projected_cost_30d || 1) / Math.max((j && j.projections && j.projections.projected_cost_30d) || 1, (j && j.projections && j.projections.trend_projected_cost_30d) || 1, 1)) * 100) + "%", background: "#ef4444", height: "100%", opacity: 0.8 } })
                     ),
-                    React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", fontFamily: "var(--theme-font-mono, monospace)", color: "#ef4444" } }, fmtCost(j && j.projections ? j.projections.trend_projected_cost_30d : null) + "/mo")
+                    React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", color: "#ef4444" } }, fmtCost(j && j.projections ? j.projections.trend_projected_cost_30d : null) + "/mo")
                   )
                 )
               ),
               j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-                React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.7 } }, "Job details"),
-                React.createElement("div", { style: { fontSize: "0.78rem", fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
+                React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
+                React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
                   React.createElement("div", null, "Schedule: " + (j.schedule || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                   React.createElement("div", null, "Next run: " + fmtTime(j.next_run)),
