@@ -289,6 +289,13 @@
       const [expandedId, setExpandedId] = useState(null);
       const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
       const paceModal = useModal();
+      const runsModal = useModal();
+      const costModal = useModal();
+      const tokensModal = useModal();
+      const topRunsModal = useModal();
+      const topCostModal = useModal();
+      const topTokensModal = useModal();
+      const topPaceModal = useModal();
 
     useEffect(() => {
       fetchJSON("/api/plugins/cronalytics/health")
@@ -411,77 +418,113 @@
           marginBottom: "1.5rem"
         }
       },
-        React.createElement(Card, null,
-          React.createElement(CardHeader, null,
-            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-              React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, ZapIcon(14)),
-              React.createElement(CardTitle, null, "Job Runs")
-            )
-          ),
-          React.createElement(CardContent, null,
-            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } }, (s.total_runs || 0).toLocaleString()),
-            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
-              runPct != null ? (runPct > 0 ? "↑ " : "↓ ") + Math.abs(runPct).toFixed(0) + "%" : "—"
+        React.createElement("div", {
+            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+            onClick: runsModal.open,
+            onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+            onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
+          },
+          React.createElement("div", {
+            style: { position: "absolute", top: "0.35rem", right: "0.35rem", zIndex: 2, opacity: 0.4, transition: "opacity 0.2s ease" },
+            onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
+            onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
+          }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
+          React.createElement(Card, null,
+            React.createElement(CardHeader, null,
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, ZapIcon(14)),
+                React.createElement(CardTitle, null, "Job Runs")
+              )
             ),
-            React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.1rem" } },
-              "vs prior ", days === 0 ? "period" : days + "d"
+            React.createElement(CardContent, null,
+              React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } }, (s.total_runs || 0).toLocaleString()),
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
+                runPct != null ? (runPct > 0 ? "↑ " : "↓ ") + Math.abs(runPct).toFixed(0) + "%" : "—"
+              ),
+              React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.1rem" } },
+                "vs prior ", days === 0 ? "period" : days + "d"
+              )
             )
           )
         ),
-        React.createElement(Card, null,
-          React.createElement(CardHeader, null,
-            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-              React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, BanknoteIcon(14)),
-              React.createElement(CardTitle, null, "Cost")
-            )
-          ),
-          React.createElement(CardContent, null,
-            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
-              fmtCost(s.total_estimated_cost)
+        React.createElement("div", {
+          style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+          onClick: costModal.open,
+          onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+          onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
+        },
+          React.createElement("div", {
+            style: { position: "absolute", top: "0.35rem", right: "0.35rem", zIndex: 2, opacity: 0.4, transition: "opacity 0.2s ease" },
+            onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
+            onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
+          }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
+          React.createElement(Card, null,
+            React.createElement(CardHeader, null,
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, BanknoteIcon(14)),
+                React.createElement(CardTitle, null, "Cost")
+              )
             ),
-            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: costPct != null ? (costPct > 0 ? "#ef4444" : "#4ade80") : null } },
-              costPct != null ? (costPct > 0 ? "↑ " : "↓ ") + Math.abs(costPct).toFixed(0) + "%" : "—"
-            ),
-            React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.1rem" } },
-              "vs prior ", days === 0 ? "period" : days + "d"
-            ),
-            React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.3rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.25rem" } },
-              "Actual: ", s.total_actual_cost != null ? fmtCost(s.total_actual_cost) : "—"
+            React.createElement(CardContent, null,
+              React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
+                fmtCost(s.total_estimated_cost)
+              ),
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: costPct != null ? (costPct > 0 ? "#ef4444" : "#4ade80") : null } },
+                costPct != null ? (costPct > 0 ? "↑ " : "↓ ") + Math.abs(costPct).toFixed(0) + "%" : "—"
+              ),
+              React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.1rem" } },
+                "vs prior ", days === 0 ? "period" : days + "d"
+              ),
+              React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.3rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.25rem" } },
+                "Actual: ", s.total_actual_cost != null ? fmtCost(s.total_actual_cost) : "—"
+              )
             )
           )
         ),
-        React.createElement(Card, null,
-          React.createElement(CardHeader, null,
-            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-              React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, BlocksIcon(14)),
-              React.createElement(CardTitle, null, "Tokens")
-            )
-          ),
-          React.createElement(CardContent, null,
-            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
-              fmtCompact(s.total_tokens)
+        React.createElement("div", {
+            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+            onClick: tokensModal.open,
+            onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+            onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
+          },
+          React.createElement("div", {
+            style: { position: "absolute", top: "0.35rem", right: "0.35rem", zIndex: 2, opacity: 0.4, transition: "opacity 0.2s ease" },
+            onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
+            onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
+          }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
+          React.createElement(Card, null,
+            React.createElement(CardHeader, null,
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, BlocksIcon(14)),
+                React.createElement(CardTitle, null, "Tokens")
+              )
             ),
-            React.createElement("div", { style: { marginTop: "0.4rem", display: "flex", flexDirection: "column", gap: "0.2rem" } },
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "In"),
-                React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
-                  React.createElement("div", { style: { width: Math.min(100, ((s.total_input_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
-                ),
-                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_input_tokens))
+            React.createElement(CardContent, null,
+              React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
+                fmtCompact(s.total_tokens)
               ),
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Out"),
-                React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
-                  React.createElement("div", { style: { width: Math.min(100, ((s.total_output_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
+              React.createElement("div", { style: { marginTop: "0.4rem", display: "flex", flexDirection: "column", gap: "0.2rem" } },
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
+                  React.createElement("span", { style: { width: "2.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "In"),
+                  React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
+                    React.createElement("div", { style: { width: Math.min(100, ((s.total_input_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
+                  ),
+                  React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_input_tokens))
                 ),
-                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_output_tokens))
-              ),
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Cached"),
-                React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
-                  React.createElement("div", { style: { width: Math.min(100, ((s.total_cache_read_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
+                  React.createElement("span", { style: { width: "2.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Out"),
+                  React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
+                    React.createElement("div", { style: { width: Math.min(100, ((s.total_output_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
+                  ),
+                  React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_output_tokens))
                 ),
-                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_cache_read_tokens))
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
+                  React.createElement("span", { style: { width: "2.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Cached"),
+                  React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
+                    React.createElement("div", { style: { width: Math.min(100, ((s.total_cache_read_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
+                  ),
+                  React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_cache_read_tokens))
+                )
               )
             )
           )
@@ -535,63 +578,99 @@
         (() => {
           const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.runs || 0) > (a.runs || 0) ? b : a, jobList[0]) : null;
           const label = j ? (j.name || j.job_id) : "—";
-          return React.createElement(Card, null,
-            React.createElement(CardHeader, null,
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, ZapIcon(13)), React.createElement(CardTitle, null, "Top Runs")
+          return React.createElement("div", {
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+              onClick: topRunsModal.open,
+              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+              onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
+            },
+            React.createElement("div", {
+              style: { position: "absolute", top: "0.35rem", right: "0.35rem", zIndex: 2, opacity: 0.4, transition: "opacity 0.2s ease" },
+              onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
+              onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
+            }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
+            React.createElement(Card, null,
+              React.createElement(CardHeader, null,
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                  React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, ZapIcon(13)), React.createElement(CardTitle, null, "Top Runs")
+                )
+              ),
+              React.createElement(CardContent, null,
+                React.createElement("div", {
+                  style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
+                }, j ? (j.runs || 0).toLocaleString() : "—"),
+                React.createElement("div", {
+                  style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                  title: label
+                }, label),
+                React.createElement("div", { style: { height: "3rem" } })
               )
-            ),
-            React.createElement(CardContent, null,
-              React.createElement("div", {
-                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
-              }, j ? (j.runs || 0).toLocaleString() : "—"),
-              React.createElement("div", {
-                style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-                title: label
-              }, label),
-              React.createElement("div", { style: { height: "3rem" } })
             )
           );
         })(),
         (() => {
           const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.total_cost || 0) > (a.total_cost || 0) ? b : a, jobList[0]) : null;
           const label = j ? (j.name || j.job_id) : "—";
-          return React.createElement(Card, null,
-            React.createElement(CardHeader, null,
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BanknoteIcon(13)), React.createElement(CardTitle, null, "Top Cost")
+          return React.createElement("div", {
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+              onClick: topCostModal.open,
+              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+              onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
+            },
+            React.createElement("div", {
+              style: { position: "absolute", top: "0.35rem", right: "0.35rem", zIndex: 2, opacity: 0.4, transition: "opacity 0.2s ease" },
+              onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
+              onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
+            }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
+            React.createElement(Card, null,
+              React.createElement(CardHeader, null,
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                  React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BanknoteIcon(13)), React.createElement(CardTitle, null, "Top Cost")
+                )
+              ),
+              React.createElement(CardContent, null,
+                React.createElement("div", {
+                  style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#f5a623", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
+                }, j ? fmtCost(j.total_cost) : "—"),
+                React.createElement("div", {
+                  style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                  title: label
+                }, label),
+                React.createElement("div", { style: { height: "3rem" } })
               )
-            ),
-            React.createElement(CardContent, null,
-              React.createElement("div", {
-                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#f5a623", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
-              }, j ? fmtCost(j.total_cost) : "—"),
-              React.createElement("div", {
-                style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-                title: label
-              }, label),
-              React.createElement("div", { style: { height: "3rem" } })
             )
           );
         })(),
         (() => {
           const j = jobList.length > 0 ? jobList.reduce((a, b) => ((b.total_tokens || 0) > (a.total_tokens || 0) ? b : a), jobList[0]) : null;
           const label = j ? (j.name || j.job_id) : "—";
-          return React.createElement(Card, null,
-            React.createElement(CardHeader, null,
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BlocksIcon(13)), React.createElement(CardTitle, null, "Top Tokens")
+          return React.createElement("div", {
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+              onClick: topTokensModal.open,
+              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+              onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
+            },
+            React.createElement("div", {
+              style: { position: "absolute", top: "0.35rem", right: "0.35rem", zIndex: 2, opacity: 0.4, transition: "opacity 0.2s ease" },
+              onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
+              onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
+            }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
+            React.createElement(Card, null,
+              React.createElement(CardHeader, null,
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                  React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BlocksIcon(13)), React.createElement(CardTitle, null, "Top Tokens")
+                )
+              ),
+              React.createElement(CardContent, null,
+                React.createElement("div", {
+                  style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#5b8def", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
+                }, j ? fmtCompact(j.total_tokens) : "—"),
+                React.createElement("div", {
+                  style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                  title: label
+                }, label),
+                React.createElement("div", { style: { height: "3rem" } })
               )
-            ),
-            React.createElement(CardContent, null,
-              React.createElement("div", {
-                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#5b8def", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
-              }, j ? fmtCompact(j.total_tokens) : "—"),
-              React.createElement("div", {
-                style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-                title: label
-              }, label),
-              React.createElement("div", { style: { height: "3rem" } })
             )
           );
         })(),
@@ -605,21 +684,33 @@
             : null;
           const label = j ? (j.name || j.job_id) : "—";
           const p = j && j.projections && j.projections.pace != null ? j.projections.pace : null;
-          return React.createElement(Card, null,
-            React.createElement(CardHeader, null,
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, MetronomeIcon(13)), React.createElement(CardTitle, null, "Top Pace")
+          return React.createElement("div", {
+              style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease" },
+              onClick: topPaceModal.open,
+              onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.10), 0 0 14px rgba(255,255,255,0.06)"; },
+              onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
+            },
+            React.createElement("div", {
+              style: { position: "absolute", top: "0.35rem", right: "0.35rem", zIndex: 2, opacity: 0.4, transition: "opacity 0.2s ease" },
+              onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
+              onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
+            }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
+            React.createElement(Card, null,
+              React.createElement(CardHeader, null,
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                  React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, MetronomeIcon(13)), React.createElement(CardTitle, null, "Top Pace")
+                )
+              ),
+              React.createElement(CardContent, null,
+                React.createElement("div", {
+                  style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: p != null ? paceColor(p) : null, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
+                }, p != null ? p.toFixed(2) + "×" : "—"),
+                React.createElement("div", {
+                  style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+                  title: label
+                }, label),
+                React.createElement("div", { style: { height: "3rem" } })
               )
-            ),
-            React.createElement(CardContent, null,
-              React.createElement("div", {
-                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: p != null ? paceColor(p) : null, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
-              }, p != null ? p.toFixed(2) + "×" : "—"),
-              React.createElement("div", {
-                style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-                title: label
-              }, label),
-              React.createElement("div", { style: { height: "3rem" } })
             )
           );
         })(),
