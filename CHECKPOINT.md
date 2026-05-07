@@ -1,23 +1,25 @@
 # Cronalytics — Work Checkpoint
-# Updated: 2026-05-06 17:15
+# Updated: 2026-05-07 14:00
 #
 ## Current Commit
-`05574e1` (layout-grid-2x4) — "ui(tweaks): Highest Pace card, leader card height balance, Pace subtitle readability, Per-Model spacing"
+`f3540b0` (layout-grid-2x4) — "ui(v2): theme-compatibility overhaul - silver icons, mono sublines, Top X titles, Pace bars, leader spacing"
 
 ## What Works Now
 1. Dashboard loads; Cronalytics tab renders without white screen
 2. Backend `/summary`: `nominal_monthly_total`, `trend_monthly_total`, `pace` (fixed-window math)
 3. Backend `/jobs`: per-job `pace = trend / nominal` in projections object
 4. Frontend: inline toolbar (day selector + refresh) inside tab content; no `usePageHeader` dependency
-5. Day selector: SDK `<Button>` component (matches Analytics tab native style)
+5. Day selector: SDK `Button` component (matches Analytics tab native style)
 6. **Row 1 — Summary Board:** 4 cards (Job Runs, Cost, Tokens, Pace)
-7. **Row 2 — Leader Board:** 4 spotlight cards (Most Runs, Highest Cost, Most Tokens, Highest Pace)
-   - All leader icons use orange/red accent `#ff5722` for visual grouping
-   - Headline colors match summary palette: runs=white, cost=amber `#f5a623`, tokens=blue `#5b8def`, pace=paceColor()
-   - Job names truncated with ellipsis; native browser `title` tooltip on hover
+   - Icons in silver; sub-lines in monospace at readable size; trend arrows bumped to 1.05rem
+   - Tokens: neutral fill bars (no hardcoded beige/green/pink) for In/Out/Cached proportions
+   - Pace: proportional Nominal + Trend bars (mirrors token bar pattern)
+7. **Row 2 — Leader Board:** 4 spotlight cards (Top Runs, Top Cost, Top Tokens, Top Pace)
+   - Icons use orange/red accent `#ff5722`; card titles use default text color
+   - Job names in monospace font with ellipsis truncation; 3rem height spacer for parity
 8. Cost card: `$XX` headline amber; vs-prior delta + Actual sub-line
-9. Pace card: font-only color `<1.0×` green, `<2.0×` neutral, `≥2.0×` red; Nominal/Trend sub-lines
-10. Tokens card: blue headline `total_tokens` + In/Out/Cached micro proportion bars
+9. Pace card: font-only color (`1.0×` green, `2.0×` neutral, `2.0×` red); Nominal/Trend bars
+10. Tokens card: blue headline `total_tokens` + In/Out/Cached micro proportion bars (neutral fill)
 11. Per-Model Breakdown: full-width horizontal proportional bar chart (amber `#f5a623` fill), top 5 cap, fade remainder
 12. Jobs table columns: Job | Runs | Total Cost | Avg Cost | Nominal/mo | Trend/mo | Pace — all sortable ↑/↓
 13. Row hover highlights on both tables
@@ -26,24 +28,24 @@
 16. Fixed-window math: both per-job and aggregate use selected `days` filter as denominator
 17. Sync Now button works end-to-end
 18. Stale-while-revalidate: no flash on day switch, only blank on first mount
+19. Theme compatibility: hardcoded accent colors removed from Summary/Leader text; silver icons; mono sub-lines; neutral token bars
 
 ## Nick's UI Polish Round (confirmed)
 - `[Last 30 days]` badge → `[30D]` (or `[7D]`, `[90D]`, `[All]`)
 - `Scheduled:` → `Nominal:`, `Projected:` → `Trend:` (consistent labels)
 - Job detail row: removed Nominal/Trend/Pace/Drift duplicates; Tokens on top; single monospace schedule line
-- Removed header-right sidebar badge (was not adding value)
-- `Est. Cost` → `Cost` with `(estimated)` tag next to headline number
+- Removed header-right sidebar badge
+- `Est. Cost` → `Cost`
+- Leader card titles: `Most Runs` → `Top Runs`, `Highest Cost` → `Top Cost`, `Most Tokens` → `Top Tokens`, `Highest Pace` → `Top Pace`
 - All changes verified on iPad and Chrome MacBook; heights align, no droop
 
-## New: At-a-Glance Summary Cards (2026-05-06)
-- **Top Jobs** (single card, two stacked sections):
-  - *Most Run*: highest `runs` from `jobList`; job name + run count.
-  - *Highest Cost*: highest `total_cost` from `jobList`; job name + cost in amber `#f5a623`.
-  - Sections divided by thin `rgba(255,255,255,0.06)` rule.
-  - No "Last X days" label — clean name+number only.
-  - Uses `ShieldAlertIcon` in header (shield with alert mark).
-- Job names truncate with `text-overflow: ellipsis` to prevent layout breakage on long names.
-- No backend changes — pure client-side derivation from existing `/jobs` data.
+## 2026-05-07: Theme-Compatibility Pass (v2)
+- Summary Board icons: silver (`color: "silver"`)
+- Summary/Leader sub-lines: JetBrains Mono (`theme-font-mono`) at 0.75rem, opacity 0.85 (no more `opacity: 0.5` or mondwest fallthrough)
+- Token bars + Pace bars: `var(--foreground-base, var(--foreground))` fill at 60% opacity (neutral across themes)
+- Leader titles: default text color; icons keep `#ff5722` accent
+- Pace card: replaced text-only Nominal/Trend with proportional bar rows (3.5rem labels, 4.5rem values)
+- Trend arrows in Runs/Cost: bumped from 0.9rem to 1.05rem for readability
 
 ## Key Math (7D filter)
 - Total est cost: $4.89

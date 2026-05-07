@@ -10,11 +10,11 @@ This document replaces the previous phase-based plan with a flat priority-sorted
 
 | # | Task | Why | Current State |
 |---|------|-----|---------------|
-| H1 | **Success/failure cost split** | `success` field exists in DB but is not surfaced in `/summary` or `/jobs`. A two-tone display (completed vs failed-to-finish) would help users spot broken cron jobs. | Design-only in old PLAN.md. Not started. |
-| H2 | **Per-job token columns in jobs table** | ~~Summary shows total tokens, but jobs table has no token attribution.~~ **Delivered.** Token breakdown is shown in the expandable detail row below each job. Header-level token columns were rejected to avoid horizontal overflow. | Detail rows show total, in, out, cached. |
-| H3 | **Sortable jobs table** | Table is currently static. Clicking column headers to sort by cost, runs, or pace is standard table UX. | Listed as missing in old FEATURES.md. Not started. |
-| H4 | **Top 5 expensive jobs highlight** | Visual emphasis on the highest-spend jobs draws attention where it matters. | Listed as missing. Not started. |
-| H5 | **Per-run expansion in dashboard UI** | API serves `/jobs/{id}/runs`, but the frontend has no UI for it. Clicking a job row should show the last N individual runs. | Not started. |
+|| H2 | **Per-job token columns in jobs table** | ~~Summary shows total tokens, but jobs table has no token attribution.~~ **Delivered.** Token breakdown is shown in the expandable detail row below each job. Header-level token columns were rejected to avoid horizontal overflow. | ✅ Detail rows show total, in, out, cached. |
+|| H3 | **Sortable jobs table** | Table is currently static. Clicking column headers to sort by cost, runs, or pace is standard table UX. | ✅ All 7 columns sortable ↑/↓ with direction indicator. |
+|| H4 | **Top jobs highlight** | Visual emphasis on the highest-spend / most-run jobs draws attention where it matters. | ✅ Leader Board: 4 cards (Top Runs, Top Cost, Top Tokens, Top Pace) with icon accents and mono job names. |
+|| H1 | **Success/failure cost split** | `success` field exists in DB but is not surfaced in `/summary` or `/jobs`. A two-tone display (completed vs failed-to-finish) would help users spot broken cron jobs. | Design-only in old PLAN.md. Not started. |
+|| H5 | **Per-run expansion in dashboard UI** | API serves `/jobs/{id}/runs`, but the frontend has no UI for it. Clicking a job row should show the last N individual runs. | Not started. |
 
 ---
 
@@ -22,14 +22,14 @@ This document replaces the previous phase-based plan with a flat priority-sorted
 
 | # | Task | Why | Current State |
 |---|------|-----|---------------|
-| M1 | **README** | Someone other than us needs to install and use this. | Not started. |
-| M2 | **CHANGELOG** | Version history for users and future maintainers. | Not started. |
-| M3 | **Test suite** | Even a minimal `pytest` run covering `_make_job_id()` and projection math would catch regressions. | Not started. |
-| M4 | **Lint / type check** | `ruff` + `mypy` configuration. | Not started. |
-| M5 | **Periodic auto-sync** | A 6-hour background timer so the scanner runs without manual intervention. | Listed in old DESIGN.md but never implemented. |
-| M6 | **Mobile layout pass** | Verify table readability on narrow viewports (phone). iPad width is acceptable; phone width likely overflows. | Unverified. |
-| M7 | **Custom tooltip component** | Native `title` works on desktop but is unreliable on iPad tap-and-hold. A portal-based or modal tooltip would be consistent across platforms. | Explored and reverted; needs a proper approach that handles viewport edges. |
-| M8 | **Success/failure split for wrapper vs payload** | Document (or decide) whether true payload-level success detection is in scope. Currently we only know if the *wrapper* completed. | Design decision pending. |
+|| M6 | **iPad + theme compatibility pass** | Mondwest font, hardcoded accent colors, and clashing progress bars break readability on iPad and across ~30 Omarchy themes. | ✅ Silver summary icons, mono sub-lines, neutral token bars, Leader Board titles default color, height parity. |
+|| M1 | **README** | Someone other than us needs to install and use this. | Not started. |
+|| M2 | **CHANGELOG** | Version history for users and future maintainers. | Not started. |
+|| M3 | **Test suite** | Even a minimal `pytest` run covering `_make_job_id()` and projection math would catch regressions. | Not started. |
+|| M4 | **Lint / type check** | `ruff` + `mypy` configuration. | Not started. |
+|| M5 | **Periodic auto-sync** | A 6-hour background timer so the scanner runs without manual intervention. | Listed in old DESIGN.md but never implemented. |
+|| M7 | **Custom tooltip component** | Native `title` works on desktop but is unreliable on iPad tap-and-hold. A portal-based or modal tooltip would be consistent across platforms. | Explored and reverted; needs a proper approach that handles viewport edges. |
+|| M8 | **Success/failure split for wrapper vs payload** | Document (or decide) whether true payload-level success detection is in scope. Currently we only know if the *wrapper* completed. | Design decision pending. |
 
 ---
 
