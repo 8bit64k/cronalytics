@@ -789,7 +789,7 @@
             React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Job Runs")
           ),
           runPct != null && React.createElement("div", { style: { marginBottom: "1rem" } },
-            React.createElement("div", { style: { fontSize: "0.8rem", color: runPct > 0 ? "#ef4444" : "#4ade80" } },
+            React.createElement("div", { style: { fontSize: "0.82rem", color: runPct > 0 ? "#ef4444" : "#4ade80" } },
               (runPct > 0 ? "↑ " : "↓ ") + Math.abs(runPct).toFixed(0) + "% vs prior " + (days === 0 ? "period" : days + "d")
             )
           ),
@@ -823,7 +823,7 @@
             "Actual: ", React.createElement("span", { style: { fontWeight: 700 } }, fmtCost(s.total_actual_cost))
           ),
           costPct != null && React.createElement("div", { style: { marginBottom: "1rem" } },
-            React.createElement("div", { style: { fontSize: "0.8rem", color: costPct > 0 ? "#ef4444" : "#4ade80" } },
+            React.createElement("div", { style: { fontSize: "0.82rem", color: costPct > 0 ? "#ef4444" : "#4ade80" } },
               (costPct > 0 ? "↑ " : "↓ ") + Math.abs(costPct).toFixed(0) + "% vs prior " + (days === 0 ? "period" : days + "d")
             )
           ),

@@ -63,15 +63,27 @@ def _load_job_names() -> dict[str, str]:
         data = json.loads(raw)
     except Exception:
         return {}
-    return {j["id"]: j.get("name", j["id"]) for j in data.get("jobs", [])}
+    return {
+        j["id"]: {
+            "name": j.get("name", j["id"]),
+            "schedule": j.get("schedule"),
+            "next_run": j.get("next_run"),
+            "model": j.get("model"),
+        }
+        for j in data.get("jobs", [])
+    }
 
 
 def _enrich_jobs_with_names(job_list: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Attach human-readable name to each job aggregate."""
-    names = _load_job_names()
+    """Attach human-readable name + schedule metadata to each job aggregate."""
+    meta = _load_job_names()
     for j in job_list:
         job_id = j.get("job_id", "")
-        j["name"] = names.get(job_id, job_id)
+        info = meta.get(job_id, {})
+        j["name"] = info.get("name", job_id)
+        j["schedule"] = info.get("schedule")
+        j["next_run"] = info.get("next_run")
+        j["model"] = info.get("model")
     return job_list
 
 
