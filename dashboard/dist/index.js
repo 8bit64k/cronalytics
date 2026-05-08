@@ -438,7 +438,7 @@
           React.createElement(Card, { style: { flex: 1 } },
             React.createElement(CardHeader, null,
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, ZapIcon(14)),
+                React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, ZapIcon(14)),
                 React.createElement(CardTitle, null, "Job Runs")
               )
             ),
@@ -467,7 +467,7 @@
           React.createElement(Card, { style: { flex: 1 } },
             React.createElement(CardHeader, null,
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, BanknoteIcon(14)),
+                React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, BanknoteIcon(14)),
                 React.createElement(CardTitle, null, "Cost")
               )
             ),
@@ -501,7 +501,7 @@
           React.createElement(Card, { style: { flex: 1 } },
             React.createElement(CardHeader, null,
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, BlocksIcon(14)),
+                React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, BlocksIcon(14)),
                 React.createElement(CardTitle, null, "Tokens")
               )
             ),
@@ -553,7 +553,7 @@
             React.createElement(Card, { style: { flex: 1 } },
               React.createElement(CardHeader, null,
                 React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                  React.createElement("span", { style: { color: "silver", lineHeight: 0 } }, MetronomeIcon(14)),
+                  React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, MetronomeIcon(14)),
                   React.createElement(CardTitle, null, "Pace")
                 )
               ),
