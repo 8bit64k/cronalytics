@@ -344,11 +344,11 @@
 
     const firstLoad = summary.loading && !summary.data && jobs.loading && !jobs.data;
     if (firstLoad) {
-      return React.createElement("div", { style: { padding: "0 1rem 1rem", color: "var(--foreground-base, var(--foreground))" } }, "Loading Cronalytics…");
+      return React.createElement("div", { style: { padding: "0 1.5rem 1rem", color: "var(--foreground-base, var(--foreground))" } }, "Loading Cronalytics…");
     }
 
     if (summary.error || jobs.error) {
-      return React.createElement("div", { style: { padding: "0 1rem 1rem", color: "var(--color-destructive)" } },
+      return React.createElement("div", { style: { padding: "0 1.5rem 1rem", color: "var(--color-destructive)" } },
         "Error: " + (summary.error || jobs.error)
       );
     }
@@ -392,7 +392,7 @@
 
     return React.createElement("div", {
       style: {
-        padding: "0 1rem 1rem",
+        padding: "0 1.5rem 1rem",
         color: "var(--foreground-base, var(--foreground))",
         position: "relative"
       }
