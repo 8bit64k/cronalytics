@@ -67,8 +67,6 @@ def _load_job_names() -> dict[str, str]:
         j["id"]: {
             "name": j.get("name", j["id"]),
             "schedule": j.get("schedule"),
-            "next_run": j.get("next_run"),
-            "model": j.get("model"),
         }
         for j in data.get("jobs", [])
     }
@@ -82,8 +80,8 @@ def _enrich_jobs_with_names(job_list: list[dict[str, Any]]) -> list[dict[str, An
         info = meta.get(job_id, {})
         j["name"] = info.get("name", job_id)
         j["schedule"] = info.get("schedule")
-        j["next_run"] = info.get("next_run")
-        j["model"] = info.get("model")
+        # next_run is ephemeral — not in jobs.json
+        # model comes from last_model in the aggregate itself
     return job_list
 
 

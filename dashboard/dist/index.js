@@ -906,10 +906,10 @@
               j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
                 React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
                 React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
-                  React.createElement("div", null, "Schedule: " + (j.schedule || "\u2014")),
+                  React.createElement("div", null, "Schedule: " + ((j.schedule && j.schedule.display) || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                   React.createElement("div", null, "Next run: " + fmtTime(j.next_run)),
-                  React.createElement("div", null, "Model: " + (j.model || "\u2014")),
+                  React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
                   React.createElement("div", null, "Tokens: " + (j.total_tokens != null ? fmtCompact(j.total_tokens) : "\u2014"))
                 )
               )
@@ -934,10 +934,10 @@
               j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
                 React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
                 React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
-                  React.createElement("div", null, "Schedule: " + (j.schedule || "\u2014")),
+                  React.createElement("div", null, "Schedule: " + ((j.schedule && j.schedule.display) || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                   React.createElement("div", null, "Next run: " + fmtTime(j.next_run)),
-                  React.createElement("div", null, "Model: " + (j.model || "\u2014")),
+                  React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
                   React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \u00b7 Avg: " + (j.avg_cost != null ? fmtCost(j.avg_cost) : "\u2014"))
                 )
               )
@@ -962,10 +962,10 @@
               j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
                 React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
                 React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
-                  React.createElement("div", null, "Schedule: " + (j.schedule || "\u2014")),
+                  React.createElement("div", null, "Schedule: " + ((j.schedule && j.schedule.display) || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                   React.createElement("div", null, "Next run: " + fmtTime(j.next_run)),
-                  React.createElement("div", null, "Model: " + (j.model || "\u2014")),
+                  React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
                   React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString())
                 )
               )
@@ -1015,10 +1015,10 @@
               j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
                 React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
                 React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
-                  React.createElement("div", null, "Schedule: " + (j.schedule || "\u2014")),
+                  React.createElement("div", null, "Schedule: " + ((j.schedule && j.schedule.display) || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                   React.createElement("div", null, "Next run: " + fmtTime(j.next_run)),
-                  React.createElement("div", null, "Model: " + (j.model || "\u2014")),
+                  React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
                   React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \u00b7 Avg cost: " + (j.avg_cost != null ? fmtCost(j.avg_cost) : "\u2014"))
                 )
               )
