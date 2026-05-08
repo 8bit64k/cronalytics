@@ -15,6 +15,7 @@ This document replaces the previous phase-based plan with a flat priority-sorted
 || H4 | **Top jobs highlight** | Visual emphasis on the highest-spend / most-run jobs draws attention where it matters. | ✅ Leader Board: 4 cards (Top Runs, Top Cost, Top Tokens, Top Pace) with icon accents and mono job names. |
 || H1 | **Success/failure cost split** | `success` field exists in DB but is not surfaced in `/summary` or `/jobs`. A two-tone display (completed vs failed-to-finish) would help users spot broken cron jobs. | Design-only in old PLAN.md. Not started. |
 || H5 | **Per-run expansion in dashboard UI** | API serves `/jobs/{id}/runs`, but the frontend has no UI for it. Clicking a job row should show the last N individual runs. | Not started. |
+|| H6 | **Duration metrics (avg duration, total duration)** | `duration_seconds` is computed and stored in the fact DB, but never surfaced in `/summary` or `/jobs`. Adding it to the Jobs Breakdown table and Top modals gives users visibility into slow/fast jobs and run performance. | Not started. |
 
 ---
 

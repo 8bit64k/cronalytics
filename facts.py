@@ -244,12 +244,14 @@ def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
                COALESCE(SUM(input_tokens), 0),
                COALESCE(SUM(output_tokens), 0),
                COALESCE(SUM(cache_read_tokens), 0),
-               COALESCE(SUM(cache_write_tokens), 0)
+               COALESCE(SUM(cache_write_tokens), 0),
+               SUM(duration_seconds),
+               AVG(duration_seconds)
         FROM cron_runs{where}
         """,
         params,
     )
-    total_runs, total_est_cost, total_act_cost, total_in, total_out, total_cr, total_cw = cursor.fetchone()
+    total_runs, total_est_cost, total_act_cost, total_in, total_out, total_cr, total_cw, total_dur, avg_dur = cursor.fetchone()
     total_tokens = (total_in or 0) + (total_out or 0) + (total_cr or 0) + (total_cw or 0)
 
     # Cost by model (only rows with known cost)
@@ -300,6 +302,8 @@ def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
         "total_output_tokens": total_out or 0,
         "total_cache_read_tokens": total_cr or 0,
         "total_cache_write_tokens": total_cw or 0,
+        "total_duration_seconds": round(total_dur, 2) if total_dur is not None else None,
+        "avg_duration_seconds": round(avg_dur, 2) if avg_dur is not None else None,
         "cost_by_model": by_model,
         "previous_period": prev_info if days > 0 else {},
         "trend": trend if days > 0 else "→",
@@ -325,7 +329,9 @@ def query_jobs(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
                COALESCE(SUM(input_tokens), 0) AS total_input_tokens,
                COALESCE(SUM(output_tokens), 0) AS total_output_tokens,
                COALESCE(SUM(cache_read_tokens), 0) AS total_cache_read_tokens,
-               COALESCE(SUM(cache_write_tokens), 0) AS total_cache_write_tokens
+               COALESCE(SUM(cache_write_tokens), 0) AS total_cache_write_tokens,
+               SUM(duration_seconds) AS total_duration,
+               AVG(duration_seconds) AS avg_duration
         FROM cron_runs{where}
         GROUP BY job_id
         ORDER BY total_cost DESC
@@ -346,6 +352,8 @@ def query_jobs(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
             "total_cache_read_tokens": r[9],
             "total_cache_write_tokens": r[10],
             "total_tokens": (r[7] or 0) + (r[8] or 0) + (r[9] or 0) + (r[10] or 0),
+            "total_duration": round(r[11], 2) if r[11] is not None else None,
+            "avg_duration": round(r[12], 2) if r[12] is not None else None,
         }
         for r in cursor.fetchall()
     ]
