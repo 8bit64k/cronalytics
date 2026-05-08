@@ -50,6 +50,18 @@
     return n.toLocaleString();
   }
 
+  function fmtDuration(s) {
+    if (s == null || s === 0) return "\u2014";
+    const seconds = Math.round(s);
+    if (seconds < 60) return seconds + "s";
+    const m = Math.floor(seconds / 60);
+    const rem = seconds % 60;
+    if (m < 60) return rem > 0 ? m + "m " + rem + "s" : m + "m";
+    const h = Math.floor(m / 60);
+    const remM = m % 60;
+    return remM > 0 ? h + "h " + remM + "m" : h + "h";
+  }
+
   function paceColor(pace) {
     if (pace == null) return "var(--foreground-base, var(--foreground))";
     if (pace < 1.0) return "#4ade80";   // green
@@ -371,6 +383,7 @@
       switch (key) {
         case "Job": return j.name || j.job_id;
         case "Runs": return j.runs || 0;
+        case "Time": return j.avg_duration || 0;
         case "Total Cost": return j.total_cost || 0;
         case "Avg Cost": return j.avg_cost || 0;
         case "Nominal/mo": return j.projections && j.projections.projected_cost_30d != null ? j.projections.projected_cost_30d : -Infinity;
@@ -1103,7 +1116,7 @@
               React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
                 React.createElement("thead", null,
                   React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
-                    ["Job", "Runs", "Total Cost", "Avg Cost", "Nominal/mo", "Trend/mo", "Pace"].map(h => {
+                    ["Job", "Runs", "Time", "Total Cost", "Avg Cost", "Nominal/mo", "Trend/mo", "Pace"].map(h => {
                       const isActive = sortConfig.key === h;
                       return React.createElement("th", {
                         key: h,
@@ -1137,6 +1150,7 @@
                         React.createElement("div", { style: { fontSize: "0.78rem", fontWeight: 500 } }, j.name || j.job_id)
                       ),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, (j.runs || 0).toLocaleString()),
+                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtDuration(j.avg_duration)),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.total_cost)),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.avg_cost)),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } },
@@ -1168,7 +1182,7 @@
                       )
                     ),
                     expandedId === j.job_id && React.createElement("tr", { key: j.job_id + "_detail" },
-                      React.createElement("td", { colSpan: 7, style: { padding: "0.6rem 0.35rem 0.6rem 0.75rem", background: "rgba(255,255,255,0.02)", fontSize: "0.72rem" } },
+                      React.createElement("td", { colSpan: 8, style: { padding: "0.6rem 0.35rem 0.6rem 0.75rem", background: "rgba(255,255,255,0.02)", fontSize: "0.72rem" } },
                         React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.3rem" } },
                           React.createElement("div", {
                             style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.72rem" }
