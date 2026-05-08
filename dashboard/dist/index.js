@@ -344,11 +344,11 @@
 
     const firstLoad = summary.loading && !summary.data && jobs.loading && !jobs.data;
     if (firstLoad) {
-      return React.createElement("div", { style: { padding: "1rem", color: "var(--foreground-base, var(--foreground))" } }, "Loading Cronalytics…");
+      return React.createElement("div", { style: { padding: "0 1rem 1rem", color: "var(--foreground-base, var(--foreground))" } }, "Loading Cronalytics…");
     }
 
     if (summary.error || jobs.error) {
-      return React.createElement("div", { style: { padding: "1rem", color: "var(--color-destructive)" } },
+      return React.createElement("div", { style: { padding: "0 1rem 1rem", color: "var(--color-destructive)" } },
         "Error: " + (summary.error || jobs.error)
       );
     }
@@ -390,10 +390,57 @@
       return sortConfig.direction === "asc" ? va - vb : vb - va;
     });
 
-    return React.createElement("div", { style: { padding: "1rem", color: "var(--foreground-base, var(--foreground))" } },
-      // Inline toolbar: day selector + refresh (right-aligned, title is in page header)
+    return React.createElement("div", {
+      style: {
+        padding: "0 1rem 1rem",
+        color: "var(--foreground-base, var(--foreground))",
+        position: "relative"
+      }
+    },
+      // Hero banner
       React.createElement("div", {
-        style: { display: "flex", justifyContent: "flex-end", alignItems: "center", marginBottom: "0.5rem" }
+        style: {
+          padding: "1.25rem 0 0.75rem",
+          borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))"
+        }
+      },
+        React.createElement("div", {
+          style: {
+            fontFamily: "var(--theme-font-mono, monospace)",
+            fontSize: "0.7rem",
+            fontWeight: 600,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            opacity: 0.5,
+            marginBottom: "0.35rem"
+          }
+        }, "HERMES CRON FLEET"),
+        React.createElement("div", {
+          style: {
+            fontSize: "0.82rem",
+            opacity: 0.65,
+            lineHeight: 1.5,
+            maxWidth: "42rem",
+            fontFamily: "var(--theme-font-mono, monospace)"
+          }
+        }, "Track run volume, cost, and scheduling for every job in your fleet.")
+      ),
+
+      // Sticky toolbar
+      React.createElement("div", {
+        style: {
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          padding: "0.5rem 0",
+          marginBottom: "0.5rem",
+          background: "var(--background, rgba(12,12,12,0.88))",
+          backdropFilter: "blur(8px)",
+          borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))"
+        }
       },
         React.createElement("div", { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
           React.createElement(DaySelector, { selected: days, onChange: setDays }),
