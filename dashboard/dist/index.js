@@ -414,7 +414,7 @@
             opacity: 0.5,
             marginBottom: "0.35rem"
           }
-        }, "HERMES CRON FLEET"),
+        }, "CRON ANALYTICS"),
         React.createElement("div", {
           style: {
             fontSize: "0.82rem",
@@ -423,7 +423,7 @@
             maxWidth: "42rem",
             fontFamily: "var(--theme-font-mono, monospace)"
           }
-        }, "Track run volume, cost, and scheduling for every job in your fleet.")
+        }, "Observability into the costs of the autonomous, automated processes of your self-improving Hermes AI agents.")
       ),
 
       // Sticky toolbar
@@ -433,7 +433,7 @@
           top: 0,
           zIndex: 10,
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
           alignItems: "center",
           padding: "0.5rem 0",
           marginBottom: "0.5rem",
@@ -442,6 +442,21 @@
           borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))"
         }
       },
+        React.createElement("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center" } },
+          React.createElement(Button, {
+            size: "sm",
+            outlined: true,
+            disabled: syncing,
+            onClick: onSync,
+          }, syncing ? "Syncing..." : "Sync Now"),
+          syncInfo && syncInfo.lastSync &&
+            React.createElement("span", {
+              style: { fontSize: "0.65rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)" }
+            },
+              "Synced " + fmtTime(new Date(syncInfo.lastSync).getTime() / 1000) +
+              (syncInfo.rowsSynced != null ? " · " + syncInfo.rowsSynced + " jobs" : "")
+            )
+        ),
         React.createElement("div", { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
           React.createElement(DaySelector, { selected: days, onChange: setDays }),
           React.createElement(Button, {
@@ -1121,19 +1136,6 @@
               React.createElement(CardTitle, null, "Jobs Breakdown")
             ),
             React.createElement("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center" } },
-              syncInfo && syncInfo.lastSync &&
-                React.createElement("span", {
-                  style: { fontSize: "0.65rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)" }
-                },
-                  "Synced " + fmtTime(new Date(syncInfo.lastSync).getTime() / 1000) +
-                  (syncInfo.rowsSynced != null ? " · " + syncInfo.rowsSynced + " jobs" : "")
-                ),
-              React.createElement(Button, {
-                size: "sm",
-                outlined: true,
-                disabled: syncing,
-                onClick: onSync,
-              }, syncing ? "Syncing..." : "Sync Now")
             )
           )
         ),
