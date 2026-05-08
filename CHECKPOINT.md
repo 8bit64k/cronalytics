@@ -1,8 +1,8 @@
 # Cronalytics — Work Checkpoint
-# Updated: 2026-05-07 14:00
+# Updated: 2026-05-07 20:50
 #
 ## Current Commit
-`69f5316` (layout-grid-2x4) — "feat(modals): add educational modals for Runs, Cost, Tokens, and all 4 Leader cards"
+`276ce28` (master) — "chore: rename AGENT.md → AGENTS.md, add build session protocol"
 
 ## What Works Now
 1. Dashboard loads; Cronalytics tab renders without white screen
@@ -11,7 +11,8 @@
 4. Frontend: inline toolbar (day selector + refresh) inside tab content; no `usePageHeader` dependency
 5. Day selector: SDK `Button` component (matches Analytics tab native style)
 6. **Row 1 — Summary Board:** 4 cards (Job Runs, Cost, Tokens, Pace)
-   - Icons in silver; sub-lines in monospace at readable size; trend arrows bumped to 1.05rem
+   - Icons inherit text color with orange glow (drop-shadow) for pop across light/dark themes
+   - Sub-lines in monospace at readable size; trend arrows bumped to 1.05rem with dynamic color (red increase, green decrease)
    - Tokens: neutral fill bars (no hardcoded beige/green/pink) for In/Out/Cached proportions
    - Pace: proportional Nominal + Trend bars (mirrors token bar pattern)
 7. **Row 2 — Leader Board:** 4 spotlight cards (Top Runs, Top Cost, Top Tokens, Top Pace)
@@ -75,6 +76,15 @@
 
 ## Known Issues / Needs Feedback
 - Detail row layout may need visual polish at tablet width
+
+## Completed Today (2026-05-07 Evening)
+- `f3e90ef` Backend: `_enrich_jobs_with_names()` attaches `schedule` from `jobs.json`
+- `e1b0dc2` Frontend: Top modals use `j.schedule.display` and `j.last_model` (fixes `[object Object]` and empty model)
+- `b09774d` Frontend: dropped `Next run` from Top modals (ephemeral runtime field)
+- `3d01d02` Frontend: added dynamic trend color to Runs summary card (red ↑, green ↓)
+- `d74e740` PLAN.md: marked M7 Educational modals as delivered
+- `15f83e3` Frontend: replaced silver icon color with theme-safe text color + orange glow
+- `276ce28` Chore: renamed AGENT.md → AGENTS.md, added build session protocol
 
 ## Next Priority
 - See PLAN.md for V1.0 backlog.
