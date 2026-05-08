@@ -28,7 +28,7 @@ This document replaces the previous phase-based plan with a flat priority-sorted
 || M3 | **Test suite** | Even a minimal `pytest` run covering `_make_job_id()` and projection math would catch regressions. | Not started. |
 || M4 | **Lint / type check** | `ruff` + `mypy` configuration. | Not started. |
 || M5 | **Periodic auto-sync** | A 6-hour background timer so the scanner runs without manual intervention. | Listed in old DESIGN.md but never implemented. |
-|| M7 | **Custom tooltip component** | Native `title` works on desktop but is unreliable on iPad tap-and-hold. A portal-based or modal tooltip would be consistent across platforms. | Explored and reverted; needs a proper approach that handles viewport edges. |
+|| M7 | **Educational modals** | Replaced native `title` tooltips with two modal layers: ⓘ info modals (metric definitions, formulas, interpretation) and Top card drill-down modals (#1 job details). Solves iPad tap-and-hold unreliability with intentional click interactions. Mono font, normal case body, 0.78rem detail blocks. | ✅ Delivered. |
 || M8 | **Success/failure split for wrapper vs payload** | Document (or decide) whether true payload-level success detection is in scope. Currently we only know if the *wrapper* completed. | Design decision pending. |
 
 ---
