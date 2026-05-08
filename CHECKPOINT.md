@@ -1,8 +1,8 @@
 # Cronalytics — Work Checkpoint
-# Updated: 2026-05-07 20:50
+# Updated: 2026-05-08 20:15
 #
 ## Current Commit
-`276ce28` (master) — "chore: rename AGENT.md → AGENTS.md, add build session protocol"
+`872a6e5` (master) — "feat(duration): add total_duration_seconds and avg_duration_seconds to /summary and total_duration/avg_duration to /jobs"
 
 ## What Works Now
 1. Dashboard loads; Cronalytics tab renders without white screen
