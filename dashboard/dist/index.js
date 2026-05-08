@@ -723,7 +723,7 @@
       ),
       // ── Pace Modal (educational drill-down) ──────────────────────────
       React.createElement(Modal, { isOpen: paceModal.isOpen, onClose: paceModal.close },
-        React.createElement("div", { style: { padding: "1.5rem", fontFamily: "var(--theme-font-mono, monospace)" } },
+        React.createElement("div", { style: { padding: "1.5rem", fontFamily: "var(--theme-font-mono, monospace)", textTransform: "none" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" } },
             React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(s.pace) } },
               s.pace != null ? s.pace.toFixed(2) + "\u00d7" : "\u2014"
@@ -781,7 +781,7 @@
       ),
       // ── Runs Modal ─────────────────────────────────────────────────────
       React.createElement(Modal, { isOpen: runsModal.isOpen, onClose: runsModal.close },
-        React.createElement("div", { style: { padding: "1.5rem" } },
+        React.createElement("div", { style: { padding: "1.5rem", fontFamily: "var(--theme-font-mono, monospace)", textTransform: "none" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" } },
             React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
               (s.total_runs || 0).toLocaleString()
@@ -812,7 +812,7 @@
       ),
       // ── Cost Modal ─────────────────────────────────────────────────────
       React.createElement(Modal, { isOpen: costModal.isOpen, onClose: costModal.close },
-        React.createElement("div", { style: { padding: "1.5rem" } },
+        React.createElement("div", { style: { padding: "1.5rem", fontFamily: "var(--theme-font-mono, monospace)", textTransform: "none" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" } },
             React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
               fmtCost(s.total_estimated_cost)
@@ -845,7 +845,7 @@
       ),
       // ── Tokens Modal ───────────────────────────────────────────────────
       React.createElement(Modal, { isOpen: tokensModal.isOpen, onClose: tokensModal.close },
-        React.createElement("div", { style: { padding: "1.5rem" } },
+        React.createElement("div", { style: { padding: "1.5rem", fontFamily: "var(--theme-font-mono, monospace)", textTransform: "none" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" } },
             React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
               fmtCompact(s.total_tokens)
@@ -891,7 +891,7 @@
       ),
       // ── Top Runs Modal ─────────────────────────────────────────────────
       React.createElement(Modal, { isOpen: topRunsModal.isOpen, onClose: topRunsModal.close },
-        React.createElement("div", { style: { padding: "1.5rem" } },
+        React.createElement("div", { style: { padding: "1.5rem", fontFamily: "var(--theme-font-mono, monospace)", textTransform: "none" } },
           (() => {
             const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.runs || 0) > (a.runs || 0) ? b : a, jobList[0]) : null;
             const label = j ? (j.name || j.job_id) : "\u2014";
@@ -919,7 +919,7 @@
       ),
       // ── Top Cost Modal ─────────────────────────────────────────────────
       React.createElement(Modal, { isOpen: topCostModal.isOpen, onClose: topCostModal.close },
-        React.createElement("div", { style: { padding: "1.5rem" } },
+        React.createElement("div", { style: { padding: "1.5rem", fontFamily: "var(--theme-font-mono, monospace)", textTransform: "none" } },
           (() => {
             const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.total_cost || 0) > (a.total_cost || 0) ? b : a, jobList[0]) : null;
             const label = j ? (j.name || j.job_id) : "\u2014";
@@ -947,7 +947,7 @@
       ),
       // ── Top Tokens Modal ───────────────────────────────────────────────
       React.createElement(Modal, { isOpen: topTokensModal.isOpen, onClose: topTokensModal.close },
-        React.createElement("div", { style: { padding: "1.5rem" } },
+        React.createElement("div", { style: { padding: "1.5rem", fontFamily: "var(--theme-font-mono, monospace)", textTransform: "none" } },
           (() => {
             const j = jobList.length > 0 ? jobList.reduce((a, b) => ((b.total_tokens || 0) > (a.total_tokens || 0) ? b : a), jobList[0]) : null;
             const label = j ? (j.name || j.job_id) : "\u2014";
@@ -975,7 +975,7 @@
       ),
       // ── Top Pace Modal ─────────────────────────────────────────────────
       React.createElement(Modal, { isOpen: topPaceModal.isOpen, onClose: topPaceModal.close },
-        React.createElement("div", { style: { padding: "1.5rem" } },
+        React.createElement("div", { style: { padding: "1.5rem", fontFamily: "var(--theme-font-mono, monospace)", textTransform: "none" } },
           (() => {
             const j = jobList.length > 0
               ? jobList.reduce((a, b) => {
