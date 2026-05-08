@@ -1,8 +1,11 @@
 # Cronalytics — Work Checkpoint
-# Updated: 2026-05-07 20:50
+# Updated: 2026-05-07 22:47
 #
 ## Current Commit
-`276ce28` (master) — "chore: rename AGENT.md → AGENTS.md, add build session protocol"
+`a5ba4da` (hero branch) — "feat(toolbar): move Sync Now + synced timestamp to sticky toolbar left"
+## Branches
+- `master`: `0ee6f96` — last stable before hero work
+- `hero`: `a5ba4da` — hero banner + sticky toolbar + sync controls repositioned (ahead of master)
 
 ## What Works Now
 1. Dashboard loads; Cronalytics tab renders without white screen
@@ -31,6 +34,13 @@
 18. Stale-while-revalidate: no flash on day switch, only blank on first mount
 19. Theme compatibility: hardcoded accent colors removed from Summary/Leader text; silver icons; mono sub-lines; neutral token bars
 20. **M7 — Educational Modals (all 8 cards):** click any card → modal opens with detailed metric info, formula explanation, and live worked examples. Sparkle hover effect + Info icon (ⓘ) in top-right of every card. Escape or backdrop click to close.
+21. **Hero banner + sticky toolbar:**
+    - Hero label: `CRON ANALYTICS` (mono, uppercase, 0.7rem, letter-spaced)
+    - Hero subtitle: `Observability into the costs of the autonomous, automated processes of your self-improving Hermes AI agents.`
+    - Sticky toolbar: `position: sticky`, `top: 0`, glassmorphism backdrop (`backdropFilter: blur(8px)`)
+    - Root padding: `0 0.25rem 1rem 0` (flush left, micro right padding, 0 top, 1rem bottom)
+    - **Left-balanced toolbar:** Sync Now + sync timestamp live on the left side of the sticky toolbar; DaySelector + Refresh on the right
+    - Sync controls removed from Jobs Breakdown card header (cleaner)
 
 ## Nick's UI Polish Round (confirmed)
 - `[Last 30 days]` badge → `[30D]` (or `[7D]`, `[90D]`, `[All]`)
@@ -85,11 +95,19 @@
 - `d74e740` PLAN.md: marked M7 Educational modals as delivered
 - `15f83e3` Frontend: replaced silver icon color with theme-safe text color + orange glow
 - `276ce28` Chore: renamed AGENT.md → AGENTS.md, added build session protocol
+- `6225a66` feat(hero): add hero banner scaffolding with sticky toolbar
+- `9a34768` feat(hero): tune horizontal padding to achieve native alignment (0 left, 0.25rem right)
+- `5ec286a` feat(hero): final padding `0 0.25rem 1rem 0` (flush left)
+- `a5ba4da` feat(toolbar): move Sync Now + synced timestamp to sticky toolbar left
+  - justifyContent: space-between on toolbar
+  - Sync controls removed from Jobs Breakdown card header
+  - Hero copy finalized: "CRON ANALYTICS" / "Observability into the costs..."
 
-## Next Priority
-- See PLAN.md for V1.0 backlog.
-
-## Rejoin Instructions
+## Notes for Tomorrow
+- Hero layout and toolbar balance — let it sit, revisit after a day of use
+- Branch `hero` ahead of `master` by 4 commits; either merge or continue iterating
+- PLAN.md V1.0 backlog: H1 (success/failure cost split) or H5 (per-run expansion) are next high priorities
+- Nick mentioned completing the hero banner and doing other PLAN.md items tomorrow
 - Tab open at `https://hermes.tail315577.ts.net/`
 - Plugin loaded from `~/.hermes/plugins/cronalytics` symlink
 - Dashboard process: PID managed by Hermes CLI (`hermes dashboard --port 9119 --host 0.0.0.0 --insecure --no-open`)
