@@ -908,7 +908,6 @@
                 React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
                   React.createElement("div", null, "Schedule: " + ((j.schedule && j.schedule.display) || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
-                  React.createElement("div", null, "Next run: " + fmtTime(j.next_run)),
                   React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
                   React.createElement("div", null, "Tokens: " + (j.total_tokens != null ? fmtCompact(j.total_tokens) : "\u2014"))
                 )
@@ -936,7 +935,6 @@
                 React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
                   React.createElement("div", null, "Schedule: " + ((j.schedule && j.schedule.display) || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
-                  React.createElement("div", null, "Next run: " + fmtTime(j.next_run)),
                   React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
                   React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \u00b7 Avg: " + (j.avg_cost != null ? fmtCost(j.avg_cost) : "\u2014"))
                 )
@@ -964,7 +962,6 @@
                 React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
                   React.createElement("div", null, "Schedule: " + ((j.schedule && j.schedule.display) || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
-                  React.createElement("div", null, "Next run: " + fmtTime(j.next_run)),
                   React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
                   React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString())
                 )
@@ -1017,7 +1014,6 @@
                 React.createElement("div", { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
                   React.createElement("div", null, "Schedule: " + ((j.schedule && j.schedule.display) || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
-                  React.createElement("div", null, "Next run: " + fmtTime(j.next_run)),
                   React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
                   React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \u00b7 Avg cost: " + (j.avg_cost != null ? fmtCost(j.avg_cost) : "\u2014"))
                 )
