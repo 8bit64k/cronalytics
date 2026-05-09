@@ -292,6 +292,19 @@ def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
             elif delta < -0.05:
                 trend = "↓"
 
+    # Success / failure split
+    cursor = conn.execute(
+        f"""
+        SELECT count(CASE WHEN success = 1 THEN 1 END),
+               count(CASE WHEN success = 0 THEN 1 END),
+               SUM(CASE WHEN success = 1 THEN estimated_cost_usd END),
+               SUM(CASE WHEN success = 0 THEN estimated_cost_usd END)
+        FROM cron_runs{where}
+        """,
+        params,
+    )
+    success_runs, failure_runs, success_cost, failure_cost = cursor.fetchone()
+
     return {
         "days": days,
         "total_runs": total_runs,
@@ -304,6 +317,10 @@ def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
         "total_cache_write_tokens": total_cw or 0,
         "total_duration_seconds": round(total_dur, 2) if total_dur is not None else None,
         "avg_duration_seconds": round(avg_dur, 2) if avg_dur is not None else None,
+        "success_runs": success_runs or 0,
+        "failure_runs": failure_runs or 0,
+        "success_cost": round(success_cost, 4) if success_cost is not None else None,
+        "failure_cost": round(failure_cost, 4) if failure_cost is not None else None,
         "cost_by_model": by_model,
         "previous_period": prev_info if days > 0 else {},
         "trend": trend if days > 0 else "→",
@@ -331,7 +348,11 @@ def query_jobs(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
                COALESCE(SUM(cache_read_tokens), 0) AS total_cache_read_tokens,
                COALESCE(SUM(cache_write_tokens), 0) AS total_cache_write_tokens,
                SUM(duration_seconds) AS total_duration,
-               AVG(duration_seconds) AS avg_duration
+               AVG(duration_seconds) AS avg_duration,
+               count(CASE WHEN success = 1 THEN 1 END) AS success_runs,
+               count(CASE WHEN success = 0 THEN 1 END) AS failure_runs,
+               SUM(CASE WHEN success = 1 THEN estimated_cost_usd END) AS success_cost,
+               SUM(CASE WHEN success = 0 THEN estimated_cost_usd END) AS failure_cost
         FROM cron_runs{where}
         GROUP BY job_id
         ORDER BY total_cost DESC
@@ -354,6 +375,10 @@ def query_jobs(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
             "total_tokens": (r[7] or 0) + (r[8] or 0) + (r[9] or 0) + (r[10] or 0),
             "total_duration": round(r[11], 2) if r[11] is not None else None,
             "avg_duration": round(r[12], 2) if r[12] is not None else None,
+            "success_runs": r[13] or 0,
+            "failure_runs": r[14] or 0,
+            "success_cost": round(r[15], 4) if r[15] is not None else None,
+            "failure_cost": round(r[16], 4) if r[16] is not None else None,
         }
         for r in cursor.fetchall()
     ]
