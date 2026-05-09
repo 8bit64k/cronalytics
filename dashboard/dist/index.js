@@ -263,6 +263,7 @@
 
   // ── Day selector control (uses SDK Button to match Analytics tab) ─
   function DaySelector({ selected, onChange }) {
+    const [custom, setCustom] = useState("");
     const days = [
       { label: "7D", value: 7 },
       { label: "30D", value: 30 },
@@ -281,8 +282,33 @@
       type: "button",
       size: "sm",
       outlined: selected !== d.value,
-      onClick: () => onChange(d.value),
-    }, d.label)));
+      onClick: () => {
+        if (d.label === "All") {
+          const v = parseInt(custom, 10);
+          onChange(isNaN(v) || v < 0 ? 0 : v);
+        } else {
+          onChange(d.value);
+        }
+      },
+    }, d.label)), React.createElement("input", {
+      type: "number",
+      min: 0,
+      step: 1,
+      placeholder: "days",
+      value: custom,
+      onChange: e => setCustom(e.target.value),
+      style: {
+        width: "3.5rem",
+        fontSize: "0.7rem",
+        fontFamily: "var(--theme-font-mono, monospace)",
+        background: "var(--background, rgba(12,12,12,0.5))",
+        color: "var(--foreground-base, var(--foreground))",
+        border: "1px solid var(--border, rgba(255,255,255,0.1))",
+        borderRadius: "0.25rem",
+        padding: "0.25rem 0.35rem",
+        outline: "none",
+      }
+    }));
   }
 
     // ── Main /cron tab ──────────────────────────────────────────────
@@ -313,6 +339,17 @@
       const topCostModal = useModal();
       const topTokensModal = useModal();
       const topPaceModal = useModal();
+
+    const [heroLines, setHeroLines] = useState({ label: "CRON ANALYTICS", sub: "Observability into the costs of the autonomous, automated processes of your self-improving Hermes AI agents." });
+    useEffect(() => {
+      fetch("/dashboard-plugins/cronalytics/dist/hero.txt")
+        .then(r => r.ok ? r.text() : Promise.reject())
+        .then(text => {
+          const lines = text.split(/\r?\n/).filter(Boolean);
+          if (lines.length >= 2) setHeroLines({ label: lines[0].trim(), sub: lines[1].trim() });
+        })
+        .catch(() => {});
+    }, []);
 
     useEffect(() => {
       fetchJSON("/api/plugins/cronalytics/health")
@@ -427,7 +464,7 @@
             opacity: 0.5,
             marginBottom: "0.35rem"
           }
-        }, "CRON ANALYTICS"),
+        }, heroLines.label),
         React.createElement("div", {
           style: {
             fontSize: "0.82rem",
@@ -436,7 +473,7 @@
             maxWidth: "42rem",
             fontFamily: "var(--theme-font-mono, monospace)"
           }
-        }, "Observability into the costs of the autonomous, automated processes of your self-improving Hermes AI agents.")
+        }, heroLines.sub)
       ),
 
       // Sticky toolbar

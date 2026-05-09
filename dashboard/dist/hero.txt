@@ -1,0 +1,2 @@
+CRON ANALYTICS
+Observability into the costs of the autonomous, automated processes of your self-improving Hermes AI agents.
