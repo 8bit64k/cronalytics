@@ -311,6 +311,24 @@
     }));
   }
 
+  // ── Outcome toggle (Both / Success / Failure) ─────────────────────
+  function OutcomeToggle({ selected, onChange }) {
+    const opts = [
+      { label: "Both", value: "both" },
+      { label: "Success", value: "success" },
+      { label: "Failure", value: "failure" },
+    ];
+    return React.createElement("div", {
+      style: { display: "flex", gap: "0.375rem", alignItems: "center" }
+    }, opts.map(o => React.createElement(Button, {
+      key: o.value,
+      type: "button",
+      size: "sm",
+      outlined: selected !== o.value,
+      onClick: () => onChange(o.value),
+    }, o.label)));
+  }
+
     // ── Main /cron tab ──────────────────────────────────────────────
     function CronTab() {
       const [days, setDaysRaw] = useState(() => {
@@ -324,8 +342,19 @@
         try { localStorage.setItem("cronalytics:days", String(v)); } catch {}
         setDaysRaw(v);
       };
-      const summary = useApi("/api/plugins/cronalytics/summary?days=" + days);
-      const jobs = useApi("/api/plugins/cronalytics/jobs?days=" + days);
+      const [outcome, setOutcomeRaw] = useState(() => {
+        try {
+          const saved = localStorage.getItem("cronalytics:outcome");
+          if (saved) return saved;
+        } catch {}
+        return "both";
+      });
+      const setOutcome = (v) => {
+        try { localStorage.setItem("cronalytics:outcome", v); } catch {}
+        setOutcomeRaw(v);
+      };
+      const summary = useApi("/api/plugins/cronalytics/summary?days=" + days + "&outcome=" + outcome);
+      const jobs = useApi("/api/plugins/cronalytics/jobs?days=" + days + "&outcome=" + outcome);
       const [syncing, setSyncing] = useState(false);
       const [syncInfo, setSyncInfo] = useState(null);
 
@@ -508,6 +537,7 @@
             )
         ),
         React.createElement("div", { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
+          React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome }),
           React.createElement(DaySelector, { selected: days, onChange: setDays }),
           React.createElement(Button, {
             type: "button",
@@ -580,11 +610,11 @@
             React.createElement(CardHeader, null,
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
                 React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, BanknoteIcon(14)),
-                React.createElement(CardTitle, null, "Cost")
+                React.createElement(CardTitle, null, outcome === "failure" ? "Wasted" : "Cost")
               )
             ),
             React.createElement(CardContent, null,
-              React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
+              React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: outcome === "failure" ? "#ef4444" : "#f5a623" } },
                 fmtCost(s.total_estimated_cost)
               ),
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: costPct != null ? (costPct > 0 ? "#ef4444" : "#4ade80") : null } },
@@ -596,7 +626,7 @@
               React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.3rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.25rem" } },
                 "Actual: ", s.total_actual_cost != null ? fmtCost(s.total_actual_cost) : "\u2014"
               ),
-              React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem" } },
+              outcome !== "failure" && React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem" } },
                 React.createElement("span", { style: { color: "#4ade80" } }, "\u2713 ", s.success_runs || 0),
                 " \u00b7 ",
                 React.createElement("span", { style: { color: (s.failure_runs || 0) > 0 ? "#ef4444" : null } }, "\u2717 ", s.failure_runs || 0),
