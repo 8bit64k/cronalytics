@@ -229,12 +229,19 @@ def row_exists(db_path: Path, session_id: str) -> bool:
 # Aggregation queries (Phase 3 API)
 # ---------------------------------------------------------------------------
 
-def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
+def query_summary(db_path: Path, days: int = 30, outcome: str = "both") -> dict[str, Any]:
     """Return aggregate stats for cron runs in the last N days (0 = all time)."""
     conn = get_conn(db_path)
-    cutoff_clause = " WHERE run_time >= ?"
-    params = [time.time() - (days * 86400)] if days > 0 else []
-    where = cutoff_clause if days > 0 else ""
+
+    conditions: list[str] = []
+    params: list[Any] = []
+    if days > 0:
+        conditions.append("run_time >= ?")
+        params.append(time.time() - (days * 86400))
+    if outcome in ("success", "failure"):
+        conditions.append("success = ?")
+        params.append(1 if outcome == "success" else 0)
+    where = " WHERE " + " AND ".join(conditions) if conditions else ""
 
     cursor = conn.execute(
         f"""
@@ -254,8 +261,9 @@ def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
     total_runs, total_est_cost, total_act_cost, total_in, total_out, total_cr, total_cw, total_dur, avg_dur = cursor.fetchone()
     total_tokens = (total_in or 0) + (total_out or 0) + (total_cr or 0) + (total_cw or 0)
 
-    # Cost by model (only rows with known cost)
-    cost_where = where + (" AND " if days > 0 else " WHERE ") + "estimated_cost_usd IS NOT NULL"
+    # Cost by model (only rows with known cost, respecting outcome filter)
+    cost_conds = conditions + ["estimated_cost_usd IS NOT NULL"]
+    cost_where = " WHERE " + " AND ".join(cost_conds)
 
     cursor = conn.execute(
         f"""
@@ -271,14 +279,20 @@ def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
         for r in cursor.fetchall()
     ]
 
-    # Previous period for trend
+    # Previous period for trend (respect outcome filter)
     prev_info = {}
     trend = "→"
     if days > 0:
         prev_cutoff = time.time() - (2 * days * 86400)
+        prev_conds = ["run_time >= ?", "run_time < ?"]
+        prev_params = [prev_cutoff, params[0] if params else time.time()]
+        if outcome in ("success", "failure"):
+            prev_conds.append("success = ?")
+            prev_params.append(1 if outcome == "success" else 0)
+        prev_where = " WHERE " + " AND ".join(prev_conds)
         cursor = conn.execute(
-            "SELECT count(*), SUM(estimated_cost_usd) FROM cron_runs WHERE run_time >= ? AND run_time < ?",
-            (prev_cutoff, params[0] if params else time.time()),
+            "SELECT count(*), SUM(estimated_cost_usd) FROM cron_runs" + prev_where,
+            prev_params,
         )
         prev_runs, prev_cost = cursor.fetchone()
         prev_info = {
@@ -292,7 +306,7 @@ def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
             elif delta < -0.05:
                 trend = "↓"
 
-    # Success / failure split
+    # Success / failure split (filtered by outcome when applicable)
     cursor = conn.execute(
         f"""
         SELECT count(CASE WHEN success = 1 THEN 1 END),
@@ -327,12 +341,19 @@ def query_summary(db_path: Path, days: int = 30) -> dict[str, Any]:
     }
 
 
-def query_jobs(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
+def query_jobs(db_path: Path, days: int = 30, outcome: str = "both") -> list[dict[str, Any]]:
     """Return per-job aggregates (0 = all time)."""
     conn = get_conn(db_path)
-    cutoff_clause = " WHERE run_time >= ?"
-    params = [time.time() - (days * 86400)] if days > 0 else []
-    where = cutoff_clause if days > 0 else ""
+
+    conditions: list[str] = []
+    params: list[Any] = []
+    if days > 0:
+        conditions.append("run_time >= ?")
+        params.append(time.time() - (days * 86400))
+    if outcome in ("success", "failure"):
+        conditions.append("success = ?")
+        params.append(1 if outcome == "success" else 0)
+    where = " WHERE " + " AND ".join(conditions) if conditions else ""
 
     cursor = conn.execute(
         f"""
@@ -447,12 +468,19 @@ def query_health(db_path: Path) -> dict[str, Any]:
     }
 
 
-def query_models(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
+def query_models(db_path: Path, days: int = 30, outcome: str = "both") -> list[dict[str, Any]]:
     """Return per-model usage aggregates (0 = all time)."""
     conn = get_conn(db_path)
-    cutoff_clause = " WHERE run_time >= ?"
-    params = [time.time() - (days * 86400)] if days > 0 else []
-    where = cutoff_clause if days > 0 else ""
+
+    conditions: list[str] = []
+    params: list[Any] = []
+    if days > 0:
+        conditions.append("run_time >= ?")
+        params.append(time.time() - (days * 86400))
+    if outcome in ("success", "failure"):
+        conditions.append("success = ?")
+        params.append(1 if outcome == "success" else 0)
+    where = " WHERE " + " AND ".join(conditions) if conditions else ""
 
     cursor = conn.execute(
         f"""
@@ -483,12 +511,19 @@ def query_models(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
     ]
 
 
-def query_trends(db_path: Path, days: int = 30) -> list[dict[str, Any]]:
+def query_trends(db_path: Path, days: int = 30, outcome: str = "both") -> list[dict[str, Any]]:
     """Return daily cost and run-count trend (0 = all time)."""
     conn = get_conn(db_path)
-    cutoff_clause = " WHERE run_time >= ?"
-    params = [time.time() - (days * 86400)] if days > 0 else []
-    where = cutoff_clause if days > 0 else ""
+
+    conditions: list[str] = []
+    params: list[Any] = []
+    if days > 0:
+        conditions.append("run_time >= ?")
+        params.append(time.time() - (days * 86400))
+    if outcome in ("success", "failure"):
+        conditions.append("success = ?")
+        params.append(1 if outcome == "success" else 0)
+    where = " WHERE " + " AND ".join(conditions) if conditions else ""
 
     cursor = conn.execute(
         f"""

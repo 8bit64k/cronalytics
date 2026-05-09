@@ -144,14 +144,15 @@ async def sync() -> dict[str, Any]:
 @router.get("/summary")
 async def summary(
     days: int = Query(default=30, ge=0),
+    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
 ) -> dict[str, Any]:
     """Aggregated stats for cron runs over the last N days (0 = all time).
 
     Includes schedule-aware projections: nominal (if running exactly on schedule),
     trend (if current pace continues), and pace (the ratio of the two).
     """
-    raw_summary = _facts_mod.query_summary(FACT_DB, days=days)
-    raw_jobs = _facts_mod.query_jobs(FACT_DB, days=days)
+    raw_summary = _facts_mod.query_summary(FACT_DB, days=days, outcome=outcome)
+    raw_jobs = _facts_mod.query_jobs(FACT_DB, days=days, outcome=outcome)
 
     nominal_total = 0.0
     trend_total = 0.0
@@ -190,9 +191,10 @@ async def summary(
 async def jobs(
     days: int = Query(default=30, ge=0),
     skip_projections: bool = Query(default=False, description="Set true to omit schedule-aware projections (faster)"),
+    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
 ) -> dict[str, Any]:
     """Per-job aggregates: runs, total cost, avg cost, projections (0 = all time)."""
-    raw_jobs = _facts_mod.query_jobs(FACT_DB, days=days)
+    raw_jobs = _facts_mod.query_jobs(FACT_DB, days=days, outcome=outcome)
     enriched = _enrich_jobs_with_names(raw_jobs)
 
     if not skip_projections:
@@ -240,12 +242,14 @@ async def job_runs(
 @router.get("/models")
 async def models(
     days: int = Query(default=30, ge=0),
+    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
 ) -> dict[str, Any]:
     """Per-model usage aggregates (0 = all time)."""
     return _api_wrap(
         {
             "days": days,
-            "models": _facts_mod.query_models(FACT_DB, days=days),
+            "outcome": outcome,
+            "models": _facts_mod.query_models(FACT_DB, days=days, outcome=outcome),
         }
     )
 
@@ -253,11 +257,13 @@ async def models(
 @router.get("/trends")
 async def trends(
     days: int = Query(default=30, ge=0),
+    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
 ) -> dict[str, Any]:
     """Daily cost trend (0 = all time)."""
     return _api_wrap(
         {
             "days": days,
-            "trend": _facts_mod.query_trends(FACT_DB, days=days),
+            "outcome": outcome,
+            "trend": _facts_mod.query_trends(FACT_DB, days=days, outcome=outcome),
         }
     )
