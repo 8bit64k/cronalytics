@@ -90,6 +90,36 @@
 - `15f83e3` Frontend: replaced silver icon color with theme-safe text color + orange glow
 - `276ce28` Chore: renamed AGENT.md → AGENTS.md, added build session protocol
 
+## Launch Plan
+- **Date: Tuesday, May 19, 2026 at ~9:00 AM EST**
+- **Days Remaining: 11 (from May 9)**
+- **Feature Freeze: Thursday, May 14**
+- Full plan: See `LAUNCH_PLAN.md` at repo root
+
+## V1.0 Technical In-Scope
+| # | Task | Status |
+|---|------|--------|
+| H1 | Success/failure cost split | ✅ Delivered |
+| H2 | Per-job token columns (detail rows) | ✅ Delivered |
+| H3 | Sortable jobs table | ✅ Delivered |
+| H4 | Top jobs highlight (Leader Board) | ✅ Delivered |
+| H5 | Per-run expansion | 🟡 V1.0 — Day 1–2 |
+| H6 | Duration metrics | ✅ Delivered |
+| H7 | Suspect/hung job detection | 🟡 V1.0 — Day 2–3 |
+| H8 | Global outcome toggle | ✅ Delivered |
+| M5 | Auto-sync | 🟡 V1.0 if small; else V1.1 |
+| M8 | Wrapper vs payload success | 🟡 V1.0 — document in README |
+
+## Technical Out-of-Scope (V1.1+)
+| # | Task | Reason |
+|---|------|--------|
+| D1 | Budget thresholds + alerts | Needs notification infra |
+| D2 | Model comparison recommendations | Needs pricing engine |
+| D3 | Schedule optimization | Needs session output analysis |
+| D4 | Tool-level cost attribution | Needs `session_messages` join |
+| D5 | Live log streaming | Separate infrastructure |
+| D6 | External DB backend | SQLite sufficient for now |
+
 ## Next Priority
 - See PLAN.md for V1.0 backlog.
 
