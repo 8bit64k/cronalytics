@@ -1201,6 +1201,13 @@
                               + fmtCompact(j.total_cache_read_tokens) + " cached)"
                           ),
                           React.createElement("div", {
+                            style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.72rem" }
+                          },
+                            React.createElement("span", { style: { color: "#4ade80" } }, "\u2713 ", j.success_runs || 0),
+                            " \u00b7 ",
+                            React.createElement("span", { style: { color: (j.failure_runs || 0) > 0 ? "#ef4444" : null } }, "\u2717 ", j.failure_runs || 0)
+                          ),
+                          React.createElement("div", {
                             style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7, whiteSpace: "pre" }
                           },
                             (j.projections && j.projections.schedule_display ? j.projections.schedule_display : "No schedule"),
