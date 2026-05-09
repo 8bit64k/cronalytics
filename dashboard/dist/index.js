@@ -922,6 +922,7 @@
                   React.createElement("div", null, "Schedule: " + ((j.schedule && j.schedule.display) || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                   React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
+                  React.createElement("div", null, "Avg duration: " + (j.avg_duration != null ? fmtDuration(j.avg_duration) : "\u2014")),
                   React.createElement("div", null, "Tokens: " + (j.total_tokens != null ? fmtCompact(j.total_tokens) : "\u2014"))
                 )
               )
@@ -949,6 +950,7 @@
                   React.createElement("div", null, "Schedule: " + ((j.schedule && j.schedule.display) || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                   React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
+                  React.createElement("div", null, "Avg duration: " + (j.avg_duration != null ? fmtDuration(j.avg_duration) : "\u2014")),
                   React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \u00b7 Avg: " + (j.avg_cost != null ? fmtCost(j.avg_cost) : "\u2014"))
                 )
               )
