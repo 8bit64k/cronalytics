@@ -2,7 +2,11 @@
 # Updated: 2026-05-08 20:15
 #
 ## Current Commit
-`872a6e5` (master) — "feat(duration): add total_duration_seconds and avg_duration_seconds to /summary and total_duration/avg_duration to /jobs"
+`905a7d3` (master) — "docs(PLAN): mark H1 success/failure split as delivered with wrapper-level caveat"
+
+## Recently Delivered (2026-05-08 Evening)
+- H6 Duration metrics: backend `total_duration_seconds` + `avg_duration_seconds`; frontend `fmtDuration` helper, "Avg Time" column in Jobs Breakdown, avg duration in Top Runs/Top Cost modals.
+- H1 Success/Failure split: backend aggregates (`success_runs`, `failure_runs`, `success_cost`, `failure_cost`) on `/summary` and `/jobs`; frontend Cost card sub-line `✓ N · ✗ M ($X wasted)`, per-job detail row `✓ N · ✗ M`.
 
 ## What Works Now
 1. Dashboard loads; Cronalytics tab renders without white screen
