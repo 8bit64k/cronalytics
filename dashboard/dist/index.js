@@ -182,6 +182,21 @@
       React.createElement("path", { d: "M12 8h.01" })
     );
   }
+  function HelpCircleIcon(props) {
+    const { size, style } = props || {};
+    return React.createElement("svg", {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: size || 16, height: size || 16, viewBox: "0 0 24 24",
+      fill: "none", stroke: "currentColor", strokeWidth: 2,
+      strokeLinecap: "round", strokeLinejoin: "round",
+      style: Object.assign({ display: "inline-block", verticalAlign: "middle", cursor: "pointer" }, style || {})
+    },
+      React.createElement("circle", { cx: 12, cy: 12, r: 10 }),
+      React.createElement("path", { d: "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" }),
+      React.createElement("path", { d: "M12 17h.01" })
+    );
+  }
+
 
   function useApi(path) {
     const [data, setData] = useState(null);
@@ -561,7 +576,7 @@
             style: { position: "absolute", top: "0.35rem", right: "0.35rem", zIndex: 2, opacity: 0.4, transition: "opacity 0.2s ease" },
             onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
             onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
-          }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
+          }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
           React.createElement(Card, { style: { flex: 1 } },
             React.createElement(CardHeader, null,
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
@@ -590,7 +605,7 @@
             style: { position: "absolute", top: "0.35rem", right: "0.35rem", zIndex: 2, opacity: 0.4, transition: "opacity 0.2s ease" },
             onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
             onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
-          }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
+          }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
           React.createElement(Card, { style: { flex: 1 } },
             React.createElement(CardHeader, null,
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
@@ -630,7 +645,7 @@
             style: { position: "absolute", top: "0.35rem", right: "0.35rem", zIndex: 2, opacity: 0.4, transition: "opacity 0.2s ease" },
             onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
             onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
-          }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
+          }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
           React.createElement(Card, { style: { flex: 1 } },
             React.createElement(CardHeader, null,
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
@@ -682,7 +697,7 @@
               style: { position: "absolute", top: "0.35rem", right: "0.35rem", zIndex: 2, opacity: 0.4, transition: "opacity 0.2s ease" },
               onMouseEnter: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "1"; },
               onMouseLeave: (e) => { e.stopPropagation(); e.currentTarget.style.opacity = "0.4"; },
-            }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
+            }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } })),
             React.createElement(Card, { style: { flex: 1 } },
               React.createElement(CardHeader, null,
                 React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
@@ -731,7 +746,7 @@
             React.createElement(Card, { style: { flex: 1 } },
               React.createElement(CardHeader, null,
                 React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                  React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, ZapIcon(13)), React.createElement(CardTitle, null, "Top Runs")
+                  React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, ZapIcon(14)), React.createElement(CardTitle, null, "Top Runs")
                 )
               ),
               React.createElement(CardContent, null,
@@ -764,7 +779,7 @@
             React.createElement(Card, { style: { flex: 1 } },
               React.createElement(CardHeader, null,
                 React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                  React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BanknoteIcon(13)), React.createElement(CardTitle, null, "Top Cost")
+                  React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BanknoteIcon(14)), React.createElement(CardTitle, null, "Top Cost")
                 )
               ),
               React.createElement(CardContent, null,
@@ -797,7 +812,7 @@
             React.createElement(Card, { style: { flex: 1 } },
               React.createElement(CardHeader, null,
                 React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                  React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BlocksIcon(13)), React.createElement(CardTitle, null, "Top Tokens")
+                  React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BlocksIcon(14)), React.createElement(CardTitle, null, "Top Tokens")
                 )
               ),
               React.createElement(CardContent, null,
@@ -837,7 +852,7 @@
             React.createElement(Card, { style: { flex: 1 } },
               React.createElement(CardHeader, null,
                 React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                  React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, MetronomeIcon(13)), React.createElement(CardTitle, null, "Top Pace")
+                  React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, MetronomeIcon(14)), React.createElement(CardTitle, null, "Top Pace")
                 )
               ),
               React.createElement(CardContent, null,
@@ -1254,8 +1269,9 @@
                           fontWeight: 600,
                           userSelect: "none",
                           borderBottom: "2px solid var(--color-border)",
-                        }
-                      }, h + (isActive ? (sortConfig.direction === "asc" ? " \u2191" : " \u2193") : ""));
+                        },
+                        title: h === "Pace" ? "Pace = Trend ÷ Nominal. Under 1.0× = under budget. Over 2.0× = over budget." : undefined
+                      }, h + (isActive ? (sortConfig.direction === "asc" ? " ↑" : " ↓") : ""));
                     })
                   )
                 ),
