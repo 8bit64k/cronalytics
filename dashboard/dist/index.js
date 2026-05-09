@@ -500,7 +500,8 @@
               React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem" } },
                 React.createElement("span", { style: { color: "#4ade80" } }, "\u2713 ", s.success_runs || 0),
                 " \u00b7 ",
-                React.createElement("span", { style: { color: (s.failure_runs || 0) > 0 ? "#ef4444" : null } }, "\u2717 ", s.failure_runs || 0)
+                React.createElement("span", { style: { color: (s.failure_runs || 0) > 0 ? "#ef4444" : null } }, "\u2717 ", s.failure_runs || 0),
+                (s.failure_cost != null && s.failure_cost > 0) ? " (" + fmtCost(s.failure_cost) + " wasted)" : ""
               )
             )
           )
