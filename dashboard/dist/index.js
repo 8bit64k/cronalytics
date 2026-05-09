@@ -311,12 +311,12 @@
     }));
   }
 
-  // ── Outcome toggle (Both / Success / Failure) ─────────────────────
+  // ── Outcome toggle (Success / Failure / All) ─────────────────────
   function OutcomeToggle({ selected, onChange }) {
     const opts = [
-      { label: "Both", value: "both" },
       { label: "Success", value: "success" },
       { label: "Failure", value: "failure" },
+      { label: "All", value: "both" },
     ];
     return React.createElement("div", {
       style: { display: "flex", gap: "0.375rem", alignItems: "center" }
@@ -521,23 +521,8 @@
           borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))"
         }
       },
-        React.createElement("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center" } },
-          React.createElement(Button, {
-            size: "sm",
-            outlined: true,
-            disabled: syncing,
-            onClick: onSync,
-          }, syncing ? "Syncing..." : "Sync Now"),
-          syncInfo && syncInfo.lastSync &&
-            React.createElement("span", {
-              style: { fontSize: "0.65rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)" }
-            },
-              "Synced " + fmtTime(new Date(syncInfo.lastSync).getTime() / 1000) +
-              (syncInfo.rowsSynced != null ? " · " + syncInfo.rowsSynced + " jobs" : "")
-            )
-        ),
+        React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome }),
         React.createElement("div", { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
-          React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome }),
           React.createElement(DaySelector, { selected: days, onChange: setDays }),
           React.createElement(Button, {
             type: "button",
@@ -626,7 +611,7 @@
               React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.3rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.25rem" } },
                 "Actual: ", s.total_actual_cost != null ? fmtCost(s.total_actual_cost) : "\u2014"
               ),
-              outcome !== "failure" && React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem" } },
+              React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem" } },
                 React.createElement("span", { style: { color: "#4ade80" } }, "\u2713 ", s.success_runs || 0),
                 " \u00b7 ",
                 React.createElement("span", { style: { color: (s.failure_runs || 0) > 0 ? "#ef4444" : null } }, "\u2717 ", s.failure_runs || 0),
@@ -1224,6 +1209,19 @@
               React.createElement(CardTitle, null, "Jobs Breakdown")
             ),
             React.createElement("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center" } },
+              React.createElement(Button, {
+                size: "sm",
+                outlined: true,
+                disabled: syncing,
+                onClick: onSync,
+              }, syncing ? "Syncing..." : "Sync Now"),
+              syncInfo && syncInfo.lastSync &&
+                React.createElement("span", {
+                  style: { fontSize: "0.65rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)" }
+                },
+                  "Synced " + fmtTime(new Date(syncInfo.lastSync).getTime() / 1000) +
+                  (syncInfo.rowsSynced != null ? " · " + syncInfo.rowsSynced + " jobs" : "")
+                )
             )
           )
         ),
