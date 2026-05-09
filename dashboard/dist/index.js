@@ -383,7 +383,7 @@
       switch (key) {
         case "Job": return j.name || j.job_id;
         case "Runs": return j.runs || 0;
-        case "Time": return j.avg_duration || 0;
+        case "Avg Time": return j.avg_duration || 0;
         case "Total Cost": return j.total_cost || 0;
         case "Avg Cost": return j.avg_cost || 0;
         case "Nominal/mo": return j.projections && j.projections.projected_cost_30d != null ? j.projections.projected_cost_30d : -Infinity;
@@ -1118,7 +1118,7 @@
               React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
                 React.createElement("thead", null,
                   React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
-                    ["Job", "Runs", "Time", "Total Cost", "Avg Cost", "Nominal/mo", "Trend/mo", "Pace"].map(h => {
+                    ["Job", "Runs", "Avg Time", "Total Cost", "Avg Cost", "Nominal/mo", "Trend/mo", "Pace"].map(h => {
                       const isActive = sortConfig.key === h;
                       return React.createElement("th", {
                         key: h,
