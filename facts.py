@@ -406,15 +406,32 @@ def query_jobs(db_path: Path, days: int = 30, outcome: str = "both") -> list[dic
 
 
 def query_job_runs(
-    db_path: Path, job_id: str, limit: int = 50, days: int = 0
+    db_path: Path, job_id: str, limit: int = 50, days: int = 0,
+    outcome: str = "both", sort_key: str = "run_time", sort_dir: str = "desc"
 ) -> list[dict[str, Any]]:
-    """Return individual run history for a specific job (0 = all time)."""
+    """Return individual run history for a specific job (0 = all time).
+
+    Supports filtering by outcome (both/success/failure) and custom sorting:
+    run_time, estimated_cost_usd, duration_seconds, success, model.
+    """
     conn = get_conn(db_path)
-    cutoff_clause = " AND run_time >= ?"
+    conditions = ["job_id = ?"]
     params = [job_id]
+
     if days > 0:
+        conditions.append("run_time >= ?")
         params.append(time.time() - (days * 86400))
-    where = cutoff_clause if days > 0 else ""
+
+    if outcome in ("success", "failure"):
+        conditions.append("success = ?")
+        params.append(1 if outcome == "success" else 0)
+
+    where = " WHERE " + " AND ".join(conditions)
+
+    # Safe column whitelist — only allow known sortable columns
+    safe_cols = {"run_time", "estimated_cost_usd", "duration_seconds", "success", "model"}
+    order_col = sort_key if sort_key in safe_cols else "run_time"
+    order_dir = "DESC" if sort_dir == "desc" else "ASC"
 
     cursor = conn.execute(
         f"""
@@ -426,8 +443,8 @@ def query_job_runs(
                cost_status, billing_provider,
                end_reason, success
         FROM cron_runs
-        WHERE job_id = ?{where}
-        ORDER BY run_time DESC
+        {where}
+        ORDER BY {order_col} {order_dir}
         LIMIT ?
         """,
         params + [limit],

@@ -224,9 +224,19 @@ async def job_runs(
     job_id: str,
     limit: int = Query(default=50, ge=1, le=500),
     days: int = Query(default=0, ge=0),
+    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
+    sort_key: str = Query(default="run_time", pattern="^(run_time|estimated_cost_usd|duration_seconds|success|model)$"),
+    sort_dir: str = Query(default="desc", pattern="^(asc|desc)$"),
 ) -> dict[str, Any]:
-    """Individual run history for a specific job (0 = all time)."""
-    rows = _facts_mod.query_job_runs(FACT_DB, job_id=job_id, limit=limit, days=days)
+    """Individual run history for a specific job (0 = all time).
+
+    Inherits the global outcome filter and allows sorting by cost, duration, model, success,
+    or time. Defaults to the parent table's sort preference if passed through sort_key.
+    """
+    rows = _facts_mod.query_job_runs(
+        FACT_DB, job_id=job_id, limit=limit, days=days,
+        outcome=outcome, sort_key=sort_key, sort_dir=sort_dir,
+    )
     if not rows:
         raise HTTPException(status_code=404, detail=f"No runs found for job {job_id}")
     return _api_wrap(
@@ -234,6 +244,9 @@ async def job_runs(
             "job_id": job_id,
             "limit": limit,
             "days": days,
+            "outcome": outcome,
+            "sort_key": sort_key,
+            "sort_dir": sort_dir,
             "runs": rows,
         }
     )
