@@ -495,7 +495,12 @@
                 "vs prior ", days === 0 ? "period" : days + "d"
               ),
               React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.3rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.25rem" } },
-                "Actual: ", s.total_actual_cost != null ? fmtCost(s.total_actual_cost) : "—"
+                "Actual: ", s.total_actual_cost != null ? fmtCost(s.total_actual_cost) : "\u2014"
+              ),
+              React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem" } },
+                React.createElement("span", { style: { color: "#4ade80" } }, "\u2713 ", s.success_runs || 0),
+                " \u00b7 ",
+                React.createElement("span", { style: { color: (s.failure_runs || 0) > 0 ? "#ef4444" : null } }, "\u2717 ", s.failure_runs || 0)
               )
             )
           )
