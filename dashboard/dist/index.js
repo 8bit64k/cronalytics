@@ -357,16 +357,23 @@
   }
 
   function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir }) {
-    const path = `/api/plugins/cronalytics/jobs/${encodeURIComponent(jobId)}/runs?days=${days}&outcome=${outcome}&sort_key=${sortKey}&sort_dir=${sortDir}&limit=50`;
+    const [sKey, setSKey] = useState(sortKey);
+    const [sDir, setSDir] = useState(sortDir);
+    const path = `/api/plugins/cronalytics/jobs/${encodeURIComponent(jobId)}/runs?days=${days}&outcome=${outcome}&sort_key=${sKey}&sort_dir=${sDir}&limit=50`;
     const runs = useApi(path);
 
-    return React.createElement("div", { style: { padding: "0.5rem 2.5rem 0.25rem 0.25rem" } },
-      React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" } },
-        React.createElement("div", { style: { fontSize: "0.85rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)" } },
+    return React.createElement("div", { style: { padding: "1.5rem 3rem 1.5rem 1.5rem" } },
+      React.createElement("div", { style: { marginBottom: "0.75rem" } },
+        React.createElement("div", { style: { fontSize: "0.9rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", marginBottom: "0.2rem" } },
           jobName || jobId
         ),
-        React.createElement("span", { style: { fontSize: "0.75rem", opacity: 0.5, fontFamily: "var(--theme-font-mono, monospace)" } },
-          runs.data && runs.data.runs ? runs.data.runs.length + " run" + (runs.data.runs.length === 1 ? "" : "s") : ""
+        React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+          React.createElement("span", { style: { fontSize: "0.72rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)" } },
+            jobId
+          ),
+          React.createElement("span", { style: { fontSize: "0.72rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)" } },
+            runs.data && runs.data.runs ? runs.data.runs.length + " run" + (runs.data.runs.length === 1 ? "" : "s") : ""
+          )
         )
       ),
 
@@ -380,18 +387,28 @@
               React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
                 React.createElement("thead", null,
                   React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
-                    ["Time", "Cost", "Duration", "Model", "Result"].map(h =>
-                      React.createElement("th", {
-                        key: h,
+                    [{label:"Time",key:"run_time",align:"left"},
+                     {label:"Cost",key:"estimated_cost_usd",align:"right"},
+                     {label:"Duration",key:"duration_seconds",align:"right"},
+                     {label:"Tokens",key:"input_tokens",align:"right"},
+                     {label:"Model",key:"model",align:"left"},
+                     {label:"Result",key:"success",align:"center"}].map(col => {
+                      const isActive = sKey === col.key;
+                      return React.createElement("th", {
+                        key: col.key,
+                        onClick: () => { setSKey(col.key); setSDir(isActive && sDir === "desc" ? "asc" : "desc"); },
                         style: {
-                          textAlign: h === "Time" || h === "Model" ? "left" : (h === "Result" ? "center" : "right"),
+                          textAlign: col.align,
                           padding: "0.5rem 0.35rem",
                           fontFamily: "var(--theme-font-mono, monospace)",
                           fontWeight: 600,
                           borderBottom: "2px solid var(--color-border)",
+                          cursor: "pointer",
+                          userSelect: "none",
+                          whiteSpace: "nowrap",
                         }
-                      }, h)
-                    )
+                      }, col.label + (isActive ? (sDir === "desc" ? " ↓" : " ↑") : ""));
+                    })
                   )
                 ),
                 React.createElement("tbody", null,
@@ -408,6 +425,11 @@
                       ),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } },
                         fmtDuration(r.duration_seconds)
+                      ),
+                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)", whiteSpace: "nowrap" } },
+                        (r.input_tokens || 0) + (r.output_tokens || 0) > 0
+                          ? fmtCompact((r.input_tokens || 0) + (r.output_tokens || 0))
+                          : "—"
                       ),
                       React.createElement("td", { style: { padding: "0.4rem 0.35rem" } },
                         r.model || "—"
