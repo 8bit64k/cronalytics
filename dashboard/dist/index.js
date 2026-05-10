@@ -823,46 +823,6 @@
         }, heroLines.sub)
       ),
 
-      // Utility bar (sync info + controls, non-sticky)
-      React.createElement("div", {
-        style: {
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "center",
-          gap: "0.75rem",
-          padding: "0.35rem 0",
-          marginBottom: "0.25rem",
-        }
-      },
-        syncInfo && syncInfo.lastSync &&
-          React.createElement("span", {
-            style: { fontSize: "0.65rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)" }
-          },
-            "Synced " + fmtTime(new Date(syncInfo.lastSync).getTime() / 1000) +
-            (syncInfo.rowsSynced != null ? " \u00B7 " + syncInfo.rowsSynced + " jobs" : "")
-          ),
-        React.createElement(Button, {
-          type: "button",
-          size: "sm",
-          outlined: true,
-          disabled: syncing,
-          onClick: onSync,
-        }, syncing ? "Syncing..." : "Sync Now"),
-        React.createElement(Button, {
-          type: "button",
-          size: "sm",
-          outlined: true,
-          disabled: summary.loading || jobs.loading,
-          onClick: () => { summary.refetch(); jobs.refetch(); },
-        }, summary.loading || jobs.loading
-          ? "\u2026"
-          : React.createElement("span", { style: { display: "flex", alignItems: "center", gap: "0.25rem" } },
-              RefreshCwIcon(14),
-              "Refresh"
-            )
-        )
-      ),
-
       // Sticky toolbar
       React.createElement("div", {
         style: {
@@ -887,6 +847,20 @@
         ),
         React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" } },
           React.createElement(DaySelector, { selected: days, onChange: setDays }),
+          React.createElement(Button, {
+            type: "button",
+            size: "sm",
+            outlined: true,
+            disabled: summary.loading || jobs.loading,
+            onClick: () => { summary.refetch(); jobs.refetch(); },
+            style: { minWidth: "5.5rem" }
+          }, summary.loading || jobs.loading
+            ? "\u2026"
+            : React.createElement("span", { style: { display: "flex", alignItems: "center", gap: "0.25rem" } },
+                RefreshCwIcon(14),
+                "Refresh"
+              )
+          )
         )
       ),
 
@@ -1538,9 +1512,26 @@
       // Jobs Breakdown
       React.createElement(Card, { style: { marginBottom: "1.5rem" } },
         React.createElement(CardHeader, null,
-          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem" } },
-            ClockIcon(16),
-            React.createElement(CardTitle, null, "Jobs Breakdown")
+          React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" } },
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem" } },
+              ClockIcon(16),
+              React.createElement(CardTitle, null, "Jobs Breakdown")
+            ),
+            React.createElement("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center" } },
+              React.createElement(Button, {
+                size: "sm",
+                outlined: true,
+                disabled: syncing,
+                onClick: onSync,
+              }, syncing ? "Syncing..." : "Sync Now"),
+              syncInfo && syncInfo.lastSync &&
+                React.createElement("span", {
+                  style: { fontSize: "0.65rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)" }
+                },
+                  "Synced " + fmtTime(new Date(syncInfo.lastSync).getTime() / 1000) +
+                  (syncInfo.rowsSynced != null ? " · " + syncInfo.rowsSynced + " jobs" : "")
+                )
+            )
           )
         ),
         React.createElement(CardContent, null,
