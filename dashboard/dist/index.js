@@ -295,12 +295,15 @@
   // ── Day selector control (uses SDK Button to match Analytics tab) ─
   function DaySelector({ selected, onChange }) {
     const [custom, setCustom] = useState("");
-    const days = [
-      { label: "7D", value: 7 },
-      { label: "30D", value: 30 },
-      { label: "90D", value: 90 },
-      { label: "All", value: 0 },
+    const presets = [
+      { label: "7", value: 7 },
+      { label: "30", value: 30 },
+      { label: "90", value: 90 },
     ];
+    const applyCustom = () => {
+      const v = parseInt(custom, 10);
+      onChange(isNaN(v) || v < 0 ? 0 : v);
+    };
     return React.createElement("div", {
       style: {
         display: "flex",
@@ -308,38 +311,46 @@
         alignItems: "center",
         gap: "0.375rem",
       }
-    }, days.map(d => React.createElement(Button, {
-      key: d.value,
-      type: "button",
-      size: "sm",
-      outlined: selected !== d.value,
-      onClick: () => {
-        if (d.label === "All") {
-          const v = parseInt(custom, 10);
-          onChange(isNaN(v) || v < 0 ? 0 : v);
-        } else {
-          onChange(d.value);
+    },
+      // Preset buttons
+      ...presets.map(d => React.createElement(Button, {
+        key: d.value,
+        type: "button",
+        size: "sm",
+        outlined: selected !== d.value,
+        onClick: () => { setCustom(""); onChange(d.value); },
+      }, d.label)),
+      // Custom days input
+      React.createElement("input", {
+        type: "number",
+        min: 0,
+        step: 1,
+        placeholder: "days",
+        value: custom,
+        onChange: e => setCustom(e.target.value),
+        onKeyDown: e => { if (e.key === "Enter") applyCustom(); },
+        style: {
+          width: "3.5rem",
+          fontSize: "0.7rem",
+          fontFamily: "var(--theme-font-mono, monospace)",
+          background: "var(--background, rgba(12,12,12,0.5))",
+          color: "var(--foreground-base, var(--foreground))",
+          border: "1px solid var(--border, rgba(255,255,255,0.1))",
+          borderRadius: "0.25rem",
+          padding: "0.25rem 0.35rem",
+          outline: "none",
         }
-      },
-    }, d.label)), React.createElement("input", {
-      type: "number",
-      min: 0,
-      step: 1,
-      placeholder: "days",
-      value: custom,
-      onChange: e => setCustom(e.target.value),
-      style: {
-        width: "3.5rem",
-        fontSize: "0.7rem",
-        fontFamily: "var(--theme-font-mono, monospace)",
-        background: "var(--background, rgba(12,12,12,0.5))",
-        color: "var(--foreground-base, var(--foreground))",
-        border: "1px solid var(--border, rgba(255,255,255,0.1))",
-        borderRadius: "0.25rem",
-        padding: "0.25rem 0.35rem",
-        outline: "none",
-      }
-    }));
+      }),
+      // Apply custom
+      React.createElement(Button, {
+        type: "button",
+        size: "sm",
+        outlined: true,
+        onClick: applyCustom,
+        title: "Apply custom days",
+        style: { paddingLeft: "0.4rem", paddingRight: "0.4rem", minWidth: "auto" }
+      }, "→")
+    );
   }
 
   // ── Outcome toggle (Success / Failure / All) ─────────────────────
