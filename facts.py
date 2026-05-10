@@ -49,7 +49,9 @@ CREATE TABLE IF NOT EXISTS cron_runs (
     job_mode TEXT DEFAULT 'agent',
     ingested_at REAL DEFAULT (unixepoch())
 );
+"""
 
+INDEX_SQL = """
 CREATE INDEX IF NOT EXISTS idx_cron_runs_job_id
     ON cron_runs(job_id);
 CREATE INDEX IF NOT EXISTS idx_cron_runs_run_time
@@ -118,7 +120,14 @@ def ensure_schema(db_path: Path) -> sqlite3.Connection:
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA synchronous=NORMAL")
     conn.executescript(SCHEMA_SQL)
-    conn.commit()
+    # Migrate: add job_mode if missing (v0.1 -> v0.2)
+    try:
+        conn.execute("SELECT job_mode FROM cron_runs LIMIT 1")
+    except sqlite3.OperationalError:
+        conn.execute("ALTER TABLE cron_runs ADD COLUMN job_mode TEXT DEFAULT 'agent'")
+        conn.commit()
+        logger.info("[facts] Migrated: added job_mode column")
+    conn.executescript(INDEX_SQL)
     return conn
 
 
