@@ -373,7 +373,7 @@
       const [syncing, setSyncing] = useState(false);
       const [syncInfo, setSyncInfo] = useState(null);
 
-      const [expandedId, setExpandedId] = useState(null);
+      const [selectedJobId, setSelectedJobId] = useState(null);
       const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
       const paceModal = useModal();
       const runsModal = useModal();
@@ -555,6 +555,19 @@
           )
         )
       ),
+
+      // ── Detail view OR Dashboard ───────────────────────────────────
+      selectedJobId
+        ? React.createElement(JobDetailView, {
+            key: selectedJobId,
+            jobId: selectedJobId,
+            days: days,
+            outcome: outcome,
+            sortKey: sortConfig.key === "Job" ? "run_time" : (sortConfig.key || "run_time"),
+            sortDir: sortConfig.direction || "desc",
+            onBack: () => setSelectedJobId(null),
+          })
+        : React.createElement("div", null,
 
       // Summary cards
       React.createElement("div", {
@@ -1250,7 +1263,7 @@
                       style: { borderBottom: "1px solid rgba(255,255,255,0.04)", cursor: "pointer", transition: "background 0.12s ease" },
                       onMouseEnter: e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; },
                       onMouseLeave: e => { e.currentTarget.style.background = "transparent"; },
-                      onClick: () => setExpandedId(expandedId === j.job_id ? null : j.job_id)
+                      onClick: () => setSelectedJobId(j.job_id)
                     },
                       React.createElement("td", { style: { padding: "0.4rem 0.35rem" } },
                         React.createElement("div", { style: { fontSize: "0.78rem", fontWeight: 500 } }, j.name || j.job_id)
@@ -1287,42 +1300,14 @@
                         )
                       )
                     ),
-                    expandedId === j.job_id && React.createElement("tr", { key: j.job_id + "_detail" },
-                      React.createElement("td", { colSpan: 8, style: { padding: "0.6rem 0.35rem 0.6rem 0.75rem", background: "rgba(255,255,255,0.02)", fontSize: "0.72rem" } },
-                        React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.3rem" } },
-                          React.createElement("div", {
-                            style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.72rem" }
-                          },
-                            "Tokens: " + fmtCompact(j.total_tokens) + " total "
-                              + "(" + fmtCompact(j.total_input_tokens) + " in / "
-                              + fmtCompact(j.total_output_tokens) + " out / "
-                              + fmtCompact(j.total_cache_read_tokens) + " cached)"
-                          ),
-                          React.createElement("div", {
-                            style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.72rem" }
-                          },
-                            React.createElement("span", { style: { color: "#4ade80" } }, "\u2713 ", j.success_runs || 0),
-                            " \u00b7 ",
-                            React.createElement("span", { style: { color: (j.failure_runs || 0) > 0 ? "#ef4444" : null } }, "\u2717 ", j.failure_runs || 0)
-                          ),
-                          React.createElement("div", {
-                            style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7, whiteSpace: "pre" }
-                          },
-                            (j.projections && j.projections.schedule_display ? j.projections.schedule_display : "No schedule"),
-                            "   Last: ", fmtTime(j.last_run),
-                            j.last_model ? "   using " + j.last_model : "",
-                            "   Next: ", j.projections && j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014"
-                          )
-                        )
-                      )
-                    )
+
                   ]).flat()
                 )
               )
             )
         )
       ),
-    );
+    ))  ; // +1 close for ternary false branch div
   }
 
   PLUGINS.register("cronalytics", CronTab);
