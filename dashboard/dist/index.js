@@ -222,7 +222,7 @@
   }
 
   // ── Modal overlay for card drill-down ──────────────────────────────
-  function Modal({ isOpen, onClose, children }) {
+  function Modal({ isOpen, onClose, children, maxWidth }) {
     const backdropRef = useRef(null);
     useEffect(() => {
       if (!isOpen) return;
@@ -249,7 +249,7 @@
         color: "var(--foreground-base, var(--foreground))",
         border: "1px solid var(--color-border)",
         borderRadius: "0.5rem",
-        width: "100%", maxWidth: "28rem",
+        width: "100%", maxWidth: maxWidth || "28rem",
         maxHeight: "85vh",
         overflow: "auto",
         boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)",
@@ -356,87 +356,72 @@
     );
   }
 
-  function JobDetailView({ jobId, days, outcome, sortKey, sortDir, onBack }) {
+  function JobDetailView({ jobId, days, outcome, sortKey, sortDir }) {
     const path = `/api/plugins/cronalytics/jobs/${encodeURIComponent(jobId)}/runs?days=${days}&outcome=${outcome}&sort_key=${sortKey}&sort_dir=${sortDir}&limit=50`;
     const runs = useApi(path);
 
-    return React.createElement("div", { style: { marginBottom: "1.5rem" } },
-      React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" } },
-        React.createElement(Button, {
-          type: "button", size: "sm", outlined: true,
-          onClick: onBack,
-          style: { display: "flex", alignItems: "center", gap: "0.25rem" }
-        }, ArrowLeftIcon(14), "Back"),
-        React.createElement("span", { style: { fontSize: "0.85rem", opacity: 0.7, fontFamily: "var(--theme-font-mono, monospace)" } },
+    return React.createElement("div", { style: { padding: "0.5rem 0.25rem 0.25rem" } },
+      React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" } },
+        React.createElement("div", { style: { fontSize: "0.85rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)" } },
+          jobId
+        ),
+        React.createElement("span", { style: { fontSize: "0.75rem", opacity: 0.5, fontFamily: "var(--theme-font-mono, monospace)" } },
           runs.data && runs.data.runs ? runs.data.runs.length + " run" + (runs.data.runs.length === 1 ? "" : "s") : ""
         )
       ),
 
-      React.createElement("div", {
-        style: {
-          background: "var(--background-raised, var(--background))",
-          border: "1px solid var(--color-border)",
-          borderRadius: "0.5rem",
-          padding: "1rem",
-        }
-      },
-        React.createElement("div", { style: { fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } },
-          jobId
-        ),
-
-        runs.loading
-          ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, "Loading runs...")
-          : runs.error
-            ? React.createElement("div", { style: { color: "#ef4444", padding: "1rem 0" } }, "Error: " + runs.error)
-            : !runs.data || !runs.data.runs || runs.data.runs.length === 0
-              ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, "No runs captured for this job.")
-              : React.createElement("div", { style: { overflow: "auto" } },
-                React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
-                  React.createElement("thead", null,
-                    React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
-                      ["Time", "Cost", "Duration", "Model", "Result"].map(h =>
-                        React.createElement("th", {
-                          key: h,
-                          style: {
-                            textAlign: h === "Time" || h === "Model" ? "left" : (h === "Result" ? "center" : "right"),
-                            padding: "0.5rem 0.35rem",
-                            fontFamily: "var(--theme-font-mono, monospace)",
-                            fontWeight: 600,
-                            borderBottom: "2px solid var(--color-border)",
-                          }
-                        }, h)
-                      )
+      runs.loading
+        ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, "Loading runs...")
+        : runs.error
+          ? React.createElement("div", { style: { color: "#ef4444", padding: "1rem 0" } }, "Error: " + runs.error)
+          : !runs.data || !runs.data.runs || runs.data.runs.length === 0
+            ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, "No runs captured for this job.")
+            : React.createElement("div", { style: { overflow: "auto" } },
+              React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
+                React.createElement("thead", null,
+                  React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
+                    ["Time", "Cost", "Duration", "Model", "Result"].map(h =>
+                      React.createElement("th", {
+                        key: h,
+                        style: {
+                          textAlign: h === "Time" || h === "Model" ? "left" : (h === "Result" ? "center" : "right"),
+                          padding: "0.5rem 0.35rem",
+                          fontFamily: "var(--theme-font-mono, monospace)",
+                          fontWeight: 600,
+                          borderBottom: "2px solid var(--color-border)",
+                        }
+                      }, h)
                     )
-                  ),
-                  React.createElement("tbody", null,
-                    runs.data.runs.map(r =>
-                      React.createElement("tr", {
-                        key: r.session_id,
-                        style: { borderBottom: "1px solid rgba(255,255,255,0.04)" }
-                      },
-                        React.createElement("td", { style: { padding: "0.4rem 0.35rem", whiteSpace: "nowrap" } },
-                          fmtTime(r.run_time)
-                        ),
-                        React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } },
-                          fmtCost(r.estimated_cost_usd)
-                        ),
-                        React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } },
-                          fmtDuration(r.duration_seconds)
-                        ),
-                        React.createElement("td", { style: { padding: "0.4rem 0.35rem" } },
-                          r.model || "—"
-                        ),
-                        React.createElement("td", { style: { textAlign: "center", padding: "0.4rem 0.35rem" } },
-                          r.success
-                            ? React.createElement("span", { style: { color: "#22c55e" } }, "✓")
-                            : React.createElement("span", { style: { color: "#ef4444" } }, "✗")
-                        )
+                  )
+                ),
+                React.createElement("tbody", null,
+                  runs.data.runs.map(r =>
+                    React.createElement("tr", {
+                      key: r.session_id,
+                      style: { borderBottom: "1px solid rgba(255,255,255,0.04)" }
+                    },
+                      React.createElement("td", { style: { padding: "0.4rem 0.35rem", whiteSpace: "nowrap" } },
+                        fmtTime(r.run_time)
+                      ),
+                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } },
+                        fmtCost(r.estimated_cost_usd)
+                      ),
+                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } },
+                        fmtDuration(r.duration_seconds)
+                      ),
+                      React.createElement("td", { style: { padding: "0.4rem 0.35rem" } },
+                        r.model || "—"
+                      ),
+                      React.createElement("td", { style: { textAlign: "center", padding: "0.4rem 0.35rem" } },
+                        r.success
+                          ? React.createElement("span", { style: { color: "#22c55e" } }, "✓")
+                          : React.createElement("span", { style: { color: "#ef4444" } }, "✗")
                       )
                     )
                   )
                 )
               )
-      )
+            )
     );
   }
 
@@ -652,18 +637,19 @@
         )
       ),
 
-      // ── Detail view OR Dashboard ───────────────────────────────────
-      selectedJobId
-        ? React.createElement(JobDetailView, {
-            key: selectedJobId,
-            jobId: selectedJobId,
-            days: days,
-            outcome: outcome,
-            sortKey: sortConfig.key === "Job" ? "run_time" : (sortConfig.key || "run_time"),
-            sortDir: sortConfig.direction || "desc",
-            onBack: () => setSelectedJobId(null),
-          })
-        : React.createElement("div", null,
+      // ── Job Detail Modal ─────────────────────────────────────────────
+      React.createElement(Modal, {
+        isOpen: !!selectedJobId,
+        onClose: () => setSelectedJobId(null),
+        maxWidth: "42rem",
+      }, selectedJobId && React.createElement(JobDetailView, {
+        key: selectedJobId,
+        jobId: selectedJobId,
+        days: days,
+        outcome: outcome,
+        sortKey: sortConfig.key === "Job" ? "run_time" : (sortConfig.key || "run_time"),
+        sortDir: sortConfig.direction || "desc",
+      })),
 
       // Summary cards
       React.createElement("div", {
@@ -1403,7 +1389,7 @@
             )
         )
       ),
-    ))  ; // +1 close for ternary false branch div
+    )  ;
   }
 
   PLUGINS.register("cronalytics", CronTab);
