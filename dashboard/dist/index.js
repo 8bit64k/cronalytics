@@ -506,17 +506,13 @@
         )
       ),
 
-      // Sparkline (always chronological — not affected by table sort)
-      runs.data && runs.data.runs && runs.data.runs.length > 0 &&
-        React.createElement(SparkLine, { runs: runs.data.runs }),
-
       runs.loading
         ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, "Loading runs...")
         : runs.error
           ? React.createElement("div", { style: { color: "#ef4444", padding: "1rem 0" } }, "Error: " + runs.error)
-          : !sortedRuns.length
-            ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, "No runs captured for this job.")
-            : React.createElement("div", { style: { overflow: "auto" } },
+            : !sortedRuns.length
+              ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, "No runs captured for this job.")
+              : React.createElement("div", { style: { overflow: "auto", position: "relative" } },
               React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
                 React.createElement("thead", null,
                   React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
@@ -539,6 +535,10 @@
                           cursor: "pointer",
                           userSelect: "none",
                           whiteSpace: "nowrap",
+                          position: "sticky",
+                          top: 0,
+                          backgroundColor: "var(--color-panel-card)",
+                          zIndex: 10,
                         }
                       }, col.label + (isActive ? (sDir === "desc" ? " ↓" : " ↑") : ""));
                     })
