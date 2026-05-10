@@ -90,6 +90,35 @@
 - `15f83e3` Frontend: replaced silver icon color with theme-safe text color + orange glow
 - `276ce28` Chore: renamed AGENT.md → AGENTS.md, added build session protocol
 
+## 2026-05-10: No_Agent (Script Job) Placeholder + Synthetic Test DB
+
+### Backend (commit `b447114`)
+- `facts.py`: `job_mode` column on `cron_runs` (`agent` | `no_agent`); `ingest_script_row()` for synthetic script runs; mode filtering on all queries; per-job script watermark helper
+- `config.py`: `OUTPUT_DIR` constant
+- `scanner.py`: dual-track sync — agent rows from `state.db` + no_agent output directory scan using `cron_runs` itself as watermark
+- `plugin_api.py`: `mode` query param on all endpoints; `script_jobs_in_window` in summary response
+
+### Frontend (commit `02fa057`)
+- `ModeToggle` toolbar component: `ALL | Agent | Script` with localStorage persistence
+- Script badge inline on Jobs Breakdown rows + expanded detail line
+- Mode column on Job Detail Modal (Script badge vs Agent text)
+- Summary footnote when ALL mode includes script jobs: *"N script job(s) at $0.00 included. Filter to isolate agent costs."*
+
+### Schema Migration (commit `0df6391`)
+- Split `SCHEMA_SQL` (table creation) from `INDEX_SQL` (index creation)
+- Auto-migrate existing DBs: `ALTER TABLE cron_runs ADD COLUMN job_mode TEXT DEFAULT 'agent'`
+
+### PLAN.md (commit `350bd85`)
+- H7 deferred to v1.1+ (troubleshooting edge case)
+- H9 marked delivered
+
+### Synthetic Test DB (`seed_test_db.py`)
+- Generates `fact.test.db` with realistic data across 10 jobs (30 days default)
+- Mix: gpt-4o-mini, gpt-4o, claude-sonnet-4 | varying frequencies, costs, durations, failure rates
+- Includes 1 no_agent job (Backup, $0.00 cost) with 30 runs
+- Total: ~2200 runs, ~$13 cost over 30 days
+- Usage: `python3 seed_test_db.py [--days N]`
+
 ## Launch Plan
 - **Date: Tuesday, May 19, 2026 at ~9:00 AM EST**
 - **Days Remaining: 11 (from May 9)**
