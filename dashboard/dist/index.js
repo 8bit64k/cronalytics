@@ -343,39 +343,65 @@
   }
 
   // ── Outcome toggle (Success / Failure / All) ─────────────────────
-  function OutcomeToggle({ selected, onChange }) {
+  function OutcomeToggle({ selected, onChange, label }) {
     const opts = [
       { label: "Success", value: "success" },
       { label: "Failure", value: "failure" },
       { label: "All", value: "both" },
     ];
     return React.createElement("div", {
-      style: { display: "flex", gap: "0.375rem", alignItems: "center" }
-    }, opts.map(o => React.createElement(Button, {
-      key: o.value,
-      type: "button",
-      size: "sm",
-      outlined: selected !== o.value,
-      onClick: () => onChange(o.value),
-    }, o.label)));
+      style: { display: "flex", gap: "0.5rem", alignItems: "center" }
+    },
+      label ? React.createElement("span", {
+        style: {
+          fontSize: "0.75rem",
+          textTransform: "uppercase",
+          opacity: 0.55,
+          fontWeight: 500,
+          letterSpacing: "0.03em",
+          lineHeight: 1,
+          userSelect: "none",
+        }
+      }, label) : null,
+      ...opts.map(o => React.createElement(Button, {
+        key: o.value,
+        type: "button",
+        size: "sm",
+        outlined: selected !== o.value,
+        onClick: () => onChange(o.value),
+      }, o.label))
+    );
   }
 
   // ── Mode toggle (Agent / No_Agent / All) ──────────────────────────
-  function ModeToggle({ selected, onChange }) {
+  function ModeToggle({ selected, onChange, label }) {
     const opts = [
       { label: "Agent", value: "agent" },
       { label: "Script", value: "no_agent" },
       { label: "All", value: "all" },
     ];
     return React.createElement("div", {
-      style: { display: "flex", gap: "0.375rem", alignItems: "center" }
-    }, opts.map(o => React.createElement(Button, {
-      key: o.value,
-      type: "button",
-      size: "sm",
-      outlined: selected !== o.value,
-      onClick: () => onChange(o.value),
-    }, o.label)));
+      style: { display: "flex", gap: "0.5rem", alignItems: "center" }
+    },
+      label ? React.createElement("span", {
+        style: {
+          fontSize: "0.75rem",
+          textTransform: "uppercase",
+          opacity: 0.55,
+          fontWeight: 500,
+          letterSpacing: "0.03em",
+          lineHeight: 1,
+          userSelect: "none",
+        }
+      }, label) : null,
+      ...opts.map(o => React.createElement(Button, {
+        key: o.value,
+        type: "button",
+        size: "sm",
+        outlined: selected !== o.value,
+        onClick: () => onChange(o.value),
+      }, o.label))
+    );
   }
 
   function ArrowLeftIcon(size) {
@@ -814,8 +840,8 @@
         }
       },
         React.createElement("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center" } },
-          React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome }),
-          React.createElement(ModeToggle, { selected: mode, onChange: setMode }),
+          React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome, label: "Outcomes" }),
+          React.createElement(ModeToggle, { selected: mode, onChange: setMode, label: "Mode" }),
         ),
         React.createElement("div", { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
           React.createElement(DaySelector, { selected: days, onChange: setDays }),
