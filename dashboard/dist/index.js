@@ -512,73 +512,76 @@
           ? React.createElement("div", { style: { color: "#ef4444", padding: "1rem 0" } }, "Error: " + runs.error)
             : !sortedRuns.length
               ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, "No runs captured for this job.")
-              : React.createElement("div", { style: { overflow: "auto", position: "relative" } },
-              React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
-                React.createElement("thead", null,
-                  React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
-                    [{label:"Time",key:"run_time",align:"left"},
+              : (() => {
+                const cols = [{label:"Time",key:"run_time",align:"left"},
                      {label:"Cost",key:"estimated_cost_usd",align:"right"},
                      {label:"Duration",key:"duration_seconds",align:"right"},
                      {label:"Tokens",key:"input_tokens",align:"right"},
                      {label:"Model",key:"model",align:"left"},
-                     {label:"Result",key:"success",align:"center"}].map(col => {
-                      const isActive = sKey === col.key;
-                      return React.createElement("th", {
-                        key: col.key,
-                        onClick: () => { setSKey(col.key); setSDir(isActive && sDir === "desc" ? "asc" : "desc"); },
-                        style: {
-                          textAlign: col.align,
-                          padding: "0.5rem 0.35rem",
-                          fontFamily: "var(--theme-font-mono, monospace)",
-                          fontWeight: 600,
-                          borderBottom: "2px solid var(--color-border)",
-                          cursor: "pointer",
-                          userSelect: "none",
-                          whiteSpace: "nowrap",
-                          position: "sticky",
-                          top: 0,
-                          backgroundColor: "var(--color-panel-card)",
-                          zIndex: 10,
-                        }
-                      }, col.label + (isActive ? (sDir === "desc" ? " ↓" : " ↑") : ""));
-                    })
-                  )
-                ),
-                React.createElement("tbody", null,
-                  sortedRuns.map(r =>
-                    React.createElement("tr", {
-                      key: r.session_id,
-                      style: { borderBottom: "1px solid rgba(255,255,255,0.04)" }
-                    },
-                      React.createElement("td", { style: { padding: "0.4rem 0.35rem", whiteSpace: "nowrap" } },
-                        fmtTime(r.run_time)
-                      ),
-                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } },
-                        fmtCost(r.estimated_cost_usd)
-                      ),
-                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } },
-                        fmtDuration(r.duration_seconds)
-                      ),
-                      React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)", whiteSpace: "nowrap" } },
-                        (function totalTok() {
-                          const total = tokTotal(r);
-                          if (total === 0) return "—";
-                          return fmtCompact(total);
-                        })()
-                      ),
-                      React.createElement("td", { style: { padding: "0.4rem 0.35rem" } },
-                        r.model || "—"
-                      ),
-                      React.createElement("td", { style: { textAlign: "center", padding: "0.4rem 0.35rem" } },
-                        r.success
-                          ? React.createElement("span", { style: { color: "#22c55e" } }, "✓")
-                          : React.createElement("span", { style: { color: "#ef4444" } }, "✗")
+                     {label:"Result",key:"success",align:"center"}];
+                return React.createElement(React.Fragment, null,
+                  React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem", tableLayout: "fixed" } },
+                    React.createElement("thead", null,
+                      React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
+                        cols.map(col => {
+                          const isActive = sKey === col.key;
+                          return React.createElement("th", {
+                            key: col.key,
+                            onClick: () => { setSKey(col.key); setSDir(isActive && sDir === "desc" ? "asc" : "desc"); },
+                            style: {
+                              textAlign: col.align,
+                              padding: "0.5rem 0.35rem",
+                              fontFamily: "var(--theme-font-mono, monospace)",
+                              fontWeight: 600,
+                              borderBottom: "2px solid var(--color-border)",
+                              cursor: "pointer",
+                              userSelect: "none",
+                              whiteSpace: "nowrap",
+                            }
+                          }, col.label + (isActive ? (sDir === "desc" ? " ↓" : " ↑") : ""));
+                        })
+                      )
+                    )
+                  ),
+                  React.createElement("div", { style: { overflow: "auto", maxHeight: "40vh" } },
+                    React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem", tableLayout: "fixed" } },
+                      React.createElement("tbody", null,
+                        sortedRuns.map(r =>
+                          React.createElement("tr", {
+                            key: r.session_id,
+                            style: { borderBottom: "1px solid rgba(255,255,255,0.04)" }
+                          },
+                            React.createElement("td", { style: { padding: "0.4rem 0.35rem", whiteSpace: "nowrap" } },
+                              fmtTime(r.run_time)
+                            ),
+                            React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } },
+                              fmtCost(r.estimated_cost_usd)
+                            ),
+                            React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } },
+                              fmtDuration(r.duration_seconds)
+                            ),
+                            React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)", whiteSpace: "nowrap" } },
+                              (function totalTok() {
+                                const total = tokTotal(r);
+                                if (total === 0) return "—";
+                                return fmtCompact(total);
+                              })()
+                            ),
+                            React.createElement("td", { style: { padding: "0.4rem 0.35rem" } },
+                              r.model || "—"
+                            ),
+                            React.createElement("td", { style: { textAlign: "center", padding: "0.4rem 0.35rem" } },
+                              r.success
+                                ? React.createElement("span", { style: { color: "#22c55e" } }, "✓")
+                                : React.createElement("span", { style: { color: "#ef4444" } }, "✗")
+                            )
+                          )
+                        )
                       )
                     )
                   )
-                )
-              )
-            )
+                );
+              })()
     );
   }
 
