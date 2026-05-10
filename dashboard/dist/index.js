@@ -224,12 +224,24 @@
   // ── Modal overlay for card drill-down ──────────────────────────────
   function Modal({ isOpen, onClose, children, maxWidth }) {
     const backdropRef = useRef(null);
+    const [bounds, setBounds] = useState(null);
     useEffect(() => {
       if (!isOpen) return;
       const onKey = (e) => { if (e.key === "Escape") onClose(); };
       document.addEventListener("keydown", onKey);
       return () => document.removeEventListener("keydown", onKey);
     }, [isOpen, onClose]);
+    useEffect(() => {
+      if (!isOpen) return;
+      function update() {
+        const el = document.querySelector("main") || document.body;
+        const r = el.getBoundingClientRect();
+        setBounds({ top: r.top, left: r.left, width: r.width, height: r.height });
+      }
+      update();
+      window.addEventListener("resize", update);
+      return () => window.removeEventListener("resize", update);
+    }, [isOpen]);
     if (!isOpen) return null;
     return React.createElement("div", {
       ref: backdropRef,
@@ -237,7 +249,11 @@
       "aria-modal": true,
       onClick: (e) => { if (e.target === backdropRef.current) onClose(); },
       style: {
-        position: "fixed", inset: 0,
+        position: "fixed",
+        top: (bounds && bounds.top) || 0,
+        left: (bounds && bounds.left) || 0,
+        width: (bounds && bounds.width) || "100%",
+        height: (bounds && bounds.height) || "100%",
         background: "rgba(0,0,0,0.78)",
         zIndex: 1000,
         display: "flex", alignItems: "center", justifyContent: "center",
