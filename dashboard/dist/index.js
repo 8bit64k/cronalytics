@@ -348,7 +348,7 @@
         outlined: true,
         onClick: applyCustom,
         title: "Apply custom days",
-        style: { paddingLeft: "0.4rem", paddingRight: "0.4rem", minWidth: "auto" }
+        style: { paddingLeft: "0.55rem", paddingRight: "0.55rem", minWidth: "auto", fontSize: "0.9rem" }
       }, "→")
     );
   }
