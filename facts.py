@@ -429,7 +429,7 @@ def query_job_runs(
     where = " WHERE " + " AND ".join(conditions)
 
     # Safe column whitelist — only allow known sortable columns
-    safe_cols = {"run_time", "estimated_cost_usd", "duration_seconds", "success", "model"}
+    safe_cols = {"run_time", "estimated_cost_usd", "duration_seconds", "success", "model", "input_tokens"}
     order_col = sort_key if sort_key in safe_cols else "run_time"
     order_dir = "DESC" if sort_dir == "desc" else "ASC"
 
