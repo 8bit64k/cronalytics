@@ -360,6 +360,24 @@
     }, o.label)));
   }
 
+  // ── Mode toggle (Agent / No_Agent / All) ──────────────────────────
+  function ModeToggle({ selected, onChange }) {
+    const opts = [
+      { label: "Agent", value: "agent" },
+      { label: "Script", value: "no_agent" },
+      { label: "All", value: "all" },
+    ];
+    return React.createElement("div", {
+      style: { display: "flex", gap: "0.375rem", alignItems: "center" }
+    }, opts.map(o => React.createElement(Button, {
+      key: o.value,
+      type: "button",
+      size: "sm",
+      outlined: selected !== o.value,
+      onClick: () => onChange(o.value),
+    }, o.label)));
+  }
+
   function ArrowLeftIcon(size) {
     return React.createElement("svg", {
       xmlns: "http://www.w3.org/2000/svg",
@@ -518,6 +536,7 @@
                      {label:"Duration",key:"duration_seconds",align:"right"},
                      {label:"Tokens",key:"input_tokens",align:"right"},
                      {label:"Model",key:"model",align:"left"},
+                     {label:"Mode",key:"job_mode",align:"center"},
                      {label:"Result",key:"success",align:"center"}];
                 return React.createElement(React.Fragment, null,
                   React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem", tableLayout: "fixed" } },
@@ -571,6 +590,11 @@
                               r.model || "—"
                             ),
                             React.createElement("td", { style: { textAlign: "center", padding: "0.4rem 0.35rem" } },
+                              r.job_mode === "no_agent"
+                                ? React.createElement(Badge, { size: "xs", style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.7 } }, "Script")
+                                : React.createElement("span", { style: { fontSize: "0.65rem", opacity: 0.45 } }, "Agent")
+                            ),
+                            React.createElement("td", { style: { textAlign: "center", padding: "0.4rem 0.35rem" } },
                               r.success
                                 ? React.createElement("span", { style: { color: "#22c55e" } }, "✓")
                                 : React.createElement("span", { style: { color: "#ef4444" } }, "✗")
@@ -609,8 +633,19 @@
         try { localStorage.setItem("cronalytics:outcome", v); } catch {}
         setOutcomeRaw(v);
       };
-      const summary = useApi("/api/plugins/cronalytics/summary?days=" + days + "&outcome=" + outcome);
-      const jobs = useApi("/api/plugins/cronalytics/jobs?days=" + days + "&outcome=" + outcome);
+      const [mode, setModeRaw] = useState(() => {
+        try {
+          const saved = localStorage.getItem("cronalytics:mode");
+          if (saved) return saved;
+        } catch {}
+        return "all";
+      });
+      const setMode = (v) => {
+        try { localStorage.setItem("cronalytics:mode", v); } catch {}
+        setModeRaw(v);
+      };
+      const summary = useApi("/api/plugins/cronalytics/summary?days=" + days + "&outcome=" + outcome + "&mode=" + mode);
+      const jobs = useApi("/api/plugins/cronalytics/jobs?days=" + days + "&outcome=" + outcome + "&mode=" + mode);
       const [syncing, setSyncing] = useState(false);
       const [syncInfo, setSyncInfo] = useState(null);
 
@@ -778,7 +813,10 @@
           borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))"
         }
       },
-        React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome }),
+        React.createElement("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center" } },
+          React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome }),
+          React.createElement(ModeToggle, { selected: mode, onChange: setMode }),
+        ),
         React.createElement("div", { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
           React.createElement(DaySelector, { selected: days, onChange: setDays }),
           React.createElement(Button, {
@@ -1440,6 +1478,9 @@
           )
         );
       })(),
+      mode === "all" && s.script_jobs_in_window > 0 && React.createElement("div", {
+        style: { fontSize: "0.65rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)", marginBottom: "0.5rem", paddingLeft: "0.25rem" }
+      }, s.script_jobs_in_window + " script job" + (s.script_jobs_in_window === 1 ? "" : "s") + " at $0.00 included. Filter to isolate agent costs."),
       // Jobs Breakdown
       React.createElement(Card, { style: { marginBottom: "1.5rem" } },
         React.createElement(CardHeader, null,
@@ -1510,7 +1551,13 @@
                       onClick: () => setExpandedId(expandedId === j.job_id ? null : j.job_id)
                     },
                       React.createElement("td", { style: { padding: "0.4rem 0.35rem" } },
-                        React.createElement("div", { style: { fontSize: "0.78rem", fontWeight: 500 } }, j.name || j.job_id)
+                        React.createElement("div", { style: { fontSize: "0.78rem", fontWeight: 500, display: "flex", alignItems: "center", gap: "0.4rem" } },
+                          j.name || j.job_id,
+                          j.job_mode === "no_agent" && React.createElement(Badge, {
+                            size: "xs",
+                            style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.7 }
+                          }, "Script")
+                        )
                       ),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, (j.runs || 0).toLocaleString()),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtDuration(j.avg_duration)),
@@ -1564,12 +1611,13 @@
                           ),
                           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
                             React.createElement("div", {
-                              style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7, whiteSpace: "pre" }
+                              style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7, whiteSpace: "pre", display: "flex", alignItems: "center", gap: "0.5rem" }
                             },
                               (j.projections && j.projections.schedule_display ? j.projections.schedule_display : "No schedule"),
                               "   Last: ", fmtTime(j.last_run),
                               j.last_model ? "   using " + j.last_model : "",
-                              "   Next: ", j.projections && j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014"
+                              "   Next: ", j.projections && j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014",
+                              j.job_mode === "no_agent" && React.createElement("span", { style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.5, marginLeft: "0.25rem" } }, "[Script]")
                             ),
                             React.createElement("button", {
                               type: "button",
