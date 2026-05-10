@@ -356,6 +356,66 @@
     );
   }
 
+  // ── Sparkline: cost by run, color-coded by model ──────────────────
+  function SparkLine({ runs }) {
+    const [hoverIdx, setHoverIdx] = useState(-1);
+    if (!runs || runs.length === 0) return null;
+    const chrono = [...runs].sort((a, b) => a.run_time - b.run_time);
+
+    const maxCost = Math.max(...chrono.map(r => r.estimated_cost_usd || 0), 0.0001);
+    const h = 60;
+    const w = 4;
+    const gap = 1;
+    const totalW = chrono.length * (w + gap);
+
+    function modelColor(m) {
+      if (!m) return "var(--foreground-base, #888)";
+      if (m.includes("kimi")) return "#22c55e";
+      if (m.includes("gemini")) return "#f59e0b";
+      if (m.includes("gpt")) return "#3b82f6";
+      if (m.includes("claude")) return "#d946ef";
+      return "var(--foreground-base, #888)";
+    }
+    function shortModel(m) {
+      if (!m) return "—";
+      return m.split("/").pop();
+    }
+
+    const hoverRun = hoverIdx >= 0 ? chrono[hoverIdx] : null;
+
+    return React.createElement("div", { style: { marginBottom: "1rem", position: "relative" } },
+      React.createElement("svg", {
+        viewBox: `0 0 ${totalW} ${h}`,
+        style: { width: "100%", height: h + "px", display: "block" }
+      }, chrono.map((r, i) => {
+        const barH = (r.estimated_cost_usd || 0) / maxCost * h;
+        return React.createElement("rect", {
+          key: r.session_id,
+          x: i * (w + gap),
+          y: h - barH,
+          width: w,
+          height: Math.max(barH, 1),
+          fill: modelColor(r.model),
+          opacity: hoverIdx >= 0 && hoverIdx !== i ? 0.35 : 1,
+          style: { transition: "opacity 0.15s", cursor: "pointer" },
+          onMouseEnter: () => setHoverIdx(i),
+          onMouseLeave: () => setHoverIdx(-1),
+        });
+      })),
+      hoverRun && React.createElement("div", {
+        style: {
+          fontSize: "0.68rem",
+          fontFamily: "var(--theme-font-mono, monospace)",
+          opacity: 0.65,
+          marginTop: "0.25rem",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }
+      }, fmtTime(hoverRun.run_time) + " · " + fmtCost(hoverRun.estimated_cost_usd) + " · " + shortModel(hoverRun.model))
+    );
+  }
+
   function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir }) {
     const [sKey, setSKey] = useState(sortKey);
     const [sDir, setSDir] = useState(sortDir);
@@ -389,6 +449,10 @@
           )
         )
       ),
+
+      // Sparkline (always chronological — not affected by table sort)
+      runs.data && runs.data.runs && runs.data.runs.length > 0 &&
+        React.createElement(SparkLine, { runs: runs.data.runs }),
 
       runs.loading
         ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, "Loading runs...")
