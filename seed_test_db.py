@@ -47,16 +47,17 @@ _MODELS = {
 # None → no_agent (zero cost).  All others default ~10% failure.
 # Costs and durations tuned per job name / schedule frequency.
 _PROFILES = {
-    "841aee933270": (None,              0.00,  30,  0.10),  # backup — no_agent
+    "841aee933270": ("gpt-4o",          0.020, 30,  0.10),  # backup — agent runs script, reports result
     "8ce310056bdb": ("claude-sonnet-4", 0.035, 180, 0.10),  # tui skill check (weekly, reasoning-heavy)
     "67541bf6e230": ("gpt-4o",          0.075, 90,  0.10),  # daily journal (medium-long)
     "eb1d4a33d30a": ("claude-sonnet-4", 0.095, 120, 0.10),  # security briefing (analysis-heavy)
     "74a667c54db4": ("gpt-4o",          0.110, 150, 0.10),  # AI digest (biggest daily)
     "d42a624c85b9": ("o3-mini",         0.008, 25,  0.10),  # gateway check (frequent, short, reasoning)
-    "abcab3ad4d10": ("o3-mini",         0.005, 20,  0.10),  # disk watchdog (weekly)
-    "d2d2a63f9111": ("o3-mini",         0.004, 15,  0.10),  # dashboard watchdog
-    "e15e1a865aa5": ("o3-mini",         0.004, 15,  0.10),  # gateway watchdog
-    "306054cd4fc3": ("o3-mini",         0.004, 15,  0.10),  # RAM watchdog
+    # Watchdogs — no_agent (script stdout delivered directly)
+    "abcab3ad4d10": (None,              0.00,  10,  0.05),  # disk watchdog (weekly)
+    "d2d2a63f9111": (None,              0.00,  10,  0.05),  # dashboard watchdog
+    "e15e1a865aa5": (None,              0.00,  10,  0.05),  # gateway watchdog
+    "306054cd4fc3": (None,              0.00,  10,  0.05),  # RAM watchdog
 }
 
 def _job_schedule_to_interval(schedule_str: str):
