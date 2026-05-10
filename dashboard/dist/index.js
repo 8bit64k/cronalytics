@@ -377,7 +377,7 @@
   function ModeToggle({ selected, onChange, label }) {
     const opts = [
       { label: "Agent", value: "agent" },
-      { label: "Script", value: "no_agent" },
+      { label: "No Agent", value: "no_agent" },
       { label: "All", value: "all" },
     ];
     return React.createElement("div", {
@@ -841,7 +841,7 @@
           borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))"
         }
       },
-        React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" } },
+        React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "1.5rem", alignItems: "center" } },
           React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome, label: "Outcomes" }),
           React.createElement(ModeToggle, { selected: mode, onChange: setMode, label: "Mode" }),
         ),
