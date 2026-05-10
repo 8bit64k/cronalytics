@@ -830,8 +830,10 @@
           top: 0,
           zIndex: 10,
           display: "flex",
+          flexWrap: "wrap",
           justifyContent: "space-between",
           alignItems: "center",
+          gap: "0.5rem 0.75rem",
           padding: "0.5rem 0",
           marginBottom: "0.5rem",
           background: "var(--background, rgba(12,12,12,0.88))",
@@ -839,11 +841,11 @@
           borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))"
         }
       },
-        React.createElement("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center" } },
+        React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" } },
           React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome, label: "Outcomes" }),
           React.createElement(ModeToggle, { selected: mode, onChange: setMode, label: "Mode" }),
         ),
-        React.createElement("div", { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
+        React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" } },
           React.createElement(DaySelector, { selected: days, onChange: setDays }),
           React.createElement(Button, {
             type: "button",
