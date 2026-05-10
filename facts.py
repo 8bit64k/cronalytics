@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS cron_runs (
     tool_call_count INTEGER DEFAULT 0,
     end_reason TEXT,
     success BOOLEAN,
+    job_mode TEXT DEFAULT 'agent',
     ingested_at REAL DEFAULT (unixepoch())
 );
 
@@ -55,6 +56,8 @@ CREATE INDEX IF NOT EXISTS idx_cron_runs_run_time
     ON cron_runs(run_time DESC);
 CREATE INDEX IF NOT EXISTS idx_cron_runs_ingested
     ON cron_runs(ingested_at);
+CREATE INDEX IF NOT EXISTS idx_cron_runs_job_mode
+    ON cron_runs(job_mode);
 """
 
 # All columns in order, for convenience when row-mapping from state.db queries.
@@ -80,6 +83,7 @@ RUN_COLUMNS: tuple[str, ...] = (
     "tool_call_count",
     "end_reason",
     "success",
+    "job_mode",
     "ingested_at",
 )
 
@@ -191,6 +195,10 @@ def ingest_row(
     end_reason = row.get("end_reason", "")
     values.append(1 if end_reason in ("cron_complete", "complete") else 0)
 
+    cols.append("job_mode")
+    placeholders.append("?")
+    values.append("agent")
+
     sql = (
         f"INSERT OR IGNORE INTO cron_runs ({', '.join(cols)}) "
         f"VALUES ({', '.join(placeholders)})"
@@ -202,6 +210,58 @@ def ingest_row(
         return cursor.rowcount == 1
     except sqlite3.Error as exc:
         logger.warning("[facts] DB error inserting %s: %s", session_id, exc)
+        return False
+
+
+def ingest_script_row(
+    db_path: Path,
+    job_id: str,
+    run_time: float,
+) -> bool:
+    """Insert a synthetic row for a no_agent (script-only) cron job run.
+
+    Args:
+        db_path: Path to the plugin-owned SQLite fact DB.
+        job_id: The cron job ID.
+        run_time: Unix timestamp of the run (from output filename).
+
+    Returns:
+        True if inserted (or already present), False on error.
+    """
+    conn = get_conn(db_path)
+    cursor = conn.cursor()
+
+    session_id = f"script_{job_id}_{int(run_time)}"
+
+    cols = [
+        "session_id", "job_id", "run_time", "ended_at",
+        "estimated_cost_usd", "actual_cost_usd",
+        "input_tokens", "output_tokens", "reasoning_tokens",
+        "cache_read_tokens", "cache_write_tokens",
+        "api_call_count", "message_count", "tool_call_count",
+        "duration_seconds", "model", "success", "job_mode",
+    ]
+    placeholders = ["?"] * len(cols)
+    values = [
+        session_id, job_id, run_time, run_time,
+        0.0, 0.0,
+        0, 0, 0,
+        0, 0,
+        0, 0, 0,
+        None, None, 1, "no_agent",
+    ]
+
+    sql = (
+        f"INSERT OR IGNORE INTO cron_runs ({', '.join(cols)}) "
+        f"VALUES ({', '.join(placeholders)})"
+    )
+
+    try:
+        cursor.execute(sql, values)
+        conn.commit()
+        return cursor.rowcount == 1
+    except sqlite3.Error as exc:
+        logger.warning("[facts] DB error inserting script row %s: %s", session_id, exc)
         return False
 
 
@@ -229,7 +289,7 @@ def row_exists(db_path: Path, session_id: str) -> bool:
 # Aggregation queries (Phase 3 API)
 # ---------------------------------------------------------------------------
 
-def query_summary(db_path: Path, days: int = 30, outcome: str = "both") -> dict[str, Any]:
+def query_summary(db_path: Path, days: int = 30, outcome: str = "both", mode: str = "all") -> dict[str, Any]:
     """Return aggregate stats for cron runs in the last N days (0 = all time)."""
     conn = get_conn(db_path)
 
@@ -241,6 +301,9 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "both") -> dict[
     if outcome in ("success", "failure"):
         conditions.append("success = ?")
         params.append(1 if outcome == "success" else 0)
+    if mode in ("agent", "no_agent"):
+        conditions.append("job_mode = ?")
+        params.append(mode)
     where = " WHERE " + " AND ".join(conditions) if conditions else ""
 
     cursor = conn.execute(
@@ -261,7 +324,7 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "both") -> dict[
     total_runs, total_est_cost, total_act_cost, total_in, total_out, total_cr, total_cw, total_dur, avg_dur = cursor.fetchone()
     total_tokens = (total_in or 0) + (total_out or 0) + (total_cr or 0) + (total_cw or 0)
 
-    # Cost by model (only rows with known cost, respecting outcome filter)
+    # Cost by model (only rows with known cost, respecting outcome+mode filter)
     cost_conds = conditions + ["estimated_cost_usd IS NOT NULL"]
     cost_where = " WHERE " + " AND ".join(cost_conds)
 
@@ -279,7 +342,7 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "both") -> dict[
         for r in cursor.fetchall()
     ]
 
-    # Previous period for trend (respect outcome filter)
+    # Previous period for trend (respect outcome+mode filter)
     prev_info = {}
     trend = "→"
     if days > 0:
@@ -289,6 +352,9 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "both") -> dict[
         if outcome in ("success", "failure"):
             prev_conds.append("success = ?")
             prev_params.append(1 if outcome == "success" else 0)
+        if mode in ("agent", "no_agent"):
+            prev_conds.append("job_mode = ?")
+            prev_params.append(mode)
         prev_where = " WHERE " + " AND ".join(prev_conds)
         cursor = conn.execute(
             "SELECT count(*), SUM(estimated_cost_usd) FROM cron_runs" + prev_where,
@@ -306,7 +372,7 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "both") -> dict[
             elif delta < -0.05:
                 trend = "↓"
 
-    # Success / failure split (filtered by outcome when applicable)
+    # Success / failure split (filtered by outcome+mode when applicable)
     cursor = conn.execute(
         f"""
         SELECT count(CASE WHEN success = 1 THEN 1 END),
@@ -341,7 +407,7 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "both") -> dict[
     }
 
 
-def query_jobs(db_path: Path, days: int = 30, outcome: str = "both") -> list[dict[str, Any]]:
+def query_jobs(db_path: Path, days: int = 30, outcome: str = "both", mode: str = "all") -> list[dict[str, Any]]:
     """Return per-job aggregates (0 = all time)."""
     conn = get_conn(db_path)
 
@@ -353,6 +419,9 @@ def query_jobs(db_path: Path, days: int = 30, outcome: str = "both") -> list[dic
     if outcome in ("success", "failure"):
         conditions.append("success = ?")
         params.append(1 if outcome == "success" else 0)
+    if mode in ("agent", "no_agent"):
+        conditions.append("job_mode = ?")
+        params.append(mode)
     where = " WHERE " + " AND ".join(conditions) if conditions else ""
 
     cursor = conn.execute(
@@ -373,7 +442,8 @@ def query_jobs(db_path: Path, days: int = 30, outcome: str = "both") -> list[dic
                count(CASE WHEN success = 1 THEN 1 END) AS success_runs,
                count(CASE WHEN success = 0 THEN 1 END) AS failure_runs,
                SUM(CASE WHEN success = 1 THEN estimated_cost_usd END) AS success_cost,
-               SUM(CASE WHEN success = 0 THEN estimated_cost_usd END) AS failure_cost
+               SUM(CASE WHEN success = 0 THEN estimated_cost_usd END) AS failure_cost,
+               MAX(job_mode) AS job_mode
         FROM cron_runs{where}
         GROUP BY job_id
         ORDER BY total_cost DESC
@@ -400,6 +470,7 @@ def query_jobs(db_path: Path, days: int = 30, outcome: str = "both") -> list[dic
             "failure_runs": r[14] or 0,
             "success_cost": round(r[15], 4) if r[15] is not None else None,
             "failure_cost": round(r[16], 4) if r[16] is not None else None,
+            "job_mode": r[17] or "agent",
         }
         for r in cursor.fetchall()
     ]
@@ -407,7 +478,8 @@ def query_jobs(db_path: Path, days: int = 30, outcome: str = "both") -> list[dic
 
 def query_job_runs(
     db_path: Path, job_id: str, limit: int = 50, days: int = 0,
-    outcome: str = "both", sort_key: str = "run_time", sort_dir: str = "desc"
+    outcome: str = "both", sort_key: str = "run_time", sort_dir: str = "desc",
+    mode: str = "all",
 ) -> list[dict[str, Any]]:
     """Return individual run history for a specific job (0 = all time).
 
@@ -426,6 +498,10 @@ def query_job_runs(
         conditions.append("success = ?")
         params.append(1 if outcome == "success" else 0)
 
+    if mode in ("agent", "no_agent"):
+        conditions.append("job_mode = ?")
+        params.append(mode)
+
     where = " WHERE " + " AND ".join(conditions)
 
     # Safe column whitelist — only allow known sortable columns
@@ -441,7 +517,7 @@ def query_job_runs(
                cache_read_tokens, cache_write_tokens,
                estimated_cost_usd, actual_cost_usd,
                cost_status, billing_provider,
-               end_reason, success
+               end_reason, success, job_mode
         FROM cron_runs
         {where}
         ORDER BY {order_col} {order_dir}
@@ -456,9 +532,20 @@ def query_job_runs(
         "cache_read_tokens", "cache_write_tokens",
         "estimated_cost_usd", "actual_cost_usd",
         "cost_status", "billing_provider",
-        "end_reason", "success",
+        "end_reason", "success", "job_mode",
     ]
     return [dict(zip(cols, r)) for r in cursor.fetchall()]
+
+
+def query_script_watermark(db_path: Path, job_id: str) -> float:
+    """Return the max run_time for a no_agent job, or 0.0 if none."""
+    conn = get_conn(db_path)
+    cursor = conn.execute(
+        "SELECT COALESCE(MAX(run_time), 0) FROM cron_runs WHERE job_id = ? AND job_mode = 'no_agent'",
+        (job_id,),
+    )
+    row = cursor.fetchone()
+    return float(row[0]) if row else 0.0
 
 
 def query_health(db_path: Path) -> dict[str, Any]:
@@ -485,7 +572,7 @@ def query_health(db_path: Path) -> dict[str, Any]:
     }
 
 
-def query_models(db_path: Path, days: int = 30, outcome: str = "both") -> list[dict[str, Any]]:
+def query_models(db_path: Path, days: int = 30, outcome: str = "both", mode: str = "all") -> list[dict[str, Any]]:
     """Return per-model usage aggregates (0 = all time)."""
     conn = get_conn(db_path)
 
@@ -497,6 +584,9 @@ def query_models(db_path: Path, days: int = 30, outcome: str = "both") -> list[d
     if outcome in ("success", "failure"):
         conditions.append("success = ?")
         params.append(1 if outcome == "success" else 0)
+    if mode in ("agent", "no_agent"):
+        conditions.append("job_mode = ?")
+        params.append(mode)
     where = " WHERE " + " AND ".join(conditions) if conditions else ""
 
     cursor = conn.execute(
@@ -528,7 +618,7 @@ def query_models(db_path: Path, days: int = 30, outcome: str = "both") -> list[d
     ]
 
 
-def query_trends(db_path: Path, days: int = 30, outcome: str = "both") -> list[dict[str, Any]]:
+def query_trends(db_path: Path, days: int = 30, outcome: str = "both", mode: str = "all") -> list[dict[str, Any]]:
     """Return daily cost and run-count trend (0 = all time)."""
     conn = get_conn(db_path)
 
@@ -540,6 +630,9 @@ def query_trends(db_path: Path, days: int = 30, outcome: str = "both") -> list[d
     if outcome in ("success", "failure"):
         conditions.append("success = ?")
         params.append(1 if outcome == "success" else 0)
+    if mode in ("agent", "no_agent"):
+        conditions.append("job_mode = ?")
+        params.append(mode)
     where = " WHERE " + " AND ".join(conditions) if conditions else ""
 
     cursor = conn.execute(

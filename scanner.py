@@ -15,11 +15,13 @@ import json
 import logging
 import sqlite3
 import time
+import datetime
 from pathlib import Path
 from typing import Any
 
 try:
     from . import facts
+    from . import config
     from .logger import logger
 except ImportError:
     # Running as standalone (importlib) — load sibling modules dynamically.
@@ -40,6 +42,7 @@ except ImportError:
         return mod
 
     facts = _load_module("facts")
+    config = _load_module("config")
     logger = logging.getLogger("cronalytics")
 
 # ---------------------------------------------------------------------------
@@ -106,6 +109,75 @@ def _fetch_new_sessions(
     return rows
 
 
+def _load_jobs_json(jobs_path: Path) -> list[dict[str, Any]]:
+    """Read jobs.json and return a list of no_agent job entries."""
+    if not jobs_path.exists():
+        return []
+    try:
+        data = json.loads(jobs_path.read_text())
+        jobs = data.get("jobs", [])
+        return [
+            {"id": j["id"], "name": j.get("name", j["id"])}
+            for j in jobs
+            if isinstance(j, dict) and j.get("no_agent") is True
+        ]
+    except Exception:
+        return []
+
+
+def _scan_output_dirs(
+    output_dir: Path,
+    jobs_json_path: Path,
+    fact_db: Path,
+) -> tuple[int, int]:
+    """Scan output directories for no_agent job runs and insert synthetic rows.
+
+    Returns (inserted, skipped).
+    """
+    no_agent_jobs = _load_jobs_json(jobs_json_path)
+    if not no_agent_jobs:
+        return 0, 0
+
+    inserted = 0
+    skipped = 0
+
+    for job in no_agent_jobs:
+        job_id = job["id"]
+        job_output_dir = output_dir / job_id
+        if not job_output_dir.exists():
+            continue
+
+        watermark = facts.query_script_watermark(fact_db, job_id)
+
+        # Scan all .md files in the job's output directory
+        for md_file in sorted(job_output_dir.glob("*.md")):
+            # Parse filename: YYYY-MM-DD_HH-MM-SS.md
+            try:
+                ts_str = md_file.stem  # "2026-05-10_10-53-01"
+                parts = ts_str.split("_")
+                if len(parts) != 2:
+                    continue
+                date_part = parts[0]  # "2026-05-10"
+                time_part = parts[1]  # "10-53-01"
+                dt = datetime.datetime.strptime(
+                    f"{date_part}_{time_part}", "%Y-%m-%d_%H-%M-%S"
+                )
+                run_time = dt.timestamp()
+            except Exception:
+                continue
+
+            if run_time <= watermark:
+                skipped += 1
+                continue
+
+            if facts.ingest_script_row(fact_db, job_id, run_time):
+                inserted += 1
+            else:
+                skipped += 1
+
+    return inserted, skipped
+
+
 # ---------------------------------------------------------------------------
 # Batch ingestion
 # ---------------------------------------------------------------------------
@@ -141,7 +213,7 @@ def run_sync(
     fact_db: Path,
     watermark_path: Path,
 ) -> dict[str, Any]:
-    """Run one reconciliation pass.
+    """Run one reconciliation pass (agent sessions + no_agent output dirs).
 
     Returns a summary dict with counts and timestamps.
     """
@@ -151,37 +223,57 @@ def run_sync(
     logger.info("[scanner] Starting sync since ended_at=%s", since)
     started = time.time()
 
+    # --- Track A: Agent jobs from state.db ---
     rows = _fetch_new_sessions(state_db, since)
-    if not rows:
-        logger.info("[scanner] No new cron sessions found")
+    agent_inserted, agent_skipped = 0, 0
+    if rows:
+        agent_inserted, agent_skipped = _ingest_batch(fact_db, rows)
+        new_watermark = max(
+            since,
+            *(float(r["ended_at"] or 0) for r in rows),
+        )
+        _write_watermark(watermark_path, new_watermark, agent_inserted + agent_skipped)
+        logger.info(
+            "[scanner] Agent sync: %d inserted, %d skipped, watermark=%s",
+            agent_inserted, agent_skipped, new_watermark,
+        )
+    else:
+        logger.info("[scanner] No new agent sessions found")
         _write_watermark(watermark_path, since, wm.get("rows_synced", 0))
-        return {
-            "inserted": 0,
-            "skipped": 0,
-            "new_watermark": since,
-            "elapsed_ms": round((time.time() - started) * 1000, 1),
-        }
 
-    inserted, skipped = _ingest_batch(fact_db, rows)
-    new_watermark = max(
-        since,
-        *(float(r["ended_at"] or 0) for r in rows),
-    )
-
-    _write_watermark(watermark_path, new_watermark, inserted + skipped)
+    # --- Track B: No-agent jobs from output directories ---
+    script_inserted, script_skipped = 0, 0
+    try:
+        script_inserted, script_skipped = _scan_output_dirs(
+            config.OUTPUT_DIR,
+            config.HERMES_HOME / "cron" / "jobs.json",
+            fact_db,
+        )
+        if script_inserted or script_skipped:
+            logger.info(
+                "[scanner] Script sync: %d inserted, %d skipped",
+                script_inserted, script_skipped,
+            )
+    except Exception as exc:
+        logger.warning("[scanner] Script sync failed: %s", exc)
 
     elapsed = time.time() - started
     logger.info(
-        "[scanner] Sync complete: %d inserted, %d skipped, "
-        "watermark=%s, %.2fs",
-        inserted, skipped, new_watermark, elapsed,
+        "[scanner] Sync complete: agent=%d/%d, script=%d/%d, %.2fs",
+        agent_inserted, agent_skipped,
+        script_inserted, script_skipped,
+        elapsed,
     )
 
     return {
-        "inserted": inserted,
-        "skipped": skipped,
+        "inserted": agent_inserted + script_inserted,
+        "skipped": agent_skipped + script_skipped,
+        "agent_inserted": agent_inserted,
+        "agent_skipped": agent_skipped,
+        "script_inserted": script_inserted,
+        "script_skipped": script_skipped,
         "total_candidates": len(rows),
-        "new_watermark": new_watermark,
+        "new_watermark": since if not rows else max(since, *(float(r["ended_at"] or 0) for r in rows)),
         "elapsed_ms": round(elapsed * 1000, 1),
     }
 

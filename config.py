@@ -39,3 +39,6 @@ WATERMARK_FILE: Path = PLUGIN_DIR / "watermark.json"
 
 # Pending queue backing file — survives gateway restarts.
 PENDING_FILE: Path = PLUGIN_DIR / "pending.jsonl"
+
+# Cron output directory — no_agent jobs write .md artifacts here.
+OUTPUT_DIR: Path = HERMES_HOME / "cron" / "output"
