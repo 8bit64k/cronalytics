@@ -1,70 +1,98 @@
 #!/usr/bin/env python3
-"""Generate a synthetic fact.test.db for visual testing of Cronalytics.
+r"""Generate a synthetic fact.test.db using Nick's REAL cron job IDs.
 
 Usage:
-    python3 seed_test_db.py          # creates/overwrites fact.test.db
-    python3 seed_test_db.py --days 7 # shorter window for edge-case testing
+    python3 seed_test_db.py          # 120 days, 10% failure rate
+    python3 seed_test_db.py --days 30  # override window
 """
-
 import argparse
+import json
 import random
 import sqlite3
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
-try:
-    from config import PLUGIN_DIR
-except ImportError:
-    PLUGIN_DIR = Path(__file__).parent
+random.seed(2026)  # deterministic for reproducible visual testing
 
-# ── Configuration ──────────────────────────────────────────────────────
+CONFIG_DIR = Path.home() / ".hermes" / "cron"
+JOBS_PATH = CONFIG_DIR / "jobs.json"
+PLUGIN_DIR = Path(__file__).parent
 
-JOBS = [
-    # (job_id, name, schedule_cron, model, avg_cost, avg_dur_sec, failure_rate)
-    ("a1b2c3d4e5f6", "Daily Newsletter",      "0 8 * * *",   "gpt-4o-mini",       0.002,  12, 0.02),
-    ("b2c3d4e5f6a7", "Hourly Health Check",   "0 * * * *",   "claude-sonnet-4",   0.008,  45, 0.05),
-    ("c3d4e5f6a7b8", "4h Trend Analysis",     "0 */4 * * *", "gpt-4o",            0.045, 120, 0.08),
-    ("d4e5f6a7b8c9", "Weekly Report",         "0 9 * * 1",   "claude-sonnet-4",   0.120, 300, 0.10),
-    ("e5f6a7b8c9d0", "Git Sync",              "*/30 * * * *","gpt-4o-mini",       0.001,   5, 0.01),
-    ("f6a7b8c9d0e1", "Backup",                "0 3 * * *",   None,                0.000,  60, 0.00),  # no_agent
-    ("a7b8c9d0e1f2", "SEO Audit",             "0 6 * * 0",   "gpt-4o",            0.080, 180, 0.15),
-    ("b8c9d0e1f2a3", "Security Scan",         "0 */6 * * *", "claude-sonnet-4",   0.035,  90, 0.20),
-    ("c9d0e1f2a3b4", "Content Summarizer",    "0 */2 * * *", "gpt-4o-mini",       0.003,  20, 0.03),
-    ("d0e1f2a3b4c5", "Monthly Billing Recon", "0 5 1 * *",   "gpt-4o",            0.060, 240, 0.05),
-]
+# ── Load REAL job IDs + schedules from jobs.json ────────────────────────────
+def _load_real_jobs():
+    try:
+        jobs = json.loads(JOBS_PATH.read_text()).get("jobs", [])
+    except Exception:
+        raise SystemExit(f"Cannot read {JOBS_PATH} — run in a real Hermes environment")
 
-MODELS = {
-    "gpt-4o-mini":      {"provider": "openai",     "input": 0.15,  "output": 0.60},
-    "gpt-4o":           {"provider": "openai",     "input": 2.50,  "output": 10.0},
-    "claude-sonnet-4":  {"provider": "anthropic",  "input": 3.00,  "output": 15.0},
-    "claude-haiku-3":   {"provider": "anthropic",  "input": 0.25,  "output": 1.25},
+    result = []
+    for j in jobs:
+        jid = j.get("id")
+        name = j.get("name", "Unknown")
+        sched = j.get("schedule_display", j.get("schedule", {}).get("display", "?"))
+        no_agent = j.get("no_agent", False)
+        result.append((jid, name, str(sched), no_agent))
+    return result
+
+# ── Model / cost mapping (medium-to-high tier, 10% fail rate) ───────────────
+_MODELS = {
+    "gpt-4o":           {"provider": "openai",     "input": 2.50,  "output": 10.00},
+    "claude-sonnet-4":  {"provider": "anthropic",  "input": 3.00,  "output": 15.00},
     "o3-mini":          {"provider": "openai",     "input": 1.10,  "output": 4.40},
 }
 
-def fmt_iso(dt: datetime) -> str:
-    return dt.strftime("%Y-%m-%dT%H:%M:%S")
+# job_id → (model_or_none, avg_cost, avg_dur_sec, failure_rate)
+# None → no_agent (zero cost).  All others default ~10% failure.
+# Costs and durations tuned per job name / schedule frequency.
+_PROFILES = {
+    "841aee933270": (None,              0.00,  30,  0.10),  # backup — no_agent
+    "8ce310056bdb": ("claude-sonnet-4", 0.035, 180, 0.10),  # tui skill check (weekly, reasoning-heavy)
+    "67541bf6e230": ("gpt-4o",          0.075, 90,  0.10),  # daily journal (medium-long)
+    "eb1d4a33d30a": ("claude-sonnet-4", 0.095, 120, 0.10),  # security briefing (analysis-heavy)
+    "74a667c54db4": ("gpt-4o",          0.110, 150, 0.10),  # AI digest (biggest daily)
+    "d42a624c85b9": ("o3-mini",         0.008, 25,  0.10),  # gateway check (frequent, short, reasoning)
+    "abcab3ad4d10": ("o3-mini",         0.005, 20,  0.10),  # disk watchdog (weekly)
+    "d2d2a63f9111": ("o3-mini",         0.004, 15,  0.10),  # dashboard watchdog
+    "e15e1a865aa5": ("o3-mini",         0.004, 15,  0.10),  # gateway watchdog
+    "306054cd4fc3": ("o3-mini",         0.004, 15,  0.10),  # RAM watchdog
+}
+
+def _job_schedule_to_interval(schedule_str: str):
+    """Very rough parser for the handful of schedules Nick uses."""
+    s = schedule_str.strip()
+    if "every " in s.lower():
+        # e.g. "every 360m" or "every 10080m"
+        parts = s.lower().replace("every", "").strip().split()
+        if parts:
+            num = int(parts[0].replace("m", ""))
+            return timedelta(minutes=num)
+    # cron-ish
+    if "* * *" in s or s.startswith("*/"):
+        # assume hourly-ish if first field is */something
+        return timedelta(hours=1)
+    if s.startswith("0 ") and s.endswith(" * *"):
+        return timedelta(days=1)
+    if " * * 1" in s:
+        return timedelta(weeks=1)
+    return timedelta(days=1)
 
 
-def generate_run(job, run_time: datetime) -> dict:
-    """Create a single synthetic cron run."""
-    job_id, name, cron, model, avg_cost, avg_dur, fail_rate = job
+def _generate_run(jid, name, schedule_str, no_agent, dt: datetime) -> dict:
+    model, avg_cost, avg_dur, fail_rate = _PROFILES.get(jid, ("gpt-4o", 0.050, 60, 0.10))
+    if no_agent:
+        model = None
     is_no_agent = model is None
 
-    # Jitter duration ±30%
     dur = avg_dur * random.uniform(0.7, 1.3)
-    duration_ms = int(dur * 1000)
-
     success = random.random() > fail_rate
-    end_reason = "cron_complete" if success else ("cron_error" if random.random() > 0.5 else "timeout")
+    end_reason = "cron_complete" if success else ("cron_error" if random.random() > 0.3 else "timeout")
 
-    # Token math: back out approximate tokens from cost
     if is_no_agent:
         input_tok = output_tok = cache_tok = 0
         cost_usd = 0.0
+        provider = None
     else:
-        m = MODELS.get(model, MODELS["gpt-4o-mini"])
-        # approximate: 60/40 input/output split
+        m = _MODELS.get(model, _MODELS["gpt-4o"])
         cost_per_1k = (m["input"] * 0.6 + m["output"] * 0.4) / 1000
         target_cost = avg_cost * random.uniform(0.5, 1.5)
         total_tok = int(target_cost / cost_per_1k * 1000)
@@ -72,16 +100,13 @@ def generate_run(job, run_time: datetime) -> dict:
         output_tok = int(total_tok * 0.30)
         cache_tok = int(total_tok * 0.05)
         cost_usd = round((input_tok * m["input"] + output_tok * m["output"]) / 1_000_000, 6)
-
-    # Introduce occasional zero-cost agent runs (edge case)
-    if not is_no_agent and random.random() < 0.03:
-        cost_usd = 0.0
+        provider = m["provider"]
 
     return {
-        "session_id": f"sess_{job_id}_{int(run_time.timestamp() * 1000)}",
-        "job_id": job_id,
-        "run_time": run_time.timestamp(),
-        "ended_at": (run_time + timedelta(seconds=dur)).timestamp(),
+        "session_id": f"sess_{jid}_{int(dt.timestamp() * 1000)}",
+        "job_id": jid,
+        "run_time": dt.timestamp(),
+        "ended_at": (dt + timedelta(seconds=dur)).timestamp(),
         "duration_seconds": round(dur, 1),
         "model": model,
         "input_tokens": input_tok,
@@ -93,7 +118,7 @@ def generate_run(job, run_time: datetime) -> dict:
         "actual_cost_usd": None,
         "cost_status": "estimated" if cost_usd > 0 else None,
         "cost_source": "computed",
-        "billing_provider": m["provider"] if not is_no_agent else None,
+        "billing_provider": provider,
         "api_call_count": random.randint(1, 8) if not is_no_agent else 0,
         "message_count": random.randint(2, 20) if not is_no_agent else 0,
         "tool_call_count": random.randint(0, 4) if not is_no_agent else 0,
@@ -103,9 +128,13 @@ def generate_run(job, run_time: datetime) -> dict:
     }
 
 
-def seed(db_path: Path, days: int = 30):
+def seed(days: int = 120) -> Path:
+    real_jobs = _load_real_jobs()
+    db_path = PLUGIN_DIR / "fact.test.db"
     if db_path.exists():
         db_path.unlink()
+        for wal in (db_path.with_suffix(".db-shm"), db_path.with_suffix(".db-wal")):
+            wal.unlink(missing_ok=True)
 
     conn = sqlite3.connect(str(db_path))
     conn.execute("PRAGMA journal_mode=WAL")
@@ -138,40 +167,22 @@ def seed(db_path: Path, days: int = 30):
             ingested_at REAL DEFAULT (unixepoch())
         )
     """)
-    conn.execute("CREATE INDEX idx_cron_runs_job_id ON cron_runs(job_id)")
+    conn.execute("CREATE INDEX idx_cron_runs_job_id   ON cron_runs(job_id)")
     conn.execute("CREATE INDEX idx_cron_runs_run_time ON cron_runs(run_time DESC)")
-    conn.execute("CREATE INDEX idx_cron_runs_ingested ON cron_runs(ingested_at)")
     conn.execute("CREATE INDEX idx_cron_runs_job_mode ON cron_runs(job_mode)")
 
     now = datetime.now()
     start = now - timedelta(days=days)
     total = 0
 
-    for job in JOBS:
-        job_id, name, cron, model, avg_cost, avg_dur, fail_rate = job
-        # Parse cron-ish schedule into a run generator
-        parts = cron.split()
-        if parts[0] == "*/30":           # every 30 min
-            interval = timedelta(minutes=30)
-        elif parts[0] == "0" and parts[1].startswith("*/"):  # every N hours
-            n = int(parts[1].split("/")[1])
-            interval = timedelta(hours=n)
-        elif parts[0] == "0" and parts[2] == "*" and parts[3] == "*" and parts[4] == "*":
-            interval = timedelta(days=1)  # daily
-        elif parts[0] == "0" and parts[4] != "*":
-            interval = timedelta(weeks=1) # weekly
-        elif parts[0] == "0" and parts[2] == "1":
-            interval = timedelta(days=30) # monthly-ish
-        else:
-            interval = timedelta(hours=4) # fallback
-
+    for jid, name, sched, no_agent in real_jobs:
+        interval = _job_schedule_to_interval(sched)
         t = start
         while t < now:
-            # Shift exact minute slightly so all "0 *" jobs don't stack exactly
-            t_run = t + timedelta(seconds=random.randint(0, 120))
+            t_run = t + timedelta(seconds=random.randint(0, int(interval.total_seconds() * 0.05)))
             if t_run > now:
                 break
-            row = generate_run(job, t_run)
+            row = _generate_run(jid, name, sched, no_agent, t_run)
             conn.execute("""
                 INSERT INTO cron_runs (
                     session_id, job_id, run_time, ended_at, duration_seconds, model,
@@ -191,7 +202,7 @@ def seed(db_path: Path, days: int = 30):
     conn.commit()
     conn.close()
 
-    # Summary
+    # Quick summary
     conn = sqlite3.connect(str(db_path))
     agent_runs = conn.execute("SELECT COUNT(*) FROM cron_runs WHERE job_mode='agent'").fetchone()[0]
     script_runs = conn.execute("SELECT COUNT(*) FROM cron_runs WHERE job_mode='no_agent'").fetchone()[0]
@@ -199,14 +210,12 @@ def seed(db_path: Path, days: int = 30):
     conn.close()
 
     print(f"Seeded {db_path.name}: {total} runs ({agent_runs} agent, {script_runs} script)")
-    print(f"  Total cost: ${total_cost:.4f}")
-    print(f"  Window: last {days} days")
+    print(f"  Total cost: ${total_cost:.4f}  |  Window: last {days} days  |  Jobs: {len(real_jobs)}")
+    return db_path
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--days", type=int, default=30, help="Days of history to generate")
+    parser.add_argument("--days", type=int, default=120, help="Days of history (default 120)")
     args = parser.parse_args()
-
-    db = PLUGIN_DIR / "fact.test.db"
-    seed(db, args.days)
+    seed(args.days)
