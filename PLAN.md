@@ -47,6 +47,7 @@ This document replaces the previous phase-based plan with a flat priority-sorted
 | D4 | **Tool-level cost attribution** | Would require joining with `session_messages`, which is large and not cached in the fact DB. |
 | D5 | **Live log streaming** | Output files live at `~/.hermes/cron/output/`. Streaming them into the dashboard is a separate infrastructure project. |
 | D6 | **External DB backend** | PostgreSQL, TimescaleDB, etc. SQLite is sufficient for single-user local usage. |
+| D7 | **Job detail modal pagination** | Modal limits to 50 runs (default API `limit=50`). High-frequency jobs show correct run count in breakdown, but drill-down is capped. Needs "Load more" or pagination toggle. Noticed during H9 testing (2026-05-10): hourly job showed 333 runs in 7D table but only 50 in modal. |
 
 ---
 
