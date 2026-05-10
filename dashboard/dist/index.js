@@ -356,14 +356,14 @@
     );
   }
 
-  function JobDetailView({ jobId, days, outcome, sortKey, sortDir }) {
+  function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir }) {
     const path = `/api/plugins/cronalytics/jobs/${encodeURIComponent(jobId)}/runs?days=${days}&outcome=${outcome}&sort_key=${sortKey}&sort_dir=${sortDir}&limit=50`;
     const runs = useApi(path);
 
-    return React.createElement("div", { style: { padding: "0.5rem 0.25rem 0.25rem" } },
+    return React.createElement("div", { style: { padding: "0.5rem 2.5rem 0.25rem 0.25rem" } },
       React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" } },
         React.createElement("div", { style: { fontSize: "0.85rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)" } },
-          jobId
+          jobName || jobId
         ),
         React.createElement("span", { style: { fontSize: "0.75rem", opacity: 0.5, fontFamily: "var(--theme-font-mono, monospace)" } },
           runs.data && runs.data.runs ? runs.data.runs.length + " run" + (runs.data.runs.length === 1 ? "" : "s") : ""
@@ -455,6 +455,7 @@
       const [syncInfo, setSyncInfo] = useState(null);
 
       const [selectedJobId, setSelectedJobId] = useState(null);
+      const [expandedId, setExpandedId] = useState(null);
       const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
       const paceModal = useModal();
       const runsModal = useModal();
@@ -645,9 +646,10 @@
       }, selectedJobId && React.createElement(JobDetailView, {
         key: selectedJobId,
         jobId: selectedJobId,
+        jobName: (jobList.find(j => j.job_id === selectedJobId) || {}).name,
         days: days,
         outcome: outcome,
-        sortKey: sortConfig.key === "Job" ? "run_time" : (sortConfig.key || "run_time"),
+        sortKey: ({"Job":"run_time","Runs":"run_time","Avg Time":"duration_seconds","Total Cost":"estimated_cost_usd","Avg Cost":"estimated_cost_usd","Nominal/mo":"run_time","Trend/mo":"run_time","Pace":"run_time"}[sortConfig.key] || "run_time"),
         sortDir: sortConfig.direction || "desc",
       })),
 
@@ -1345,7 +1347,7 @@
                       style: { borderBottom: "1px solid rgba(255,255,255,0.04)", cursor: "pointer", transition: "background 0.12s ease" },
                       onMouseEnter: e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; },
                       onMouseLeave: e => { e.currentTarget.style.background = "transparent"; },
-                      onClick: () => setSelectedJobId(j.job_id)
+                      onClick: () => setExpandedId(expandedId === j.job_id ? null : j.job_id)
                     },
                       React.createElement("td", { style: { padding: "0.4rem 0.35rem" } },
                         React.createElement("div", { style: { fontSize: "0.78rem", fontWeight: 500 } }, j.name || j.job_id)
@@ -1379,6 +1381,55 @@
                           j.projections && j.projections.pace != null
                             ? j.projections.pace.toFixed(2) + "\u00d7"
                             : "\u2014"
+                        )
+                      )
+                    ),
+                    expandedId === j.job_id && React.createElement("tr", { key: j.job_id + "_detail" },
+                      React.createElement("td", { colSpan: 8, style: { padding: "0.6rem 0.35rem 0.6rem 0.75rem", background: "rgba(255,255,255,0.02)", fontSize: "0.72rem" } },
+                        React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.3rem" } },
+                          React.createElement("div", {
+                            style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.72rem" }
+                          },
+                            "Tokens: " + fmtCompact(j.total_tokens) + " total "
+                              + "(" + fmtCompact(j.total_input_tokens) + " in / "
+                              + fmtCompact(j.total_output_tokens) + " out / "
+                              + fmtCompact(j.total_cache_read_tokens) + " cached)"
+                          ),
+                          React.createElement("div", {
+                            style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.72rem" }
+                          },
+                            React.createElement("span", { style: { color: "#4ade80" } }, "\u2713 ", j.success_runs || 0),
+                            " \u00b7 ",
+                            React.createElement("span", { style: { color: (j.failure_runs || 0) > 0 ? "#ef4444" : null } }, "\u2717 ", j.failure_runs || 0)
+                          ),
+                          React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
+                            React.createElement("div", {
+                              style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7, whiteSpace: "pre" }
+                            },
+                              (j.projections && j.projections.schedule_display ? j.projections.schedule_display : "No schedule"),
+                              "   Last: ", fmtTime(j.last_run),
+                              j.last_model ? "   using " + j.last_model : "",
+                              "   Next: ", j.projections && j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014"
+                            ),
+                            React.createElement("button", {
+                              type: "button",
+                              onClick: (e) => { e.stopPropagation(); setSelectedJobId(j.job_id); },
+                              style: {
+                                fontSize: "0.72rem",
+                                fontFamily: "var(--theme-font-mono, monospace)",
+                                background: "rgba(255,255,255,0.08)",
+                                border: "1px solid rgba(255,255,255,0.15)",
+                                borderRadius: "0.3rem",
+                                padding: "0.25rem 0.5rem",
+                                color: "var(--foreground-base, var(--foreground))",
+                                cursor: "pointer",
+                                lineHeight: 1,
+                                whiteSpace: "nowrap",
+                              },
+                              onMouseEnter: (e) => { e.currentTarget.style.background = "rgba(255,255,255,0.15)"; },
+                              onMouseLeave: (e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; },
+                            }, "See Runs")
+                          )
                         )
                       )
                     ),
