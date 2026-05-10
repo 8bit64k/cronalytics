@@ -441,14 +441,9 @@
                       ),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)", whiteSpace: "nowrap" } },
                         (function totalTok() {
-                          const total = (r.input_tokens || 0) + (r.output_tokens || 0) + (r.cache_read_tokens || 0) + (r.cache_write_tokens || 0);
+                          const total = tokTotal(r);
                           if (total === 0) return "—";
-                          const base = fmtCompact(total);
-                          const cached = (r.cache_read_tokens || 0) + (r.cache_write_tokens || 0);
-                          if (cached > 0) {
-                            return base + " (c" + fmtCompact(cached) + ")";
-                          }
-                          return base;
+                          return fmtCompact(total);
                         })()
                       ),
                       React.createElement("td", { style: { padding: "0.4rem 0.35rem" } },
