@@ -783,7 +783,7 @@
       React.createElement(Modal, {
         isOpen: !!selectedJobId,
         onClose: () => setSelectedJobId(null),
-        maxWidth: "42rem",
+        maxWidth: "75vw",
       }, selectedJobId && React.createElement(JobDetailView, {
         key: selectedJobId,
         jobId: selectedJobId,
