@@ -35,3 +35,7 @@ htmlcov/
 
 # Node artifacts (dashboard build)
 node_modules/
+*.backup*
+*.bak
+facts.db-shm
+facts.db-wal

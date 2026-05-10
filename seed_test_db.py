@@ -7,6 +7,8 @@ Usage:
 """
 import argparse
 import json
+import os
+import pwd
 import random
 import sqlite3
 from datetime import datetime, timedelta
@@ -14,7 +16,7 @@ from pathlib import Path
 
 random.seed(2026)  # deterministic for reproducible visual testing
 
-CONFIG_DIR = Path.home() / ".hermes" / "cron"
+CONFIG_DIR = Path(pwd.getpwuid(os.getuid()).pw_dir) / ".hermes" / "cron"
 JOBS_PATH = CONFIG_DIR / "jobs.json"
 PLUGIN_DIR = Path(__file__).parent
 
@@ -60,21 +62,41 @@ _PROFILES = {
 def _job_schedule_to_interval(schedule_str: str):
     """Very rough parser for the handful of schedules Nick uses."""
     s = schedule_str.strip()
-    if "every " in s.lower():
-        # e.g. "every 360m" or "every 10080m"
+    # Interval schedules: "every 360m" or "every 10080m"
+    if s.lower().startswith("every "):
         parts = s.lower().replace("every", "").strip().split()
         if parts:
             num = int(parts[0].replace("m", ""))
             return timedelta(minutes=num)
-    # cron-ish
-    if "* * *" in s or s.startswith("*/"):
-        # assume hourly-ish if first field is */something
         return timedelta(hours=1)
-    if s.startswith("0 ") and s.endswith(" * *"):
-        return timedelta(days=1)
-    if " * * 1" in s:
+    # Cron expressions — 5 fields
+    parts = s.split()
+    if len(parts) != 5:
+        return timedelta(days=1)  # fallback
+    minute, hour, dom, month, dow = parts
+    # Minute interval: "*/N"
+    if minute.startswith("*/"):
+        n = int(minute[2:])
+        return timedelta(minutes=n)
+    # Hour interval: "0 */N * * *"
+    if minute == "0" and hour.startswith("*/"):
+        n = int(hour[2:])
+        return timedelta(hours=n)
+    # Every N hours: "0 N/N * * *"  (e.g. "0 */4 * * *")
+    if hour.startswith("*/"):
+        n = int(hour[2:])
+        return timedelta(hours=n)
+    # Weekly: specific day of week (not *) and minute=0 hour=fixed
+    if minute == "0" and dow != "*" and month == "*":
         return timedelta(weeks=1)
-    return timedelta(days=1)
+    # Monthly: specific day of month (not *)
+    if minute == "0" and dom != "*" and month == "*" and dow == "*":
+        return timedelta(days=30)
+    # Daily: default for "0 H * * *"
+    if minute == "0" and hour != "*":
+        return timedelta(days=1)
+    # Fallback: every hour
+    return timedelta(hours=1)
 
 
 def _generate_run(jid, name, schedule_str, no_agent, dt: datetime) -> dict:
