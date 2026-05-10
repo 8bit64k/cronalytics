@@ -5,7 +5,7 @@
   if (!SDK || !PLUGINS) return;
 
   const { React } = SDK;
-  const { useState, useEffect, useRef } = SDK.hooks;
+  const { useState, useEffect, useRef, useMemo } = SDK.hooks;
   const { fetchJSON } = SDK;
   const { Card, CardHeader, CardTitle, CardContent, Badge, Button } = SDK.components;
 
@@ -359,8 +359,21 @@
   function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir }) {
     const [sKey, setSKey] = useState(sortKey);
     const [sDir, setSDir] = useState(sortDir);
-    const path = `/api/plugins/cronalytics/jobs/${encodeURIComponent(jobId)}/runs?days=${days}&outcome=${outcome}&sort_key=${sKey}&sort_dir=${sDir}&limit=50`;
+    const path = `/api/plugins/cronalytics/jobs/${encodeURIComponent(jobId)}/runs?days=${days}&outcome=${outcome}&sort_key=run_time&sort_dir=desc&limit=50`;
     const runs = useApi(path);
+
+    const tokTotal = (r) => (r.input_tokens || 0) + (r.output_tokens || 0) + (r.cache_read_tokens || 0) + (r.cache_write_tokens || 0);
+
+    const sortedRuns = runs.data && runs.data.runs ? [...runs.data.runs].sort((a, b) => {
+      const dir = sDir === "desc" ? -1 : 1;
+      const av = a[sKey], bv = b[sKey];
+      if (sKey === "input_tokens") return dir * (tokTotal(a) - tokTotal(b));
+      if (sKey === "run_time" || sKey === "estimated_cost_usd" || sKey === "duration_seconds") return dir * (av - bv);
+      if (sKey === "success") return dir * ((av ? 1 : 0) - (bv ? 1 : 0));
+      if (av == null || av === "") return 1;
+      if (bv == null || bv === "") return -1;
+      return dir * String(av).localeCompare(String(bv));
+    }) : [];
 
     return React.createElement("div", { style: { padding: "1.5rem 3rem 1.5rem 1.5rem" } },
       React.createElement("div", { style: { marginBottom: "0.75rem" } },
@@ -381,7 +394,7 @@
         ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, "Loading runs...")
         : runs.error
           ? React.createElement("div", { style: { color: "#ef4444", padding: "1rem 0" } }, "Error: " + runs.error)
-          : !runs.data || !runs.data.runs || runs.data.runs.length === 0
+          : !sortedRuns.length
             ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, "No runs captured for this job.")
             : React.createElement("div", { style: { overflow: "auto" } },
               React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
@@ -412,7 +425,7 @@
                   )
                 ),
                 React.createElement("tbody", null,
-                  runs.data.runs.map(r =>
+                  sortedRuns.map(r =>
                     React.createElement("tr", {
                       key: r.session_id,
                       style: { borderBottom: "1px solid rgba(255,255,255,0.04)" }
