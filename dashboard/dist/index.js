@@ -349,7 +349,7 @@
         onClick: applyCustom,
         title: "Apply custom days",
         style: { paddingLeft: "0.55rem", paddingRight: "0.55rem", minWidth: "auto", fontSize: "0.9rem" }
-      }, "→")
+      }, "Go")
     );
   }
 
@@ -628,7 +628,7 @@
                             ),
                             React.createElement("td", { style: { textAlign: "center", padding: "0.4rem 0.35rem" } },
                               r.job_mode === "no_agent"
-                                ? React.createElement(Badge, { size: "xs", style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.7 } }, "Script")
+                                ? React.createElement(Badge, { size: "xs", style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.7 } }, "No agent")
                                 : React.createElement("span", { style: { fontSize: "0.65rem", opacity: 0.45 } }, "Agent")
                             ),
                             React.createElement("td", { style: { textAlign: "center", padding: "0.4rem 0.35rem" } },
@@ -1519,7 +1519,7 @@
       })(),
       mode === "all" && s.script_jobs_in_window > 0 && React.createElement("div", {
         style: { fontSize: "0.65rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)", marginBottom: "0.5rem", paddingLeft: "0.25rem" }
-      }, s.script_jobs_in_window + " script job" + (s.script_jobs_in_window === 1 ? "" : "s") + " at $0.00 included. Filter to isolate agent costs."),
+      }, s.script_jobs_in_window + " no-agent job" + (s.script_jobs_in_window === 1 ? "" : "s") + " at $0.00 included. Filter to isolate agent costs."),
       // Jobs Breakdown
       React.createElement(Card, { style: { marginBottom: "1.5rem" } },
         React.createElement(CardHeader, null,
@@ -1595,7 +1595,7 @@
                           j.job_mode === "no_agent" && React.createElement(Badge, {
                             size: "xs",
                             style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.7 }
-                          }, "Script")
+                          }, "No agent")
                         )
                       ),
                       React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, (j.runs || 0).toLocaleString()),
@@ -1656,7 +1656,7 @@
                               "   Last: ", fmtTime(j.last_run),
                               j.last_model ? "   using " + j.last_model : "",
                               "   Next: ", j.projections && j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014",
-                              j.job_mode === "no_agent" && React.createElement("span", { style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.5, marginLeft: "0.25rem" } }, "[Script]")
+                              j.job_mode === "no_agent" && React.createElement("span", { style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.5, marginLeft: "0.25rem" } }, "[No agent]")
                             ),
                             React.createElement("button", {
                               type: "button",
