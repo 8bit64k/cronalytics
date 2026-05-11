@@ -782,7 +782,7 @@
 
     const firstLoad = summary.loading && !summary.data && jobs.loading && !jobs.data;
     if (firstLoad) {
-      return React.createElement("div", { style: { padding: "0 0.25rem 1rem 0", color: "var(--foreground-base, var(--foreground))" } }, "Loading Cronalytics…");
+      return null;
     }
 
     if (summary.error || jobs.error) {
