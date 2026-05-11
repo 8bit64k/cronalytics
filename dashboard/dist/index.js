@@ -1757,8 +1757,8 @@
       // Sync toast
       syncToast && React.createElement("div", {
         style: {
-          position: "absolute",
-          bottom: "1rem",
+          position: "fixed",
+          bottom: "1.5rem",
           left: "50%",
           transform: "translateX(-50%)",
           background: "var(--background)",
@@ -1768,7 +1768,7 @@
           padding: "0.5rem 1rem",
           fontSize: "0.75rem",
           fontFamily: "var(--theme-font-mono, monospace)",
-          zIndex: 100,
+          zIndex: 10000,
           boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
           whiteSpace: "nowrap",
         }
