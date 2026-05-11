@@ -57,8 +57,8 @@ def _read_watermark(path: Path) -> Watermark:
     try:
         with open(path, encoding="utf-8") as fh:
             return json.load(fh)
-    except Exception:
-        logger.warning("[scanner] Corrupt watermark, resetting")
+    except (OSError, json.JSONDecodeError):
+        logger.error("[scanner] Corrupt watermark, resetting", exc_info=True)
         return {"last_ended_at": 0.0, "last_sync": None, "rows_synced": 0}
 
 
@@ -120,7 +120,8 @@ def _load_jobs_json(jobs_path: Path) -> list[dict[str, Any]]:
             for j in jobs
             if isinstance(j, dict) and j.get("no_agent") is True
         ]
-    except Exception:
+    except (OSError, json.JSONDecodeError):
+        logger.error("[scanner] Failed to read jobs.json", exc_info=True)
         return []
 
 
@@ -162,7 +163,7 @@ def _scan_output_dirs(
                     f"{date_part}_{time_part}", "%Y-%m-%d_%H-%M-%S"
                 )
                 run_time = dt.timestamp()
-            except Exception:
+            except ValueError:
                 continue
 
             if run_time <= watermark:
@@ -253,8 +254,8 @@ def run_sync(
                 "[scanner] Script sync: %d inserted, %d skipped",
                 script_inserted, script_skipped,
             )
-    except Exception as exc:
-        logger.warning("[scanner] Script sync failed: %s", exc)
+    except Exception:
+        logger.error("[scanner] Script sync failed", exc_info=True)
 
     elapsed = time.time() - started
     logger.info(

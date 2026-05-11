@@ -100,8 +100,8 @@ def _append_pending(item: dict) -> None:
             with open(PENDING_FILE, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps(item, separators=(",", ":")) + "\n")
                 fh.flush()
-        except Exception as exc:
-            logger.warning("[ingester] Failed to write pending file: %s", exc)
+        except OSError:
+            logger.error("[ingester] Failed to write pending file", exc_info=True)
 
 
 def _remove_pending(session_id: str) -> None:
@@ -128,10 +128,10 @@ def _remove_pending(session_id: str) -> None:
             with open(PENDING_FILE, "w", encoding="utf-8") as fh:
                 fh.writelines(kept)
                 fh.flush()
-        except Exception as exc:
-            logger.warning(
-                "[ingester] Failed to remove %s from pending file: %s",
-                session_id, exc,
+        except OSError:
+            logger.error(
+                "[ingester] Failed to remove %s from pending file",
+                session_id, exc_info=True,
             )
 
 
@@ -156,8 +156,8 @@ def _recover_pending() -> int:
                         recovered.append(data)
                 except json.JSONDecodeError:
                     continue
-    except Exception as exc:
-        logger.warning("[ingester] Failed to read pending file: %s", exc)
+    except OSError:
+        logger.error("[ingester] Failed to read pending file", exc_info=True)
         return 0
 
     if recovered:

@@ -31,7 +31,9 @@ def register(ctx) -> None:
                     "Bootstrap scanner: %d inserted, %d skipped",
                     result.get("inserted", 0), result.get("skipped", 0),
                 )
-        except Exception as exc:
-            logging.getLogger("cronalytics").warning("Bootstrap scanner failed: %s", exc)
+        except Exception:
+            logging.getLogger("cronalytics").error(
+                "Bootstrap scanner failed", exc_info=True,
+            )
 
     threading.Thread(target=_bootstrap, name="cronalytics-bootstrap", daemon=True).start()

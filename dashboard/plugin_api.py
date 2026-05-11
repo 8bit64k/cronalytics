@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import sqlite3
 import sys
 from pathlib import Path
 from typing import Any
@@ -61,7 +62,7 @@ def _load_job_names() -> dict[str, dict]:
     try:
         raw = _JOBS_PATH.read_text()
         data = json.loads(raw)
-    except Exception:
+    except (OSError, json.JSONDecodeError):
         return {}
     return {
         j["id"]: {
@@ -96,7 +97,7 @@ def _get_status() -> dict[str, Any]:
     """Delegate to scanner.get_status() for canonical health values."""
     try:
         return _scanner_mod.get_status(WATERMARK_FILE)
-    except Exception:
+    except sqlite3.Error:
         return {
             "last_ended_at": None,
             "last_sync": None,

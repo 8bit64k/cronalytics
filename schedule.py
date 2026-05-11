@@ -13,7 +13,7 @@ from typing import Any
 
 try:
     import croniter
-except Exception:  # pragma: no cover
+except ImportError:  # pragma: no cover
     croniter = None  # type: ignore
 
 
@@ -25,7 +25,7 @@ def _load_job_defs(jobs_json_path: Path) -> dict[str, dict[str, Any]]:
     """Return {job_id: job_def} from jobs.json."""
     try:
         data = json.loads(jobs_json_path.read_text())
-    except Exception:
+    except (OSError, json.JSONDecodeError):
         return {}
     return {j["id"]: j for j in data.get("jobs", [])}
 
@@ -54,7 +54,7 @@ def _count_occurrences(
                     break
                 count += 1
             return count
-        except Exception:
+        except (ValueError, TypeError):
             pass
     elif kind == "interval" and minutes:
         interval = timedelta(minutes=minutes)
