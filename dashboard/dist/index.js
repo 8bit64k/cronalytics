@@ -62,6 +62,18 @@
     return remM > 0 ? h + "h " + remM + "m" : h + "h";
   }
 
+  function fmtSyncAge(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    const now = new Date();
+    const diffSec = Math.floor((now - d) / 1000);
+    if (diffSec < 60) return { text: diffSec + "s ago", color: "#4ade80" };
+    if (diffSec < 3600) return { text: Math.floor(diffSec / 60) + "m ago", color: "#4ade80" };
+    if (diffSec < 86400) return { text: Math.floor(diffSec / 3600) + "h ago", color: null };
+    if (diffSec < 604800) return { text: Math.floor(diffSec / 86400) + "d ago", color: "#f59e0b" };
+    return { text: Math.floor(diffSec / 86400) + "d ago", color: "#ef4444" };
+  }
+
   function paceColor(pace) {
     if (pace == null) return "var(--foreground-base, var(--foreground))";
     if (pace < 1.0) return "#4ade80";   // green
@@ -108,12 +120,13 @@
       React.createElement("path", { d: "M12 6v6l4 2" })
     );
   }
-  function RefreshCwIcon(size) {
+  function RefreshCwIcon(size, opts) {
+    opts = opts || {};
     return React.createElement("svg", {
       width: size || 14, height: size || 14, viewBox: "0 0 24 24",
       fill: "none", stroke: "currentColor", strokeWidth: 2,
       strokeLinecap: "round", strokeLinejoin: "round",
-      style: { display: "inline-block", verticalAlign: "middle" }
+      style: Object.assign({ display: "inline-block", verticalAlign: "middle" }, opts.style || {})
     },
       React.createElement("path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" }),
       React.createElement("path", { d: "M21 3v5h-5" }),
@@ -684,6 +697,7 @@
       const jobs = useApi("/api/plugins/cronalytics/jobs?days=" + days + "&outcome=" + outcome + "&mode=" + mode);
       const [syncing, setSyncing] = useState(false);
       const [syncInfo, setSyncInfo] = useState(null);
+      const [syncToast, setSyncToast] = useState(null);
 
       const [selectedJobId, setSelectedJobId] = useState(null);
       const [expandedId, setExpandedId] = useState(null);
@@ -725,26 +739,44 @@
       if (syncing) return;
       setSyncing(true);
       let cancelled = false;
+      let syncResult = null;
+      let hasError = false;
+
       fetchJSON("/api/plugins/cronalytics/sync", { method: "POST" })
-        .then(() => {
-          fetchJSON("/api/plugins/cronalytics/health")
-            .then(d2 => {
-              if (d2 && d2.sync) {
-                setSyncInfo({
-                  lastSync: d2.sync.last_sync,
-                  rowsSynced: d2.sync.rows_synced,
-                });
-              }
-            })
-            .catch(() => {});
-          summary.refetch();
-          jobs.refetch();
+        .then(d => { syncResult = d; })
+        .then(() => fetchJSON("/api/plugins/cronalytics/health"))
+        .then(d2 => {
+          if (!cancelled && d2 && d2.sync) {
+            setSyncInfo({
+              lastSync: d2.sync.last_sync,
+              rowsSynced: d2.sync.rows_synced,
+            });
+          }
         })
         .catch(e => {
-          if (!cancelled) setSyncInfo({ error: e.message });
+          if (!cancelled) {
+            setSyncInfo({ error: e.message });
+            hasError = true;
+          }
         })
-        .finally(() => {
-          if (!cancelled) setSyncing(false);
+        .then(() => {
+          if (cancelled || hasError) {
+            if (!cancelled) setSyncing(false);
+            return;
+          }
+          // Artificial 5s delay so spinner is visible during testing
+          return new Promise(resolve => setTimeout(resolve, 5000));
+        })
+        .then(() => {
+          if (cancelled || hasError) return;
+          setSyncing(false);
+          if (syncResult && syncResult.result) {
+            const { inserted, elapsed_ms } = syncResult.result;
+            setSyncToast({ msg: `\u2713 Synced ${inserted} runs \u00b7 ${(elapsed_ms / 1000).toFixed(1)}s` });
+            setTimeout(() => setSyncToast(null), 3000);
+          }
+          summary.refetch();
+          jobs.refetch();
         });
     };
 
@@ -804,6 +836,9 @@
         position: "relative"
       }
     },
+      // Spinner animation keyframe
+      React.createElement('style', {}, `@keyframes cronalytics-spin { to { transform: rotate(360deg); } }`),
+
       // Hero banner
       React.createElement("div", {
         style: {
@@ -1552,17 +1587,27 @@
             React.createElement("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center" } },
               React.createElement(Button, {
                 size: "sm",
-                outlined: true,
+                outlined: !syncing,
                 disabled: syncing,
                 onClick: onSync,
-              }, syncing ? "Syncing..." : "Sync Now"),
-              syncInfo && syncInfo.lastSync &&
-                React.createElement("span", {
-                  style: { fontSize: "0.65rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)" }
-                },
-                  "Synced " + fmtTime(new Date(syncInfo.lastSync).getTime() / 1000) +
-                  (syncInfo.rowsSynced != null ? " · " + syncInfo.rowsSynced + " jobs" : "")
-                )
+              }, syncing
+                ? React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: "0.35rem" } },
+                    RefreshCwIcon(14, { style: { animation: "cronalytics-spin 1s linear infinite" } }),
+                    "Syncing"
+                  )
+                : "Sync Now"
+              ),
+              syncInfo && syncInfo.lastSync && (() => {
+                const age = fmtSyncAge(syncInfo.lastSync);
+                return age ? React.createElement("span", {
+                  style: {
+                    fontSize: "0.65rem",
+                    opacity: age.color ? 1 : 0.45,
+                    fontFamily: "var(--theme-font-mono, monospace)",
+                    color: age.color || "inherit",
+                  }
+                }, age.text) : null;
+              })()
             )
           )
         ),
@@ -1708,6 +1753,26 @@
             )
         )
       ),
+
+      // Sync toast
+      syncToast && React.createElement("div", {
+        style: {
+          position: "absolute",
+          bottom: "1rem",
+          left: "50%",
+          transform: "translateX(-50%)",
+          background: "var(--background)",
+          color: "var(--foreground-base, var(--foreground))",
+          border: "1px solid var(--color-accent)",
+          borderRadius: "0.5rem",
+          padding: "0.5rem 1rem",
+          fontSize: "0.75rem",
+          fontFamily: "var(--theme-font-mono, monospace)",
+          zIndex: 100,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+          whiteSpace: "nowrap",
+        }
+      }, syncToast.msg),
     )  ;
   }
 
