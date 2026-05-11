@@ -1,29 +1,27 @@
 # Cronalytics V1.0 Launch Plan
 
 > **Launch Date: Tuesday, May 19, 2026 at ~9:00 AM EST**
-> **Days Remaining: 11 (from May 9)**
+> **Days Remaining: 8 (from May 11)**
 
 ## Philosophy
 
 Code can iterate. First impressions are permanent.
 
-**Technical features freeze May 14.** Everything after that is polish, docs, and demo.
+**Technical features freeze May 14.** Everything after that is docs, demo, and launch polish.
 If an idea shows up May 15, it goes in V1.1. No exceptions.
 
 ---
 
-## Phase 1: Technical Lock (Days 1–6, May 9–14)
+## Phase 1: Technical Lock (Days 1–4, May 11–14)
 
-Goal: Merge remaining V1.0 features. No new features after May 14 end-of-day.
+Goal: Merge remaining V1.0 code. No new features after May 14 end-of-day.
 
 | Day | Date | Focus |
 |-----|------|-------|
-| 1 | Sat May 9 | H5 Per-run expansion in Jobs Breakdown — clicking a job name opens detail row with last N individual runs (time, duration, cost, tokens, model). UI pattern already exists (expandable rows). |
-| 2 | Sun May 10 | H7 Suspect/orphaned/hung job detection — `ended_at IS NULL` + `started_at + 3×avg_duration < now` heuristic. Surface as "Active Jobs" card or badge count. Small scope: just a count + suspect list. |
-| 3 | Mon May 11 | M5 Auto-sync (6-hour background timer + manual trigger bridged). If lightweight, land it. If it requires scheduler infrastructure, defer to V1.1. |
-| 4 | Tue May 12 | M3 Test suite — minimal `pytest` covering `_make_job_id()`, projection math, SQL query edge cases. M4 Lint/type check (`ruff` + `mypy`). |
-| 5 | Wed May 13 | Bug fix / hardening pass. Cross-device regression check (MacBook → iPad). Verify iPad toolbar, modal sizing, theme compatibility. |
-| 6 | Thu May 14 | **FEATURE FREEZE**. Final backend validation. Push passing commit. Update CHECKPOINT.md. Any unmerged work gets cut or moved to V1.1. |
+| 1 | Mon May 11 | Toolbar polish, hero redesign, manual-sync UX hardening, terminology unification, DaySelector wrapping hardening. |
+| 2 | Tue May 12 | M3 Test suite — minimal `pytest` covering `_make_job_id()`, projection math, SQL edge cases. M4 Lint/type check (`ruff` + `mypy`). |
+| 3 | Wed May 13 | Bug fix / hardening pass. Cross-device regression check (MacBook → iPad). Verify iPad toolbar, modal sizing, theme compatibility. |
+| 4 | Thu May 14 | **FEATURE FREEZE**. Final backend validation. Push passing commit. Update CHECKPOINT.md. Any unmerged work gets cut or moved to V1.1. |
 
 ### V1.0 Technical In-Scope
 
@@ -33,12 +31,15 @@ Goal: Merge remaining V1.0 features. No new features after May 14 end-of-day.
 | H2 | Per-job token columns (detail rows) | ✅ Delivered | Keep |
 | H3 | Sortable jobs table | ✅ Delivered | Keep |
 | H4 | Top jobs highlight (Leader Board) | ✅ Delivered | Keep |
-| H5 | Per-run expansion | 🟡 Not started | **V1.0** — fits existing expandable row pattern |
+| H5 | Per-run expansion (Job Detail Modal) | ✅ Delivered | Keep |
 | H6 | Duration metrics | ✅ Delivered | Keep |
-| H7 | Suspect/hung job detection | ⚫ Not started | **V1.0** — small scope: count + suspect list |
+| H7 | Suspect/hung job detection | ⚫ Deferred | **V1.1** — troubleshooting-oriented, low surface area |
 | H8 | Global outcome toggle | ✅ Delivered | Keep |
-| M5 | Auto-sync | 🟡 Listed, never implemented | **V1.0 if small**; else V1.1 |
-| M8 | Wrapper vs payload success decision | ⚫ Pending | **V1.0** — document in README, not a code change |
+| H9 | Agent / no_agent mode awareness | ✅ Delivered | Keep |
+| M5 | Auto-sync | ⚫ Deferred | **V1.1** — bootstrap scanner + hook + retry cover gaps |
+| M8 | Wrapper vs payload success | 🟡 Document | **V1.0** — one paragraph in README, not a code change |
+| — | Toolbar polish (DaySelector, toggles, wrapping, sync UX) | ✅ Delivered | Keep |
+| — | Hero redesign (dictionary entry, accent border, system sans) | ✅ Delivered | Keep |
 
 ### V1.0 Technical Out-of-Scope (V1.1 or later)
 
@@ -50,23 +51,24 @@ Goal: Merge remaining V1.0 features. No new features after May 14 end-of-day.
 | D4 | Tool-level cost attribution | Needs `session_messages` join, too large |
 | D5 | Live log streaming | Separate infrastructure project |
 | D6 | External DB backend | SQLite sufficient for single-user local |
+| D7 | Job detail modal pagination | Modal capped at 200 runs; "show all" deferred |
 | — | Sparkline event annotations | Nice-to-have, not launch-critical |
 | — | Pace column tooltip/education | README covers this; in-UI can be V1.1 |
 | — | Session log deep-link from Top Runs | Requires Hermes session URL schema |
 
 ---
 
-## Phase 2: Polish & Packaging (Days 7–11, May 15–19)
+## Phase 2: Polish & Packaging (Days 5–8, May 15–19)
 
 Goal: Make the launch shiny. Docs, demo, and GitHub are the product as much as the code.
 
 | Day | Date | Focus |
 |-----|------|-------|
-| 7 | Fri May 15 | **README** — installation, screenshots, feature list, one-liner. **CHANGELOG** — version history from first commit to now. |
-| 8 | Sat May 16 | **Demo video / GIF** — 30–60 second screen capture showing outcome toggle, sortable table, expandable rows, leader board. Compressed, loopable. |
-| 9 | Sun May 17 | **GitHub release** — tag v1.0.0, release notes, attach demo video/GIF. **X thread draft** — 3–5 tweet thread with hook, demo, GitHub link, CTA. |
-| 10 | Mon May 18 | **Discord announcement** — copy + formatting. **YouTube video** — edit, thumbnail, description, end cards. Schedule/premiere for Tuesday 2:00 PM EST. **Final cross-device pass** — MacBook + iPad, 30+ Omarchy themes. |
-| 11 | Tue May 19 | **LAUNCH DAY**. Execute timeline below. Monitor responses. Be available for questions for 4 hours post-launch. |
+| 5 | Fri May 15 | **README** — installation, screenshots, feature list, one-liner. **CHANGELOG** — version history from first commit to now. |
+| 6 | Sat May 16 | **Demo video / GIF** — 30–60 second screen capture showing outcome toggle, sortable table, expandable rows, leader board. Compressed, loopable. |
+| 7 | Sun May 17 | **GitHub release** — tag v1.0.0, release notes, attach demo video/GIF. **X thread draft** — 3–5 tweet thread with hook, demo, GitHub link, CTA. |
+| 8 | Mon May 18 | **Discord announcement** — copy + formatting. **Final cross-device pass** — MacBook + iPad, 30+ Omarchy themes. Last bug sweep. |
+| 9 | Tue May 19 | **LAUNCH DAY**. Execute timeline below. Monitor responses. Be available for questions for 4 hours post-launch. |
 
 ### Launch Day Timeline (EST — Tuesday, May 19)
 
@@ -75,31 +77,30 @@ Goal: Make the launch shiny. Docs, demo, and GitHub are the product as much as t
 | 9:00 AM | GitHub release v1.0.0 goes live | GitHub |
 | 9:30 AM | Announcement thread posted | X/Twitter |
 | 10:00 AM | Community announcement with links | Discord |
-| 2:00 PM | YouTube premiere goes live | YouTube |
 | All day | Monitor mentions, reply to questions, retweet/respond | All |
 
 ---
 
-## The 11-Day Checklist
+## The 8-Day Checklist
 
-### Technical (Days 1–6)
-- [ ] H5 — Per-run expansion in Jobs Breakdown
-- [ ] H7 — Suspect / orphaned / hung job detection
-- [ ] M5 — Auto-sync (if feasible; else cut)
+### Technical (Days 1–4)
+- [x] H5 — Per-run expansion in Jobs Breakdown (modal-based drilldown)
+- [x] H9 — Agent / no_agent mode awareness
+- [x] Toolbar polish — DaySelector, Outcome/Mode toggles, wrapping, sync UX
+- [x] Hero redesign — dictionary entry, accent border, system sans
 - [ ] M3 — Minimal test suite (`pytest`)
 - [ ] M4 — Lint + type check (`ruff` + `mypy`)
 - [ ] M8 — Document wrapper vs payload success in README
 - [ ] Hardening / regression pass (MacBook → iPad)
 - [ ] **May 14: FEATURE FREEZE**
 
-### Packaging (Days 7–11)
+### Packaging (Days 5–8)
 - [ ] README.md — install, features, screenshots
 - [ ] CHANGELOG.md — v1.0.0 release notes
 - [ ] Demo video / GIF — 30–60s screen capture
 - [ ] GitHub release — tag, notes, demo attachment
 - [ ] X thread — draft, schedule for 9:30 AM EST May 19
 - [ ] Discord announcement — draft, schedule for 10:00 AM EST May 19
-- [ ] YouTube video — edit, thumbnail, schedule premiere 2:00 PM EST May 19
 - [ ] Final cross-device / cross-theme pass
 - [ ] **May 19: LAUNCH**
 
@@ -108,10 +109,9 @@ Goal: Make the launch shiny. Docs, demo, and GitHub are the product as much as t
 ## If We Fall Behind
 
 **Cut order (never slip launch date):**
-1. M5 Auto-sync → V1.1
-2. H7 Suspect detection → V1.1 (if scope creeps beyond count + list)
-3. H5 Per-run expansion → V1.1 (but it's the last technical feature — try to keep it)
-4. YouTube video → Skip, rely on GIF + screenshots
+1. M3 Test suite → V1.1 (nice-to-have, not user-facing)
+2. M4 Lint/type check → V1.1 (engineering hygiene, not launch-critical)
+3. YouTube video → Skip, rely on GIF + screenshots
 
 **Never cut:** README, CHANGELOG, GitHub release, X thread. These *are* the launch.
 
@@ -121,4 +121,4 @@ Goal: Make the launch shiny. Docs, demo, and GitHub are the product as much as t
 
 Full research report saved at `~/launch_day_research.md`.
 
-**Consensus:** Tuesday is the single best day for synchronized cross-platform developer tool launches. X, GitHub, and Discord all peak Tuesday–Wednesday. YouTube prefers Thursday but Tuesday is within 10–15% of peak for tech content — an acceptable trade-off for unified launch momentum.
+**Consensus:** Tuesday is the single best day for synchronized cross-platform developer tool launches. X, GitHub, and Discord all peak Tuesday–Wednesday.
