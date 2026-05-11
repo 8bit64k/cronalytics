@@ -2,7 +2,7 @@
 # Updated: 2026-05-11
 #
 ## Current Commit
-`f9f1d94` (master) — "docs(plan): mark M5 deferred to v1.1, M8 as document-in-README"
+`e865b22` (master) — "refactor(error-handling): specific exceptions + exc_info=True"
 
 ## Recently Delivered (2026-05-10–11)
 - H9 Agent/no_agent mode awareness: schema `job_mode`, dual-track sync, `ModeToggle` toolbar, `[No agent]` badges, summary footnote, script job count in summary
@@ -16,6 +16,11 @@
 - Terminology unification: all user-facing `Script` → `No agent`
 - PLAN.md updated: D7 deferred; M5 deferred to v1.1; M8 marked "document in README"
 - LAUNCH_PLAN.md updated: realistic 8-day timeline, H9 delivered, M5/M7 status corrected
+- **M3** — Minimal test suite (`pytest`): 40 tests covering facts, parser, scanner, schedule. All passing.
+- **M4** — Lint / type check (`ruff` + `mypy`): clean on 10 source files; `pyproject.toml` configs in place.
+- **M8** — Document wrapper vs payload success in README: one-paragraph section under "Understanding your data".
+- **Error-handling refactor**: replaced 13 bare `except Exception` with specific types (`OSError`, `json.JSONDecodeError`, `sqlite3.Error`, `ValueError`, `TypeError`, `ImportError`); `exc_info=True` on unexpected logger calls; upgraded warn→error for unexpected failures.
+- **Plugin `__init__.py`**: added bootstrap scanner call on plugin load (catches stale gaps after gateway restarts).
 
 ## What Works Now
 1. Dashboard loads; Cronalytics tab renders without white screen
@@ -40,20 +45,13 @@
 16. Theme compatibility: silver icons, neutral bars, mono sub-lines, system-ui sans for definitions
 17. No duplicate loading spinners — Hermes native spinner handles first load
 18. Stale-while-revalidate: no flash on day switch or mode/outcome toggle
-
-## Synthetic Test DB (seed_test_db.py)
-- Dynamically loads real job IDs from `~/.hermes/cron/jobs.json`
-- Proper 5-field cron interval parser (no broad substring matching)
-- Corrected profiles: backup = agent; 4 watchdogs = no_agent recurring
-- 120 days: ~1,356 runs (978 agent + 378 script), ~$33.82, ~10% failure rate
-- Live facts.db now ~1,358 runs (watchdog jobs fired since generation)
+19. **Test suite**: 40 pytest tests, all passing (`pytest -q`)
+20. **Lint/type**: ruff clean, mypy clean on 10 source files
+21. **Bootstrap scanner**: plugin `__init__.py` syncs watermarks on load (catches post-restart gaps)
 
 ## V1.0 Technical In-Scope (Remaining)
 | # | Task | Status |
 |---|------|--------|
-| M3 | Minimal test suite (`pytest`) | 🟡 Not started |
-| M4 | Lint / type check (`ruff` + `mypy`) | 🟡 Not started |
-| M8 | Document wrapper vs payload success in README | 🟡 Not started |
 | — | Cross-device regression (MacBook → iPad → themes) | 🟡 Not started |
 
 ## V1.0 Technical Out-of-Scope (V1.1+)
@@ -62,6 +60,9 @@
 | H7 | Suspect/hung job detection | Troubleshooting edge case, low priority |
 | M5 | Auto-sync | Bootstrap scanner + hook + retry cover gaps |
 | D1–D7 | Budget alerts, model recommendations, schedule optimization, tool attribution, log streaming, external DB, modal pagination | See LAUNCH_PLAN.md |
+| M3 | Test suite | ✅ Delivered — 40 tests passing |
+| M4 | Lint / type check | ✅ Delivered — ruff + mypy clean |
+| M8 | Wrapper vs payload success docs | ✅ Delivered — README section added |
 
 ## Launch Plan
 - **Date: Tuesday, May 19, 2026 at ~9:00 AM EST**
