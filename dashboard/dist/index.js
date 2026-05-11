@@ -376,7 +376,7 @@
     if (d2 > 0) return d2 + "d " + h % 24 + "h";
     return h + "h";
   }
-  function fmtCompact2(n) {
+  function fmtCompact(n) {
     if (n == null || n === 0) return "0";
     const abs = Math.abs(n);
     if (abs >= 1e9) return (n / 1e9).toFixed(2) + "B";
@@ -567,7 +567,7 @@
                     (() => {
                       const total = tokTotal(r);
                       if (total === 0) return "\u2014";
-                      return fmtCompact2(total);
+                      return fmtCompact(total);
                     })()
                   ),
                   React.createElement("td", { style: { padding: "0.4rem 0.35rem" } }, r.model || "\u2014"),
@@ -993,7 +993,7 @@
             React.createElement(
               "div",
               { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
-              fmtCompact2(s.total_tokens)
+              fmtCompact(s.total_tokens)
             ),
             React.createElement(
               "div",
@@ -1007,7 +1007,7 @@
                   { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
                   React.createElement("div", { style: { width: Math.min(100, (s.total_input_tokens || 0) / (s.total_tokens || 1) * 100) + "%", background: "var(--foreground-base, var(--foreground))", height: "100%", opacity: 0.6 } })
                 ),
-                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact2(s.total_input_tokens))
+                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_input_tokens))
               ),
               React.createElement(
                 "div",
@@ -1018,7 +1018,7 @@
                   { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
                   React.createElement("div", { style: { width: Math.min(100, (s.total_output_tokens || 0) / (s.total_tokens || 1) * 100) + "%", background: "var(--foreground-base, var(--foreground))", height: "100%", opacity: 0.6 } })
                 ),
-                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact2(s.total_output_tokens))
+                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_output_tokens))
               ),
               React.createElement(
                 "div",
@@ -1029,7 +1029,7 @@
                   { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
                   React.createElement("div", { style: { width: Math.min(100, (s.total_cache_read_tokens || 0) / (s.total_tokens || 1) * 100) + "%", background: "var(--foreground-base, var(--foreground))", height: "100%", opacity: 0.6 } })
                 ),
-                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact2(s.total_cache_read_tokens))
+                React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_cache_read_tokens))
               )
             )
           )
@@ -1231,7 +1231,7 @@
               null,
               React.createElement("div", {
                 style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#5b8def", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
-              }, j ? fmtCompact2(j.total_tokens) : "\u2014"),
+              }, j ? fmtCompact(j.total_tokens) : "\u2014"),
               React.createElement("div", {
                 style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
                 title: label
@@ -2064,7 +2064,7 @@
             React.createElement(
               "span",
               { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
-              fmtCompact2(s.total_tokens)
+              fmtCompact(s.total_tokens)
             ),
             React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Tokens")
           ),
@@ -2080,7 +2080,7 @@
                 { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
                 React.createElement("div", { style: { width: Math.min(100, (s.total_input_tokens || 0) / (s.total_tokens || 1) * 100) + "%", background: "#5b8def", height: "100%", opacity: 0.8 } })
               ),
-              React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem" } }, fmtCompact2(s.total_input_tokens))
+              React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem" } }, fmtCompact(s.total_input_tokens))
             ),
             React.createElement(
               "div",
@@ -2091,7 +2091,7 @@
                 { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
                 React.createElement("div", { style: { width: Math.min(100, (s.total_output_tokens || 0) / (s.total_tokens || 1) * 100) + "%", background: "#5b8def", height: "100%", opacity: 0.8 } })
               ),
-              React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem" } }, fmtCompact2(s.total_output_tokens))
+              React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem" } }, fmtCompact(s.total_output_tokens))
             ),
             React.createElement(
               "div",
@@ -2102,7 +2102,7 @@
                 { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
                 React.createElement("div", { style: { width: Math.min(100, (s.total_cache_read_tokens || 0) / (s.total_tokens || 1) * 100) + "%", background: "#5b8def", height: "100%", opacity: 0.8 } })
               ),
-              React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem" } }, fmtCompact2(s.total_cache_read_tokens))
+              React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem" } }, fmtCompact(s.total_cache_read_tokens))
             )
           ),
           React.createElement(
@@ -2118,9 +2118,9 @@
             React.createElement(
               "div",
               { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
-              React.createElement("div", null, "Input:  " + fmtCompact2(s.total_input_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_input_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)"),
-              React.createElement("div", null, "Output: " + fmtCompact2(s.total_output_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_output_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)"),
-              React.createElement("div", null, "Cached: " + fmtCompact2(s.total_cache_read_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_cache_read_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)")
+              React.createElement("div", null, "Input:  " + fmtCompact(s.total_input_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_input_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)"),
+              React.createElement("div", null, "Output: " + fmtCompact(s.total_output_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_output_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)"),
+              React.createElement("div", null, "Cached: " + fmtCompact(s.total_cache_read_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_cache_read_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)")
             )
           )
         )
@@ -2160,7 +2160,7 @@
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                   React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
                   React.createElement("div", null, "Avg duration: " + (j.avg_duration != null ? fmtDuration(j.avg_duration) : "\u2014")),
-                  React.createElement("div", null, "Tokens: " + (j.total_tokens != null ? fmtCompact2(j.total_tokens) : "\u2014"))
+                  React.createElement("div", null, "Tokens: " + (j.total_tokens != null ? fmtCompact(j.total_tokens) : "\u2014"))
                 )
               )
             );
@@ -2229,7 +2229,7 @@
                 React.createElement(
                   "span",
                   { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
-                  j ? fmtCompact2(j.total_tokens) : "\u2014"
+                  j ? fmtCompact(j.total_tokens) : "\u2014"
                 ),
                 React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "tokens")
               ),

@@ -1,5 +1,5 @@
 import { React, Card, CardHeader, CardTitle, CardContent, Badge, Button } from "../lib/sdk.js";
-import { fmtCost, fmtDuration, fmtTime, fmtRel, fmtSyncAge, paceColor, paceBg } from "../lib/formatters.js";
+import { fmtCost, fmtCompact, fmtDuration, fmtTime, fmtRel, fmtSyncAge, paceColor, paceBg } from "../lib/formatters.js";
 import { ClockIcon, RefreshCwIcon } from "../lib/icons.js";
 
 export function JobBreakdown({
