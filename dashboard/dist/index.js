@@ -542,7 +542,7 @@
   function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir }) {
     const [sKey, setSKey] = useState(sortKey);
     const [sDir, setSDir] = useState(sortDir);
-    const path = `/api/plugins/cronalytics/jobs/${encodeURIComponent(jobId)}/runs?days=${days}&outcome=${outcome}&sort_key=run_time&sort_dir=desc&limit=50`;
+    const path = `/api/plugins/cronalytics/jobs/${encodeURIComponent(jobId)}/runs?days=${days}&outcome=${outcome}&sort_key=${sKey}&sort_dir=${sDir}&limit=200`;
     const runs = useApi(path);
 
     const tokTotal = (r) => (r.input_tokens || 0) + (r.output_tokens || 0) + (r.cache_read_tokens || 0) + (r.cache_write_tokens || 0);
@@ -764,8 +764,6 @@
             if (!cancelled) setSyncing(false);
             return;
           }
-          // Artificial 5s delay so spinner is visible during testing
-          return new Promise(resolve => setTimeout(resolve, 5000));
         })
         .then(() => {
           if (cancelled || hasError) return;
