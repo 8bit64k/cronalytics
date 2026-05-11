@@ -697,7 +697,7 @@
       const topTokensModal = useModal();
       const topPaceModal = useModal();
 
-    const [heroLines, setHeroLines] = useState({ label: "CRON ANALYTICS", sub: "Observability into the costs of the autonomous, automated processes of your self-improving Hermes AI agents." });
+    const [heroLines, setHeroLines] = useState({ label: "cronalytics", sub: "Observe. Measure. Optimize." });
     useEffect(() => {
       fetch("/dashboard-plugins/cronalytics/dist/hero.txt")
         .then(r => r.ok ? r.text() : Promise.reject())
@@ -807,7 +807,9 @@
       // Hero banner
       React.createElement("div", {
         style: {
-          padding: "1.25rem 0 0.75rem",
+          padding: "0.75rem 0 0.5rem 0.75rem",
+          marginBottom: "0.5rem",
+          borderLeft: "3px solid var(--color-accent)",
           borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))"
         }
       },
@@ -815,22 +817,42 @@
           style: {
             fontFamily: "var(--theme-font-mono, monospace)",
             fontSize: "0.7rem",
+            opacity: 0.6,
+            marginBottom: "0.15rem"
+          }
+        }, "/ˈkrɒn.əˌlɪt.ɪks/", 
+          React.createElement("i", { style: { opacity: 0.5, marginLeft: "0.5rem", fontSize: "0.65rem" } }, "(noun)")
+        ),
+        React.createElement("div", {
+          style: {
+            fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            fontSize: "0.95rem",
+            opacity: 0.85,
+            lineHeight: 1.35,
+            maxWidth: "42rem",
+            marginBottom: "0.15rem"
+          }
+        }, "1. Cron analytics and observability."),
+        React.createElement("div", {
+          style: {
+            fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            fontSize: "0.95rem",
+            opacity: 0.85,
+            lineHeight: 1.35,
+            maxWidth: "42rem",
+            marginBottom: "0.35rem"
+          }
+        }, "2. The dashboard for agentic automations in Hermes."),
+        React.createElement("div", {
+          style: {
+            fontFamily: "var(--theme-font-mono, monospace)",
+            fontSize: "0.75rem",
             fontWeight: 600,
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            opacity: 0.5,
-            marginBottom: "0.35rem"
+            opacity: 0.6
           }
-        }, heroLines.label),
-        React.createElement("div", {
-          style: {
-            fontSize: "0.82rem",
-            opacity: 0.65,
-            lineHeight: 1.5,
-            maxWidth: "42rem",
-            fontFamily: "var(--theme-font-mono, monospace)"
-          }
-        }, heroLines.sub)
+        }, "Observe. Measure. Optimize.")
       ),
 
       // Sticky toolbar
@@ -874,7 +896,7 @@
         )
       ),
 
-      // ── Job Detail Modal ─────────────────────────────────────────────
+      // ── Job Detail Modal ─────────────────────────────────────────────────────────────────────────────────────────
       React.createElement(Modal, {
         isOpen: !!selectedJobId,
         onClose: () => setSelectedJobId(null),
