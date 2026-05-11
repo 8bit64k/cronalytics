@@ -368,6 +368,8 @@
   }
 
   // ── Outcome toggle (Success / Failure / All) ─────────────────────
+
+  // ── Outcome toggle (Success / Failure / All) ─────────────────────
   function OutcomeToggle({ selected, onChange, label }) {
     const opts = [
       { label: "All", value: "both" },
@@ -913,9 +915,7 @@
           React.createElement(ModeToggle, { selected: mode, onChange: setMode, label: "Mode" }),
         ),
         React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" } },
-          React.createElement("span", { style: { display: "inline-flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" } },
-            ...DaySelector({ selected: days, onChange: setDays })
-          ),
+          React.createElement(DaySelector, { selected: days, onChange: setDays }),
           React.createElement(Button, {
             type: "button",
             size: "sm",
