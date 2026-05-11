@@ -1440,7 +1440,16 @@
                   const isActive = sortConfig.key === h;
                   return React.createElement("th", {
                     key: h,
+                    tabIndex: 0,
+                    role: "button",
+                    "aria-label": isActive ? "Sorted by " + h + ", " + (sortConfig.direction === "asc" ? "ascending" : "descending") : "Sort by " + h,
                     onClick: () => onSort(h),
+                    onKeyDown: (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onSort(h);
+                      }
+                    },
                     style: {
                       textAlign: h === "Job" ? "left" : "right",
                       padding: "0.5rem 0.35rem",
