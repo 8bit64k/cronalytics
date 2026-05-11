@@ -1560,10 +1560,10 @@
                   })
                 ),
                 React.createElement("span", {
-                  style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", flexShrink: 0, textAlign: "right", whiteSpace: "nowrap" }
+                  style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", flexShrink: 0, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "0.35rem", width: "9rem", justifyContent: "flex-end" }
                 },
-                  React.createElement("span", { style: { color: "#f5a623" } }, fmtCost(m.total_cost)),
-                  React.createElement("span", { style: { opacity: 0.45, marginLeft: "0.35rem" } }, "· ", (m.runs || 0).toLocaleString())
+                  React.createElement("span", { style: { color: "#f5a623", width: "4.5rem", textAlign: "right", display: "inline-block" } }, fmtCost(m.total_cost)),
+                  React.createElement("span", { style: { opacity: 0.45, width: "3.5rem", textAlign: "right", display: "inline-block" } }, "\u00b7 " + (m.runs || 0).toLocaleString())
                 )
               )),
               remaining > 0 && React.createElement("div", {
