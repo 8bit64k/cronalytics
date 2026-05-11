@@ -2,7 +2,7 @@
 # Updated: 2026-05-11
 #
 ## Current Commit
-`e865b22` (master) — "refactor(error-handling): specific exceptions + exc_info=True"
+`8538f70` (master) — "Merge feat/monolith-source-split (certified)"
 
 ## Recently Delivered (2026-05-10–11)
 - H9 Agent/no_agent mode awareness: schema `job_mode`, dual-track sync, `ModeToggle` toolbar, `[No agent]` badges, summary footnote, script job count in summary
@@ -21,6 +21,13 @@
 - **M8** — Document wrapper vs payload success in README: one-paragraph section under "Understanding your data".
 - **Error-handling refactor**: replaced 13 bare `except Exception` with specific types (`OSError`, `json.JSONDecodeError`, `sqlite3.Error`, `ValueError`, `TypeError`, `ImportError`); `exc_info=True` on unexpected logger calls; upgraded warn→error for unexpected failures.
 - **Plugin `__init__.py`**: added bootstrap scanner call on plugin load (catches stale gaps after gateway restarts).
+- **Monolith source split** → modular `src/` tree (certified & merged to master):
+  - Extracted 13 source files from 1,811-line `dist/index.js` monolith
+  - `src/components/HeroBanner.js`, `SummaryBoard.js`, `LeaderBoard.js`, `ModelBreakdown.js`, `JobBreakdown.js`
+  - `src/components/CronalyticsTab.js` — orchestrator (~370 lines)
+  - `src/components/DaySelector.js`, `ModeToggle.js`, `OutcomeToggle.js`, `JobDetailView.js`, `Modal.js`, `ErrorBoundary.js`, `SparkLine.js`
+  - `src/hooks/useApi.js`, `src/lib/sdk.js`, `src/lib/formatters.js`, `src/lib/icons.js`
+  - Build: `dashboard/build.js` (esbuild IIFE bundler) → `dist/index.js` (108.7 KB)
 
 ## What Works Now
 1. Dashboard loads; Cronalytics tab renders without white screen
@@ -48,6 +55,7 @@
 19. **Test suite**: 40 pytest tests, all passing (`pytest -q`)
 20. **Lint/type**: ruff clean, mypy clean on 10 source files
 21. **Bootstrap scanner**: plugin `__init__.py` syncs watermarks on load (catches post-restart gaps)
+22. **Source architecture**: modular `src/` tree with esbuild bundler; no more 1,811-line monolith edit sessions
 
 ## V1.0 Technical In-Scope (Remaining)
 | # | Task | Status |
