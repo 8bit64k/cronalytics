@@ -773,7 +773,7 @@
           if (syncResult && syncResult.result) {
             const { inserted, elapsed_ms } = syncResult.result;
             setSyncToast({ msg: `\u2713 Synced ${inserted} runs \u00b7 ${(elapsed_ms / 1000).toFixed(1)}s` });
-            setTimeout(() => setSyncToast(null), 3000);
+            setTimeout(() => setSyncToast(null), 5000);
           }
           summary.refetch();
           jobs.refetch();
@@ -1763,10 +1763,10 @@
           transform: "translateX(-50%)",
           background: "var(--background)",
           color: "var(--foreground-base, var(--foreground))",
-          border: "1px solid var(--color-accent)",
+          border: "1px solid var(--foreground-base, var(--foreground))",
           borderRadius: "0.5rem",
-          padding: "0.5rem 1rem",
-          fontSize: "0.75rem",
+          padding: "0.6rem 1.25rem",
+          fontSize: "0.85rem",
           fontFamily: "var(--theme-font-mono, monospace)",
           zIndex: 10000,
           boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
