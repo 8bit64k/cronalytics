@@ -5,12 +5,12 @@
  */
 import { React, PLUGINS } from "./lib/sdk.js";
 import { PluginErrorBoundary } from "./components/ErrorBoundary.js";
-import { CronanalyticsTab } from "./components/CronanalyticsTab.js";
+import { CronalyticsTab } from "./components/CronalyticsTab.js";
 
 PLUGINS.register("cronalytics", function CronalyticsWrapped() {
   return React.createElement(
     PluginErrorBoundary,
     null,
-    React.createElement(CronanalyticsTab)
+    React.createElement(CronalyticsTab)
   );
 });

@@ -14,7 +14,7 @@ import { JobBreakdown } from "../components/JobBreakdown.js";
 import { fmtCost, fmtTime, fmtCompact, fmtDuration, fmtSyncAge, paceColor } from "../lib/formatters.js";
 import { RefreshCwIcon } from "../lib/icons.js";
 
-export function CronanalyticsTab() {
+export function CronalyticsTab() {
   const [days, setDaysRaw] = useState(() => {
     try {
       const saved = localStorage.getItem("cronalytics:days");

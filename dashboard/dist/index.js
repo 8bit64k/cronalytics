@@ -1597,8 +1597,8 @@
     );
   }
 
-  // src/components/CronanalyticsTab.js
-  function CronanalyticsTab() {
+  // src/components/CronalyticsTab.js
+  function CronalyticsTab() {
     const [days, setDaysRaw] = useState(() => {
       try {
         const saved = localStorage.getItem("cronalytics:days");
@@ -2371,7 +2371,7 @@
     return React.createElement(
       PluginErrorBoundary,
       null,
-      React.createElement(CronanalyticsTab)
+      React.createElement(CronalyticsTab)
     );
   });
 })();
