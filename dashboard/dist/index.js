@@ -317,52 +317,54 @@
       const v = parseInt(custom, 10);
       onChange(isNaN(v) || v < 0 ? 0 : v);
     };
-    return React.createElement("div", {
-      style: {
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "center",
-        gap: "0.375rem",
-      }
-    },
-      // Preset buttons
-      ...presets.map(d => React.createElement(Button, {
-        key: d.value,
-        type: "button",
-        size: "sm",
-        outlined: selected !== d.value,
-        onClick: () => { setCustom(""); onChange(d.value); },
-      }, d.label)),
-      // Custom days input
-      React.createElement("input", {
-        type: "number",
-        min: 0,
-        step: 1,
-        placeholder: "days",
-        value: custom,
-        onChange: e => setCustom(e.target.value),
-        onKeyDown: e => { if (e.key === "Enter") applyCustom(); },
-        style: {
-          width: "3.5rem",
-          fontSize: "0.7rem",
-          fontFamily: "var(--theme-font-mono, monospace)",
-          background: "var(--background, rgba(12,12,12,0.5))",
-          color: "var(--foreground-base, var(--foreground))",
-          border: "1px solid var(--border, rgba(255,255,255,0.1))",
-          borderRadius: "0.25rem",
-          padding: "0.25rem 0.35rem",
-          outline: "none",
-        }
-      }),
-      // Apply custom
-      React.createElement(Button, {
-        type: "button",
-        size: "sm",
-        outlined: true,
-        onClick: applyCustom,
-        title: "Apply custom days",
-      }, "Go")
-    );
+    return [
+      // Preset buttons group
+      React.createElement("span", {
+        key: "presets",
+        style: { display: "inline-flex", gap: "0.375rem", alignItems: "center" }
+      },
+        ...presets.map(d => React.createElement(Button, {
+          key: d.value,
+          type: "button",
+          size: "sm",
+          outlined: selected !== d.value,
+          onClick: () => { setCustom(""); onChange(d.value); },
+        }, d.label))
+      ),
+      // Custom input + Go group
+      React.createElement("span", {
+        key: "custom",
+        style: { display: "inline-flex", gap: "0.375rem", alignItems: "center" }
+      },
+        React.createElement("input", {
+          type: "number",
+          min: 0,
+          step: 1,
+          placeholder: "days",
+          value: custom,
+          onChange: e => setCustom(e.target.value),
+          onKeyDown: e => { if (e.key === "Enter") applyCustom(); },
+          style: {
+            width: "3.5rem",
+            fontSize: "0.7rem",
+            fontFamily: "var(--theme-font-mono, monospace)",
+            background: "var(--background, rgba(12,12,12,0.5))",
+            color: "var(--foreground-base, var(--foreground))",
+            border: "1px solid var(--border, rgba(255,255,255,0.1))",
+            borderRadius: "0.25rem",
+            padding: "0.25rem 0.35rem",
+            outline: "none",
+          }
+        }),
+        React.createElement(Button, {
+          type: "button",
+          size: "sm",
+          outlined: true,
+          onClick: applyCustom,
+          title: "Apply custom days",
+        }, "Go")
+      )
+    ];
   }
 
   // ── Outcome toggle (Success / Failure / All) ─────────────────────
@@ -911,7 +913,9 @@
           React.createElement(ModeToggle, { selected: mode, onChange: setMode, label: "Mode" }),
         ),
         React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" } },
-          React.createElement(DaySelector, { selected: days, onChange: setDays }),
+          React.createElement("span", { style: { display: "inline-flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" } },
+            ...DaySelector({ selected: days, onChange: setDays })
+          ),
           React.createElement(Button, {
             type: "button",
             size: "sm",
