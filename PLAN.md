@@ -31,9 +31,9 @@ This document replaces the previous phase-based plan with a flat priority-sorted
 || M2 | **CHANGELOG** | Version history for users and future maintainers. | Not started. |
 || M3 | **Test suite** | Even a minimal `pytest` run covering `_make_job_id()` and projection math would catch regressions. | Not started. |
 || M4 | **Lint / type check** | `ruff` + `mypy` configuration. | Not started. |
-|| M5 | **Periodic auto-sync** | A 6-hour background timer so the scanner runs without manual intervention. | Listed in old DESIGN.md but never implemented. |
+|| M5 | **Periodic auto-sync** | Deferred to v1.1. Bootstrap scanner on gateway start + real-time hook + retry worker cover steady-state and restart gaps. | 🟡 Deferred. |
 || M7 | **Educational modals** | Replaced native `title` tooltips with two modal layers: ⓘ info modals (metric definitions, formulas, interpretation) and Top card drill-down modals (#1 job details). Solves iPad tap-and-hold unreliability with intentional click interactions. Mono font, normal case body, 0.78rem detail blocks. | ✅ Delivered. |
-|| M8 | **Success/failure split for wrapper vs payload** | Document (or decide) whether true payload-level success detection is in scope. Currently we only know if the *wrapper* completed. | Design decision pending. |
+|| M8 | **Success/failure split for wrapper vs payload** | Document in README that we track wrapper-level completion only. Decision made: payload-level success detection is out of scope for v1.0. | 🟡 Document in README. |
 
 ---
 
