@@ -13,10 +13,8 @@ from __future__ import annotations
 
 import argparse
 import sys
-import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 # ---------------------------------------------------------------------------
 # assuming we're run from inside the plugin repo; facts.py lives next door.
@@ -28,8 +26,8 @@ import config
 from facts import (
     get_conn,
     query_health,
-    query_jobs,
     query_job_runs,
+    query_jobs,
     query_models,
     query_summary,
     query_trends,
@@ -174,7 +172,7 @@ def cmd_runs(args: argparse.Namespace) -> int:
 
     lines: list[str] = [
         "",
-        f"  ╔══════════════════════════════════════════════════════════╗",
+        "  ╔══════════════════════════════════════════════════════════╗",
         f"  ║                📝 Runs: {job_id[:36]:37}║",
         "  ╚══════════════════════════════════════════════════════════╝",
         "",
@@ -188,8 +186,8 @@ def cmd_runs(args: argparse.Namespace) -> int:
         dur_str = f"{dur:.0f}s" if dur is not None else "—"
         cost = _fmt_cost(r.get("estimated_cost_usd"))
         tok = _fmt_tokens(
-            (r.get("input_tokens", 0) + r.get("output_tokens", 0) +
-             r.get("cache_read_tokens", 0) + r.get("cache_write_tokens", 0))
+            r.get("input_tokens", 0) + r.get("output_tokens", 0) +
+             r.get("cache_read_tokens", 0) + r.get("cache_write_tokens", 0)
         )
         model = (r.get("model") or "unknown")[:24]
         lines.append(f"  {t:16} {dur_str:>6} {cost:>9} {tok:>8} {model:25}")
@@ -221,7 +219,7 @@ def cmd_models(args: argparse.Namespace) -> int:
     for m in models:
         model = (m["model"] or "unknown")[:28]
         cost = _fmt_cost(m["total_cost"])
-        tokens = _fmt_tokens((m.get("total_input_tokens", 0) + m.get("total_output_tokens", 0)))
+        tokens = _fmt_tokens(m.get("total_input_tokens", 0) + m.get("total_output_tokens", 0))
         lines.append(f"  {model:30} {m['runs']:>8,} {cost:>10} {tokens:>10}")
 
     lines.append("")

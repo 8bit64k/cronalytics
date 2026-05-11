@@ -10,7 +10,6 @@ import issues.
 
 import importlib.util
 from pathlib import Path
-import pytest
 
 
 def _load_facts():
@@ -64,4 +63,7 @@ class TestMakeJobId:
 
     def test_uuid_style_job_id(self):
         """Hyphenated uuid-style job id (no underscores in id)."""
-        assert _make_job_id("cron_550e8400-e29b-41d4-a716-446655440000_20260430_120000") == "550e8400-e29b-41d4-a716-446655440000"
+        assert (
+            _make_job_id("cron_550e8400-e29b-41d4-a716-446655440000_20260430_120000")
+            == "550e8400-e29b-41d4-a716-446655440000"
+        )

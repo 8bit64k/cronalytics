@@ -1,0 +1,62 @@
+[project]
+name = "cronalytics"
+version = "0.1.0"
+description = "Hermes dashboard plugin for cron observability"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "croniter>=1.0",
+    "fastapi>=0.100",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.0.0",
+    "pytest>=9.0.3",
+    "ruff>=0.15.12",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib -v"
+pythonpath = ["/home/nick/.hermes/hermes-agent"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "W",
+    "I",
+    "N",
+    "UP",
+    "B",
+    "C4",
+    "SIM",
+    "ARG",
+]
+ignore = [
+    "E402",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+explicit_package_bases = true
+namespace_packages = true
+exclude = [
+    "dashboard/",
+    "seed_test_db.py",
+    "ingester.py",
+    "scanner.py",
+    "__init__.py",
+]

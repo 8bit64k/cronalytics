@@ -12,8 +12,8 @@ Strategy:
 3. Provide shared fixtures for temporary fact DBs and watermark files.
 """
 
+import contextlib
 import json
-import sqlite3
 import sys
 import tempfile
 from pathlib import Path
@@ -51,10 +51,8 @@ def temp_db():
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         path = Path(f.name)
     yield path
-    try:
+    with contextlib.suppress(FileNotFoundError):
         path.unlink()
-    except FileNotFoundError:
-        pass
 
 
 @pytest.fixture
@@ -72,10 +70,8 @@ def temp_watermark():
         json.dump({"last_ended_at": None, "last_sync": None, "rows_synced": 0}, f)
         path = Path(f.name)
     yield path
-    try:
+    with contextlib.suppress(FileNotFoundError):
         path.unlink()
-    except FileNotFoundError:
-        pass
 
 
 @pytest.fixture

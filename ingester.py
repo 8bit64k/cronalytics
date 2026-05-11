@@ -18,7 +18,7 @@ import time
 from typing import Any
 
 from . import facts
-from .config import FACT_DB, RETRY_DELAYS, JITTER_MAX, STATE_DB, PENDING_FILE
+from .config import FACT_DB, JITTER_MAX, PENDING_FILE, RETRY_DELAYS, STATE_DB
 from .logger import logger
 
 # In-memory work queue. Each item is a dict:
@@ -56,7 +56,7 @@ def start() -> None:
 def handle_session_end(
     session_id: str = "",
     completed: bool = True,
-    interrupted: bool = False,
+    interrupted: bool = False,  # noqa: ARG001 — reserved for future use
     model: str = "",
     platform: str = "",
     **_: Any,
@@ -110,7 +110,7 @@ def _remove_pending(session_id: str) -> None:
         if not PENDING_FILE.exists():
             return
         try:
-            with open(PENDING_FILE, "r", encoding="utf-8") as fh:
+            with open(PENDING_FILE, encoding="utf-8") as fh:
                 lines = fh.readlines()
 
             kept: list[str] = []
@@ -145,7 +145,7 @@ def _recover_pending() -> int:
 
     recovered: list[dict] = []
     try:
-        with open(PENDING_FILE, "r", encoding="utf-8") as fh:
+        with open(PENDING_FILE, encoding="utf-8") as fh:
             for line in fh:
                 line = line.strip()
                 if not line:

@@ -24,8 +24,8 @@ PLUGIN_DIR = Path(__file__).parent
 def _load_real_jobs():
     try:
         jobs = json.loads(JOBS_PATH.read_text()).get("jobs", [])
-    except Exception:
-        raise SystemExit(f"Cannot read {JOBS_PATH} — run in a real Hermes environment")
+    except Exception as exc:
+        raise SystemExit(f"Cannot read {JOBS_PATH} — run in a real Hermes environment") from exc
 
     result = []
     for j in jobs:
@@ -100,7 +100,7 @@ def _job_schedule_to_interval(schedule_str: str):
     return timedelta(hours=1)
 
 
-def _generate_run(jid, name, schedule_str, no_agent, dt: datetime) -> dict:
+def _generate_run(jid, _name, _schedule_str, no_agent, dt: datetime) -> dict:
     model, avg_cost, avg_dur, fail_rate = _PROFILES.get(jid, ("gpt-4o", 0.050, 60, 0.10))
     if no_agent:
         model = None

@@ -6,13 +6,13 @@ single-row inserts, and basic query primitives.
 
 from __future__ import annotations
 
+import logging
 import sqlite3
 import threading
 import time
 from pathlib import Path
 from typing import Any
 
-import logging
 logger = logging.getLogger("cronalytics")
 
 # Reused connection per thread (SQLite is fine with this for our
@@ -137,7 +137,8 @@ def get_conn(db_path: Path) -> sqlite3.Connection:
     if getattr(_local, "db_path", None) != key:
         _local.db_path = key
         _local.conn = ensure_schema(db_path)
-    return _local.conn
+    conn: sqlite3.Connection = _local.conn
+    return conn
 
 
 def _make_job_id(session_id: str) -> str | None:
@@ -330,7 +331,8 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "both", mode: st
         """,
         params,
     )
-    total_runs, total_est_cost, total_act_cost, total_in, total_out, total_cr, total_cw, total_dur, avg_dur = cursor.fetchone()
+    row = cursor.fetchone()
+    total_runs, total_est_cost, total_act_cost, total_in, total_out, total_cr, total_cw, total_dur, avg_dur = row
     total_tokens = (total_in or 0) + (total_out or 0) + (total_cr or 0) + (total_cw or 0)
 
     # Cost by model (only rows with known cost, respecting outcome+mode filter)
@@ -497,7 +499,7 @@ def query_job_runs(
     """
     conn = get_conn(db_path)
     conditions = ["job_id = ?"]
-    params = [job_id]
+    params: list[Any] = [job_id]
 
     if days > 0:
         conditions.append("run_time >= ?")
@@ -543,7 +545,7 @@ def query_job_runs(
         "cost_status", "billing_provider",
         "end_reason", "success", "job_mode",
     ]
-    return [dict(zip(cols, r)) for r in cursor.fetchall()]
+    return [dict(zip(cols, r, strict=True)) for r in cursor.fetchall()]
 
 
 def query_script_watermark(db_path: Path, job_id: str) -> float:

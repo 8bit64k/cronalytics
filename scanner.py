@@ -11,17 +11,16 @@ Called:
 
 from __future__ import annotations
 
+import datetime
 import json
 import logging
 import sqlite3
 import time
-import datetime
 from pathlib import Path
 from typing import Any
 
 try:
-    from . import facts
-    from . import config
+    from . import config, facts
     from .logger import logger
 except ImportError:
     # Running as standalone (importlib) — load sibling modules dynamically.
@@ -56,7 +55,7 @@ def _read_watermark(path: Path) -> Watermark:
     if not path.exists():
         return {"last_ended_at": 0.0, "last_sync": None, "rows_synced": 0}
     try:
-        with open(path, "r", encoding="utf-8") as fh:
+        with open(path, encoding="utf-8") as fh:
             return json.load(fh)
     except Exception:
         logger.warning("[scanner] Corrupt watermark, resetting")

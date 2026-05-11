@@ -233,7 +233,10 @@ async def job_runs(
     limit: int = Query(default=50, ge=1, le=500),
     days: int = Query(default=0, ge=0),
     outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
-    sort_key: str = Query(default="run_time", pattern="^(run_time|estimated_cost_usd|duration_seconds|success|model|input_tokens)$"),
+    sort_key: str = Query(
+        default="run_time",
+        pattern="^(run_time|estimated_cost_usd|duration_seconds|success|model|input_tokens)$",
+    ),
     sort_dir: str = Query(default="desc", pattern="^(asc|desc)$"),
     mode: str = Query(default="all", pattern="^(all|agent|no_agent)$"),
 ) -> dict[str, Any]:

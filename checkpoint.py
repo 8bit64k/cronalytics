@@ -120,13 +120,16 @@ def checkpoint_load(
         return None
 
     try:
-        with open(target, "r", encoding="utf-8") as fh:
+        with open(target, encoding="utf-8") as fh:
             payload = json.load(fh)
         logger.info(
             "[checkpoint] Loaded checkpoint from %s (saved %s)",
             target, payload.get("iso_time", "unknown"),
         )
-        return payload.get("state")
+        state = payload.get("state")
+        if isinstance(state, dict):
+            return state
+        return None
     except Exception as exc:
         logger.warning("[checkpoint] Failed to load: %s", exc)
         return None

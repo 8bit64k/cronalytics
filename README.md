@@ -170,6 +170,25 @@ Key fields captured per run:
 
 ---
 
+## Understanding Success
+
+Cronalytics tracks two different notions of "success":
+
+| Signal | What It Means | Source |
+|--------|--------------|--------|
+| **Wrapper Success** (`success` toggle in dashboard) | The cron wrapper finished without error — the job ran, the agent responded, and the wrapper exited cleanly. | `end_reason` field in the session row |
+| **Payload Success** | The agent's actual output was correct, useful, or achieved the intended goal. | Not tracked by Cronalytics |
+
+### How to interpret the dashboard
+
+- **Success = high, Failure = low** → Your cron jobs are mechanically reliable (wrappers don't crash, API calls succeed, no timeouts).
+- **Success = high, but output quality is poor** → The infrastructure is fine; the issue is in the prompt, model choice, or task definition.
+- **Failure = high** → Investigate timeouts, API errors, or wrapper crashes. The job may need retry logic, a different model, or smaller task scope.
+
+> The Success/Failure toggle is a **reliability** signal, not a **correctness** signal. It tells you whether your automation is running; it does not tell you whether it is working.
+
+---
+
 ## Architecture at a Glance
 
 ```
