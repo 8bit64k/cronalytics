@@ -35,3 +35,28 @@ When building Cronalytics together in real-time:
 - Exception: backend data flow verification (curl, API responses) is still mine.
 
 This rule applies specifically to Cronalytics during live joint build sessions. Solo overnight or delegated build/test cycles may use full browser automation where appropriate.
+
+---
+
+## Release Gate Policy (Effective Immediately)
+
+Cronalytics has reached **mature pre-release stability**. The core feature set is complete, the architecture is proven, and the codebase is now in a pre-launch testing and hardening phase.
+
+### Branch Discipline
+
+- **All changes must land on a feature branch first.** Never commit directly to `master`.
+- Branch naming: `feat/<description>` or `fix/<description>` or `ui/<description>`.
+- Each branch must be tied to a specific issue, assessment item, or launch-plan task.
+
+### Certification Requirement
+
+Before any branch is merged into `master`, it must be **certified by both Phosphor and Nick**:
+
+1. **Phosphor certifies technical correctness:** tests pass, lint is green, no regressions in existing functionality, assessment recommendations are addressed or explicitly deferred.
+2. **Nick certifies product readiness:** UI/UX is verified manually across devices, copy and behavior match intent, and the change does not destabilize the pre-release build.
+
+Neither party can override the other. If Phosphor rejects a branch, it does not merge. If Nick rejects a branch, it does not merge.
+
+### Rationale
+
+We are past the experimentation phase. The `master` branch must remain a known-good, launch-candidate state at all times. Disposable experimentation belongs in branches. Merge is a deliberate, dual-signature act.
