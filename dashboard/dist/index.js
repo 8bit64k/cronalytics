@@ -296,9 +296,9 @@
   function DaySelector({ selected, onChange }) {
     const [custom, setCustom] = useState("");
     const presets = [
-      { label: "7", value: 7 },
-      { label: "30", value: 30 },
-      { label: "90", value: 90 },
+      { label: "7D", value: 7 },
+      { label: "30D", value: 30 },
+      { label: "90D", value: 90 },
     ];
     const applyCustom = () => {
       const v = parseInt(custom, 10);
@@ -348,7 +348,7 @@
         outlined: true,
         onClick: applyCustom,
         title: "Apply custom days",
-        style: { paddingLeft: "0.55rem", paddingRight: "0.55rem", minWidth: "auto", fontSize: "0.9rem" }
+        style: { paddingLeft: "0.65rem", paddingRight: "0.65rem", minWidth: "auto", fontSize: "1rem" }
       }, "Go")
     );
   }
@@ -356,9 +356,9 @@
   // ── Outcome toggle (Success / Failure / All) ─────────────────────
   function OutcomeToggle({ selected, onChange, label }) {
     const opts = [
+      { label: "All", value: "both" },
       { label: "Success", value: "success" },
       { label: "Failure", value: "failure" },
-      { label: "All", value: "both" },
     ];
     return React.createElement("div", {
       style: { display: "flex", gap: "0.5rem", alignItems: "center" }
@@ -387,9 +387,9 @@
   // ── Mode toggle (Agent / No_Agent / All) ──────────────────────────
   function ModeToggle({ selected, onChange, label }) {
     const opts = [
+      { label: "All", value: "all" },
       { label: "Agent", value: "agent" },
       { label: "No Agent", value: "no_agent" },
-      { label: "All", value: "all" },
     ];
     return React.createElement("div", {
       style: { display: "flex", gap: "0.5rem", alignItems: "center" }
