@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.egg-info/
-dist/
+/dist/
 build/
 
 # Facts DB (generated at runtime)
