@@ -315,7 +315,7 @@
     ];
     const applyCustom = () => {
       const v = parseInt(custom, 10);
-      onChange(isNaN(v) || v < 0 ? 0 : v);
+      onChange(isNaN(v) || v < 0 ? 0 : Math.min(v, 365));
     };
     return [
       // Preset buttons group
@@ -340,6 +340,7 @@
           type: "number",
           min: 0,
           step: 1,
+      max: 365,
           placeholder: "days",
           value: custom,
           onChange: e => setCustom(e.target.value),
@@ -660,6 +661,33 @@
                 );
               })()
     );
+  }
+
+  // ── Error Boundary to prevent total tab crash ──────────────────────
+  class PluginErrorBoundary extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = { hasError: false };
+    }
+    static getDerivedStateFromError() {
+      return { hasError: true };
+    }
+    render() {
+      if (this.state.hasError) {
+        return React.createElement("div", {
+          style: {
+            padding: "2rem",
+            color: "var(--color-destructive, #ef4444)",
+            textAlign: "center",
+            fontFamily: "var(--theme-font-mono, monospace)",
+          }
+        },
+          React.createElement("div", { style: { fontWeight: 700, marginBottom: "0.5rem" } }, "Cronalytics Error"),
+          React.createElement("div", { style: { fontSize: "0.85rem", opacity: 0.8 } }, "Something went wrong. Please refresh or contact support.")
+        );
+      }
+      return this.props.children;
+    }
   }
 
     // ── Main /cron tab ──────────────────────────────────────────────
@@ -1778,5 +1806,7 @@
     )  ;
   }
 
-  PLUGINS.register("cronalytics", CronTab);
+  PLUGINS.register("cronalytics", function CronalyticsWrapped() {
+    return React.createElement(PluginErrorBoundary, null, React.createElement(CronTab));
+  });
 })();
