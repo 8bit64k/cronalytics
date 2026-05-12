@@ -1894,7 +1894,7 @@
             zIndex: 10,
             display: "flex",
             flexWrap: "wrap",
-            justifyContent: "space-between",
+            justifyContent: "flex-start",
             alignItems: "center",
             gap: "0.5rem 0.75rem",
             padding: "0.5rem 0",
@@ -1904,35 +1904,35 @@
             borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))"
           }
         },
+        // Toggles group — nowrap so they stay together as one unit.
         React.createElement(
           "div",
-          { style: { display: "flex", flexWrap: "wrap", gap: "1.5rem", alignItems: "center" } },
+          { style: { display: "flex", flexWrap: "nowrap", gap: "1.5rem", alignItems: "center" } },
           React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome, label: "Outcomes" }),
           React.createElement(ModeToggle, { selected: mode, onChange: setMode, label: "Mode" })
         ),
+        // DaySelector returns [presets, custom] — flattened as direct flex children
+        // so presets, custom input, and Refresh wrap independently.
+        React.createElement(DaySelector, { selected: days, onChange: setDays }),
+        // Refresh — its own flex item so it breaks away first at 110%.
         React.createElement(
-          "div",
-          { style: { display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" } },
-          React.createElement(DaySelector, { selected: days, onChange: setDays }),
-          React.createElement(
-            Button,
-            {
-              type: "button",
-              size: "sm",
-              outlined: true,
-              disabled: summary.loading || jobs.loading,
-              onClick: () => {
-                summary.refetch();
-                jobs.refetch();
-              },
-              style: { minWidth: "5.5rem" }
+          Button,
+          {
+            type: "button",
+            size: "sm",
+            outlined: true,
+            disabled: summary.loading || jobs.loading,
+            onClick: () => {
+              summary.refetch();
+              jobs.refetch();
             },
-            summary.loading || jobs.loading ? "\u2026" : React.createElement(
-              "span",
-              { style: { display: "flex", alignItems: "center", gap: "0.25rem" } },
-              RefreshCwIcon(14),
-              "Refresh"
-            )
+            style: { minWidth: "5.5rem" }
+          },
+          summary.loading || jobs.loading ? "\u2026" : React.createElement(
+            "span",
+            { style: { display: "flex", alignItems: "center", gap: "0.25rem" } },
+            RefreshCwIcon(14),
+            "Refresh"
           )
         )
       ),
