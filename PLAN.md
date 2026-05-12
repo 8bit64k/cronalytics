@@ -74,8 +74,13 @@ All high-priority technical items are **delivered** for V1.0.
 - [x] Discord announcement draft — written
 - [x] YouTube video description draft — written
 - [ ] Demo video / GIF (May 16)
-- [ ] GitHub release tag v1.0.0 (May 19)
-- [ ] Final cross-device regression pass
+- [x] GitHub release — tag v1.0.0 (May 12, accelerated)
+- [x] Demo video / GIF — `docs/screenshots/cronalytics-tour.gif`
+- [x] X thread draft — written (7 tweets, in docs/LAUNCH_POSTS.md)
+- [x] Discord announcement draft — written (in docs/LAUNCH_POSTS.md)
+- [ ] X thread — posted
+- [ ] Discord announcement — posted
+- [ ] Final cross-device / cross-theme pass
 
 ---
 
