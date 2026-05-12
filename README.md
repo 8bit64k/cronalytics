@@ -310,12 +310,12 @@ cronalytics/
 
 ## Support
 
-This is an independent project built by a solo developer with help from an AI agent. I use it daily and will fix bugs as I find them, but there is **no SLA, no dedicated support channel, and no guarantee of timely response**.
+This is an independent project built by a solo developer with help from an AI agent, and I'm grateful you are willing to try Cronayltics. I hope it helps optimize your cron activity. I use it daily and will fix bugs as I find them, but support and bug fixes will be on my **best effort** time schedule.
 
 **Found a bug?** Open a [GitHub issue](https://github.com/8bit64k/cronalytics/issues) with reproduction steps.  
 **Have a feature idea?** Open a [discussion](https://github.com/8bit64k/cronalytics/discussions) or fork it.
 
-Use at your own risk. The cost estimates are approximate. The success/failure signal is wrapper-level only (see [Understanding Success](#understanding-success)). Verify anything mission-critical independently.
+Caveat: The cost estimates are approximate and as recorded by the Hermes Agent framework. The success/failure signal is wrapper-level only (see [Understanding Success](#understanding-success)). Verify anything mission-critical independently.
 
 ---
 
