@@ -702,16 +702,76 @@
 
   // src/components/HeroBanner.js
   function HeroBanner() {
+    const [collapsed, setCollapsed] = useState(() => {
+      try {
+        return localStorage.getItem("cronalytics:hero:collapsed") === "1";
+      } catch {
+        return false;
+      }
+    });
+    const toggle = () => {
+      const next = !collapsed;
+      try {
+        localStorage.setItem("cronalytics:hero:collapsed", next ? "1" : "0");
+      } catch {
+      }
+      setCollapsed(next);
+    };
+    if (collapsed) {
+      return React.createElement(
+        "div",
+        {
+          style: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0.3rem 0.5rem 0.3rem 0.75rem",
+            marginBottom: "0.5rem",
+            borderLeft: "3px solid var(--color-accent)",
+            borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))",
+            cursor: "pointer"
+          },
+          onClick: toggle,
+          title: "Expand hero banner"
+        },
+        React.createElement(
+          "div",
+          { style: { display: "flex", alignItems: "baseline", gap: "0.5rem" } },
+          React.createElement("span", { style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", fontWeight: 700, opacity: 0.8, letterSpacing: "0.08em", textTransform: "uppercase" } }, "CRONALYTICS"),
+          React.createElement("span", { style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.65rem", opacity: 0.5, letterSpacing: "0.1em", textTransform: "uppercase" } }, "Observe. Measure. Optimize.")
+        ),
+        React.createElement("span", { style: { fontSize: "0.7rem", opacity: 0.5 } }, "\u25BC")
+      );
+    }
     return React.createElement(
       "div",
       {
         style: {
+          position: "relative",
           padding: "0.75rem 0 0.5rem 0.75rem",
           marginBottom: "0.5rem",
           borderLeft: "3px solid var(--color-accent)",
           borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))"
         }
       },
+      // Collapse toggle
+      React.createElement("button", {
+        onClick: toggle,
+        title: "Collapse hero banner",
+        style: {
+          position: "absolute",
+          top: 4,
+          right: 8,
+          background: "transparent",
+          border: "none",
+          color: "rgba(255,255,255,0.3)",
+          fontSize: "0.7rem",
+          cursor: "pointer",
+          lineHeight: 1,
+          padding: "0.15rem 0.25rem",
+          borderRadius: "0.2rem"
+        }
+      }, "\u25B2"),
       React.createElement(
         "div",
         {
