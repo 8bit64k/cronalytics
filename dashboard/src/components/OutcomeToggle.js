@@ -16,13 +16,12 @@ export function OutcomeToggle({ selected, onChange, label }) {
           "span",
           {
             style: {
-              fontSize: "0.75rem",
+              fontFamily: "var(--theme-font-mono, monospace)",
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              opacity: 0.7,
+              letterSpacing: "0.08em",
               textTransform: "uppercase",
-              opacity: 0.55,
-              fontWeight: 500,
-              letterSpacing: "0.03em",
-              lineHeight: 1,
-              userSelect: "none",
             },
           },
           label
