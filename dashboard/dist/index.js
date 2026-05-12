@@ -702,14 +702,6 @@
 
   // src/components/HeroBanner.js
   function HeroBanner() {
-    const [heroLines, setHeroLines] = useState({ label: "cronalytics", sub: "Observe. Measure. Optimize." });
-    useEffect(() => {
-      fetch("/dashboard-plugins/cronalytics/dist/hero.txt").then((r) => r.ok ? r.text() : Promise.reject()).then((text) => {
-        const lines = text.split(/\r?\n/).filter(Boolean);
-        if (lines.length >= 2) setHeroLines({ label: lines[0].trim(), sub: lines[1].trim() });
-      }).catch(() => {
-      });
-    }, []);
     return React.createElement(
       "div",
       {
@@ -762,7 +754,7 @@
           textTransform: "uppercase",
           opacity: 0.6
         }
-      }, heroLines.sub)
+      }, "Observe. Measure. Optimize.")
     );
   }
 
