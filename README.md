@@ -110,7 +110,7 @@ If the dashboard shows "No cron jobs captured," click **Sync Now**.
 
 ```yaml
 name: cronalytics
-version: 0.1.0
+version: 1.0.0
 description: Cost and operational observability for Hermes cron jobs
 provides_hooks:
   - on_session_end
@@ -329,7 +329,7 @@ If you are running Hermes Agent you have everything you need:
 
 ## Changelog
 
-### v1.0.0 (2026-05-19)
+### v1.0.0 (2026-05-12)
 
 - Dashboard: Summary Board, Leader Board, Per-Model Breakdown, Jobs Breakdown table
 - Sortable 8-column jobs table with expandable detail rows

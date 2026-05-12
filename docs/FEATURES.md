@@ -187,7 +187,7 @@ The `mode` parameter accepts `all`, `agent`, `no_agent`.
   "label": "Cronalytics",
   "description": "Cost and operational observability for Hermes cron jobs",
   "icon": "Clock",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "tab": {"path": "/cronalytics", "position": "end", "hidden": false},
   "slots": ["pre-main", "post-main"],
   "entry": "dist/index.js",

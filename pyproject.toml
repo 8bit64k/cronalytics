@@ -1,6 +1,6 @@
 [project]
 name = "cronalytics"
-version = "0.1.0"
+version = "1.0.0"
 description = "Hermes dashboard plugin for cron observability"
 readme = "README.md"
 requires-python = ">=3.11"

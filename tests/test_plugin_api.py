@@ -215,7 +215,7 @@ class TestHealth:
         data = response.json()
         assert data["plugin"] == "cronalytics"
         assert data["status"] == "ok"
-        assert data["version"] == "0.1.0"
+        assert data["version"] == "1.0.0"
         assert "fact_db" in data
         assert "sync" in data
 
