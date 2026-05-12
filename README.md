@@ -15,6 +15,10 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
 
 ---
 
+## Mini-Tour
+![Short Tour](docs/screenshots/cronalytics-tour.gif)
+---
+
 ## What It Does
 
 - **Captures** every cron job run as it completes via the `on_session_end` hook
