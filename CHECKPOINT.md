@@ -2,7 +2,7 @@
 # Updated: 2026-05-11
 #
 ## Current Commit
-`7ac11eb` (master) — "fix(toolbar): progressive zoom-responsive wrapping on MacBook"
+`31f3206` (master) — "fix(layout): defensive CSS for large-font themes"
 
 ## Recently Delivered (2026-05-10–11)
 - H9 Agent/no_agent mode awareness: schema `job_mode`, dual-track sync, `ModeToggle` toolbar, `[No agent]` badges, summary footnote, script job count in summary
@@ -19,6 +19,7 @@
 - **M3** — Minimal test suite (`pytest`): 40 tests covering facts, parser, scanner, schedule. All passing.
 - **M4** — Lint / type check (`ruff` + `mypy`): clean on 10 source files; `pyproject.toml` configs in place.
 - **M8** — Document wrapper vs payload success in README: one-paragraph section under "Understanding your data".
+- **Large-font theme resilience**: `minmax(0, 1fr)` grid columns, `minWidth: 0` on cards, `nowrap` + ellipsis on overflow-prone text, flex-basis instead of fixed widths in ModelBreakdown
 - **Error-handling refactor**: replaced 13 bare `except Exception` with specific types (`OSError`, `json.JSONDecodeError`, `sqlite3.Error`, `ValueError`, `TypeError`, `ImportError`); `exc_info=True` on unexpected logger calls; upgraded warn→error for unexpected failures.
 - **Plugin `__init__.py`**: added bootstrap scanner call on plugin load (catches stale gaps after gateway restarts).
 - **Monolith source split** → modular `src/` tree (certified & merged to master):
@@ -58,6 +59,7 @@
 22. **Source architecture**: modular `src/` tree with esbuild bundler
 23. **API validation**: JSDoc typedefs + thin runtime guard — dev-only `assertType()` for 6 API shapes
 24. **a11y**: Keyboard-accessible table headers and summary/leader cards (tabIndex, role, aria-label, Enter/Space)
+25. **Large-font theme support**: grid cells shrink below content width without spillover; ModelBreakdown uses flex-basis; JobBreakdown detail rows don't push buttons off-screen
 
 ## V1.0 Technical In-Scope (Remaining)
 | # | Task | Status |
