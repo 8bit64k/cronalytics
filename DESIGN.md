@@ -38,62 +38,60 @@ Cronalytics is a **dashboard plugin** (plus a standalone CLI) that attributes se
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    HERMES GATEWAY PROCESS                   │
-│                                                             │
-│  ┌───────────┐    ┌────────────┐    ┌────────────┐  │
-│  │  Cron Tick  ───▶│ Agent Session───▶│on_session_end│  │
-│  │ (scheduler) │    │(run_agent.py)│    │   hook fires │  │
-│  └───────────┘    └────────────┘    └─────┘────────  │
-│                              platform="cron"                 │
-│                              session_id=                     │
-│                                cron_{id}_{ts}                │
-│                                                 │            │
-│                                        ┌───────────┐    │
-│                                        │  Enqueue to  │    │
-│                                        │ pending.jsonl│    │
-│                                        └─────┘────────    │
-│                                               │             │
-│                              ┌──────────────────────┘             │
-│                              ▼                              │
-│                    ┌───────────────────┐                      │
-│                    │ Background      │                      │
-│                    │ Worker Thread   │                      │
-│                    │ (retry w/ jitter│                      │
-│                    │  up to 3x)      │                      │
-│                    └──────────────────┘                      │
-│                             │                               │
-│              Query state.db │ (sessions table)              │
-│                             ▼                               │
-│                    ┌───────────────────┐                      │
-│                    │  Fact DB Write  │                      │
-│                    │  (append-only)  │                      │
-│                    └───────────────────┘                      │
-│                             │                               │
-│         ┌─────────────────────┘                               │
-│         ▼                                                   │
-│  ┌───────────────┐     ┌─────────────────┐               │
-│  │ Reconciliation  │     │  Bootstrap      │               │
-│  │ Scanner         │     │  on plugin load │               │
-│  │ (watermark +    │     │  (catches gaps) │               │
-│  │  batch insert)  │     │                 │               │
-│  └───────────────┘     └─────────────────┘               │
+│                      HERMES GATEWAY PROCESS                     │
+│                                                                 │
+│  ┌───────────────┐ ──▶ ┌───────────────┐ ──▶ ┌───────────────┐  │
+│  │   Cron Tick   │     │ Agent Session │     │ on_session_end│  │
+│  │  (scheduler)  │     │ (run_agent.py)│     │   hook fires  │  │
+│  └───────────────┘ ──▶ └───────────────┘ ──▶ └───────────────┘  │
+│                         platform="cron"                         │
+│                           session_id=                           │
+│                           cron_{id}_{ts}                        │
+│                                                                 │
+│                        ┌───────────────┐                        │
+│                        │   Enqueue to  │                        │
+│                        │ pending.jsonl │                        │
+│                        └───────────────┘                        │
+│                                │                                │
+│                               ▼                                 │
+│                     ┌─────────────────────┐                     │
+│                     │  Background Worker  │                     │
+│                     │        Thread       │                     │
+│                     │   (retry w/ jitter  │                     │
+│                     │       up to 3x)     │                     │
+│                     └─────────────────────┘                     │
+│                                │                                │
+│                Query state.db │ (sessions table)                │
+│                               ▼                                 │
+│                     ┌─────────────────────┐                     │
+│                     │    Fact DB Write    │                     │
+│                     │    (append-only)    │                     │
+│                     └─────────────────────┘                     │
+│                                │                                │
+│                               ▼                                 │
+│           ┌─────────────────┐     ┌─────────────────┐           │
+│           │  Reconciliation │     │    Bootstrap    │           │
+│           │     Scanner     │     │  on plugin load │           │
+│           │   (watermark +  │     │  (catches gaps) │           │
+│           │  batch insert)  │     │                 │           │
+│           └─────────────────┘     └─────────────────┘           │
 └─────────────────────────────────────────────────────────────────┘
-                              │
-           API reads          │
+                               │                                 
+                            API reads                            
 ┌─────────────────────────────────────────────────────────────────┐
-│                  HERMES DASHBOARD PROCESS                   │
-│                                                             │
-│  ┌────────────────────────────────────────────────┐  │
-│  │            /cronalytics tab                     │  │
-│  │                                                 │  │
-│  │  Hero banner + sticky toolbar                    │  │
-│  │  Summary Board (4 cards)                         │  │
-│  │  Leader Board (4 spotlight cards)                 │  │
-│  │  Per-Model Breakdown (bar chart)                  │  │
-│  │  Jobs Breakdown (8-column sortable table)         │  │
-│  │  Expandable detail rows + Job Detail Modal        │  │
-│  │  Educational modals (Pace, Cost, Runs, Tokens)    │  │
-│  └────────────────────────────────────────────────┘  │
+│                     HERMES DASHBOARD PROCESS                    │
+│                                                                 │
+│    ┌───────────────────────────────────────────────────────┐    │
+│    │                    /cronalytics tab                   │    │
+│    │                                                       │    │
+│    │              Hero banner + sticky toolbar             │    │
+│    │                Summary Board (4 cards)                │    │
+│    │            Leader Board (4 spotlight cards)           │    │
+│    │            Per-Model Breakdown (bar chart)            │    │
+│    │        Jobs Breakdown (8-column sortable table)       │    │
+│    │       Expandable detail rows + Job Detail Modal       │    │
+│    │     Educational modals (Pace, Cost, Runs, Tokens)     │    │
+│    └───────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
