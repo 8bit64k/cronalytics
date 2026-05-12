@@ -206,7 +206,7 @@ export function CronalyticsTab() {
       // Spacer pushes DaySelector + Refresh to the right edge.
       // Using a flex child instead of marginLeft: auto so that when items wrap,
       // each wrapped line starts from the left and uses full toolbar width.
-      React.createElement("div", { style: { flex: "1 1 0%", minWidth: "0.5rem" } }),
+      React.createElement("div", { style: { flex: "1 1 0%", minWidth: "0.25rem" } }),
       // DaySelector returns [label, presets, custom] — flattened as direct flex children
       // of the toolbar so presets, custom input, and Refresh wrap progressively.
       React.createElement(DaySelector, { selected: days, onChange: setDays, label: "Days" }),
