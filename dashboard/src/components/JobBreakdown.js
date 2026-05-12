@@ -154,7 +154,7 @@ export function JobBreakdown({
                       ),
                       React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
                         React.createElement("div", {
-                          style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7, whiteSpace: "pre", display: "flex", alignItems: "center", gap: "0.5rem" }
+                          style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "flex", alignItems: "center", gap: "0.5rem" }
                         },
                           (j.projections && j.projections.schedule_display ? j.projections.schedule_display : "No schedule"),
                           "   Last: ", fmtTime(j.last_run),

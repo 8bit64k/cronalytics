@@ -7,8 +7,8 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
     onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
     onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
   };
-  const cardProps = (onClick, label) => ({
-    style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
+  const cardProps = (onClick, label, extraStyle) => ({
+    style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column", ...(extraStyle || {}) },
     tabIndex: 0,
     role: "button",
     "aria-label": label,
@@ -21,7 +21,7 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
   return React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "repeat(4, 1fr)",
+      gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
       gap: "1rem",
       marginBottom: "1.5rem",
       alignItems: "stretch"
@@ -31,7 +31,7 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
     (() => {
       const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.runs || 0) > (a.runs || 0) ? b : a, jobList[0]) : null;
       const label = j ? (j.name || j.job_id) : "\u2014";
-      return React.createElement("div", cardProps(onTopRunsClick, "Top Runs details"),
+      return React.createElement("div", cardProps(onTopRunsClick, "Top Runs details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
@@ -57,7 +57,7 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
     (() => {
       const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.total_cost || 0) > (a.total_cost || 0) ? b : a, jobList[0]) : null;
       const label = j ? (j.name || j.job_id) : "\u2014";
-      return React.createElement("div", cardProps(onTopCostClick, "Top Cost details"),
+      return React.createElement("div", cardProps(onTopCostClick, "Top Cost details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
@@ -83,7 +83,7 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
     (() => {
       const j = jobList.length > 0 ? jobList.reduce((a, b) => ((b.total_tokens || 0) > (a.total_tokens || 0) ? b : a), jobList[0]) : null;
       const label = j ? (j.name || j.job_id) : "\u2014";
-      return React.createElement("div", cardProps(onTopTokensClick, "Top Tokens details"),
+      return React.createElement("div", cardProps(onTopTokensClick, "Top Tokens details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
@@ -116,7 +116,7 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
         : null;
       const label = j ? (j.name || j.job_id) : "\u2014";
       const p = j && j.projections && j.projections.pace != null ? j.projections.pace : null;
-      return React.createElement("div", cardProps(onTopPaceClick, "Top Pace details"),
+      return React.createElement("div", cardProps(onTopPaceClick, "Top Pace details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },

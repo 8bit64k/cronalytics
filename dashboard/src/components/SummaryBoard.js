@@ -15,8 +15,8 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
     onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
     onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
   };
-  const cardProps = (onClick, label) => ({
-    style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
+  const cardProps = (onClick, label, extraStyle) => ({
+    style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column", ...(extraStyle || {}) },
     tabIndex: 0,
     role: "button",
     "aria-label": label,
@@ -29,14 +29,14 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
   return React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "repeat(4, 1fr)",
+      gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
       gap: "1rem",
       marginBottom: "1.5rem",
       alignItems: "stretch"
     }
   },
     // Job Runs
-    React.createElement("div", cardProps(onRunsClick, "Job Runs details"),
+    React.createElement("div", cardProps(onRunsClick, "Job Runs details", { minWidth: 0, overflow: "hidden" }),
       React.createElement(Card, { style: { flex: 1 } },
         React.createElement(CardHeader, null,
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
@@ -57,7 +57,7 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
       )
     ),
     // Cost
-    React.createElement("div", cardProps(onCostClick, outcome === "failure" ? "Wasted cost details" : "Cost details"),
+    React.createElement("div", cardProps(onCostClick, outcome === "failure" ? "Wasted cost details" : "Cost details", { minWidth: 0, overflow: "hidden" }),
       React.createElement(Card, { style: { flex: 1 } },
         React.createElement(CardHeader, null,
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
@@ -89,7 +89,7 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
       )
     ),
     // Tokens
-    React.createElement("div", cardProps(onTokensClick, "Tokens details"),
+    React.createElement("div", cardProps(onTokensClick, "Tokens details", { minWidth: 0, overflow: "hidden" }),
       React.createElement(Card, { style: { flex: 1 } },
         React.createElement(CardHeader, null,
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
@@ -133,7 +133,7 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
       const nominalPace = s.nominal_monthly_total || 0;
       const trendPace = s.trend_monthly_total || 0;
       const maxPace = Math.max(nominalPace, trendPace, 1);
-      return React.createElement("div", cardProps(onPaceClick, "Pace details"),
+      return React.createElement("div", cardProps(onPaceClick, "Pace details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },

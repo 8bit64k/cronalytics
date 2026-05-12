@@ -966,8 +966,8 @@
         e.currentTarget.style.boxShadow = "";
       }
     };
-    const cardProps = (onClick, label) => ({
-      style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
+    const cardProps = (onClick, label, extraStyle) => ({
+      style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column", ...extraStyle || {} },
       tabIndex: 0,
       role: "button",
       "aria-label": label,
@@ -986,7 +986,7 @@
       {
         style: {
           display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
+          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
           gap: "1rem",
           marginBottom: "1.5rem",
           alignItems: "stretch"
@@ -995,7 +995,7 @@
       // Job Runs
       React.createElement(
         "div",
-        cardProps(onRunsClick, "Job Runs details"),
+        cardProps(onRunsClick, "Job Runs details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(
           Card,
           { style: { flex: 1 } },
@@ -1031,7 +1031,7 @@
       // Cost
       React.createElement(
         "div",
-        cardProps(onCostClick, outcome === "failure" ? "Wasted cost details" : "Cost details"),
+        cardProps(onCostClick, outcome === "failure" ? "Wasted cost details" : "Cost details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(
           Card,
           { style: { flex: 1 } },
@@ -1085,7 +1085,7 @@
       // Tokens
       React.createElement(
         "div",
-        cardProps(onTokensClick, "Tokens details"),
+        cardProps(onTokensClick, "Tokens details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(
           Card,
           { style: { flex: 1 } },
@@ -1155,7 +1155,7 @@
         const maxPace = Math.max(nominalPace, trendPace, 1);
         return React.createElement(
           "div",
-          cardProps(onPaceClick, "Pace details"),
+          cardProps(onPaceClick, "Pace details", { minWidth: 0, overflow: "hidden" }),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1219,8 +1219,8 @@
         e.currentTarget.style.boxShadow = "";
       }
     };
-    const cardProps = (onClick, label) => ({
-      style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
+    const cardProps = (onClick, label, extraStyle) => ({
+      style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column", ...extraStyle || {} },
       tabIndex: 0,
       role: "button",
       "aria-label": label,
@@ -1239,7 +1239,7 @@
       {
         style: {
           display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
+          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
           gap: "1rem",
           marginBottom: "1.5rem",
           alignItems: "stretch"
@@ -1251,7 +1251,7 @@
         const label = j ? j.name || j.job_id : "\u2014";
         return React.createElement(
           "div",
-          cardProps(onTopRunsClick, "Top Runs details"),
+          cardProps(onTopRunsClick, "Top Runs details", { minWidth: 0, overflow: "hidden" }),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1287,7 +1287,7 @@
         const label = j ? j.name || j.job_id : "\u2014";
         return React.createElement(
           "div",
-          cardProps(onTopCostClick, "Top Cost details"),
+          cardProps(onTopCostClick, "Top Cost details", { minWidth: 0, overflow: "hidden" }),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1323,7 +1323,7 @@
         const label = j ? j.name || j.job_id : "\u2014";
         return React.createElement(
           "div",
-          cardProps(onTopTokensClick, "Top Tokens details"),
+          cardProps(onTopTokensClick, "Top Tokens details", { minWidth: 0, overflow: "hidden" }),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1364,7 +1364,7 @@
         const p = j && j.projections && j.projections.pace != null ? j.projections.pace : null;
         return React.createElement(
           "div",
-          cardProps(onTopPaceClick, "Top Pace details"),
+          cardProps(onTopPaceClick, "Top Pace details", { minWidth: 0, overflow: "hidden" }),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1435,7 +1435,7 @@
               }
             },
             React.createElement("span", {
-              style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", flexShrink: 0, width: "38%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
+              style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", flexShrink: 0, minWidth: 0, flex: "0 0 38%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
             }, m.model),
             React.createElement(
               "div",
@@ -1449,7 +1449,7 @@
             React.createElement(
               "span",
               {
-                style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", flexShrink: 0, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "0.35rem", width: "9rem", justifyContent: "flex-end" }
+                style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", flexShrink: 0, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "0.35rem", minWidth: 0, flex: "0 0 9rem", justifyContent: "flex-end" }
               },
               React.createElement("span", { style: { color: "#f5a623", width: "4.5rem", textAlign: "right", display: "inline-block" } }, fmtCost(m.total_cost)),
               React.createElement("span", { style: { opacity: 0.45, width: "3.5rem", textAlign: "right", display: "inline-block" } }, "\xB7 " + (m.runs || 0).toLocaleString())
@@ -1667,7 +1667,7 @@
                         React.createElement(
                           "div",
                           {
-                            style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7, whiteSpace: "pre", display: "flex", alignItems: "center", gap: "0.5rem" }
+                            style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "flex", alignItems: "center", gap: "0.5rem" }
                           },
                           j.projections && j.projections.schedule_display ? j.projections.schedule_display : "No schedule",
                           "   Last: ",
