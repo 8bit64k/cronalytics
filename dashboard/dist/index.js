@@ -1989,7 +1989,7 @@
         // DaySelector returns [label, presets, custom] — flattened as direct flex children
         // of the toolbar so presets, custom input, and Refresh wrap progressively.
         React.createElement(DaySelector, { selected: days, onChange: setDays, label: "Days" }),
-        // Refresh — icon-only with hover tooltip to save toolbar space.
+        // Refresh — its own flex item so it breaks away first at 110%.
         React.createElement(
           Button,
           {
@@ -1997,14 +1997,18 @@
             size: "sm",
             outlined: true,
             disabled: summary.loading || jobs.loading,
-            title: "Refresh",
             onClick: () => {
               summary.refetch();
               jobs.refetch();
             },
-            style: { minWidth: "2.5rem" }
+            style: { minWidth: "5.5rem" }
           },
-          summary.loading || jobs.loading ? "\u2026" : RefreshCwIcon(14)
+          summary.loading || jobs.loading ? "\u2026" : React.createElement(
+            "span",
+            { style: { display: "flex", alignItems: "center", gap: "0.25rem" } },
+            RefreshCwIcon(14),
+            "Refresh"
+          )
         )
       ),
       // Job Detail Modal
