@@ -53,39 +53,22 @@ All documentation lives in `docs/` except where noted.
 
 ## Installation
 
-### Method 1: Copy
+### Dashboard Plugins Tab (Recommended)
 
-```bash
-mkdir -p ~/.hermes/plugins
-cp -r /path/to/cronalytics ~/.hermes/plugins/cronalytics
-```
-
-### Method 2: Symlink (recommended for development)
-
-```bash
-mkdir -p ~/.hermes/plugins
-ln -s /path/to/cronalytics ~/.hermes/plugins/cronalytics
-```
-
-### Method 3: Dashboard Plugins Tab
-
-Open the Hermes dashboard, navigate to the **Plugins** tab, and use the **Install from GitHub / Git URL** field. Enter either:
+Open the Hermes dashboard, navigate to the **Plugins** tab, and use the **Install from GitHub / Git URL** field. Enter:
 
 - `owner/repo` shorthand (e.g. `8bit64k/cronalytics`)
-- A full `https://` or `git@` clone URL
+- Or a full `https://` or `git@` clone URL
 
-Then restart the dashboard server.
+Check **Enable after install**, then click **Install**.
 
 ### After Install
-
-```bash
-# Restart the Hermes dashboard server so API routes mount and the JS bundle is picked up
-hermes dashboard
-```
 
 Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS.
 
 Open the **Cronalytics** tab in the dashboard sidebar.
+
+> For development setup, see [`docs/DEV_SETUP.md`](docs/DEV_SETUP.md).
 
 ---
 

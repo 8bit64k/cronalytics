@@ -1,45 +1,34 @@
 # Installation Guide
 
-## Method 1: Copy
-
-Hermes plugins are static directories. No package manager required.
-
-```bash
-# 1. Copy the plugin into your Hermes plugins directory
-mkdir -p ~/.hermes/plugins
-cp -r /path/to/cronalytics ~/.hermes/plugins/cronalytics
-
-# 2. Restart the Hermes dashboard server
-hermes dashboard --no-open
-
-# 3. Hard-refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)
-
-# 4. Open the Cronalytics tab in the sidebar
-```
-
-## Method 2: Symlink (recommended for development)
-
-```bash
-mkdir -p ~/.hermes/plugins
-ln -s /path/to/cronalytics ~/.hermes/plugins/cronalytics
-```
-
-This keeps your build directory and the active plugin in sync. Any change you make is immediately reflected after a dashboard restart.
-
-## Method 3: Dashboard Plugins Tab
+## Method 1: Dashboard Plugins Tab (Recommended)
 
 Open the Hermes dashboard and navigate to the **Plugins** tab. Find the **Install from GitHub / Git URL** section and enter either:
 
-- `owner/repo` shorthand (e.g. `yourname/cronalytics`)
-- A full `https://` or `git@` clone URL (e.g. `https://github.com/yourname/cronalytics.git`)
+- `owner/repo` shorthand (e.g. `8bit64k/cronalytics`)
+- A full `https://` or `git@` clone URL
 
-The dashboard will clone the repository into `~/.hermes/plugins/cronalytics/` automatically.
+Check **Enable after install**, then click **Install**.
 
-Then restart the dashboard server:
+Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS.
+
+The **Cronalytics** tab will appear in the sidebar.
+
+## Method 2: Manual Copy (CLI Fallback)
+
+If you prefer to install from a local clone:
 
 ```bash
-hermes dashboard --no-open
+mkdir -p ~/.hermes/plugins
+cp -r /path/to/cronalytics ~/.hermes/plugins/cronalytics
 ```
+
+Then restart the gateway so hooks register and API routes mount:
+
+```bash
+hermes gateway restart
+```
+
+Hard-refresh your browser to pick up the new frontend bundle.
 
 ## Structure After Install
 
@@ -84,7 +73,7 @@ If the dashboard shows "No cron jobs captured," click **Sync Now**.
 
 ## Verification
 
-After install and restart:
+After install:
 
 1. Open the dashboard sidebar — you should see a **Cronalytics** tab.
 2. Click it — the hero banner and toolbar should render.

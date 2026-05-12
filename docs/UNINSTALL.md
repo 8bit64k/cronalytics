@@ -1,8 +1,10 @@
 # Uninstall Guide
 
-Cronalytics stores all data locally inside the plugin directory. Uninstall is a single directory removal.
+## Method 1: Dashboard Plugins Tab (Recommended)
 
-## Quick Uninstall
+Navigate to the **Plugins** tab in the Hermes dashboard. Find Cronalytics in the list and click **Delete**. This removes the plugin directory and disables it in config automatically.
+
+## Method 2: Manual Removal
 
 ```bash
 rm -rf ~/.hermes/plugins/cronalytics
@@ -14,8 +16,6 @@ This removes:
 - The sync watermark (`watermark.json`)
 - The pending queue (`pending.jsonl`)
 
-## If Enabled in Config
-
 If you added `cronalytics` to `plugins.enabled` in `~/.hermes/config.yaml`, remove it:
 
 ```yaml
@@ -25,10 +25,10 @@ plugins:
     # - cronalytics   <-- remove this line
 ```
 
-Then restart the dashboard server:
+Then restart the gateway:
 
 ```bash
-hermes dashboard --no-open
+hermes gateway restart
 ```
 
 ## Data Preservation
@@ -43,19 +43,6 @@ To restore later, reinstall the plugin and copy the backup back:
 
 ```bash
 cp ~/cronalytics-backup-YYYYMMDD.db ~/.hermes/plugins/cronalytics/facts.db
-```
-
-## Clean Install (Remove All Trace)
-
-```bash
-# Remove plugin directory
-rm -rf ~/.hermes/plugins/cronalytics
-
-# Remove from enabled plugins list
-# Edit ~/.hermes/config.yaml and delete the cronalytics line
-
-# Restart dashboard
-hermes dashboard --no-open
 ```
 
 ---
