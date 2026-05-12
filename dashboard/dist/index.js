@@ -1848,20 +1848,6 @@
     const topCostModal = useModal();
     const topTokensModal = useModal();
     const topPaceModal = useModal();
-    const toolbarRef = useRef(null);
-    const [refreshCompact, setRefreshCompact] = useState(false);
-    useEffect(() => {
-      const el = toolbarRef.current;
-      if (!el || typeof ResizeObserver === "undefined") return;
-      const ro = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const w = entry.contentRect ? entry.contentRect.width : entry.target.clientWidth;
-          setRefreshCompact(w < 520);
-        }
-      });
-      ro.observe(el);
-      return () => ro.disconnect();
-    }, []);
     useEffect(() => {
       fetchJSON("/api/plugins/cronalytics/health").then((d) => {
         if (d && d.sync) {
@@ -1973,7 +1959,6 @@
       React.createElement(
         "div",
         {
-          ref: toolbarRef,
           style: {
             position: "sticky",
             top: 0,
@@ -2004,7 +1989,7 @@
         // DaySelector returns [label, presets, custom] — flattened as direct flex children
         // of the toolbar so presets, custom input, and Refresh wrap progressively.
         React.createElement(DaySelector, { selected: days, onChange: setDays, label: "Days" }),
-        // Refresh — shrinks to icon-only when toolbar gets cramped.
+        // Refresh — its own flex item so it breaks away first at 110%.
         React.createElement(
           Button,
           {
@@ -2012,14 +1997,13 @@
             size: "sm",
             outlined: true,
             disabled: summary.loading || jobs.loading,
-            title: refreshCompact ? "Refresh" : void 0,
             onClick: () => {
               summary.refetch();
               jobs.refetch();
             },
-            style: { minWidth: refreshCompact ? "2.5rem" : "5.5rem" }
+            style: { minWidth: "5.5rem" }
           },
-          summary.loading || jobs.loading ? "\u2026" : refreshCompact ? RefreshCwIcon(14) : React.createElement(
+          summary.loading || jobs.loading ? "\u2026" : React.createElement(
             "span",
             { style: { display: "flex", alignItems: "center", gap: "0.25rem" } },
             RefreshCwIcon(14),
