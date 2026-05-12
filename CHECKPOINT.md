@@ -2,7 +2,7 @@
 # Updated: 2026-05-11
 #
 ## Current Commit
-`8538f70` (master) — "Merge feat/monolith-source-split (certified)"
+`fa6d960` (master) — "Merge feat/a11y-table-sort-keyboard (certified)"
 
 ## Recently Delivered (2026-05-10–11)
 - H9 Agent/no_agent mode awareness: schema `job_mode`, dual-track sync, `ModeToggle` toolbar, `[No agent]` badges, summary footnote, script job count in summary
