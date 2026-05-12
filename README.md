@@ -1,8 +1,15 @@
 # Cronalytics
 
-**Cost and operational observability for Hermes cron jobs.**
 
-Cronalytics is a Hermes Agent plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are actually costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them in the Hermes dashboard via a dedicated `/cronalytics` tab.
+/ˈkrɒn.əˌlɪt.ɪks/ (noun)
+
+1. Cron analytics and observability.
+2. The dashboard for agentic automations in Hermes.
+
+Observe. Measure. Optimize.
+
+
+Cronalytics is a Hermes Agent plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them in the Hermes dashboard via a dedicated `/cronalytics` tab.
 
 > Turn hidden automation into visible spend.
 
@@ -27,6 +34,23 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
 
 ---
 
+## Documentation Index
+
+All documentation lives in `docs/` except where noted.
+
+- **docs/BRIEF.md** — Product opportunity brief & positioning
+- **docs/DESIGN.md** — Architecture, data flow, and technical decisions
+- **docs/FEATURES.md** — Complete feature catalog with formulas
+- **PLAN.md** — Phased build plan and backlog (root)
+- **docs/LAUNCH_PLAN.md** — V1.0 launch timeline
+- **docs/INSTALL.md** — Detailed installation guide
+- **docs/UNINSTALL.md** — Clean removal instructions
+- **docs/USAGE.md** — Dashboard usage guide
+- **docs/AGENTS.md** — Contributor conventions & release gates
+
+---
+
+
 ## Installation
 
 ### Method 1: Copy
@@ -47,7 +71,7 @@ ln -s /path/to/cronalytics ~/.hermes/plugins/cronalytics
 
 Open the Hermes dashboard, navigate to the **Plugins** tab, and use the **Install from GitHub / Git URL** field. Enter either:
 
-- `owner/repo` shorthand (e.g. `yourname/cronalytics`)
+- `owner/repo` shorthand (e.g. `8bit64k/cronalytics`)
 - A full `https://` or `git@` clone URL
 
 Then restart the dashboard server.
@@ -292,23 +316,11 @@ cronalytics/
 
 ---
 
-## Documentation Index
-
-- **BRIEF.md** — Product opportunity brief & positioning
-- **DESIGN.md** — Architecture, data flow, and technical decisions
-- **FEATURES.md** — Complete feature catalog with formulas
-- **PLAN.md** — Phased build plan and backlog
-- **LAUNCH_PLAN.md** — V1.0 launch timeline
-- **INSTALL.md** — Detailed installation guide
-- **UNINSTALL.md** — Clean removal instructions
-- **USAGE.md** — Dashboard usage guide
-- **AGENTS.md** — Contributor conventions & release gates
-- **CHECKPOINT.md** — Session-level dev checkpoint
 
 ---
 
 ## Requirements
-
+If you are running Hermes Agent you have everything you need:
 - Hermes Agent with plugin hook support (`on_session_end`)
 - Hermes dashboard server for UI components
 - SQLite (bundled with Python)

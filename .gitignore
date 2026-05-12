@@ -39,3 +39,4 @@ node_modules/
 *.bak
 facts.db-shm
 facts.db-wal
+CHECKPOINT.md
