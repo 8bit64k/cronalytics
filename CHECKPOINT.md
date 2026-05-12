@@ -2,7 +2,7 @@
 # Updated: 2026-05-11
 #
 ## Current Commit
-`b8907d2` (master) — "Merge feat/api-validation (certified)"
+`7ac11eb` (master) — "fix(toolbar): progressive zoom-responsive wrapping on MacBook"
 
 ## Recently Delivered (2026-05-10–11)
 - H9 Agent/no_agent mode awareness: schema `job_mode`, dual-track sync, `ModeToggle` toolbar, `[No agent]` badges, summary footnote, script job count in summary
@@ -33,7 +33,7 @@
 1. Dashboard loads; Cronalytics tab renders without white screen
 2. Backend `/summary`: `nominal_monthly_total`, `trend_monthly_total`, `pace`, `script_jobs_in_window`, `success_runs`, `failure_runs`, `success_cost`, `failure_cost`
 3. Backend `/jobs`: per-job `pace` in projections object, mode-aware filtering
-4. Frontend: sticky toolbar with hero banner + toggle clusters + DaySelector + sync button
+4. Frontend: sticky toolbar with hero banner + toggle clusters + DaySelector + sync button; progressive zoom-responsive wrapping (Refresh → custom+Go → presets)
 5. Day selector: preset `[7D] [30D] [90D]`, custom input with `Go` button/Enter key
 6. **Row 1 — Summary Board:** 4 cards (Job Runs, Cost, Tokens, Pace)
    - Icons inherit text color with orange glow; sub-lines mono; trend arrows dynamic color
