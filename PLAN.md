@@ -6,34 +6,36 @@ This document replaces the previous phase-based plan with a flat priority-sorted
 
 ---
 
-## 🟡 High (Significant User Value)
+## 🟢 High (Significant User Value)
 
-| # | Task | Why | Current State |
-|---|------|-----|---------------|
-|| H2 | **Per-job token columns in jobs table** | ~~Summary shows total tokens, but jobs table has no token attribution.~~ **Delivered.** Token breakdown is shown in the expandable detail row below each job. Header-level token columns were rejected to avoid horizontal overflow. | ✅ Detail rows show total, in, out, cached. |
-|| H3 | **Sortable jobs table** | Table is currently static. Clicking column headers to sort by cost, runs, or pace is standard table UX. | ✅ All 7 columns sortable ↑/↓ with direction indicator. |
-|| H4 | **Top jobs highlight** | Visual emphasis on the highest-spend / most-run jobs draws attention where it matters. | ✅ Leader Board: 4 cards (Top Runs, Top Cost, Top Tokens, Top Pace) with icon accents and mono job names. |
-|| H1 | **Success/failure cost split** | `success` field exists in DB but is not surfaced in `/summary` or `/jobs`. A two-tone display (completed vs failed-to-finish) helps users spot broken cron jobs and wasted spend. Note: this reflects *wrapper-level* completion (the cron process finished), not payload-level success (the task did what it meant to). | ✅ Backend: `success_runs`, `failure_runs`, `success_cost`, `failure_cost` on `/summary` and `/jobs`. Frontend: Cost card shows ✓/✗ counts + wasted cost; expandable job detail rows show per-job ✓/✗ breakdown. |
-||| H5 | **Per-run expansion in dashboard UI** | API serves `/jobs/{id}/runs`, but the frontend has no UI for it. Clicking a job row should show the last N individual runs. | ✅ Modal-based job detail view with inline row expansion, sortable run table, sticky headers, 95% width. Merged `feat/per-job-drilldown` 2026-05-10. |
-||| H6 | **Duration metrics (avg duration, total duration)** | `duration_seconds` is computed and stored in the fact DB, but never surfaced in `/summary` or `/jobs`. Adding it to the Jobs Breakdown table and Top modals gives users visibility into slow/fast jobs and run performance. | ✅ Backend: `total_duration_seconds` + `avg_duration_seconds` in `/summary`; `total_duration` + `avg_duration` in `/jobs`. Frontend: `Time` column in Jobs Breakdown (sortable); avg duration in Top Runs + Top Cost modals. |
-||| H7 | **Suspect / orphaned / hung cron job detection** | Cron jobs with `ended_at IS NULL` in state.db are either running normally, hung, or dead. Using the `avg_duration` heuristic — flag a job as suspect if `now > started_at + (3 × avg_duration)` — gives users a clear signal when something is stuck or orphaned without requiring manual state.db inspection. Surface as an "Active Jobs" card or suspect count badge. | Deferred to v1.1+. Low surface area, troubleshooting-oriented rather than cost/visibility core. |
-||| H9 | **Agent / no_agent mode awareness** | Hermes supports `no_agent` (script-only) cron jobs that bypass the LLM entirely. These produce zero cost, zero tokens, and no state.db entry. In the current dashboard they are invisible ("ghost jobs"). V1.0 placeholder adds: `job_mode` column, dual-track sync (state.db + output directory scan), global mode filter (All / Agent / Script), script badge in table rows + modal, summary footnote. Full per-run history for script jobs deferred to v1.1 (requires exit-code parsing from `.md` output files). | ✅ Schema, sync, API params, toolbar badge+filter+footnote. 2026-05-10. |
-|| H8 | **Global outcome toggle (Success / Failure / Both)** | A single toggle that refilters the entire dashboard: both (default), success, failure. In Success mode, every card and table shows only successful runs — your efficient spend. In Failure mode, shows only failures — your audit view. Jobs Breakdown sorts by failure cost; Cost card flips to "Wasted"; Leader cards spotlight top failure sources. Zero new UI patterns — just the same dashboard through a different lens. See discussion in session 2026-05-08. | ✅ Toolbar toggle (Success / Failure / All). Inherits into job detail modal. Cost card conditional headline/color. LocalStorage persistence. |
+All high-priority technical items are **delivered** for V1.0.
+
+| # | Task | Current State |
+|---|------|---------------|
+| H1 | **Success/failure cost split** | ✅ Backend: `success_runs`, `failure_runs`, `success_cost`, `failure_cost` on `/summary` and `/jobs`. Frontend: Cost card shows ✓/✗ counts + wasted cost; expandable job detail rows show per-job ✓/✗ breakdown. |
+| H2 | **Per-job token columns in jobs table** | ✅ Token breakdown shown in expandable detail row below each job. Header-level token columns rejected to avoid horizontal overflow. |
+| H3 | **Sortable jobs table** | ✅ All 8 columns sortable ↑/↓ with direction indicator. |
+| H4 | **Top jobs highlight** | ✅ Leader Board: 4 cards (Top Runs, Top Cost, Top Tokens, Top Pace) with icon accents and mono job names. |
+| H5 | **Per-run expansion in dashboard UI** | ✅ Modal-based job detail view with inline row expansion, sortable run table, sticky headers, 95% width, 200-run limit. |
+| H6 | **Duration metrics** | ✅ Backend: `total_duration_seconds` + `avg_duration_seconds` in `/summary`; `total_duration` + `avg_duration` in `/jobs`. Frontend: `Avg Time` column in Jobs Breakdown (sortable); avg duration in Top Runs + Top Cost modals. |
+| H7 | **Suspect/hung job detection** | ⚫ Deferred to v1.1+. Low surface area, troubleshooting-oriented rather than cost/visibility core. |
+| H8 | **Global outcome toggle** | ✅ Toolbar toggle (All/Success/Failure). Inherits into job detail modal. Cost card conditional headline/color. LocalStorage persistence. |
+| H9 | **Agent / no_agent mode awareness** | ✅ Schema, sync, API params, toolbar badge+filter+footnote. Script scanning from output directory. `[No agent]` badges. |
 
 ---
 
-## 🟢 Medium (Quality of Life)
+## 🟡 Medium (Quality of Life)
 
-| # | Task | Why | Current State |
-|---|------|-----|---------------|
-|| M6 | **iPad + theme compatibility pass** | Mondwest font, hardcoded accent colors, and clashing progress bars break readability on iPad and across ~30 Omarchy themes. | ✅ Silver summary icons, mono sub-lines, neutral token bars, Leader Board titles default color, height parity. |
-|| M1 | **README** | Someone other than us needs to install and use this. | Not started. |
-|| M2 | **CHANGELOG** | Version history for users and future maintainers. | Not started. |
-|| M3 | **Test suite** | ✅ Delivered — 40+ tests covering facts, parser, scanner, schedule, ingester, plugin API. |
-|| M4 | **Lint / type check** | ✅ Delivered — ruff + mypy clean on 10 source files; `pyproject.toml` configured. |
-|| M5 | **Periodic auto-sync** | Deferred to v1.1. Bootstrap scanner + hook + retry cover steady-state and restart gaps. | 🟡 Deferred. |
-|| M7 | **Educational modals** | Replaced native `title` tooltips with two modal layers. | ✅ Delivered. |
-|| M8 | **Success/failure split for wrapper vs payload** | ✅ Documented in README under "Understanding your data". |
+| # | Task | Current State |
+|---|------|---------------|
+| M1 | **README** | ✅ Rewritten for V1.0. |
+| M2 | **CHANGELOG** | ✅ In README; standalone CHANGELOG.md deferred to v1.1. |
+| M3 | **Test suite** | ✅ Delivered — 83 tests covering facts, parser, scanner, schedule, ingester, plugin API. All passing. |
+| M4 | **Lint / type check** | ✅ Delivered — ruff + mypy clean on source files; `pyproject.toml` configured. |
+| M5 | **Periodic auto-sync** | ⚫ Deferred to v1.1. Bootstrap scanner + hook + retry cover steady-state and restart gaps. |
+| M6 | **iPad + theme compatibility pass** | ✅ Silver summary icons, mono sub-lines, neutral token bars, Leader Board titles default color, height parity, large-font theme resilience. |
+| M7 | **Educational modals** | ✅ Delivered — Pace, Runs, Cost, Tokens modals with formulas and color guides. |
+| M8 | **Success/failure split for wrapper vs payload** | ✅ Documented in README under "Understanding your data". |
 
 ---
 
@@ -47,12 +49,33 @@ This document replaces the previous phase-based plan with a flat priority-sorted
 | D4 | **Tool-level cost attribution** | Would require joining with `session_messages`, which is large and not cached in the fact DB. |
 | D5 | **Live log streaming** | Output files live at `~/.hermes/cron/output/`. Streaming them into the dashboard is a separate infrastructure project. |
 | D6 | **External DB backend** | PostgreSQL, TimescaleDB, etc. SQLite is sufficient for single-user local usage. |
-| D7 | **Job detail modal pagination** | Modal limits to 50 runs (default API `limit=50`). High-frequency jobs show correct run count in breakdown, but drill-down is capped. Needs "Load more" or pagination toggle. Noticed during H9 testing (2026-05-10): hourly job showed 333 runs in 7D table but only 50 in modal. |
+| D7 | **Job detail modal pagination** | Modal limits to 200 runs (default API `limit=200`). High-frequency jobs show correct run count in breakdown, but drill-down is capped. Needs "Load more" or pagination toggle. |
+| D8 | **Focus trap in modals** | Medium effort with moderate DOM edge-case risk in Hermes plugin context. Escape/backdrop already work. |
 
 ---
 
-## Manual Verification Checklist
+## V1.0 Launch Status
 
-| # | Test | Notes |
-|---|------|-------|
-| V1 | **Delete a job → check dashboard** | Delete a cron job from the built-in `/cron` tab. Verify the old runs still appear in Cronalytics with raw `job_id` fallback (name and schedule show "No schedule" / "—"). |
+**Feature freeze: May 14, 2026** ✅ Complete.  
+**Launch date: May 19, 2026** — Packaging phase active.
+
+### Remaining before launch
+- [x] All technical features delivered and merged to master
+- [x] Test suite: 83 tests passing
+- [x] Lint/type: ruff + mypy clean
+- [x] README rewritten
+- [x] DESIGN.md rewritten
+- [x] FEATURES.md rewritten
+- [x] INSTALL.md updated
+- [x] UNINSTALL.md created
+- [x] USAGE.md created
+- [ ] Demo video / GIF (May 16)
+- [ ] GitHub release tag v1.0.0 (May 19)
+- [ ] X thread draft (May 17)
+- [ ] Discord announcement draft (May 18)
+- [ ] Final cross-device regression pass
+
+---
+
+*Version: 1.0.0*  
+*Last updated: 2026-05-11*

@@ -2,6 +2,7 @@
 > A Hermes dashboard plugin for cron cost & operational visibility.
 
 **One-liner:** *Turn hidden automation into visible spend.*
+
 Cronalytics attributes session-level cost, model, and frequency data to every cron-originated run so you can see which scheduled jobs are driving your token spend.
 
 ---
@@ -36,63 +37,64 @@ Cronalytics is a **dashboard plugin** (plus a standalone CLI) that attributes se
 ## 3. Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
+┌─────────────────────────────────────────────────────────────────┐
 │                    HERMES GATEWAY PROCESS                   │
 │                                                             │
-│  ┌─────────────┐    ┌──────────────┐    ┌──────────────┐  │
-│  │  Cron Tick  │───▶│ Agent Session│───▶│on_session_end│  │
+│  ┌───────────┐    ┌────────────┐    ┌────────────┐  │
+│  │  Cron Tick  ───▶│ Agent Session───▶│on_session_end│  │
 │  │ (scheduler) │    │(run_agent.py)│    │   hook fires │  │
-│  └─────────────┘    └──────────────┘    └──────┬───────┘  │
-│                                                 │           │
-│                              platform="cron"     │           │
-│                              session_id=         │           │
-│                                cron_{id}_{ts}    │           │
-│                                                 ▼           │
-│                                        ┌──────────────┐    │
+│  └───────────┘    └────────────┘    └─────┘────────  │
+│                              platform="cron"                 │
+│                              session_id=                     │
+│                                cron_{id}_{ts}                │
+│                                                 │            │
+│                                        ┌───────────┐    │
 │                                        │  Enqueue to  │    │
 │                                        │ pending.jsonl│    │
-│                                        └──────┬───────┘    │
+│                                        └─────┘────────    │
 │                                               │             │
-│                              ┌────────────────┘             │
+│                              ┌──────────────────────┘             │
 │                              ▼                              │
-│                    ┌─────────────────┐                      │
+│                    ┌───────────────────┐                      │
 │                    │ Background      │                      │
 │                    │ Worker Thread   │                      │
 │                    │ (retry w/ jitter│                      │
 │                    │  up to 3x)      │                      │
-│                    └────────┬────────┘                      │
+│                    └──────────────────┘                      │
 │                             │                               │
 │              Query state.db │ (sessions table)              │
 │                             ▼                               │
-│                    ┌─────────────────┐                      │
+│                    ┌───────────────────┐                      │
 │                    │  Fact DB Write  │                      │
 │                    │  (append-only)  │                      │
-│                    └─────────────────┘                      │
+│                    └───────────────────┘                      │
 │                             │                               │
-│         ┌───────────────────┘                               │
+│         ┌─────────────────────┘                               │
 │         ▼                                                   │
-│  ┌─────────────────┐     ┌─────────────────┐               │
+│  ┌───────────────┐     ┌─────────────────┐               │
 │  │ Reconciliation  │     │  Bootstrap      │               │
 │  │ Scanner         │     │  on plugin load │               │
 │  │ (watermark +    │     │  (catches gaps) │               │
 │  │  batch insert)  │     │                 │               │
-│  └─────────────────┘     └─────────────────┘               │
-└─────────────────────────────────────────────────────────────┘
+│  └───────────────┘     └─────────────────┘               │
+└─────────────────────────────────────────────────────────────────┘
                               │
            API reads          │
-```
-┌─────────────────────────────────────────────────────────────┐
+┌─────────────────────────────────────────────────────────────────┐
 │                  HERMES DASHBOARD PROCESS                   │
 │                                                             │
-│  ┌────────────────────────────────────────┐  │
+│  ┌────────────────────────────────────────────────┐  │
 │  │            /cronalytics tab                     │  │
 │  │                                                 │  │
-│  │  Summary cards                                  │  │
-│  │  Jobs table (7 columns)                         │  │
-│  │  Expandable detail rows                          │  │
-│  │  Day filter / Refresh / Sync Now                 │  │
-│  └────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+│  │  Hero banner + sticky toolbar                    │  │
+│  │  Summary Board (4 cards)                         │  │
+│  │  Leader Board (4 spotlight cards)                 │  │
+│  │  Per-Model Breakdown (bar chart)                  │  │
+│  │  Jobs Breakdown (8-column sortable table)         │  │
+│  │  Expandable detail rows + Job Detail Modal        │  │
+│  │  Educational modals (Pace, Cost, Runs, Tokens)    │  │
+│  └────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -118,7 +120,7 @@ We deliberately chose **non-blocking** ingestion: the hook writes the `session_i
 
 ### 4.3 Fact DB: Plugin-Owned, Append-Only SQLite
 
-**NotHermes `state.db`.** The fact DB is a separate SQLite file owned by the plugin:
+**Not Hermes `state.db`.** The fact DB is a separate SQLite file owned by the plugin:
 
 ```
 ~/.hermes/plugins/cronalytics/facts.db
@@ -153,6 +155,7 @@ CREATE TABLE cron_runs (
     tool_call_count INTEGER DEFAULT 0,
     end_reason TEXT,
     success BOOLEAN,
+    job_mode TEXT DEFAULT 'agent',
     ingested_at REAL DEFAULT (unixepoch())
 );
 ```
@@ -212,15 +215,72 @@ Relative imports remain fine in `__init__.py` and `ingester.py` because those ru
 
 Job IDs in the fact DB are stable hex strings (`841aee933270`). The dashboard resolves these to names at query time by reading `~/.hermes/cron/jobs.json` and mapping `id → name`. This is read-only; Cronalytics never writes to `jobs.json`.
 
-### 4.9 Dashboard Dev Cache Busting *(Internal)*
+### 4.9 Agent / No-Agent Mode Awareness
 
-During active development, the browser, Tailscale proxy, and disk cache all aggressively cache `dashboard/dist/index.js`. We temporarily patched `serve_plugin_asset` in the host dashboard server to emit `Cache-Control: no-store` for plugin assets. This is a **local development convenience only** — it is not part of the Cronalytics repo and will need to be re-applied after any `hermes update` that touches the dashboard server. It is documented here solely as a reminder.
+Hermes supports `no_agent` cron jobs that execute scripts without invoking an LLM. These produce no `state.db` entry, so the hook never fires for them.
 
-### 4.10 Tooltips: Decision and Reversion
+**Solution:** Dual-track sync:
+- Agent jobs: captured by `on_session_end` hook + scanner querying `state.db`.
+- No-agent jobs: scanner scans `~/.hermes/cron/output/` for `.md` artifacts and creates synthetic rows with zero cost/tokens.
 
-We explored ⓘ icons with click-to-toggle `position: fixed` tooltips for column headers (Nominal/mo, Trend/mo, Pace). The implementation worked on desktop but viewport-edge positioning on iPad Safari produced clipped/wonky popups. Rather than chase responsive tooltip layout gymnastics, we reverted to native `title` attributes. This is a known trade-off: desktop users get hover-after-delay, mobile users get tap-and-hold (browser-dependent). A custom modal or portal-based tooltip is reserved for a future polish pass.
+The dashboard exposes a **Mode toggle** (`All | Agent | No agent`) so users can see script-only jobs alongside agent jobs.
 
-**Metrics education is an open design problem.** Pace, Nominal, Trend, and Drift are not self-evident to a first-time user. Native `title` is the bare minimum. A proper solution — inline microcopy, a "What's this?" expander, or a dedicated help panel — needs design work before V1.0.
+### 4.10 Dashboard Frontend Architecture
+
+The frontend was originally a 1,811-line IIFE monolith. It has been split into a modular `src/` tree:
+
+```
+dashboard/src/
+├── index.js                 # Entry point: ErrorBoundary + PLUGINS.register
+├── lib/
+│   ├── sdk.js             # React, hooks, fetchJSON, UI primitives from HERMES_PLUGIN_SDK
+│   ├── formatters.js      # fmtCost, fmtCompact, fmtDuration, paceColor, etc.
+│   ├── icons.js           # SVG icon components
+│   └── validate.js        # API response shape validation (dev-only)
+├── hooks/
+│   └── useApi.js          # Data fetching + modal toggle hooks
+└── components/
+    ├── CronalyticsTab.js  # Main orchestrator (~370 lines)
+    ├── HeroBanner.js      # Dictionary-style header
+    ├── SummaryBoard.js    # 4-card metric grid
+    ├── LeaderBoard.js     # 4-card spotlight grid
+    ├── ModelBreakdown.js  # Per-model cost bars
+    ├── JobBreakdown.js    # Sortable jobs table + expand rows
+    ├── JobDetailView.js   # Modal run history table
+    ├── DaySelector.js     # Day presets + custom input
+    ├── OutcomeToggle.js   # All/Success/Failure toggle
+    ├── ModeToggle.js      # All/Agent/No agent toggle
+    ├── SparkLine.js       # Hoverable trend chart
+    ├── Modal.js           # Overlay with Escape/backdrop/resize
+    └── ErrorBoundary.js   # Plugin-level error boundary
+```
+
+Build: `node dashboard/build.js` (esbuild) produces `dist/index.js` as an IIFE bundle consumed by Hermes.
+
+### 4.11 API Validation Layer
+
+Because the frontend consumes API responses without TypeScript, field renames or type changes in the backend can cause silent failures. We added a lightweight validation layer:
+
+- JSDoc `@typedef` annotations for all 6 API response shapes.
+- `assertType()` runtime guard that validates expected fields in development (`NODE_ENV !== "production"`).
+- Validation errors are swallowed gracefully in production; they only log to console in dev.
+
+This is a deliberate compromise: no TypeScript migration (1–2 days of work), no Zod dependency (bundle size), just enough guardrails to catch backend drift during development.
+
+### 4.12 Accessibility
+
+All interactive elements are keyboard-accessible:
+- Table headers: `tabIndex=0`, `role="button"`, `aria-label`, `onKeyDown` for Enter/Space.
+- Summary and Leader cards: same pattern — Tab to focus, Enter/Space to activate.
+- Modals: Escape closes, backdrop click closes, focus remains inside modal while open.
+
+### 4.13 Large-Font Theme Resilience
+
+Hermes themes can override base font sizes. We use defensive CSS to prevent layout breakage:
+- `grid-template-columns: repeat(4, minmax(0, 1fr))` instead of `repeat(4, 1fr)` so columns shrink below content width.
+- `min-width: 0` on all grid children with `overflow: hidden`.
+- `white-space: nowrap` + `text-overflow: ellipsis` on overflow-prone text.
+- Flex-basis instead of fixed widths in proportional bars.
 
 ---
 
@@ -241,7 +301,7 @@ run_job() ──▶ run_conversation() ──▶ on_session_end(platform="cron")
                                           ▼
                                     Background worker (after delay)
                                           │
-                          ┌─────────────┴─────────────┐
+                          ┌────────────────────────┐
                           ▼                           ▼
                    state.db found               state.db not found
                           │                           │
@@ -260,6 +320,7 @@ run_job() ──▶ run_conversation() ──▶ on_session_end(platform="cron")
 - Observe cron job runs and attribute cost, tokens, model, and duration per run.
 - Surface aggregates (total cost, runs, tokens, pace) in a dashboard tab.
 - Project future spend based on schedule (nominal) and current pace (trend).
+- Distinguish agent vs script-only jobs.
 - Provide a standalone CLI for terminal-based inspection.
 
 ### What Cronalytics Does NOT Do
@@ -276,21 +337,24 @@ run_job() ──▶ run_conversation() ──▶ on_session_end(platform="cron")
 
 ```
 cronalytics/
-├── plugin.yaml              -- Manifest: name, version, hooks
-├── __init__.py              -- register(ctx): schema, recovery, hook, bootstrap scanner
-├── config.py                -- Paths, retry delays, jitter
-├── facts.py                 -- Fact DB: schema, insert, queries
-├── ingester.py              -- Hook handler, pending.jsonl, background worker
-├── scanner.py               -- Reconciliation scanner + watermark I/O
-├── schedule.py              -- Cron parsing, projection math (croniter)
-├── cli.py                   -- Standalone terminal interface
-├── logger.py                -- Simple prefixed logger
-├── checkpoint.py            -- Session state serialization for multi-session dev
+├── plugin.yaml              # Manifest: name, version, hooks
+├── __init__.py              # register(ctx): schema, recovery, hook, bootstrap scanner
+├── config.py                # Paths, retry delays, jitter
+├── facts.py                 # Fact DB: schema, insert, queries
+├── ingester.py              # Hook handler, pending.jsonl, background worker
+├── scanner.py               # Reconciliation scanner + watermark I/O
+├── schedule.py              # Cron parsing, projection math (croniter)
+├── cli.py                   # Standalone terminal interface
+├── logger.py                # Simple prefixed logger
+├── checkpoint.py            # Session state serialization for multi-session dev
 ├── dashboard/
-│   ├── manifest.json        -- Dashboard plugin manifest
-│   ├── plugin_api.py        -- FastAPI router (importlib-safe)
+│   ├── manifest.json        # Dashboard plugin manifest
+│   ├── plugin_api.py        # FastAPI router (importlib-safe)
+│   ├── build.js             # esbuild bundler script
+│   ├── src/                 # Modular frontend source (13 components)
 │   └── dist/
-│       └── index.js         -- Frontend bundle (React + HERMES_PLUGIN_SDK)
+│       └── index.js         # Frontend bundle (React + HERMES_PLUGIN_SDK)
+└── tests/                   # 83 pytest tests
 ```
 
 ---
@@ -303,5 +367,5 @@ See what your cron jobs are costing before background automation becomes backgro
 
 ---
 
-*Version: 0.3.0 (Design refresh)*
-*Last updated: 2026-05-04*
+*Version: 1.0.0*  
+*Last updated: 2026-05-11*

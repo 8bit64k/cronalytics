@@ -1,6 +1,6 @@
 # Features — Cronalytics
 
-> **Version:** 0.3.1
+> **Version:** 1.0.0
 > **Scope:** Living catalog of all implemented functionality.
 
 This document lists every implemented feature, the rationale for its inclusion, and the formulas or data sources it relies on. If something is not listed here, it is not implemented.
@@ -37,6 +37,12 @@ If the gateway restarts, `ingester.start()` replays `pending.jsonl` into the in-
 
 Session IDs follow the format `cron_{job_id}_{YYYYMMDD}_{HHMMSS}`. The parser drops the prefix (`cron_`) and the final two segments (date + time) to recover the stable `job_id`. Early versions incorrectly dropped only one segment, causing every run to appear as a distinct job; this was fixed in Phase 2.5.
 
+### 1.5 Script-Job Capture (No-Agent Mode)
+
+Hermes `no_agent` cron jobs execute scripts without invoking an LLM. They produce no `state.db` entry, so the hook never fires.
+
+**Solution:** The reconciliation scanner scans `~/.hermes/cron/output/` for `.md` artifacts with filenames matching `output_{job_id}_{timestamp}.md`. Each discovered artifact creates a synthetic fact DB row with zero cost, zero tokens, and `job_mode = "no_agent"`.
+
 ---
 
 ## 2. Data Storage (Fact DB)
@@ -68,11 +74,12 @@ CREATE TABLE cron_runs (
     tool_call_count INTEGER DEFAULT 0,
     end_reason TEXT,
     success BOOLEAN,
+    job_mode TEXT DEFAULT 'agent',
     ingested_at REAL DEFAULT (unixepoch())
 );
 ```
 
-Indexes: `job_id`, `run_time DESC`, `ingested_at`.
+Indexes: `job_id`, `run_time DESC`, `ingested_at`, `job_mode`.
 WAL mode enabled for concurrent read/write safety.
 
 ### 2.2 Design Rationale
@@ -108,6 +115,7 @@ All fields are read from `state.db` `sessions` table at ingestion time.
 | `tool_call_count` | `tool_call_count` | Tool calls issued |
 | `end_reason` | `end_reason` | Exit reason string |
 | `success` | Derived (`end_reason == 'cron_complete'` or `'complete'`) | Wrapper completion boolean |
+| `job_mode` | `'agent'` for hook, `'no_agent'` for scanner | Execution mode |
 
 ---
 
@@ -115,7 +123,7 @@ All fields are read from `state.db` `sessions` table at ingestion time.
 
 ### 3.1 What It Does
 
-Backfills historical cron sessions from `state.db` into `facts.db` using a timestamp watermark to avoid duplicate work.
+Backfills historical cron sessions from `state.db` into `facts.db` using a timestamp watermark to avoid duplicate work. Also scans `~/.hermes/cron/output/` for no-agent script artifacts.
 
 ### 3.2 Trigger Sources
 
@@ -135,6 +143,11 @@ for row in rows:
         insert(row)
 new_watermark = max(ended_at for row in rows)
 write_json(WATERMARK_FILE, new_watermark, rows_synced + inserted + skipped)
+
+# Dual-track: scan output dir for no-agent script artifacts
+script_rows = scan_output_dir(OUTPUT_DIR)
+for artifact in script_rows:
+    ingest_script_row(job_id, run_time)
 ```
 
 ### 3.4 Why No Auto-Run on Dashboard Load or Periodic Timer?
@@ -150,15 +163,17 @@ All endpoints are mounted at `/api/plugins/cronalytics/`.
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/health` | `GET` | Fact DB health, total runs, unique jobs, last sync watermark |
-| `/summary?days=N` | `GET` | Aggregated headline stats + schedule-aware projections |
-| `/jobs?days=N` | `GET` | Per-job aggregates with projections |
+| `/summary?days=N&outcome=both&mode=all` | `GET` | Aggregated headline stats + schedule-aware projections |
+| `/jobs?days=N&outcome=both&mode=all` | `GET` | Per-job aggregates with projections |
 | `/jobs/{job_id}/runs` | `GET` | Individual run history for a specific job |
-| `/models?days=N` | `GET` | Per-model cost/token breakdown |
-| `/trends?days=N` | `GET` | Daily cost + runs bars over time |
+| `/models?days=N&outcome=both&mode=all` | `GET` | Per-model cost/token breakdown |
+| `/trends?days=N&outcome=both&mode=all` | `GET` | Daily cost + runs bars over time |
 | `/sync` | `POST` | Trigger manual reconciliation scan |
 
 All endpoints return JSON wrapped as `{"plugin": "cronalytics", ...}`.
-The `days` parameter accepts `0` (all time) or `1–90`.
+The `days` parameter accepts `0` (all time) or `1–365`.
+The `outcome` parameter accepts `both`, `success`, `failure`.
+The `mode` parameter accepts `all`, `agent`, `no_agent`.
 
 ---
 
@@ -169,7 +184,11 @@ The `days` parameter accepts `0` (all time) or `1–90`.
 ```json
 {
   "name": "cronalytics",
-  "tab": {"path": "/cronalytics", "hidden": false},
+  "label": "Cronalytics",
+  "description": "Cost and operational observability for Hermes cron jobs",
+  "icon": "Clock",
+  "version": "0.1.0",
+  "tab": {"path": "/cronalytics", "position": "end", "hidden": false},
   "slots": ["pre-main", "post-main"],
   "entry": "dist/index.js",
   "api": "plugin_api.py"
@@ -178,53 +197,91 @@ The `days` parameter accepts `0` (all time) or `1–90`.
 
 ### 5.2 `/cronalytics` Tab
 
+#### Hero Banner
+
+Dictionary-style header with phonetic pronunciation (`/ˈkrɒn.əˌlɪt.ɪks/`), two definition lines, and the tagline **Observe. Measure. Optimize.** Left border accent in `var(--color-accent)`.
+
+#### Sticky Toolbar
+
+- **Outcome toggle** — `All | Success | Failure`
+- **Mode toggle** — `All | Agent | No agent`
+- **Day selector** — `7D | 30D | 90D` presets + custom input (max 365)
+- **Refresh** — re-fetches summary and jobs
+- **Sync Now** — triggers reconciliation scan
+
+Progressive zoom-responsive wrapping: at high zoom levels, Refresh breaks away first, then custom+Go, then the entire DaySelector cluster.
+
 #### Row 1 — Summary Board
+
 - **Job Runs** — total run count in selected window vs. prior period delta (↑/↓ %).
-- **Cost** — total `estimated_cost_usd` in amber `#f5a623`; vs-prior delta + Actual cost sub-line.
-- **Tokens** — total tokens in blue `#5b8def`; 3-row micro proportion bars (In `#ffe6cb`, Out `#34d399`, Cached `#f472b6`).
+- **Cost** — total `estimated_cost_usd` in amber `#f5a623`; vs-prior delta + Actual cost sub-line + ✓/✗ success/failure breakdown + wasted cost. In Failure mode, headline flips to red and label changes to "Wasted".
+- **Tokens** — total tokens in blue `#5b8def`; 3-row micro proportion bars (In, Out, Cached).
 - **Pace** — aggregate `trend_monthly_total / nominal_monthly_total`; font-only color:
   - `< 1.0×` — green `#4ade80` (under nominal)
-  - `< 2.0×` — yellow `#facc15` (warm)
+  - `< 2.0×` — neutral (on track)
   - `≥ 2.0×` — red `#ef4444` (over nominal)
 
+All four cards are clickable and open educational modals.
+
 #### Row 2 — Leader Board
+
 Four spotlight cards derived live from `jobList`, icon accent `#ff5722`:
-- **Most Runs** — highest `runs` job; white headline.
-- **Highest Cost** — highest `total_cost` job; amber headline `#f5a623`.
-- **Most Tokens** — highest `total_tokens` job (In+Out+Cached); blue headline `#5b8def`.
-- **Highest Pace** — highest `projections.pace` job; font-colored headline via `paceColor()`. Surfaces the job most at risk of exceeding its nominal budget.
+- **Top Runs** — highest `runs` job.
+- **Top Cost** — highest `total_cost` job; amber headline `#f5a623`.
+- **Top Tokens** — highest `total_tokens` job; blue headline `#5b8def`.
+- **Top Pace** — highest `projections.pace` job; font-colored via `paceColor()`. Surfaces the job most at risk of exceeding its nominal budget.
 
-#### Cost by Model
-A simple list showing model name, run count, and total cost for the selected window.
+All four cards are clickable and open detail modals with job metadata.
 
-#### Jobs Table
+#### Per-Model Breakdown
 
-7 columns: **Job**, **Runs**, **Total Cost**, **Avg Cost**, **Nominal/mo**, **Trend/mo**, **Pace**.
+Proportional bar chart showing the top 5 models by estimated cost. Each row shows model name, proportional bar, cost in amber, and run count. Remaining models collapsed with "and N more."
 
-- **Job** — human-readable name from `jobs.json` (falls back to truncated `job_id`).
+#### Jobs Breakdown Table
+
+Eight sortable columns: **Job**, **Runs**, **Avg Time**, **Total Cost**, **Avg Cost**, **Nominal/mo**, **Trend/mo**, **Pace**.
+
+- **Job** — human-readable name from `jobs.json` (falls back to `job_id`). Shows `[No agent]` badge for script jobs.
 - **Runs** — number of executions in the window.
+- **Avg Time** — average duration per run.
 - **Total Cost** — sum of `estimated_cost_usd`.
 - **Avg Cost** — `total_cost / runs`.
 - **Nominal/mo** — `avg_cost × scheduled_runs_30d` (what it *should* cost if run exactly on schedule).
 - **Trend/mo** — `(total_cost / days_filter) × 30` (what it *will* cost if current pace continues).
-- **Pace** — `trend / nominal`. Color-coded with background tint.
+- **Pace** — `trend / nominal`. Color-coded badge with background tint.
 
-#### Expandable Detail Rows
-
-Clicking a job row expands a detail panel (colSpan 7) showing:
+Clicking a row expands a detail panel (colSpan 8) showing:
 - Token breakdown: total, in, out, cached.
+- Success/failure split with cost attribution.
 - Schedule metadata: human-readable schedule, last run time, model used, next run time.
-- Projections: Nominal, Trend, Pace, Drift.
-- If the job has no schedule, shows "No schedule" and `—` for projections.
+- **See Runs** button opening the Job Detail Modal.
 
-#### Controls
-- **Day Selector** — 7D / 30D / 90D / All. Uniform solid borders.
-- **Refresh** — fetches `summary` and `jobs` again.
-- **Sync Now** — triggers `POST /sync` and shows last-sync timestamp.
+#### Job Detail Modal
+
+Full run history for the selected job:
+- 95% width, sticky headers
+- Sortable by run time, cost, duration, success, model
+- 200-run default limit (backend ceiling: 500)
+- Mode column showing Agent vs No agent
+- Inherits parent sort preference from Jobs Breakdown table
+
+#### Educational Modals
+
+Clicking any Summary Board card opens a contextual modal:
+- **Pace modal** — explains Nominal vs Trend, shows proportional bars, defines color guide, includes formula.
+- **Runs modal** — explains total runs, trend % calculation, window context.
+- **Cost modal** — explains estimated vs actual cost, trend %, window context.
+- **Tokens modal** — explains input/output/cached tokens, shows proportion bars, includes percentage breakdown.
+
+Leader Board cards open job-specific detail modals with schedule, last run, model, and duration.
 
 #### Empty State
-If no runs exist for the selected window, the UI shows a message like:
-> "No cron jobs captured in the last 7 days. Last sync: 2026-05-03 14:22:19 UTC"
+
+If no runs exist for the selected window, the UI shows:
+> "No jobs in last N days. Last sync: 2026-05-03 14:22:19 UTC"
+
+If no data exists at all:
+> "No cron jobs captured. Click Sync Now to backfill from state.db."
 
 ---
 
@@ -319,15 +376,16 @@ Because the math is fixed-window, the aggregate pace is always the exact sum of 
 |------|-------------|-------------|
 | Session cost, tokens, model | `~/.hermes/state.db` (Hermes core) | Operational SQLite. Queried at ingestion time. |
 | Job schedules, names | `~/.hermes/cron/jobs.json` (Hermes core) | Read-only at query time for name resolution and cron expression parsing. |
+| Script job artifacts | `~/.hermes/cron/output/*.md` | No-agent job output files. Scanned for timestamps. |
 | Derived analytics | `~/.hermes/plugins/cronalytics/facts.db` | Append-only fact DB owned by the plugin. |
-| Sync watermark | `~/.hermes/plugins/cronalytics/watermark.json` | JSON file tracking the last `ended_at` processed by the scanner. |
-| Pending queue | `~/.hermes/plugins/cronalytics/pending.jsonl` | Line-delimited JSON of sessions waiting for ingestion. Survives restarts. |
+| Sync watermark | `~/.hermes/plugins/cronalytics/watermark.json` | JSON file tracking last `ended_at` processed. |
+| Pending queue | `~/.hermes/plugins/cronalytics/pending.jsonl` | Line-delimited JSON of sessions waiting for ingestion. |
 
 ---
 
 ## 8. Configuration
 
-All values are hardcoded defaults in `config.py`. There is no user-editable configuration file yet.
+All values are hardcoded defaults in `config.py`. There is no user-editable configuration file yet (planned for v1.1).
 
 ```python
 RETRY_DELAYS = [3.0, 8.0, 15.0]   # seconds before each worker attempt
@@ -340,23 +398,39 @@ Paths:
 - `FACT_DB` = `<plugin_dir>/facts.db`
 - `WATERMARK_FILE` = `<plugin_dir>/watermark.json`
 - `PENDING_FILE` = `<plugin_dir>/pending.jsonl`
+- `OUTPUT_DIR` = `~/.hermes/cron/output`
 
 ---
 
-## 9. Known Limitations
+## 9. Test Coverage
+
+83 pytest tests covering:
+- `facts.py` — schema creation, ingestion, aggregation queries, job_id parsing
+- `scanner.py` — watermark I/O, session fetching, batch insert, script scanning
+- `schedule.py` — cron expression parsing, projection math, edge cases
+- `ingester.py` — hook handler, pending file ops, worker loop, retry logic
+- `plugin_api.py` — all 7 API endpoints, response shapes, filter params
+
+Run: `uv run pytest -q`
+
+Lint/type: `uv run ruff check . && uv run mypy .`
+
+---
+
+## 10. Known Limitations
 
 These are **intentional boundaries or acknowledged gaps**, not bugs.
 
-1. **Wrapper-level success only.** The `success` boolean is derived from `end_reason` (`cron_complete` / `complete`). It tells you whether the agent *session* finished normally, not whether the *task* succeeded. A script that errors internally but returns a clean exit will show `success = true`.
-2. **Abandoned sessions are invisible.** The scanner filters `ended_at IS NOT NULL`. Cron sessions where the gateway crashed, the process was killed, or the job got stuck forever are never ingested. There are no rows in the fact DB for them. This is by design (the fact DB stores *finished* runs), but it means the dashboard cannot show "jobs that started but never finished."
-3. **No tests.** There is no test suite. The highest-ROI first test would be `_make_job_id()` parser coverage.
-4. **No linting or type checking.** `ruff`, `mypy`, and `pyright` are not configured.
-5. **No periodic auto-sync.** The scanner only runs on plugin bootstrap and manual trigger. A 6-hour background timer is planned but not implemented.
-6. **Mobile layout unverified.** The UI has not been systematically tested on narrow viewports. The table is likely to overflow horizontally on phones.
-7. **Native `title` tooltips only.** Custom tooltips were explored and reverted due to viewport-edge positioning complexity on iPad Safari.
-8. **Per-run expansion in UI is missing.** The API exposes `/jobs/{id}/runs`, but the dashboard does not render individual run history.
+1. **Wrapper-level success only.** The `success` boolean is derived from `end_reason` (`cron_complete` / `complete`). It tells you whether the agent *session* finished normally, not whether the *task* succeeded.
+2. **Abandoned sessions are invisible.** The scanner filters `ended_at IS NOT NULL`. Cron sessions where the gateway crashed or the job got stuck are never ingested.
+3. **No user-editable config file.** All tuning values are hardcoded in `config.py`.
+4. **No periodic auto-sync.** The scanner only runs on plugin bootstrap and manual trigger.
+5. **Job detail modal capped at 200 runs.** High-frequency jobs show full count in the table but drill-down is limited.
+6. **Native `title` tooltips on table headers only.** Column headers use browser-native `title` for simple explanations. Custom tooltips were explored and reverted due to viewport-edge positioning complexity on iPad Safari.
+7. **Mobile layout functional but not optimized.** The table uses horizontal scroll on narrow viewports.
+8. **Focus trap deferred to v1.1.** Modal focus management works for typical usage but does not trap Tab cycles inside the modal.
 
 ---
 
-*Version: 0.3.1*
-*Last updated: 2026-05-06*
+*Version: 1.0.0*  
+*Last updated: 2026-05-11*

@@ -2,6 +2,7 @@
 
 > **Launch Date: Tuesday, May 19, 2026 at ~9:00 AM EST**
 > **Days Remaining: 8 (from May 11)**
+> **Feature Freeze: May 14, 2026** ✅ COMPLETE
 
 ## Philosophy
 
@@ -18,8 +19,8 @@ Goal: Merge remaining V1.0 code. No new features after May 14 end-of-day.
 
 | Day | Date | Focus |
 |-----|------|-------|
-| 1 | Mon May 11 | Toolbar polish, hero redesign, manual-sync UX hardening, terminology unification, DaySelector wrapping hardening. |
-| 2 | Tue May 12 | M3 Test suite — minimal `pytest` covering `_make_job_id()`, projection math, SQL edge cases. M4 Lint/type check (`ruff` + `mypy`). |
+| 1 | Mon May 11 | Toolbar polish, hero redesign, manual-sync UX hardening, terminology unification, DaySelector wrapping hardening, large-font theme resilience. |
+| 2 | Tue May 12 | M3 Test suite — 83 pytest tests. M4 Lint/type check (`ruff` + `mypy`). Documentation rewrite pass. |
 | 3 | Wed May 13 | Bug fix / hardening pass. Cross-device regression check (MacBook → iPad). Verify iPad toolbar, modal sizing, theme compatibility. |
 | 4 | Thu May 14 | **FEATURE FREEZE**. Final backend validation. Push passing commit. Update CHECKPOINT.md. Any unmerged work gets cut or moved to V1.1. |
 
@@ -36,10 +37,18 @@ Goal: Merge remaining V1.0 code. No new features after May 14 end-of-day.
 | H7 | Suspect/hung job detection | ⚫ Deferred | **V1.1** — troubleshooting-oriented, low surface area |
 | H8 | Global outcome toggle | ✅ Delivered | Keep |
 | H9 | Agent / no_agent mode awareness | ✅ Delivered | Keep |
+| M3 | Test suite | ✅ Delivered | Keep |
+| M4 | Lint / type check | ✅ Delivered | Keep |
 | M5 | Auto-sync | ⚫ Deferred | **V1.1** — bootstrap scanner + hook + retry cover gaps |
-| M8 | Wrapper vs payload success | 🟡 Document | **V1.0** — one paragraph in README, not a code change |
+| M6 | iPad + theme compatibility | ✅ Delivered | Keep |
+| M7 | Educational modals | ✅ Delivered | Keep |
+| M8 | Wrapper vs payload success | ✅ Delivered | Keep |
 | — | Toolbar polish (DaySelector, toggles, wrapping, sync UX) | ✅ Delivered | Keep |
 | — | Hero redesign (dictionary entry, accent border, system sans) | ✅ Delivered | Keep |
+| — | API validation layer | ✅ Delivered | Keep |
+| — | Keyboard accessibility (a11y) | ✅ Delivered | Keep |
+| — | Large-font theme resilience | ✅ Delivered | Keep |
+| — | Monolith source split → modular `src/` | ✅ Delivered | Keep |
 
 ### V1.0 Technical Out-of-Scope (V1.1 or later)
 
@@ -52,8 +61,8 @@ Goal: Merge remaining V1.0 code. No new features after May 14 end-of-day.
 | D5 | Live log streaming | Separate infrastructure project |
 | D6 | External DB backend | SQLite sufficient for single-user local |
 | D7 | Job detail modal pagination | Modal capped at 200 runs; "show all" deferred |
+| D8 | Focus trap in modals | Medium effort, moderate DOM risk in Hermes context |
 | — | Sparkline event annotations | Nice-to-have, not launch-critical |
-| — | Pace column tooltip/education | README covers this; in-UI can be V1.1 |
 | — | Session log deep-link from Top Runs | Requires Hermes session URL schema |
 
 ---
@@ -64,7 +73,7 @@ Goal: Make the launch shiny. Docs, demo, and GitHub are the product as much as t
 
 | Day | Date | Focus |
 |-----|------|-------|
-| 5 | Fri May 15 | **README** — installation, screenshots, feature list, one-liner. **CHANGELOG** — version history from first commit to now. |
+| 5 | Fri May 15 | **README** — installation, screenshots, feature list, one-liner. **CHANGELOG** — version history. **Docs** — DESIGN.md, FEATURES.md, USAGE.md, INSTALL.md, UNINSTALL.md finalized. |
 | 6 | Sat May 16 | **Demo video / GIF** — 30–60 second screen capture showing outcome toggle, sortable table, expandable rows, leader board. Compressed, loopable. |
 | 7 | Sun May 17 | **GitHub release** — tag v1.0.0, release notes, attach demo video/GIF. **X thread draft** — 3–5 tweet thread with hook, demo, GitHub link, CTA. |
 | 8 | Mon May 18 | **Discord announcement** — copy + formatting. **Final cross-device pass** — MacBook + iPad, 30+ Omarchy themes. Last bug sweep. |
@@ -88,15 +97,25 @@ Goal: Make the launch shiny. Docs, demo, and GitHub are the product as much as t
 - [x] H9 — Agent / no_agent mode awareness
 - [x] Toolbar polish — DaySelector, Outcome/Mode toggles, wrapping, sync UX
 - [x] Hero redesign — dictionary entry, accent border, system sans
-- [x] M3 — Minimal test suite (`pytest`)
+- [x] M3 — Test suite (`pytest`, 83 tests)
 - [x] M4 — Lint + type check (`ruff` + `mypy`)
-- [x] M8 — Document wrapper vs payload success in README
-- [x] Hardening / regression pass — continuous (MacBook → iPad → themes)
-- [ ] **May 14: FEATURE FREEZE**
+- [x] M6 — iPad + theme compatibility
+- [x] M7 — Educational modals
+- [x] M8 — Document wrapper vs payload success
+- [x] API validation layer
+- [x] Keyboard accessibility (a11y)
+- [x] Large-font theme resilience
+- [x] Monolith source split → modular `src/`
+- [x] **May 14: FEATURE FREEZE**
 
 ### Packaging (Days 5–8)
-- [ ] README.md — install, features, screenshots
-- [ ] CHANGELOG.md — v1.0.0 release notes
+- [x] README.md — install, features, architecture
+- [x] DESIGN.md — architecture, data flow, technical decisions
+- [x] FEATURES.md — complete feature catalog
+- [x] USAGE.md — dashboard usage guide
+- [x] INSTALL.md — installation methods
+- [x] UNINSTALL.md — clean removal
+- [ ] CHANGELOG.md — standalone version history
 - [ ] Demo video / GIF — 30–60s screen capture
 - [ ] GitHub release — tag, notes, demo attachment
 - [ ] X thread — draft, schedule for 9:30 AM EST May 19
@@ -109,11 +128,10 @@ Goal: Make the launch shiny. Docs, demo, and GitHub are the product as much as t
 ## If We Fall Behind
 
 **Cut order (never slip launch date):**
-1. M3 Test suite → V1.1 (nice-to-have, not user-facing)
-2. M4 Lint/type check → V1.1 (engineering hygiene, not launch-critical)
-3. YouTube video → Skip, rely on GIF + screenshots
+1. Demo video → Skip, rely on GIF + screenshots
+2. Standalone CHANGELOG.md → Use README changelog section
 
-**Never cut:** README, CHANGELOG, GitHub release, X thread. These *are* the launch.
+**Never cut:** README, DESIGN, FEATURES, USAGE, GitHub release, X thread. These *are* the launch.
 
 ---
 
