@@ -7,6 +7,16 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
     onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
     onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
   };
+  const cardProps = (onClick, label) => ({
+    style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
+    tabIndex: 0,
+    role: "button",
+    "aria-label": label,
+    onClick,
+    onKeyDown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } },
+    onMouseEnter: cardHover.onMouseEnter,
+    onMouseLeave: cardHover.onMouseLeave,
+  });
 
   return React.createElement("div", {
     style: {
@@ -21,11 +31,7 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
     (() => {
       const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.runs || 0) > (a.runs || 0) ? b : a, jobList[0]) : null;
       const label = j ? (j.name || j.job_id) : "\u2014";
-      return React.createElement("div", {
-        style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-        onClick: onTopRunsClick,
-        ...cardHover,
-      },
+      return React.createElement("div", cardProps(onTopRunsClick, "Top Runs details"),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
@@ -51,11 +57,7 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
     (() => {
       const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.total_cost || 0) > (a.total_cost || 0) ? b : a, jobList[0]) : null;
       const label = j ? (j.name || j.job_id) : "\u2014";
-      return React.createElement("div", {
-        style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-        onClick: onTopCostClick,
-        ...cardHover,
-      },
+      return React.createElement("div", cardProps(onTopCostClick, "Top Cost details"),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
@@ -81,11 +83,7 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
     (() => {
       const j = jobList.length > 0 ? jobList.reduce((a, b) => ((b.total_tokens || 0) > (a.total_tokens || 0) ? b : a), jobList[0]) : null;
       const label = j ? (j.name || j.job_id) : "\u2014";
-      return React.createElement("div", {
-        style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-        onClick: onTopTokensClick,
-        ...cardHover,
-      },
+      return React.createElement("div", cardProps(onTopTokensClick, "Top Tokens details"),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
@@ -118,11 +116,7 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
         : null;
       const label = j ? (j.name || j.job_id) : "\u2014";
       const p = j && j.projections && j.projections.pace != null ? j.projections.pace : null;
-      return React.createElement("div", {
-        style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-        onClick: onTopPaceClick,
-        ...cardHover,
-      },
+      return React.createElement("div", cardProps(onTopPaceClick, "Top Pace details"),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
