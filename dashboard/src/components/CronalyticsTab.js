@@ -1,4 +1,4 @@
-import { React, useState, useEffect, fetchJSON, Button } from "../lib/sdk.js";
+import { React, useState, useEffect, useRef, fetchJSON, Button } from "../lib/sdk.js";
 import { useApi, useModal } from "../hooks/useApi.js";
 import { Modal } from "../components/Modal.js";
 import { DaySelector } from "../components/DaySelector.js";
@@ -65,6 +65,22 @@ export function CronalyticsTab() {
   const topCostModal = useModal();
   const topTokensModal = useModal();
   const topPaceModal = useModal();
+
+  const toolbarRef = useRef(null);
+  const [refreshCompact, setRefreshCompact] = useState(false);
+
+  useEffect(() => {
+    const el = toolbarRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const w = entry.contentRect ? entry.contentRect.width : entry.target.clientWidth;
+        setRefreshCompact(w < 520);
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     fetchJSON("/api/plugins/cronalytics/health")
@@ -182,6 +198,7 @@ export function CronalyticsTab() {
 
     // Sticky toolbar
     React.createElement("div", {
+      ref: toolbarRef,
       style: {
         position: "sticky",
         top: 0,
@@ -210,20 +227,23 @@ export function CronalyticsTab() {
       // DaySelector returns [label, presets, custom] — flattened as direct flex children
       // of the toolbar so presets, custom input, and Refresh wrap progressively.
       React.createElement(DaySelector, { selected: days, onChange: setDays, label: "Days" }),
-      // Refresh — its own flex item so it breaks away first at 110%.
+      // Refresh — shrinks to icon-only when toolbar gets cramped.
       React.createElement(Button, {
         type: "button",
         size: "sm",
         outlined: true,
         disabled: summary.loading || jobs.loading,
+        title: refreshCompact ? "Refresh" : undefined,
         onClick: () => { summary.refetch(); jobs.refetch(); },
-        style: { minWidth: "5.5rem" }
+        style: { minWidth: refreshCompact ? "2.5rem" : "5.5rem" }
       }, summary.loading || jobs.loading
         ? "\u2026"
-        : React.createElement("span", { style: { display: "flex", alignItems: "center", gap: "0.25rem" } },
-            RefreshCwIcon(14),
-            "Refresh"
-          )
+        : refreshCompact
+          ? RefreshCwIcon(14)
+          : React.createElement("span", { style: { display: "flex", alignItems: "center", gap: "0.25rem" } },
+              RefreshCwIcon(14),
+              "Refresh"
+            )
       ),
     ),
 
