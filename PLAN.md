@@ -29,11 +29,11 @@ This document replaces the previous phase-based plan with a flat priority-sorted
 || M6 | **iPad + theme compatibility pass** | Mondwest font, hardcoded accent colors, and clashing progress bars break readability on iPad and across ~30 Omarchy themes. | ✅ Silver summary icons, mono sub-lines, neutral token bars, Leader Board titles default color, height parity. |
 || M1 | **README** | Someone other than us needs to install and use this. | Not started. |
 || M2 | **CHANGELOG** | Version history for users and future maintainers. | Not started. |
-|| M3 | **Test suite** | Even a minimal `pytest` run covering `_make_job_id()` and projection math would catch regressions. | Not started. |
-|| M4 | **Lint / type check** | `ruff` + `mypy` configuration. | Not started. |
-|| M5 | **Periodic auto-sync** | Deferred to v1.1. Bootstrap scanner on gateway start + real-time hook + retry worker cover steady-state and restart gaps. | 🟡 Deferred. |
-|| M7 | **Educational modals** | Replaced native `title` tooltips with two modal layers: ⓘ info modals (metric definitions, formulas, interpretation) and Top card drill-down modals (#1 job details). Solves iPad tap-and-hold unreliability with intentional click interactions. Mono font, normal case body, 0.78rem detail blocks. | ✅ Delivered. |
-|| M8 | **Success/failure split for wrapper vs payload** | Document in README that we track wrapper-level completion only. Decision made: payload-level success detection is out of scope for v1.0. | 🟡 Document in README. |
+|| M3 | **Test suite** | ✅ Delivered — 40+ tests covering facts, parser, scanner, schedule, ingester, plugin API. |
+|| M4 | **Lint / type check** | ✅ Delivered — ruff + mypy clean on 10 source files; `pyproject.toml` configured. |
+|| M5 | **Periodic auto-sync** | Deferred to v1.1. Bootstrap scanner + hook + retry cover steady-state and restart gaps. | 🟡 Deferred. |
+|| M7 | **Educational modals** | Replaced native `title` tooltips with two modal layers. | ✅ Delivered. |
+|| M8 | **Success/failure split for wrapper vs payload** | ✅ Documented in README under "Understanding your data". |
 
 ---
 

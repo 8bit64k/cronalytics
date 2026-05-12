@@ -88,10 +88,10 @@ Goal: Make the launch shiny. Docs, demo, and GitHub are the product as much as t
 - [x] H9 — Agent / no_agent mode awareness
 - [x] Toolbar polish — DaySelector, Outcome/Mode toggles, wrapping, sync UX
 - [x] Hero redesign — dictionary entry, accent border, system sans
-- [ ] M3 — Minimal test suite (`pytest`)
-- [ ] M4 — Lint + type check (`ruff` + `mypy`)
-- [ ] M8 — Document wrapper vs payload success in README
-- [ ] Hardening / regression pass (MacBook → iPad)
+- [x] M3 — Minimal test suite (`pytest`)
+- [x] M4 — Lint + type check (`ruff` + `mypy`)
+- [x] M8 — Document wrapper vs payload success in README
+- [x] Hardening / regression pass — continuous (MacBook → iPad → themes)
 - [ ] **May 14: FEATURE FREEZE**
 
 ### Packaging (Days 5–8)
