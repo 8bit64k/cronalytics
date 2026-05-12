@@ -1978,7 +1978,7 @@
         // Toggles group — nowrap so they stay together as one unit.
         React.createElement(
           "div",
-          { style: { display: "flex", flexWrap: "nowrap", gap: "1.5rem", alignItems: "center" } },
+          { style: { display: "flex", flexWrap: "nowrap", gap: "0.75rem", alignItems: "center" } },
           React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome, label: "Outcomes" }),
           React.createElement(ModeToggle, { selected: mode, onChange: setMode, label: "Mode" })
         ),
@@ -2000,8 +2000,7 @@
             onClick: () => {
               summary.refetch();
               jobs.refetch();
-            },
-            style: { minWidth: "5.5rem" }
+            }
           },
           summary.loading || jobs.loading ? "\u2026" : React.createElement(
             "span",
