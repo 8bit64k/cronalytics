@@ -15,6 +15,16 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
     onMouseEnter: (e) => { e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)"; },
     onMouseLeave: (e) => { e.currentTarget.style.boxShadow = ""; },
   };
+  const cardProps = (onClick, label) => ({
+    style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
+    tabIndex: 0,
+    role: "button",
+    "aria-label": label,
+    onClick,
+    onKeyDown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } },
+    onMouseEnter: cardHover.onMouseEnter,
+    onMouseLeave: cardHover.onMouseLeave,
+  });
 
   return React.createElement("div", {
     style: {
@@ -26,11 +36,7 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
     }
   },
     // Job Runs
-    React.createElement("div", {
-      style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-      onClick: onRunsClick,
-      ...cardHover,
-    },
+    React.createElement("div", cardProps(onRunsClick, "Job Runs details"),
       React.createElement(Card, { style: { flex: 1 } },
         React.createElement(CardHeader, null,
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
@@ -51,11 +57,7 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
       )
     ),
     // Cost
-    React.createElement("div", {
-      style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-      onClick: onCostClick,
-      ...cardHover,
-    },
+    React.createElement("div", cardProps(onCostClick, outcome === "failure" ? "Wasted cost details" : "Cost details"),
       React.createElement(Card, { style: { flex: 1 } },
         React.createElement(CardHeader, null,
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
@@ -87,11 +89,7 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
       )
     ),
     // Tokens
-    React.createElement("div", {
-      style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-      onClick: onTokensClick,
-      ...cardHover,
-    },
+    React.createElement("div", cardProps(onTokensClick, "Tokens details"),
       React.createElement(Card, { style: { flex: 1 } },
         React.createElement(CardHeader, null,
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
@@ -135,11 +133,7 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
       const nominalPace = s.nominal_monthly_total || 0;
       const trendPace = s.trend_monthly_total || 0;
       const maxPace = Math.max(nominalPace, trendPace, 1);
-      return React.createElement("div", {
-        style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-        onClick: onPaceClick,
-        ...cardHover,
-      },
+      return React.createElement("div", cardProps(onPaceClick, "Pace details"),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },

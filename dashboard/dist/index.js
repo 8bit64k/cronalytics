@@ -856,6 +856,21 @@
         e.currentTarget.style.boxShadow = "";
       }
     };
+    const cardProps = (onClick, label) => ({
+      style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
+      tabIndex: 0,
+      role: "button",
+      "aria-label": label,
+      onClick,
+      onKeyDown: (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      },
+      onMouseEnter: cardHover.onMouseEnter,
+      onMouseLeave: cardHover.onMouseLeave
+    });
     return React.createElement(
       "div",
       {
@@ -870,11 +885,7 @@
       // Job Runs
       React.createElement(
         "div",
-        {
-          style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-          onClick: onRunsClick,
-          ...cardHover
-        },
+        cardProps(onRunsClick, "Job Runs details"),
         React.createElement(
           Card,
           { style: { flex: 1 } },
@@ -910,11 +921,7 @@
       // Cost
       React.createElement(
         "div",
-        {
-          style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-          onClick: onCostClick,
-          ...cardHover
-        },
+        cardProps(onCostClick, outcome === "failure" ? "Wasted cost details" : "Cost details"),
         React.createElement(
           Card,
           { style: { flex: 1 } },
@@ -968,11 +975,7 @@
       // Tokens
       React.createElement(
         "div",
-        {
-          style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-          onClick: onTokensClick,
-          ...cardHover
-        },
+        cardProps(onTokensClick, "Tokens details"),
         React.createElement(
           Card,
           { style: { flex: 1 } },
@@ -1042,11 +1045,7 @@
         const maxPace = Math.max(nominalPace, trendPace, 1);
         return React.createElement(
           "div",
-          {
-            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-            onClick: onPaceClick,
-            ...cardHover
-          },
+          cardProps(onPaceClick, "Pace details"),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1110,6 +1109,21 @@
         e.currentTarget.style.boxShadow = "";
       }
     };
+    const cardProps = (onClick, label) => ({
+      style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
+      tabIndex: 0,
+      role: "button",
+      "aria-label": label,
+      onClick,
+      onKeyDown: (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      },
+      onMouseEnter: cardHover.onMouseEnter,
+      onMouseLeave: cardHover.onMouseLeave
+    });
     return React.createElement(
       "div",
       {
@@ -1127,11 +1141,7 @@
         const label = j ? j.name || j.job_id : "\u2014";
         return React.createElement(
           "div",
-          {
-            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-            onClick: onTopRunsClick,
-            ...cardHover
-          },
+          cardProps(onTopRunsClick, "Top Runs details"),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1167,11 +1177,7 @@
         const label = j ? j.name || j.job_id : "\u2014";
         return React.createElement(
           "div",
-          {
-            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-            onClick: onTopCostClick,
-            ...cardHover
-          },
+          cardProps(onTopCostClick, "Top Cost details"),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1207,11 +1213,7 @@
         const label = j ? j.name || j.job_id : "\u2014";
         return React.createElement(
           "div",
-          {
-            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-            onClick: onTopTokensClick,
-            ...cardHover
-          },
+          cardProps(onTopTokensClick, "Top Tokens details"),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1252,11 +1254,7 @@
         const p = j && j.projections && j.projections.pace != null ? j.projections.pace : null;
         return React.createElement(
           "div",
-          {
-            style: { position: "relative", cursor: "pointer", transition: "box-shadow 0.2s ease", height: "100%", display: "flex", flexDirection: "column" },
-            onClick: onTopPaceClick,
-            ...cardHover
-          },
+          cardProps(onTopPaceClick, "Top Pace details"),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1440,7 +1438,16 @@
                   const isActive = sortConfig.key === h;
                   return React.createElement("th", {
                     key: h,
+                    tabIndex: 0,
+                    role: "button",
+                    "aria-label": isActive ? "Sorted by " + h + ", " + (sortConfig.direction === "asc" ? "ascending" : "descending") : "Sort by " + h,
                     onClick: () => onSort(h),
+                    onKeyDown: (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onSort(h);
+                      }
+                    },
                     style: {
                       textAlign: h === "Job" ? "left" : "right",
                       padding: "0.5rem 0.35rem",
