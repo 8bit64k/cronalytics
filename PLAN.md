@@ -36,6 +36,7 @@ All high-priority technical items are **delivered** for V1.0.
 | M6 | **iPad + theme compatibility pass** | ✅ Silver summary icons, mono sub-lines, neutral token bars, Leader Board titles default color, height parity, large-font theme resilience. |
 | M7 | **Educational modals** | ✅ Delivered — Pace, Runs, Cost, Tokens modals with formulas and color guides. |
 | M8 | **Success/failure split for wrapper vs payload** | ✅ Documented in README under "Understanding your data". |
+| M9 | **Collapsible hero banner** | ✅ Delivered — expand/collapse toggle with localStorage persistence. Reclaims ~3.5 lines of vertical space. |
 
 ---
 
@@ -69,13 +70,14 @@ All high-priority technical items are **delivered** for V1.0.
 - [x] INSTALL.md updated
 - [x] UNINSTALL.md created
 - [x] USAGE.md created
+- [x] X thread draft — written
+- [x] Discord announcement draft — written
+- [x] YouTube video description draft — written
 - [ ] Demo video / GIF (May 16)
 - [ ] GitHub release tag v1.0.0 (May 19)
-- [ ] X thread draft (May 17)
-- [ ] Discord announcement draft (May 18)
 - [ ] Final cross-device regression pass
 
 ---
 
 *Version: 1.0.0*  
-*Last updated: 2026-05-11*
+*Last updated: 2026-05-11 (night session)*

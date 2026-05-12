@@ -1,8 +1,8 @@
 # Cronalytics — Work Checkpoint
-# Updated: 2026-05-11
+# Updated: 2026-05-11 (night session)
 #
 ## Current Commit
-`b7980e0` (master) — "docs(CHECKPOINT): update to 31f3206 (large-font layout)"
+`951abf9` (master) — "feat(hero): collapsible hero banner with localStorage persistence"
 
 ## Recently Delivered (2026-05-10–11)
 - H9 Agent/no_agent mode awareness: schema `job_mode`, dual-track sync, `ModeToggle` toolbar, `[No agent]` badges, summary footnote, script job count in summary
@@ -31,6 +31,11 @@
 - **a11y**: Keyboard-accessible table headers and summary/leader cards (`tabIndex`, `role`, `aria-label`, `onKeyDown`)
 - **Toolbar progressive wrapping**: flattened flexbox structure — Refresh breaks first at 110%, custom+Go at 120%, DaySelector cluster at 130%
 - **Documentation rewrite**: README.md, DESIGN.md, FEATURES.md, INSTALL.md, UNINSTALL.md, USAGE.md, PLAN.md, LAUNCH_PLAN.md all updated for V1.0
+- **Hero tagline fix**: corrected to "Observe. Measure. Optimize." (was overridden by stale `hero.txt`)
+- **Hero.txt deprecation**: removed runtime fetch, deleted `dist/hero.txt`, hardcoded tagline directly in `HeroBanner.js`
+- **Collapsible hero banner** (merged to master): expand/collapse toggle (▲/▼), thin collapsed bar reclaims ~3.5 lines, localStorage persistence
+- **Demo branches created**: `feat/joyride-tour` (7-step product tour, custom component, zero deps) and `feat/driver-callouts` (single-feature callout, custom component, zero deps)
+- **Release post drafts**: X/Twitter thread (7 tweets), Discord announcement, YouTube video description — all written and saved in session context
 
 ## What Works Now
 1. Dashboard loads; Cronalytics tab renders without white screen
@@ -63,6 +68,7 @@
 24. **a11y**: Keyboard-accessible table headers and summary/leader cards (tabIndex, role, aria-label, Enter/Space)
 25. **Large-font theme support**: grid cells shrink below content width without spillover; ModelBreakdown uses flex-basis; JobBreakdown detail rows don't push buttons off-screen
 26. **Documentation**: complete rewrite of README, DESIGN, FEATURES, INSTALL, UNINSTALL, USAGE, PLAN, LAUNCH_PLAN
+27. **Collapsible hero**: click ▲ to collapse to thin bar, click bar to expand, localStorage remembers choice
 
 ## V1.0 Technical In-Scope (Remaining)
 | # | Task | Status |
@@ -91,10 +97,11 @@
 - [x] UNINSTALL.md — created
 - [x] PLAN.md — synced
 - [x] LAUNCH_PLAN.md — synced
+- [x] X thread draft — written (7 tweets, in session context)
+- [x] Discord announcement draft — written (in session context)
+- [x] YouTube video description draft — written (in session context)
 - [ ] Demo video / GIF (May 16)
 - [ ] GitHub release — tag v1.0.0 (May 19)
-- [ ] X thread draft (May 17)
-- [ ] Discord announcement draft (May 18)
 - [ ] Final cross-device / cross-theme pass
 
 ## Rejoin Instructions
