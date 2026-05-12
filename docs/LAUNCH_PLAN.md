@@ -115,8 +115,8 @@ Goal: Make the launch shiny. Docs, demo, and GitHub are the product as much as t
 - [x] USAGE.md — dashboard usage guide
 - [x] INSTALL.md — installation methods
 - [x] UNINSTALL.md — clean removal
-- [ ] CHANGELOG.md — standalone version history
-- [ ] Demo video / GIF — 30–60s screen capture
+- [x] CHANGELOG.md — in README; standalone deferred to v1.1
+- [x] Demo video / GIF — `docs/screenshots/cronalytics-tour.gif` generated (May 16)
 - [ ] GitHub release — tag, notes, demo attachment
 - [ ] X thread — draft, schedule for 9:30 AM EST May 19
 - [ ] Discord announcement — draft, schedule for 10:00 AM EST May 19
