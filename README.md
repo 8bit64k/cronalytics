@@ -12,6 +12,8 @@ Observe. Measure. Optimize.
 Cronalytics is a Hermes Agent plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them in the Hermes dashboard via a dedicated `/cronalytics` tab.
 
 > Turn hidden automation into visible spend.
+>
+> Built for **[Hermes Agent](https://github.com/nousresearch/hermes-agent)**, the autonomous agent framework by **[Nous Research](https://nousresearch.com)**.
 
 ---
 
@@ -306,11 +308,28 @@ cronalytics/
 
 ---
 
+## Support
+
+This is an independent project built by a solo developer with help from an AI agent. I use it daily and will fix bugs as I find them, but there is **no SLA, no dedicated support channel, and no guarantee of timely response**.
+
+**Found a bug?** Open a [GitHub issue](https://github.com/8bit64k/cronalytics/issues) with reproduction steps.  
+**Have a feature idea?** Open a [discussion](https://github.com/8bit64k/cronalytics/discussions) or fork it.
+
+Use at your own risk. The cost estimates are approximate. The success/failure signal is wrapper-level only (see [Understanding Success](#understanding-success)). Verify anything mission-critical independently.
+
+---
+
 ## Requirements
 If you are running Hermes Agent you have everything you need:
 - Hermes Agent with plugin hook support (`on_session_end`)
 - Hermes dashboard server for UI components
 - SQLite (bundled with Python)
+
+---
+
+## License
+
+MIT — see [`LICENSE`](LICENSE) for full text.
 
 ---
 
