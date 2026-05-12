@@ -2,7 +2,7 @@
 # Updated: 2026-05-11
 #
 ## Current Commit
-`fa6d960` (master) — "Merge feat/a11y-table-sort-keyboard (certified)"
+`b8907d2` (master) — "Merge feat/api-validation (certified)"
 
 ## Recently Delivered (2026-05-10–11)
 - H9 Agent/no_agent mode awareness: schema `job_mode`, dual-track sync, `ModeToggle` toolbar, `[No agent]` badges, summary footnote, script job count in summary
@@ -55,7 +55,9 @@
 19. **Test suite**: 40 pytest tests, all passing (`pytest -q`)
 20. **Lint/type**: ruff clean, mypy clean on 10 source files
 21. **Bootstrap scanner**: plugin `__init__.py` syncs watermarks on load (catches post-restart gaps)
-22. **Source architecture**: modular `src/` tree with esbuild bundler; no more 1,811-line monolith edit sessions
+22. **Source architecture**: modular `src/` tree with esbuild bundler
+23. **API validation**: JSDoc typedefs + thin runtime guard — dev-only `assertType()` for 6 API shapes
+24. **a11y**: Keyboard-accessible table headers and summary/leader cards (tabIndex, role, aria-label, Enter/Space)
 
 ## V1.0 Technical In-Scope (Remaining)
 | # | Task | Status |
