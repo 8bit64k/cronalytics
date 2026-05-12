@@ -9,7 +9,7 @@ const PRESETS = [
 
 const MAX_DAYS = 365;
 
-export function DaySelector({ selected, onChange }) {
+export function DaySelector({ selected, onChange, label = null }) {
   const [custom, setCustom] = useState("");
 
   const applyCustom = () => {
@@ -17,7 +17,7 @@ export function DaySelector({ selected, onChange }) {
     onChange(isNaN(v) || v < 0 ? 0 : Math.min(v, MAX_DAYS));
   };
 
-  return [
+  const elements = [
     // Preset buttons group
     React.createElement(
       "span",
@@ -85,4 +85,27 @@ export function DaySelector({ selected, onChange }) {
       )
     ),
   ];
+
+  if (label) {
+    elements.unshift(
+      React.createElement(
+        "span",
+        {
+          key: "label",
+          style: {
+            fontFamily: "var(--theme-font-mono, monospace)",
+            fontSize: "0.65rem",
+            fontWeight: 700,
+            opacity: 0.7,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            marginRight: "0.25rem",
+          },
+        },
+        label
+      )
+    );
+  }
+
+  return elements;
 }

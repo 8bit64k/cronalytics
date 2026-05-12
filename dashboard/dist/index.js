@@ -299,13 +299,13 @@
     { label: "90D", value: 90 }
   ];
   var MAX_DAYS = 365;
-  function DaySelector({ selected, onChange }) {
+  function DaySelector({ selected, onChange, label = null }) {
     const [custom, setCustom] = useState("");
     const applyCustom = () => {
       const v = parseInt(custom, 10);
       onChange(isNaN(v) || v < 0 ? 0 : Math.min(v, MAX_DAYS));
     };
-    return [
+    const elements = [
       // Preset buttons group
       React.createElement(
         "span",
@@ -373,6 +373,27 @@
         )
       )
     ];
+    if (label) {
+      elements.unshift(
+        React.createElement(
+          "span",
+          {
+            key: "label",
+            style: {
+              fontFamily: "var(--theme-font-mono, monospace)",
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              opacity: 0.7,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              marginRight: "0.25rem"
+            }
+          },
+          label
+        )
+      );
+    }
+    return elements;
   }
 
   // src/components/OutcomeToggle.js
@@ -1963,28 +1984,33 @@
           React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome, label: "Outcomes" }),
           React.createElement(ModeToggle, { selected: mode, onChange: setMode, label: "Mode" })
         ),
-        // DaySelector returns [presets, custom] — flattened as direct flex children
-        // so presets, custom input, and Refresh wrap independently.
-        React.createElement(DaySelector, { selected: days, onChange: setDays }),
-        // Refresh — its own flex item so it breaks away first at 110%.
+        // Right-side group: Days selector + Refresh, pushed to the right edge.
         React.createElement(
-          Button,
-          {
-            type: "button",
-            size: "sm",
-            outlined: true,
-            disabled: summary.loading || jobs.loading,
-            onClick: () => {
-              summary.refetch();
-              jobs.refetch();
+          "div",
+          { style: { display: "flex", flexWrap: "wrap", gap: "0.5rem 0.75rem", alignItems: "center", marginLeft: "auto" } },
+          // DaySelector returns [label, presets, custom] — flattened as direct flex children
+          // so presets, custom input, and Refresh wrap independently.
+          React.createElement(DaySelector, { selected: days, onChange: setDays, label: "Days" }),
+          // Refresh — its own flex item so it breaks away first at 110%.
+          React.createElement(
+            Button,
+            {
+              type: "button",
+              size: "sm",
+              outlined: true,
+              disabled: summary.loading || jobs.loading,
+              onClick: () => {
+                summary.refetch();
+                jobs.refetch();
+              },
+              style: { minWidth: "5.5rem" }
             },
-            style: { minWidth: "5.5rem" }
-          },
-          summary.loading || jobs.loading ? "\u2026" : React.createElement(
-            "span",
-            { style: { display: "flex", alignItems: "center", gap: "0.25rem" } },
-            RefreshCwIcon(14),
-            "Refresh"
+            summary.loading || jobs.loading ? "\u2026" : React.createElement(
+              "span",
+              { style: { display: "flex", alignItems: "center", gap: "0.25rem" } },
+              RefreshCwIcon(14),
+              "Refresh"
+            )
           )
         )
       ),

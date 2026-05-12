@@ -203,24 +203,27 @@ export function CronalyticsTab() {
         React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome, label: "Outcomes" }),
         React.createElement(ModeToggle, { selected: mode, onChange: setMode, label: "Mode" }),
       ),
-      // DaySelector returns [presets, custom] — flattened as direct flex children
-      // so presets, custom input, and Refresh wrap independently.
-      React.createElement(DaySelector, { selected: days, onChange: setDays }),
-      // Refresh — its own flex item so it breaks away first at 110%.
-      React.createElement(Button, {
-        type: "button",
-        size: "sm",
-        outlined: true,
-        disabled: summary.loading || jobs.loading,
-        onClick: () => { summary.refetch(); jobs.refetch(); },
-        style: { minWidth: "5.5rem" }
-      }, summary.loading || jobs.loading
-        ? "\u2026"
-        : React.createElement("span", { style: { display: "flex", alignItems: "center", gap: "0.25rem" } },
-            RefreshCwIcon(14),
-            "Refresh"
-          )
-      )
+      // Right-side group: Days selector + Refresh, pushed to the right edge.
+      React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "0.5rem 0.75rem", alignItems: "center", marginLeft: "auto" } },
+        // DaySelector returns [label, presets, custom] — flattened as direct flex children
+        // so presets, custom input, and Refresh wrap independently.
+        React.createElement(DaySelector, { selected: days, onChange: setDays, label: "Days" }),
+        // Refresh — its own flex item so it breaks away first at 110%.
+        React.createElement(Button, {
+          type: "button",
+          size: "sm",
+          outlined: true,
+          disabled: summary.loading || jobs.loading,
+          onClick: () => { summary.refetch(); jobs.refetch(); },
+          style: { minWidth: "5.5rem" }
+        }, summary.loading || jobs.loading
+          ? "\u2026"
+          : React.createElement("span", { style: { display: "flex", alignItems: "center", gap: "0.25rem" } },
+              RefreshCwIcon(14),
+              "Refresh"
+            )
+        )
+      ),
     ),
 
     // Job Detail Modal
