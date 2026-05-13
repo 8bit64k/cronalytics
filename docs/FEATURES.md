@@ -214,7 +214,7 @@ Progressive zoom-responsive wrapping: at high zoom levels, Refresh breaks away f
 #### Row 1 — Summary Board
 
 - **Job Runs** — total run count in selected window vs. prior period delta (↑/↓ %).
-- **Cost** — total `estimated_cost_usd` in amber `#f5a623`; vs-prior delta + Actual cost sub-line + ✓/✗ success/failure breakdown + wasted cost. In Failure mode, headline flips to red and label changes to "Wasted".
+- **Cost** — total `estimated_cost_usd` in amber `#f5a623`; vs-prior delta + ✓/✗ success/failure breakdown + wasted cost. Actual cost sub-line is suppressed until provider billing coverage is reliable. In Failure mode, headline flips to red and label changes to "Wasted".
 - **Tokens** — total tokens in blue `#5b8def`; 3-row micro proportion bars (In, Out, Cached).
 - **Pace** — aggregate `trend_monthly_total / nominal_monthly_total`; font-only color:
   - `< 1.0×` — green `#4ade80` (under nominal)
@@ -226,9 +226,9 @@ All four cards are clickable and open educational modals.
 #### Row 2 — Leader Board
 
 Four spotlight cards derived live from `jobList`, icon accent `#ff5722`:
-- **Top Runs** — highest `runs` job.
-- **Top Cost** — highest `total_cost` job; amber headline `#f5a623`.
-- **Top Tokens** — highest `total_tokens` job; blue headline `#5b8def`.
+- **Top Runs** — highest `runs` job; `% of total runs` sub-line.
+- **Top Cost** — highest `total_cost` job; amber headline `#f5a623`; `% of total cost` sub-line.
+- **Top Tokens** — highest `total_tokens` job; blue headline `#5b8def`; `% of total tokens` sub-line.
 - **Top Pace** — highest `projections.pace` job; font-colored via `paceColor()`. Surfaces the job most at risk of exceeding its nominal budget.
 
 All four cards are clickable and open detail modals with job metadata.

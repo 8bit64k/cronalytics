@@ -84,12 +84,11 @@ Four cards showing aggregate metrics. Click any card to open an educational moda
 
 - **Big number:** total estimated cost in amber (`$X.XX`).
 - **Delta:** ↑/↓ percentage vs prior window.
-- **Sub-line 1:** "Actual: $X.XX" — ground-truth cost when available.
-- **Sub-line 2:** `✓ N · ✗ N` — success vs failure run counts. If failures have cost, shows wasted cost in parentheses.
+- **Sub-line:** `✓ N · ✗ N` — success vs failure run counts. If failures have cost, shows wasted cost in parentheses.
+
+> **Note:** The "Actual" line is suppressed. Partial `actual_cost_usd` coverage from providers creates misleading comparisons. It will return when coverage is reliable.
 
 In **Failure** mode, the headline turns red and reads "Wasted."
-
-**What to look for:** If actual cost consistently exceeds estimated cost, your provider pricing may have changed or your token estimates are low.
 
 ### Tokens
 
@@ -115,13 +114,13 @@ Click the Pace card to open a modal explaining the math in detail.
 Four spotlight cards showing the single highest-value job in each dimension. Click any card to see job details.
 
 ### Top Runs
-The job that executed most frequently in the window. High run count + high cost = your most expensive automation.
+The job that executed most frequently in the window, with its share of total runs (e.g. "41% of total runs"). High run count + high cost = your most expensive automation.
 
 ### Top Cost
-The job with the highest cumulative spend. Check its Pace — if pace is high, this job is the best candidate for optimization.
+The job with the highest cumulative spend, with its share of total cost (e.g. "67% of total cost"). Check its Pace — if pace is high, this job is the best candidate for optimization.
 
 ### Top Tokens
-The job consuming the most tokens. High token jobs may benefit from prompt compression or model downsizing.
+The job consuming the most tokens, with its share of total tokens (e.g. "58% of total tokens"). High token jobs may benefit from prompt compression or model downsizing.
 
 ### Top Pace
 The job most at risk of exceeding its budget. This is your early-warning signal — even if absolute cost is low, a high pace means the job is running hotter than scheduled.
