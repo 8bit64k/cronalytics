@@ -55,6 +55,18 @@ All high-priority technical items are **delivered** for V1.0.
 
 ---
 
+## V1.1 / vNext Backlog
+
+Items to be delivered on the `vNext` branch and merged when ready.
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| V1 | **Leader Board "% of total"** | In Progress | Top Runs, Top Cost, Top Tokens cards show leader's share of the aggregate (e.g. "83% of all runs"). Replaces the empty `3rem` spacer. |
+| V2 | **Summary Board token trend** | Pending | Deferred until a non-redundant metric is identified. Raw token count correlates with run count. Candidate: tokens-per-run trend. Needs Tokens card space analysis first. |
+| V3 | **Docs audience separation** | PR open (`feat/docs-audience-separation`) | Move dev-only docs to `dev/`; keep user docs in `docs/`. Separate concerns. |
+
+---
+
 ## V1.0 Launch Status
 
 **Feature freeze: May 14, 2026** ✅ Complete.  
