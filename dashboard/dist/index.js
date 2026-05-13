@@ -1282,6 +1282,9 @@
 
   // src/components/LeaderBoard.js
   function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopTokensClick, onTopPaceClick }) {
+    const totalRuns = jobList.reduce((sum, j) => sum + (j.runs || 0), 0);
+    const totalCost = jobList.reduce((sum, j) => sum + (j.total_cost || 0), 0);
+    const totalTokens = jobList.reduce((sum, j) => sum + (j.total_tokens || 0), 0);
     const cardHover = {
       onMouseEnter: (e) => {
         e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)";
@@ -1347,7 +1350,11 @@
                 style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
                 title: label
               }, label),
-              React.createElement("div", { style: { height: "3rem" } })
+              React.createElement(
+                "div",
+                { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.6, marginTop: "0.15rem" } },
+                totalRuns > 0 ? Math.round((j.runs || 0) / totalRuns * 100) + "% of total runs" : ""
+              )
             )
           )
         );
@@ -1383,7 +1390,11 @@
                 style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
                 title: label
               }, label),
-              React.createElement("div", { style: { height: "3rem" } })
+              React.createElement(
+                "div",
+                { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.6, marginTop: "0.15rem" } },
+                totalCost > 0 ? Math.round((j.total_cost || 0) / totalCost * 100) + "% of total cost" : ""
+              )
             )
           )
         );
@@ -1419,7 +1430,11 @@
                 style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
                 title: label
               }, label),
-              React.createElement("div", { style: { height: "3rem" } })
+              React.createElement(
+                "div",
+                { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.6, marginTop: "0.15rem" } },
+                totalTokens > 0 ? Math.round((j.total_tokens || 0) / totalTokens * 100) + "% of total tokens" : ""
+              )
             )
           )
         );

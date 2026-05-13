@@ -133,7 +133,8 @@ Paths are resolved automatically:
 Four cards showing aggregate metrics for the selected window:
 
 - **Job Runs** — total executions with vs-prior-period delta (↑/↓ %)
-- **Cost** — total estimated cost in amber; vs-prior delta + actual cost sub-line + ✓/✗ breakdown
+- **Cost** — total estimated cost in amber; vs-prior delta + ✓/✗ breakdown
+  (Actual cost placeholder suppressed — partial coverage creates misleading comparisons)
 - **Tokens** — total tokens in blue; In/Out/Cached proportion micro-bars
 - **Pace** — aggregate `trend_monthly / nominal_monthly` as a multiplier:
   - `< 1.0×` green — under scheduled budget
@@ -144,11 +145,11 @@ Click any card to open an educational modal explaining the metric.
 
 ### Leader Board (Row 2)
 
-Four spotlight cards surfacing the highest-value job in each dimension:
+Four spotlight cards surfacing the highest-value job in each dimension, with the leader's share of the window total:
 
-- **Top Runs** — highest execution count
-- **Top Cost** — highest cumulative spend
-- **Top Tokens** — highest token consumption
+- **Top Runs** — highest execution count; `% of total runs` sub-line
+- **Top Cost** — highest cumulative spend; `% of total cost` sub-line
+- **Top Tokens** — highest token consumption; `% of total tokens` sub-line
 - **Top Pace** — highest pace multiplier (most at risk of exceeding budget)
 
 Click any card to open a detail modal with job metadata.
@@ -337,6 +338,12 @@ MIT — see [`LICENSE`](LICENSE) for full text.
 ---
 
 ## Changelog
+
+### v1.0.1 (2026-05-13)
+
+- **Leader Board '% of total'** — spotlight cards show the leader's share of the window total (e.g. "42% of total cost")
+- **Cost card: suppressed Actual** — partial `actual_cost_usd` coverage creates misleading comparisons. The line now reads `Actual: —` until provider billing data coverage is reliable.
+- **Backend fix** — synthetic script-only rows now insert `NULL` for `actual_cost_usd` (was 0.0), eliminating phantom `$0.00` aggregates.
 
 ### v1.0.0 (2026-05-12)
 
