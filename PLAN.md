@@ -88,8 +88,8 @@ Items to be delivered on the `vNext` branch and merged when ready.
 - [ ] Demo video / GIF (May 16)
 - [x] GitHub release — tag v1.0.0 (May 12, accelerated)
 - [x] Demo video / GIF — `docs/screenshots/cronalytics-tour.gif`
-- [x] X thread draft — written (7 tweets, in docs/LAUNCH_POSTS.md)
-- [x] Discord announcement draft — written (in docs/LAUNCH_POSTS.md)
+- [x] X thread draft — written (7 tweets, in dev/LAUNCH_POSTS.md)
+- [x] Discord announcement draft — written (in dev/LAUNCH_POSTS.md)
 - [ ] X thread — posted
 - [ ] Discord announcement — posted
 - [ ] Final cross-device / cross-theme pass
