@@ -45,20 +45,23 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
 
 ## Documentation Index
 
-All documentation lives in `docs/` except where noted.
+### User Documentation (`docs/`)
 
-- **docs/BRIEF.md** — Product opportunity brief & positioning
-- **docs/DESIGN.md** — Architecture, data flow, and technical decisions
-- **docs/FEATURES.md** — Complete feature catalog with formulas
-- **PLAN.md** — Phased build plan and backlog (root)
-- **docs/LAUNCH_PLAN.md** — V1.0 launch timeline
 - **docs/INSTALL.md** — Detailed installation guide
 - **docs/UNINSTALL.md** — Clean removal instructions
 - **docs/USAGE.md** — Dashboard usage guide
-- **docs/AGENTS.md** — Contributor conventions & release gates
+
+### Developer Documentation (`dev/`)
+
+- **dev/BRIEF.md** — Product opportunity brief & positioning
+- **dev/DESIGN.md** — Architecture, data flow, and technical decisions
+- **dev/FEATURES.md** — Complete feature catalog with formulas
+- **dev/LAUNCH_PLAN.md** — V1.0 launch timeline
+- **dev/AGENTS.md** — Contributor conventions & release gates
+- **dev/DEV_SETUP.md** — Development environment setup
+- **PLAN.md** — Phased build plan and backlog (root)
 
 ---
-
 
 ## Installation
 
@@ -77,7 +80,7 @@ Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS.
 
 Open the **Cronalytics** tab in the dashboard sidebar.
 
-> For development setup, see [`docs/DEV_SETUP.md`](docs/DEV_SETUP.md).
+> For development setup, see [`dev/DEV_SETUP.md`](dev/DEV_SETUP.md).
 
 ---
 

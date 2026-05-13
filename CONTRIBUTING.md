@@ -18,3 +18,7 @@
 - All changes to `master` and `release/*` branches require PR review.
 - `release/*` branches require at least 1 approving review.
 - Keep commits focused and atomic. Squash fixups before merge if the branch is noisy.
+
+## Development Environment
+
+See [`dev/DEV_SETUP.md`](dev/DEV_SETUP.md) for build, test, and plugin setup instructions.
