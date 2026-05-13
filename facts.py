@@ -254,7 +254,7 @@ def ingest_script_row(
     placeholders = ["?"] * len(cols)
     values = [
         session_id, job_id, run_time, run_time,
-        0.0, 0.0,
+        0.0, None,  # actual_cost_usd = NULL (no billing event for script-only jobs)
         0, 0, 0,
         0, 0,
         0, 0, 0,
@@ -400,7 +400,7 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "both", mode: st
         "days": days,
         "total_runs": total_runs,
         "total_estimated_cost": round(total_est_cost, 4) if total_est_cost is not None else None,
-        "total_actual_cost": round(total_act_cost, 4) if total_act_cost is not None else None,
+        "total_actual_cost": None,  # Suppressed: incomplete data is worse than no data. Re-enable when coverage is reliable.
         "total_tokens": total_tokens,
         "total_input_tokens": total_in or 0,
         "total_output_tokens": total_out or 0,
