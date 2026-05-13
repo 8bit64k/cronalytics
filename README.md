@@ -19,6 +19,9 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
 
 ## Mini-Tour
 ![Short Tour](docs/screenshots/cronalytics-tour.gif)
+
+[YouTube](https://youtu.be/nbeViSt9hCk?si=EH2u7Ys2vDTVDqka): short video showing basic install and usage.
+
 ---
 
 ## What It Does
