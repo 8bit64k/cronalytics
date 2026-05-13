@@ -16,9 +16,18 @@ import contextlib
 import json
 import sys
 import tempfile
+import types
 from pathlib import Path
 
 import pytest
+
+# ---------------------------------------------------------------------------
+# Mock hermes_constants (not installed as a real package outside Hermes)
+# ---------------------------------------------------------------------------
+
+_hermes_constants = types.ModuleType("hermes_constants")
+_hermes_constants.get_hermes_home = lambda: str(tempfile.mkdtemp())
+sys.modules["hermes_constants"] = _hermes_constants
 
 # ---------------------------------------------------------------------------
 # Path setup —  mirror what the dashboard does via importlib
