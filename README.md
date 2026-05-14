@@ -63,6 +63,18 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
 
 ---
 
+## ⚠️ Important Notes
+
+**Cost data is estimated, not exact.** Cronalytics reports the estimated cost that Hermes computed and stored in `state.db`. Your actual invoice may differ due to rate changes, credits, or rounding. Use this for directional awareness, not accounting.
+
+**Single-profile cron by default.** Cronalytics monitors the Hermes profile where it is installed. Most users — even those with multiple profiles configured — run cron jobs in the **default** profile. For them, Cronalytics works fully.
+
+The edge case: if you explicitly create a cron job under a non-default profile (`hermes --profile <name> cron create ...`), that job runs in an isolated gateway with its own `state.db`. Cronalytics, installed in the default profile, cannot see it. To monitor those jobs, install Cronalytics in that profile's `plugins/` directory as well.
+
+Multi-profile cron support is on our roadmap.
+
+---
+
 ## Installation
 
 ### Dashboard Plugins Tab (Recommended)

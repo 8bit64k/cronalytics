@@ -127,6 +127,19 @@ The job most at risk of exceeding its budget. This is your early-warning signal 
 
 ---
 
+## Understanding the Cost Column
+
+The cost shown for each run is the **estimated cost** that Hermes calculated and recorded in `state.db` during the session.
+
+It is useful for:
+- Spotting runs that used unexpectedly many tokens
+- Comparing relative cost across jobs
+- Budget awareness
+
+It is **not** your exact invoice. Provider billing systems apply rounding, credits, and rate changes that neither Hermes nor Cronalytics see. For precise charges, check your provider dashboard.
+
+---
+
 ## Per-Model Breakdown
 
 A proportional bar chart of the top 5 models by estimated cost.
@@ -248,6 +261,16 @@ All interactive elements are keyboard-accessible:
 2. Check the **Cost** card — it now shows "Wasted" cost.
 3. Sort Jobs table by **Total Cost** — failures with highest cost appear first.
 4. Expand rows to see failure counts and last run times.
+
+---
+
+## Advanced: Multiple Profiles
+
+Hermes supports multiple profiles via `hermes --profile <name>`. Each profile has its own `state.db`, cron jobs, and plugin directory.
+
+Most users run cron exclusively in the **default** profile, even if they have other profiles configured. For these users, Cronalytics works without limitation.
+
+If you create jobs under `hermes --profile work cron create ...`, those jobs run in an isolated gateway. Cronalytics must also be installed in `~/.hermes/profiles/work/plugins/` to see them. We are exploring cross-profile aggregation for a future release.
 
 ---
 

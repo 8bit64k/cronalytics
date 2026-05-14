@@ -19,9 +19,12 @@ watermark_test_*.json
 # Pending queue backing file (generated at runtime)
 pending.jsonl
 
+# Scratchpad — local working files, not committed
+scratchpad/
+
 # Auto-checkpoint state (generated at runtime)
 cronalytics-checkpoint.json
-
+CHECKPOINT.md
 # Test artifacts
 .pytest_cache/
 .coverage
