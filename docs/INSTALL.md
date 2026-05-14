@@ -67,6 +67,24 @@ If the dashboard shows "No cron jobs captured," click **Sync Now**.
 > ```
 > Most users should use the dashboard **Sync Now** button instead.
 
+## Reverse Proxy Setup
+
+If you run the Hermes dashboard behind **Caddy**, **Nginx**, or another reverse proxy, ensure `/api/*` routes are forwarded directly to the dashboard backend. The Hermes dashboard serves the SPA fallback (`index.html`) for any unmatched path, so a misconfigured proxy will return HTML instead of JSON for plugin API calls.
+
+**Common cause:** `try_files` or `rewrite` rules intercepting `/api/*` paths.
+
+**Minimal Caddy example:**
+
+```caddy
+# Forward all /api/* routes to the Hermes dashboard backend
+reverse_proxy /api/* localhost:9119
+
+# Serve the SPA for everything else
+reverse_proxy localhost:9119
+```
+
+If you see `Unexpected token '<'` errors in the Cronalytics tab after installing behind a proxy, check this configuration first. See [Troubleshooting](#troubleshooting) for more details.
+
 ## Requirements
 
 - Hermes Agent v0.10.0+
@@ -90,11 +108,29 @@ After install:
 
 ## Troubleshooting
 
+### Reverse proxy (Caddy, Nginx) returns HTML for API routes
+
+If you run the Hermes dashboard behind a reverse proxy and see JSON parse errors (`Unexpected token '<'`), the proxy may be routing API requests incorrectly. The Hermes dashboard serves the SPA fallback (`index.html`) for any unmatched route, so any proxy misconfiguration sends HTML instead of JSON to `/api/plugins/cronalytics/*`.
+
+**Common cause:** Caddy (or Nginx) `try_files` or `rewrite` rules intercepting `/api/*` paths before they reach the dashboard server.
+
+**Fix:** Ensure your reverse proxy forwards `/api/plugins/cronalytics/*` directly to the Hermes dashboard backend without rewriting or serving static files. A minimal Caddy example:
+
+```caddy
+# Forward all /api/* routes to the Hermes dashboard backend
+reverse_proxy /api/* localhost:9119
+
+# Serve the SPA for everything else
+reverse_proxy localhost:9119
+```
+
+After updating the proxy config, hard-refresh the browser.
+
 ### "Unexpected token '<'" error in the dashboard
 
 If the Cronalytics tab shows a JSON parse error mentioning `<!doctype`, the dashboard's cached JavaScript bundle is requesting an old or unmounted API route. The Hermes dashboard server serves the SPA fallback (HTML) for any unmatched path, and the browser tries to parse that HTML as JSON.
 
-**Fix:** Perform a **hard refresh** (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear the browser cache and load the latest frontend bundle.
+**Fix:** Perform a **hard refresh** (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear the browser cache and load the latest frontend bundle. If you're behind a reverse proxy, also verify the [reverse proxy configuration](#reverse-proxy-setup) above.
 
 ### API routes are mounted but requests return HTML
 
@@ -113,21 +149,3 @@ The Cronalytics API (and all Hermes plugin APIs) requires the dashboard's epheme
 Cronalytics only captures jobs from the `on_session_end` hook going forward. Historical runs are backfilled via the reconciliation scanner.
 
 **Fix:** Click **Sync Now** in the dashboard toolbar. The scanner reads `state.db` and inserts any cron sessions newer than the last watermark.
-
-### Reverse proxy (Caddy, Nginx) returns HTML for API routes
-
-If you run the Hermes dashboard behind a reverse proxy and see JSON parse errors (`Unexpected token '<'`), the proxy may be routing API requests incorrectly. The Hermes dashboard serves the SPA fallback (`index.html`) for unmatched routes, so any proxy misconfiguration sends HTML instead of JSON to `/api/plugins/cronalytics/*`.
-
-**Common cause:** Caddy (or Nginx) `try_files` or `rewrite` rules intercepting `/api/*` paths before they reach the dashboard server.
-
-**Fix:** Ensure your reverse proxy forwards `/api/plugins/cronalytics/*` directly to the Hermes dashboard backend without rewriting or serving static files. A minimal Caddy example:
-
-```caddy
-# Forward all /api/* routes to the Hermes dashboard backend
-reverse_proxy /api/* localhost:9119
-
-# Serve the SPA for everything else
-reverse_proxy localhost:9119
-```
-
-After updating the proxy config, hard-refresh the browser.

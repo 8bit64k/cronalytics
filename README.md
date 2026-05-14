@@ -92,6 +92,8 @@ Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS.
 
 Open the **Cronalytics** tab in the dashboard sidebar.
 
+> **Reverse proxy users:** If you run the Hermes dashboard behind Caddy or Nginx, ensure `/api/*` routes are forwarded directly to the dashboard backend. A misconfigured proxy will return HTML instead of JSON for plugin API calls. See [`docs/INSTALL.md`](docs/INSTALL.md#reverse-proxy-setup) for a minimal Caddy example.
+>
 > For development setup, see [`dev/DEV_SETUP.md`](dev/DEV_SETUP.md).
 
 ---
