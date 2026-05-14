@@ -63,7 +63,21 @@ Items to be delivered on the `vNext` branch and merged when ready.
 |---|------|--------|-------|
 | V1 | **Leader Board "% of total"** | ✅ Merged to vNext | Top Runs, Top Cost, Top Tokens cards show leader's share of the aggregate (e.g. "83% of all runs"). Replaces the empty `3rem` spacer. |
 | V2 | **Summary Board token trend** | Pending | Deferred until a non-redundant metric is identified. Raw token count correlates with run count. Candidate: tokens-per-run trend. Needs Tokens card space analysis first. |
-| V3 | **Docs audience separation** | PR open (`feat/docs-audience-separation`) | Move dev-only docs to `dev/`; keep user docs in `docs/`. Separate concerns. |
+| V3 | **Docs audience separation** | ✅ Merged | Move dev-only docs to `dev/`; keep user docs in `docs/`. Separate concerns. |
+
+---
+
+## Upstream Signals — Feature Validation
+
+Tracked from `NousResearch/hermes-agent` issues and PRs. These confirm the problem space Cronalytics occupies and identify gaps to fill.
+
+| # | Author | What They Asked | Cronalytics Today | Gap / Opportunity |
+|---|--------|-----------------|-------------------|-------------------|
+| #23419 | nvst18 | Cron jobs burn provider credits without cost visibility or budget cap | Cost surfaced per run and per job; no budget enforcement | Budget alerting / spend ceiling |
+| #20622 | arshad2k | Multi-profile cron jobs hidden from centralized monitoring | Default-profile only; non-default jobs invisible | Cross-profile scanner or hook propagation |
+| #20412 | sanchomuzax | Separate Input/Output token charts + per-model breakdown | Model-level cost bars; no I/O token split | Input vs. Output token visualization |
+| #24258 | Freffles | Model and provider attribution missing from cron UI | Model shown in job table; provider not surfaced | Provider column / filter |
+| #6642 | xinbenlv | Unified telemetry for latency, cost, completion/failure rates | Cron-specific facts; latency tracked per session only | Expand beyond cron? Aggregate across all agent dispatches? |
 
 ---
 

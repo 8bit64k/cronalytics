@@ -331,7 +331,23 @@ run_job() ──▶ run_conversation() ──▶ on_session_end(platform="cron")
 
 ---
 
-## 7. File Layout
+## 7. i18n / Localization
+
+**Status:** English-only. Hermes core has an i18n system (`useI18n`, 16 locales: `en`, `zh`, `zh-hant`, `ja`, `de`, `es`, `fr`, `tr`, `uk`, `af`, `ko`, `it`, `ga`, `pt`, `ru`, `hu`), but **zero existing plugins integrate with it** — including Kanban and hermes-achievements, which are core-bundled.
+
+**Why:** Hermes plugins are loaded as `<script>`-injected IIFE bundles. The i18n context lives inside the main React tree and is **not exposed through the plugin SDK**. A plugin cannot cleanly import `useI18n` from the dashboard bundle.
+
+**Design decision:**
+1. All UI strings are centralized in `dashboard/src/lib/formatters.js` (labels, tooltips, educational copy). No display strings are scattered in JSX.
+2. This makes future string extraction trivial when Hermes exposes plugin-localization support (or when we choose to bundle our own i18n layer).
+3. No premature implementation — adding a translation system adds bundle size and complexity for a capability no other plugin offers today.
+4. If a non-English user opens an Issue or Discussion, we respond in their language where feasible, but the product UI remains English for now.
+
+**Trigger for adoption:** If NousResearch/hermes-agent exposes a `HERMES_PLUGIN_SDK.i18n` interface or begins requiring i18n compliance for bundled plugins, we centralize and extract strings within one release cycle.
+
+---
+
+## 8. File Layout
 
 ```
 cronalytics/
@@ -357,7 +373,7 @@ cronalytics/
 
 ---
 
-## 8. Positioning
+## 9. Positioning
 
 > Turn hidden automation into visible spend.
 
