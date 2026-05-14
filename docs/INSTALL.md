@@ -113,3 +113,21 @@ The Cronalytics API (and all Hermes plugin APIs) requires the dashboard's epheme
 Cronalytics only captures jobs from the `on_session_end` hook going forward. Historical runs are backfilled via the reconciliation scanner.
 
 **Fix:** Click **Sync Now** in the dashboard toolbar. The scanner reads `state.db` and inserts any cron sessions newer than the last watermark.
+
+### Reverse proxy (Caddy, Nginx) returns HTML for API routes
+
+If you run the Hermes dashboard behind a reverse proxy and see JSON parse errors (`Unexpected token '<'`), the proxy may be routing API requests incorrectly. The Hermes dashboard serves the SPA fallback (`index.html`) for unmatched routes, so any proxy misconfiguration sends HTML instead of JSON to `/api/plugins/cronalytics/*`.
+
+**Common cause:** Caddy (or Nginx) `try_files` or `rewrite` rules intercepting `/api/*` paths before they reach the dashboard server.
+
+**Fix:** Ensure your reverse proxy forwards `/api/plugins/cronalytics/*` directly to the Hermes dashboard backend without rewriting or serving static files. A minimal Caddy example:
+
+```caddy
+# Forward all /api/* routes to the Hermes dashboard backend
+reverse_proxy /api/* localhost:9119
+
+# Serve the SPA for everything else
+reverse_proxy localhost:9119
+```
+
+After updating the proxy config, hard-refresh the browser.
