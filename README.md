@@ -104,10 +104,12 @@ After install, the plugin needs data:
 2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard, or run:
 
 ```bash
-curl -X POST http://localhost:9119/api/plugins/cronalytics/sync
+curl -H "X-Hermes-Session-Token: <token>" -X POST http://localhost:9119/api/plugins/cronalytics/sync
 ```
 
 If the dashboard shows "No cron jobs captured," click **Sync Now**.
+
+> **Note:** The sync endpoint requires the dashboard's ephemeral session token for security (injected into the SPA at startup). Most users should use the dashboard **Sync Now** button instead of curl.
 
 ---
 

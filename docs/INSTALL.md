@@ -57,13 +57,15 @@ Hard-refresh your browser to pick up the new frontend bundle.
 After install, the plugin needs data.
 
 1. **Wait for a cron job to run** — the `on_session_end` hook captures it automatically.
-2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard, or run:
-
-```bash
-curl -X POST http://localhost:9119/api/plugins/cronalytics/sync
-```
+2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard toolbar.
 
 If the dashboard shows "No cron jobs captured," click **Sync Now**.
+
+> **Note on `curl`:** The sync endpoint requires the dashboard's ephemeral session token for security. The token is injected into the SPA and changes on each dashboard restart. If you need to trigger sync from a script, extract the token from `window.__HERMES_SESSION_TOKEN__` in the dashboard page source and pass it as:
+> ```bash
+> curl -H "X-Hermes-Session-Token: <token>" -X POST http://localhost:9119/api/plugins/cronalytics/sync
+> ```
+> Most users should use the dashboard **Sync Now** button instead.
 
 ## Requirements
 
@@ -83,3 +85,31 @@ After install:
 ---
 
 *Version: 1.0.0*
+
+---
+
+## Troubleshooting
+
+### "Unexpected token '<'" error in the dashboard
+
+If the Cronalytics tab shows a JSON parse error mentioning `<!doctype`, the dashboard's cached JavaScript bundle is requesting an old or unmounted API route. The Hermes dashboard server serves the SPA fallback (HTML) for any unmatched path, and the browser tries to parse that HTML as JSON.
+
+**Fix:** Perform a **hard refresh** (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear the browser cache and load the latest frontend bundle.
+
+### API routes are mounted but requests return HTML
+
+If you see plugin API routes mounted in the dashboard server logs (e.g., `/api/plugins/cronalytics/`) but requests still return HTML, the dashboard server may have been restarted after the plugin loaded.
+
+**Fix:** Restart the dashboard server (`hermes dashboard --stop` then `hermes dashboard`) and hard-refresh the browser.
+
+### `curl` returns `{"detail":"unauthorized"}`
+
+The Cronalytics API (and all Hermes plugin APIs) requires the dashboard's ephemeral session token. This token is generated when the dashboard starts and is injected into the SPA's `index.html`.
+
+**Fix:** Use the dashboard **Sync Now** button instead. If you must use `curl` from a script, extract `window.__HERMES_SESSION_TOKEN__` from the dashboard page source and pass it in the `X-Hermes-Session-Token` header.
+
+### "No cron jobs captured" after install
+
+Cronalytics only captures jobs from the `on_session_end` hook going forward. Historical runs are backfilled via the reconciliation scanner.
+
+**Fix:** Click **Sync Now** in the dashboard toolbar. The scanner reads `state.db` and inserts any cron sessions newer than the last watermark.
