@@ -8,7 +8,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from hermes_constants import get_hermes_home
+try:
+    from hermes_constants import get_hermes_home
+    _HERMES_HOME = Path(get_hermes_home())
+except Exception:
+    _HERMES_HOME = Path.home() / ".hermes"
 
 # ---------------------------------------------------------------------------
 # Polling / retry schedule
@@ -22,7 +26,7 @@ MAX_RETRIES: int = len(RETRY_DELAYS)             # 3 attempts total
 # Path resolution
 # ---------------------------------------------------------------------------
 
-HERMES_HOME: Path = Path(get_hermes_home())
+HERMES_HOME: Path = _HERMES_HOME
 
 # Operational session store (Hermes core) — the source of truth for cost data.
 STATE_DB: Path = HERMES_HOME / "state.db"

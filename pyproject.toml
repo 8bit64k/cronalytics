@@ -9,6 +9,9 @@ dependencies = [
     "fastapi>=0.100",
 ]
 
+[project.scripts]
+cronalytics = "cli:main"
+
 [dependency-groups]
 dev = [
     "httpx>=0.27",
