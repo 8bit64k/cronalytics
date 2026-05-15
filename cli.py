@@ -1,12 +1,12 @@
 """Cronalytics CLI — standalone terminal data dump.
 
-Usage:
-    python -m cronalytics.cli summary [--days N]
-    python -m cronalytics.cli jobs    [--days N]
-    python -m cronalytics.cli runs   --job JOB_ID [--days N]
-    python -m cronalytics.cli models [--days N]
-    python -m cronalytics.cli trends [--days N]
-    python -m cronalytics.cli health
+Usage (from the plugin directory):
+    python cli.py summary [--days N]
+    python cli.py jobs    [--days N]
+    python cli.py runs   --job JOB_ID [--days N]
+    python cli.py models [--days N]
+    python cli.py trends [--days N]
+    python cli.py health
 """
 
 from __future__ import annotations
