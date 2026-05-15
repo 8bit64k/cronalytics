@@ -218,7 +218,7 @@ def run_sync(
     Returns a summary dict with counts and timestamps.
     """
     wm = _read_watermark(watermark_path)
-    since = float(wm.get("last_ended_at", 0.0))
+    since = float(wm.get("last_ended_at") or 0.0)
 
     logger.info("[scanner] Starting sync since ended_at=%s", since)
     started = time.time()
