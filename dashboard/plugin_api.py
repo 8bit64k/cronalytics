@@ -127,7 +127,7 @@ async def health() -> dict[str, Any]:
             "status": "ok",
             "fact_db": db_health,
             "sync": sync_status,
-            "version": "1.0.0",
+            "version": "1.1.0",
         }
     )
 

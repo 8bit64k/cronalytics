@@ -264,6 +264,130 @@ All interactive elements are keyboard-accessible:
 
 ---
 
+## CLI Usage
+
+Cronalytics includes a standalone terminal interface with the same data as the dashboard, plus `--json` output for scripts and agents.
+
+### Installation
+
+If you installed via the dashboard plugin tab, the CLI is already available:
+
+```bash
+python ~/.hermes/plugins/cronalytics/cli.py summary --days 14
+```
+
+For global access, install via pip:
+
+```bash
+pip install cronalytics
+```
+
+This creates the `cronalytics` command, auto-detects your fact database, and works outside the Hermes environment.
+
+### Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `summary` | Headline aggregates + Leader Board + cost-by-model table | `cronalytics summary --days 14` |
+| `jobs` | Per-job table with ID, runs, cost, tokens, pace, avg duration | `cronalytics jobs --days 7 --json` |
+| `runs --job <id>` | Individual run history for a specific job | `cronalytics runs --job 67541bf6e230 --days 30` |
+| `models` | Per-model aggregate table | `cronalytics models --days 14` |
+| `trends` | Daily bar chart (ASCII) of cost + runs | `cronalytics trends --days 90` |
+| `health` | Fact DB metadata: total runs, unique jobs, last sync | `cronalytics health --json` |
+| `all` | Chains health → summary → jobs → models → trends | `cronalytics all --days 7` |
+
+### Shared Flags
+
+Every data command accepts:
+
+- `--days N` — Look-back window (default: 30, `0` = all time)
+- `--outcome both|success|failure` — Filter by run outcome
+- `--mode all|agent|no_agent` — Filter by job mode
+- `--json` — Emit JSON instead of rendered tables (pipe to `jq`, Python, etc.)
+
+### Common CLI Workflows
+
+**"Find jobs with pace above 1.2×"**
+```bash
+cronalytics jobs --days 7 --json | jq '.data[] | select(.pace > 1.2) | {id: .job_id, name: .job_name, pace}'
+```
+
+**"Get total cost for the last week"**
+```bash
+cronalytics summary --days 7 --json | jq '.data.total_estimated_cost'
+```
+
+**"Export job list as CSV"**
+```bash
+cronalytics jobs --days 30 --json | jq -r '.data[] | [.job_id, .runs, .total_cost, .total_tokens] | @csv'
+```
+
+**"Full report in one command"**
+```bash
+cronalytics all --days 14
+```
+
+### Formatting Conventions
+
+- **Cost:** `$X.XX` (e.g., `$14.37`)
+- **Tokens:** Compact K/M suffixes (e.g., `12.2M`, `538K`)
+- **Duration:** Seconds with `s` suffix (e.g., `7032s`)
+- **Tables:** Monospace-aligned ASCII boxes matching `hermes insights` style
+- **Date ranges:** Shown under every time-bounded banner (e.g., `May 03 — May 16, 2026`)
+
+---
+
+## Agent Skill
+
+Cronalytics ships with a built-in diagnostic skill that teaches Hermes agents how to analyze your cron jobs.
+
+### How to use it
+
+Ask your agent in any channel (terminal, Telegram, etc.):
+
+> "Check my cron jobs for the last two weeks — flag anything that looks off."
+
+The agent automatically loads the `cronalytics` skill and follows a structured workflow:
+
+1. **Health check** — verifies sync freshness
+2. **Summary + jobs** — pulls aggregate surface and per-job economics
+3. **Per-run drill-down** — investigates top burners with individual run trajectories
+
+### What the skill provides
+
+- **Confidence grading** — Every anomaly rated HIGH / MEDIUM / LOW with supporting evidence
+- **Alternative explanations** — The agent must consider why a finding might be normal
+- **Guardrails** — "Known Ways to Fool Yourself" prevents common false positives:
+  - Pace < 1.0 on new jobs (age-gating via `jobs.json` `created_at`)
+  - Script jobs (`[N]` in name) running differently than agent jobs
+  - Single spikes without temporal cross-check
+  - Outlier costs in job groups
+  - Deliberately growing jobs
+- **`jobs.json` cross-reference** — Human-readable names, schedules, creation dates, delivery errors, and `last_status` for silent failure detection
+
+### Example output
+
+The agent produces structured findings like:
+
+```
+Anomalies (confidence-graded):
+1. [HIGH] Watchdog script jobs failing — 4 jobs with "Script not found" since May 10
+   Evidence: jobs.json last_status for all 4 instances
+   Remediation: Check ~/.hermes/scripts/ for missing files
+
+2. [HIGH] phosphor-daily context creep — input_tokens 38K → 816K over 3 weeks
+   Evidence: per-run trajectory showing 28× variance
+   Remediation: Cap input size or split large sources
+
+3. [LOW] Gateway Check pace 0.48 — expected; job created May 1, window is 30 days
+   Evidence: jobs.json created_at confirms age < window
+   Alternative: Not a drift signal; focus on cost/tokens instead
+```
+
+> **"Dashboard for people, CLI for agents, skill for reasoning."**
+
+---
+
 ## Advanced: Multiple Profiles
 
 Hermes supports multiple profiles via `hermes --profile <name>`. Each profile has its own `state.db`, cron jobs, and plugin directory.
@@ -274,5 +398,5 @@ If you create jobs under `hermes --profile work cron create ...`, those jobs run
 
 ---
 
-*Version: 1.0.0*  
-*Last updated: 2026-05-11*
+*Version: 1.1.0*  
+*Last updated: 2026-05-16*

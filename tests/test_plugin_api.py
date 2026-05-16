@@ -136,7 +136,6 @@ logger = logging.getLogger("cronalytics")
     )
 
     # Seed a real fact DB via the temp copy of facts.py
-    import importlib.util
     spec = importlib.util.spec_from_file_location(
         "_test_facts", plugin_dir / "facts.py"
     )
@@ -185,7 +184,7 @@ logger = logging.getLogger("cronalytics")
     mod._JOBS_PATH = tmp_path / "jobs.json"
 
     # Mock scanner.run_sync to avoid needing a real Hermes state.db
-    mod._scanner_mod.run_sync = lambda *a, **k: {
+    mod._scanner_mod.run_sync = lambda *_a, **_k: {
         "inserted": 0,
         "skipped": 0,
         "agent_rows": 0,
@@ -215,7 +214,7 @@ class TestHealth:
         data = response.json()
         assert data["plugin"] == "cronalytics"
         assert data["status"] == "ok"
-        assert data["version"] == "1.0.0"
+        assert data["version"] == "1.1.0"
         assert "fact_db" in data
         assert "sync" in data
 

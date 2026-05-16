@@ -15,6 +15,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from cli import (  # noqa: I001
     JOBS_LAYOUT,
     JOBS_SEP_WIDTH,
+    LEADER_BOARD_LAYOUT,
+    LEADER_BOARD_SEP_WIDTH,
     MODELS_LAYOUT,
     MODELS_SEP_WIDTH,
     RUNS_LAYOUT,
@@ -26,17 +28,21 @@ from cli import (  # noqa: I001
     _banner_line,
     _build_separator,
     _build_table_header,
+    _compute_leader_board,
     _db_date_range,
     _fmt_cost,
     _fmt_dt,
     _fmt_tokens,
     _human_date_range,
+    _job_label,
     _json_dates,
     _json_envelope,
     _load_job_names,
     _render_health,
     _resolve_db,
     _visual_len,
+    _JOBS_NAME_MAX_AGENT,
+    _JOBS_NAME_MAX_NO_AGENT,
     main,
 )
 
@@ -330,6 +336,71 @@ class TestRenderHealth:
 # Integration — main() dispatch
 # ---------------------------------------------------------------------------
 
+class TestJobLabel:
+    """_job_label builds display labels with truncation and [N] badges."""
+
+    def test_falls_back_to_job_id(self):
+        assert _job_label("abc123", {}, None) == "abc123"
+
+    def test_uses_name_when_available(self):
+        assert _job_label("abc123", {"abc123": "My Job"}, None) == "My Job"
+
+    def test_truncates_long_names(self):
+        long_name = "a" * 30
+        result = _job_label("abc123", {"abc123": long_name}, None)
+        assert len(result) <= _JOBS_NAME_MAX_AGENT
+        assert result.endswith("…")
+
+    def test_adds_no_agent_badge(self):
+        result = _job_label("abc123", {"abc123": "Script"}, "no_agent")
+        assert result.endswith(" [N]")
+
+    def test_truncates_before_badge(self):
+        long_name = "a" * 30
+        result = _job_label("abc123", {"abc123": long_name}, "no_agent")
+        assert result.endswith(" [N]")
+        assert len(result) <= _JOBS_NAME_MAX_NO_AGENT + 4  # "… [N]" is 5 chars
+
+
+class TestComputeLeaderBoard:
+    """_compute_leader_board selects top jobs by runs, cost, tokens, and pace."""
+
+    def test_empty_jobs_returns_empty(self):
+        result = _compute_leader_board([], {"total_runs": 0}, {}, 30)
+        assert result == []
+
+    def test_runs_cost_tokens(self):
+        jobs = [
+            {"job_id": "job_a", "runs": 10, "total_cost": 5.0, "total_tokens": 1000, "job_mode": "agent"},
+            {"job_id": "job_b", "runs": 5, "total_cost": 10.0, "total_tokens": 500, "job_mode": "agent"},
+            {"job_id": "job_c", "runs": 20, "total_cost": 2.0, "total_tokens": 2000, "job_mode": "agent"},
+        ]
+        summary = {"total_runs": 35, "total_estimated_cost": 17.0, "total_tokens": 3500}
+        names = {"job_a": "Alpha", "job_b": "Beta", "job_c": "Gamma"}
+        result = _compute_leader_board(jobs, summary, names, 30)
+        categories = [r["category"] for r in result]
+        assert "Top Runs" in categories
+        assert "Top Cost" in categories
+        assert "Top Tokens" in categories
+        # job_c has most runs and most tokens; job_b has most cost
+        top_runs = next(r for r in result if r["category"] == "Top Runs")
+        assert top_runs["job_id"] == "job_c"
+        assert top_runs["share"] == "57.1%"
+        top_cost = next(r for r in result if r["category"] == "Top Cost")
+        assert top_cost["job_id"] == "job_b"
+        assert top_cost["share"] == "58.8%"
+
+    def test_no_pace_when_no_schedule(self):
+        """If no jobs have schedule definitions, Top Pace is omitted."""
+        jobs = [
+            {"job_id": "job_a", "runs": 10, "total_cost": 5.0, "total_tokens": 1000, "job_mode": "agent"},
+        ]
+        summary = {"total_runs": 10, "total_estimated_cost": 5.0, "total_tokens": 1000}
+        result = _compute_leader_board(jobs, summary, {}, 30)
+        categories = [r["category"] for r in result]
+        assert "Top Pace" not in categories
+
+
 class TestMainIntegration:
     """main() end-to-end with temporary databases."""
 
@@ -358,6 +429,73 @@ class TestMainIntegration:
         captured = capsys.readouterr()
         assert result == 0
         assert "Runs:" in captured.out
+
+    def test_summary_with_data_leader_board(self, fact_db, capsys):
+        """Summary command includes leader board when jobs exist."""
+        conn = sqlite3.connect(str(fact_db))
+        cur = conn.cursor()
+        now = datetime(2026, 5, 15, 12, 0, 0).timestamp()
+        # Insert two jobs with different stats
+        cur.execute(
+            "INSERT INTO cron_runs (session_id, job_id, run_time, estimated_cost_usd, "
+            "input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, "
+            "duration_seconds, model, success) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            ("s1", "job_alpha", now - 86400, 5.0, 1000, 100, 0, 0, 100, "model-a", 1),
+        )
+        cur.execute(
+            "INSERT INTO cron_runs (session_id, job_id, run_time, estimated_cost_usd, "
+            "input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, "
+            "duration_seconds, model, success) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            ("s2", "job_beta", now - 172800, 2.0, 500, 50, 0, 0, 50, "model-b", 1),
+        )
+        cur.execute(
+            "INSERT INTO cron_runs (session_id, job_id, run_time, estimated_cost_usd, "
+            "input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, "
+            "duration_seconds, model, success) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            ("s3", "job_alpha", now - 259200, 3.0, 800, 80, 0, 0, 80, "model-a", 1),
+        )
+        conn.commit()
+        conn.close()
+
+        result = main(["--db", str(fact_db), "summary", "--days", "7"])
+        captured = capsys.readouterr()
+        assert result == 0
+        assert "🏆 Leader Board" in captured.out
+        assert "Top Runs" in captured.out
+        assert "Top Cost" in captured.out
+        assert "Top Tokens" in captured.out
+
+    def test_summary_leader_board_json(self, fact_db, capsys):
+        """Summary JSON includes leader_board array with correct structure."""
+        conn = sqlite3.connect(str(fact_db))
+        cur = conn.cursor()
+        now = datetime(2026, 5, 15, 12, 0, 0).timestamp()
+        cur.execute(
+            "INSERT INTO cron_runs (session_id, job_id, run_time, estimated_cost_usd, "
+            "input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, "
+            "duration_seconds, model, success) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            ("s1", "job_a", now - 86400, 5.0, 1000, 100, 0, 0, 100, "model-a", 1),
+        )
+        conn.commit()
+        conn.close()
+
+        result = main(["--db", str(fact_db), "summary", "--days", "7", "--json"])
+        captured = capsys.readouterr()
+        assert result == 0
+        data = json.loads(captured.out)
+        lb = data["data"]["leader_board"]
+        assert isinstance(lb, list)
+        assert len(lb) >= 3  # runs, cost, tokens
+        categories = {item["category"] for item in lb}
+        assert "Top Runs" in categories
+        assert "Top Cost" in categories
+        assert "Top Tokens" in categories
+        # Each entry has the expected keys
+        for item in lb:
+            assert "job_id" in item
+            assert "job_name" in item
+            assert "value" in item
+            assert "share" in item
 
     def test_models_empty_db(self, fact_db, capsys):
         result = main(["--db", str(fact_db), "models"])
@@ -422,3 +560,7 @@ class TestLayoutConstants:
     def test_summary_model_layout(self):
         expected = sum(w for _, w in SUMMARY_MODEL_LAYOUT) + len(SUMMARY_MODEL_LAYOUT) - 1
         assert expected == SUMMARY_MODEL_SEP_WIDTH
+
+    def test_leader_board_layout(self):
+        expected = sum(w for _, w in LEADER_BOARD_LAYOUT) + len(LEADER_BOARD_LAYOUT) - 1
+        assert expected == LEADER_BOARD_SEP_WIDTH

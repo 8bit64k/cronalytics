@@ -1,6 +1,10 @@
 # Installation Guide
 
-## Method 1: Dashboard Plugins Tab (Recommended)
+Cronalytics installs as a **dashboard plugin** (primary) with an optional **pip install** for global CLI access and **skill symlink** for agent diagnostics.
+
+---
+
+## Dashboard Plugin (Recommended)
 
 Open the Hermes dashboard and navigate to the **Plugins** tab. Find the **Install from GitHub / Git URL** section and enter either:
 
@@ -11,9 +15,11 @@ Check **Enable after install**, then click **Install**.
 
 Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS.
 
-The **Cronalytics** tab will appear in the sidebar.
+The **Cronalytics** tab appears in the sidebar. The CLI is available immediately at `~/.hermes/plugins/cronalytics/cli.py`.
 
-## Method 2: Manual Copy (CLI Fallback)
+---
+
+## Manual Copy
 
 If you prefer to install from a local clone:
 
@@ -29,6 +35,49 @@ hermes gateway restart
 ```
 
 Hard-refresh your browser to pick up the new frontend bundle.
+
+---
+
+## CLI via pip (Optional)
+
+For global terminal access outside the Hermes environment:
+
+```bash
+pip install cronalytics
+```
+
+This installs the `cronalytics` command, which auto-detects your plugin's fact database and works from any directory:
+
+```bash
+cronalytics summary --days 14
+cronalytics jobs --json | jq '.data[] | select(.pace > 1.0)'
+```
+
+**No additional setup needed** if you already installed the dashboard plugin — the pip CLI discovers `~/.hermes/plugins/cronalytics/facts.db` automatically.
+
+---
+
+## Skill Setup (Optional)
+
+Cronalytics includes a built-in diagnostic skill at `skills/devops/cronalytics/SKILL.md`. To enable it for your Hermes agent:
+
+```bash
+# Create the skill directory if it doesn't exist
+mkdir -p ~/.hermes/skills/devops
+
+# Symlink the skill from the plugin directory
+ln -s ~/.hermes/plugins/cronalytics/skills/devops/cronalytics \
+  ~/.hermes/skills/devops/cronalytics
+```
+
+Verify it loads:
+
+```bash
+hermes skills list | grep cronalytics
+# → cronalytics ✓
+```
+
+Once enabled, the agent automatically uses the skill when you ask about cron jobs. No manual invocation required — the skill's trigger conditions match natural language queries like "check my cron jobs" or "what's burning tokens?".
 
 ## Structure After Install
 
@@ -102,7 +151,8 @@ After install:
 
 ---
 
-*Version: 1.0.0*
+*Version: 1.1.0*  
+*Last updated: 2026-05-16*
 
 ---
 

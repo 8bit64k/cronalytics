@@ -102,12 +102,19 @@ RUNS_LAYOUT: list[tuple[str, int]] = [
     ("M", 22),
     ("✓", 2),
 ]
+LEADER_BOARD_LAYOUT: list[tuple[str, int]] = [
+    ("", 14),   # Category (e.g., "Top Runs")
+    ("", 18),   # Job name
+    ("", 10),   # Value
+    ("", 8),    # Share
+]
 
 # Pre-computed separator line widths
 JOBS_SEP_WIDTH = sum(w for _, w in JOBS_LAYOUT) + len(JOBS_LAYOUT) - 1
 SUMMARY_MODEL_SEP_WIDTH = sum(w for _, w in SUMMARY_MODEL_LAYOUT) + len(SUMMARY_MODEL_LAYOUT) - 1
 MODELS_SEP_WIDTH = sum(w for _, w in MODELS_LAYOUT) + len(MODELS_LAYOUT) - 1
 RUNS_SEP_WIDTH = sum(w for _, w in RUNS_LAYOUT) + len(RUNS_LAYOUT) - 1
+LEADER_BOARD_SEP_WIDTH = sum(w for _, w in LEADER_BOARD_LAYOUT) + len(LEADER_BOARD_LAYOUT) - 1
 
 # Job-name truncation limits
 _JOBS_NAME_MAX_AGENT = 14
@@ -468,6 +475,98 @@ def _fetch_health(db_path: Path) -> Any:
     return query_health(db_path)
 
 
+def _job_label(job_id: str, job_names: dict[str, str], mode: str | None) -> str:
+    """Build a display label for a job with truncation and [N] badge."""
+    label = job_names.get(job_id, "") or job_id
+    max_base = _JOBS_NAME_MAX_NO_AGENT if mode == "no_agent" else _JOBS_NAME_MAX_AGENT
+    if len(label) > max_base:
+        label = label[: max_base - 1] + "…"
+    if mode == "no_agent":
+        label += " [N]"
+    return label
+
+
+def _compute_leader_board(
+    jobs: list[Any],
+    summary_data: dict[str, Any],
+    job_names: dict[str, str],
+    days_filter: int,
+) -> list[dict[str, Any]]:
+    """Compute the top job for each leader board category."""
+    if not jobs:
+        return []
+
+    total_runs = summary_data.get("total_runs", 0)
+    total_cost = summary_data.get("total_estimated_cost") or 0
+    total_tokens = summary_data.get("total_tokens", 0)
+
+    def _get_pace(job: Any) -> float | None:
+        proj = get_job_projections(
+            job["job_id"],
+            avg_cost=job.get("avg_cost"),
+            total_cost=job["total_cost"],
+            runs=job["runs"],
+            first_run=job.get("first_run"),
+            last_run=job.get("last_run"),
+            days_filter=days_filter,
+            jobs_json_path=_JOBS_PATH,
+        )
+        return proj.get("pace")
+
+    top_runs_job = max(jobs, key=lambda j: j["runs"])
+    top_cost_job = max(jobs, key=lambda j: j.get("total_cost") or 0)
+    top_tokens_job = max(jobs, key=lambda j: j.get("total_tokens", 0))
+
+    jobs_with_pace = [(j, _get_pace(j)) for j in jobs if _get_pace(j) is not None]
+    if jobs_with_pace:
+        top_pace_job, top_pace_val = max(jobs_with_pace, key=lambda x: x[1] or 0)
+    else:
+        top_pace_job = None
+        top_pace_val = None
+
+    leaders: list[dict[str, Any]] = []
+
+    if total_runs > 0:
+        leaders.append({
+            "category": "Top Runs",
+            "job_id": top_runs_job["job_id"],
+            "job_name": _job_label(top_runs_job["job_id"], job_names, top_runs_job.get("job_mode")),
+            "value": f"{top_runs_job['runs']:,}",
+            "share": f"{top_runs_job['runs'] / total_runs * 100:.1f}%",
+        })
+
+    if total_cost > 0:
+        cost = top_cost_job.get("total_cost") or 0
+        leaders.append({
+            "category": "Top Cost",
+            "job_id": top_cost_job["job_id"],
+            "job_name": _job_label(top_cost_job["job_id"], job_names, top_cost_job.get("job_mode")),
+            "value": _fmt_cost(cost),
+            "share": f"{cost / total_cost * 100:.1f}%",
+        })
+
+    if total_tokens > 0:
+        tokens = top_tokens_job.get("total_tokens", 0)
+        leaders.append({
+            "category": "Top Tokens",
+            "job_id": top_tokens_job["job_id"],
+            "job_name": _job_label(top_tokens_job["job_id"], job_names, top_tokens_job.get("job_mode")),
+            "value": _fmt_tokens(tokens),
+            "share": f"{tokens / total_tokens * 100:.1f}%",
+        })
+
+    if top_pace_job and top_pace_val is not None:
+        leaders.append({
+            "category": "Top Pace",
+            "job_id": top_pace_job["job_id"],
+            "job_name": _job_label(top_pace_job["job_id"], job_names, top_pace_job.get("job_mode")),
+            "value": f"{top_pace_val:.2f}×",
+            "share": "—",
+        })
+
+    return leaders
+
+
 # =============================================================================
 # RENDERING (separated from data fetching; accepts Any because facts.py is untyped)
 # =============================================================================
@@ -481,6 +580,8 @@ def _render_summary(data: Any, args: argparse.Namespace, db_path: Path) -> list[
 
     lines: list[str] = [""] + _banner("📊 Cronalytics Summary", subtitle, inner_width=_W_STD) + [""]
 
+    lines.append("  📋 Summary Board")
+    lines.append(_build_separator(_W_STD))
     lines.append(f"  Runs:              {data['total_runs']:,}")
     lines.append(f"  Estimated cost:    {_fmt_cost(data['total_estimated_cost'])}")
     lines.append(f"  Actual cost:       {_fmt_cost(data['total_actual_cost'])}")
@@ -499,6 +600,16 @@ def _render_summary(data: Any, args: argparse.Namespace, db_path: Path) -> list[
             f"{_fmt_cost(prev.get('cost'))}"  # type: ignore[arg-type]
         )
         lines.append(f"  Trend:             {data['trend']}")
+        lines.append("")
+
+    leader_board = data.get("leader_board")
+    if leader_board:
+        lines.append("  🏆 Leader Board")
+        lines.append(_build_separator(LEADER_BOARD_SEP_WIDTH))
+        for leader in leader_board:
+            lines.append(
+                f"  {leader['category']:<14} {leader['job_name']:<18} {leader['value']:>10} {leader['share']:>8}"
+            )
         lines.append("")
 
     by_model = data.get("cost_by_model", [])
@@ -536,12 +647,7 @@ def _render_jobs(
 
     for j in jobs:
         job_id = j["job_id"]
-        job_label = job_names.get(job_id, "") or job_id
-        max_base = _JOBS_NAME_MAX_NO_AGENT if j.get("job_mode") == "no_agent" else _JOBS_NAME_MAX_AGENT
-        if len(job_label) > max_base:
-            job_label = job_label[: max_base - 1] + "…"
-        if j.get("job_mode") == "no_agent":
-            job_label += " [N]"
+        job_label = _job_label(job_id, job_names, j.get("job_mode"))
         cost = _fmt_cost(j["total_cost"])
         tokens = _fmt_tokens(j["total_tokens"])
         dur = j.get("avg_duration")
@@ -679,6 +785,10 @@ def _render_health(data: Any) -> list[str]:
 
 def _cmd_summary(args: argparse.Namespace, db_path: Path) -> int:
     data = _fetch_summary(db_path, args)
+    jobs = _fetch_jobs(db_path, args)
+    job_names = _load_job_names()
+    leader_board = _compute_leader_board(jobs, data, job_names, args.days)
+    data["leader_board"] = leader_board
     if args.json:
         print(json.dumps(_json_envelope(data, args, db_path), indent=2, default=str))
         return 0
@@ -689,6 +799,32 @@ def _cmd_summary(args: argparse.Namespace, db_path: Path) -> int:
 def _cmd_jobs(args: argparse.Namespace, db_path: Path) -> int:
     jobs = _fetch_jobs(db_path, args)
     if args.json:
+        # Augment each job with schedule projections and pace (mirrors rendered path)
+        for j in jobs:
+            proj = get_job_projections(
+                j["job_id"],
+                avg_cost=j.get("avg_cost"),
+                total_cost=j["total_cost"],
+                runs=j["runs"],
+                first_run=j.get("first_run"),
+                last_run=j.get("last_run"),
+                days_filter=args.days,
+                jobs_json_path=_JOBS_PATH,
+            )
+            j["schedule_display"] = proj.get("schedule_display")
+            j["next_run_at"] = proj.get("next_run_at")
+            j["scheduled_runs_30d"] = proj.get("scheduled_runs_30d")
+            j["scheduled_runs_90d"] = proj.get("scheduled_runs_90d")
+            j["scheduled_runs_1yr"] = proj.get("scheduled_runs_1yr")
+            j["projected_cost_30d"] = proj.get("projected_cost_30d")
+            j["projected_cost_90d"] = proj.get("projected_cost_90d")
+            j["projected_cost_1yr"] = proj.get("projected_cost_1yr")
+            j["trend_projected_cost_30d"] = proj.get("trend_projected_cost_30d")
+            j["trend_projected_cost_90d"] = proj.get("trend_projected_cost_90d")
+            j["trend_projected_cost_1yr"] = proj.get("trend_projected_cost_1yr")
+            j["pace"] = proj.get("pace")
+            j["drift_ratio"] = proj.get("drift_ratio")
+            j["observed_window_days"] = proj.get("observed_window_days")
         print(json.dumps(_json_envelope(jobs, args, db_path), indent=2, default=str))
         return 0
     if not jobs:

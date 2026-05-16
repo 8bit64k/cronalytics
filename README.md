@@ -9,11 +9,45 @@
 Observe. Measure. Optimize.
 
 
-Cronalytics is a Hermes Agent plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them in the Hermes dashboard via a dedicated `/cronalytics` tab.
+Cronalytics is a Hermes Agent plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them through **three interfaces**:
+
+1. **Dashboard** — A dedicated `/cronalytics` tab inside `hermes dashboard` for visual exploration
+2. **CLI** — A standalone terminal interface (`cronalytics` or `python cli.py`) for programmatic access, `--json` output, and agent consumption
+3. **Agent Skill** — A built-in diagnostic skill that teaches Hermes agents how to analyze your cron jobs with confidence-graded anomaly detection
 
 > Turn hidden automation into visible spend.
 >
 > Built for **[Hermes Agent](https://github.com/nousresearch/hermes-agent)**, the autonomous agent framework by **[Nous Research](https://nousresearch.com)**.
+
+---
+
+## Three Ways to Use Cronalytics
+
+### Dashboard (for people)
+Visual exploration with cards, tables, charts, and modals. Best for human pattern recognition.
+
+### CLI (for agents)
+Terminal data dump with `--json` support. Best for scripts, agents, and programmatic analysis.
+
+```bash
+# Full report (chains all commands)
+cronalytics summary --days 14
+
+# Per-job economics with pace and projections
+cronalytics jobs --days 7 --json | jq '.data[] | select(.pace > 1.2)'
+
+# Drill into a specific job
+cronalytics runs --job 67541bf6e230 --days 30 --json
+```
+
+### Skill (for reasoning)
+Built-in diagnostic skill that guides agents through structured cron health checks. Ask your agent:
+
+> "Check my cron jobs for the last two weeks — flag anything that looks off."
+
+The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-references `jobs.json`, and grades every finding by confidence (HIGH / MEDIUM / LOW) with supporting evidence.
+
+> **"Dashboard for people, CLI for agents, skill for reasoning."**
 
 ---
 
@@ -29,7 +63,9 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
 - **Captures** every cron job run as it completes via the `on_session_end` hook
 - **Persists** cost, token counts, model, duration, and success state to a local fact database
 - **Backfills** historical data automatically on plugin load and on demand via reconciliation scanner
-- **Surfaces** a dashboard with:
+- **Surfaces** data through three interfaces:
+
+  **Dashboard** — visual exploration:
   - Summary cards (total runs, estimated cost, tokens, pace)
   - Leader board (top runs, top cost, top tokens, top pace)
   - Cost-by-model breakdown with proportional bars
@@ -41,15 +77,33 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
   - **Sync Now** button to trigger backfill on demand
   - Educational modals explaining Pace, Nominal, Trend, and cost math
 
+  **CLI** — terminal access:
+  - `summary` — headline aggregates + leader board + cost-by-model table
+  - `jobs` — per-job table with ID, runs, cost, tokens, pace, avg duration
+  - `runs --job <id>` — individual run history (time, duration, cost, tokens, model)
+  - `models` — per-model aggregate table
+  - `trends` — daily bar chart (ASCII) of cost + runs
+  - `health` — fact DB metadata, job count, last sync
+  - `all` — chains health → summary → jobs → models → trends
+  - All commands support `--days N`, `--outcome`, `--mode`, and `--json`
+  - Job name resolution from `~/.hermes/cron/jobs.json`
+
+  **Skill** — agent-guided diagnostics:
+  - Structured 3-step workflow: health → summary → jobs → per-run drill-down
+  - Confidence-graded anomaly detection (HIGH / MEDIUM / LOW)
+  - `jobs.json` cross-reference for temporal context and silent failure detection
+  - "Known Ways to Fool Yourself" guardrails prevent false positives
+  - Works in any terminal session or messaging channel
+
 ---
 
 ## Documentation Index
 
 ### User Documentation (`docs/`)
 
-- **docs/INSTALL.md** — Detailed installation guide
+- **docs/INSTALL.md** — Installation guide (dashboard plugin + pip CLI + skill setup)
 - **docs/UNINSTALL.md** — Clean removal instructions
-- **docs/USAGE.md** — Dashboard usage guide
+- **docs/USAGE.md** — Dashboard and CLI usage guide
 
 ### Developer Documentation (`dev/`)
 
@@ -77,7 +131,7 @@ Multi-profile cron support is on our roadmap.
 
 ## Installation
 
-### Dashboard Plugins Tab (Recommended)
+### Dashboard Plugin (Recommended)
 
 Open the Hermes dashboard, navigate to the **Plugins** tab, and use the **Install from GitHub / Git URL** field. Enter:
 
@@ -86,11 +140,22 @@ Open the Hermes dashboard, navigate to the **Plugins** tab, and use the **Instal
 
 Check **Enable after install**, then click **Install**.
 
-### After Install
-
 Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS.
 
-Open the **Cronalytics** tab in the dashboard sidebar.
+The **Cronalytics** tab appears in the sidebar. The CLI is available automatically at `~/.hermes/plugins/cronalytics/cli.py`.
+
+### CLI via pip
+
+```bash
+pip install cronalytics
+```
+
+This installs the `cronalytics` command globally, auto-detects your plugin's fact database, and works outside the Hermes environment:
+
+```bash
+cronalytics summary --days 14
+cronalytics jobs --json | jq '.data[] | {id: .job_id, cost: .total_cost}'
+```
 
 > **Reverse proxy users:** If you run the Hermes dashboard behind Caddy or Nginx, ensure `/api/*` routes are forwarded directly to the dashboard backend. A misconfigured proxy will return HTML instead of JSON for plugin API calls. See [`docs/INSTALL.md`](docs/INSTALL.md#reverse-proxy-setup) for a minimal Caddy example.
 >
@@ -121,7 +186,7 @@ If the dashboard shows "No cron jobs captured," click **Sync Now**.
 
 ```yaml
 name: cronalytics
-version: 1.0.0
+version: 1.1.0
 description: Cost and operational observability for Hermes cron jobs
 provides_hooks:
   - on_session_end
@@ -242,9 +307,14 @@ Enqueue session_id ──▶ Deferred worker retries
     ▼
 Query state.db ──▶ Insert into facts.db
     │
-    ▼
-Dashboard queries facts.db via plugin API
+    ├──────▶ Dashboard queries facts.db via plugin API
+    │
+    ├──────▶ CLI queries facts.db directly
+    │
+    └──────▶ Skill guides agent to query via CLI
 ```
+
+> **Three-layer diagnostic model:** The CLI is a dumb data pipe (aggregates, never interprets). The skill is the interpretation layer (heuristics, guardrails, confidence grading). The agent is the fuzzy reasoner (applies the skill, improvises within guidelines). The human is the final authority. Together they produce better decisions than any single layer alone.
 
 ---
 
@@ -289,28 +359,28 @@ Key fields captured per run:
 
 ```
 cronalytics/
-├── plugin.yaml              # Plugin manifest (hooks, version)
-├── __init__.py              # Register hook + bootstrap scanner
-├── config.py                # Paths + defaults
-├── facts.py                 # SQLite fact DB: schema, insert, queries
-├── ingester.py              # Deferred ingestion worker + crash recovery
-├── scanner.py               # Reconciliation scanner + watermark I/O
-├── schedule.py              # Cron parsing + projection math
-├── cli.py                   # Standalone terminal interface
-├── logger.py                # Shared logger
-├── checkpoint.py            # Session state persistence
-├── dashboard/
-│   ├── manifest.json        # Dashboard plugin manifest
-│   ├── plugin_api.py        # FastAPI router
-│   ├── build.js             # esbuild bundler script
-│   ├── src/                 # Modular frontend source
-│   │   ├── index.js         # Entry point
-│   │   ├── lib/             # SDK, formatters, icons, validators
-│   │   ├── hooks/           # useApi, useModal
-│   │   └── components/      # 13 React components
-│   └── dist/
-│       └── index.js         # Bundled IIFE frontend
-└── tests/                   # 83 pytest tests
+├─── plugin.yaml              # Plugin manifest (hooks, version)
+├─── __init__.py              # Register hook + bootstrap scanner
+├─── config.py                # Paths + defaults
+├─── facts.py                 # SQLite fact DB: schema, insert, queries
+├─── ingester.py              # Deferred ingestion worker + crash recovery
+├─── scanner.py               # Reconciliation scanner + watermark I/O
+├─── schedule.py              # Cron parsing + projection math
+├─── cli.py                   # Standalone terminal interface (dashboard + pip)
+├─── logger.py                # Shared logger
+├─── checkpoint.py            # Session state persistence
+├─── skills/
+│   └─── devops/
+│       └─── cronalytics/
+│           └─── SKILL.md     # Built-in diagnostic skill for agents
+├─── dashboard/
+│   ├─── manifest.json        # Slot registration + routes
+│   ├─── plugin_api.py        # REST API mounted at /api/plugins/cronalytics/
+│   ├─── build.js             # esbuild bundler script
+│   ├─── src/                 # Modular frontend source
+│   └─── dist/
+│       └─── index.js         # Bundled React frontend
+└─── tests/                   # Unit tests (run with pytest)
 ```
 
 ---
@@ -357,6 +427,12 @@ MIT — see [`LICENSE`](LICENSE) for full text.
 ---
 
 ## Changelog
+
+### v1.1.0 (2026-05-19)
+
+- **Standalone CLI** — `cronalytics` command with 7 subcommands: `summary`, `jobs`, `runs`, `models`, `trends`, `health`, `all`. Full `--json` output, `--days`, `--outcome`, `--mode` filters on every data command. Leader Board spotlight in `summary`. Job name resolution from `jobs.json`. Dual-path: `python cli.py` (plugin directory) or `pip install cronalytics` (global).
+- **Agent Diagnostic Skill** — Built-in `cronalytics` skill with structured 3-step workflow (health → summary → jobs → per-run drill-down). Confidence-graded anomaly detection (HIGH / MEDIUM / LOW) with supporting evidence requirements. "Known Ways to Fool Yourself" guardrails (age-gating, script job awareness, variance checks). Cross-references `jobs.json` for scheduling context and silent failure detection.
+- **Test suite: 149 tests** (83 original + 66 CLI tests) — all passing, `ruff` + `mypy` clean.
 
 ### v1.0.1 (2026-05-13)
 

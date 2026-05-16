@@ -347,7 +347,61 @@ run_job() ──▶ run_conversation() ──▶ on_session_end(platform="cron")
 
 ---
 
-## 8. File Layout
+## 8. Standalone CLI
+
+Cronalytics ships a standalone terminal interface (`cli.py`) that queries `facts.db` directly and renders monospace-aligned ASCII tables or `--json` envelopes. It is designed for **scripts, agents, and programmatic consumption** — not human visual exploration.
+
+### Design Philosophy: Dashboard for People, CLI for Agents
+
+The CLI is a **dumb data pipe**. It aggregates, formats, and emits. It never interprets.
+
+| Layer | Role | Consumer |
+|-------|------|----------|
+| **CLI** | Data pipe | Scripts, agents, `jq`, Python |
+| **Skill** | Interpretation framework | Hermes agent (fuzzy reasoning) |
+| **Agent** | Force multiplier | Human operator |
+| **Human** | Final authority | Decision maker |
+
+### Architecture
+
+```
+User / Agent
+    │
+    ▼
++------------+    +------------+    +------------+
+│   Skill    │ → │    CLI     │ → │  facts.db   │
+│ (heuristics,│    │ (queries,  │    │ (append-   │
+│ guardrails,│    │  renders)  │    │  only)     │
+│ confidence)│    +------------+    +------------+
++------------+         ↑
+                       │
+                  state.db
+                  (cron sessions)
+```
+
+### CLI Design Decisions
+
+1. **Single file** (`cli.py`, ~1000 lines) — self-contained, no external deps beyond Python stdlib + croniter. Works whether installed via plugin tab or `pip install`.
+2. **Dual-path distribution** — `python ~/.hermes/plugins/cronalytics/cli.py` (plugin directory) or `cronalytics` (pip global).
+3. **Every data command supports `--json`** — structured envelopes with `period`, `start_date`, `end_date`, `outcome`, `mode`, and `data`. Pipe-friendly.
+4. **Job name resolution** — reads `~/.hermes/cron/jobs.json` to map `job_id` → human-readable name, applies truncation + `[N]` badge.
+5. **Projection computation** — calls `schedule.get_job_projections()` per-job to compute `pace`, `drift_ratio`, `scheduled_runs_*`, etc. JSON path mirrors rendered path exactly.
+6. **Leader Board** — `summary` command selects top job per category (runs, cost, tokens, pace) and computes `% of total` share, matching the dashboard's spotlight cards.
+7. **ASCII art banners** — Unicode box-drawing with emoji-aware width calculation (`_visual_len()`). Consistent with `hermes insights` visual style.
+
+### Filter Grammar
+
+Every data command shares the same filter surface:
+
+- `--days N` — window in days (`0` = all time)
+- `--outcome both|success|failure` — outcome filter
+- `--mode all|agent|no_agent` — job mode filter
+
+This means `cronalytics jobs --days 7 --json` and `cronalytics models --days 7 --json` apply identical filters. An agent reading the skill learns one grammar and applies it everywhere.
+
+---
+
+## 9. File Layout
 
 ```
 cronalytics/
@@ -358,9 +412,13 @@ cronalytics/
 ├── ingester.py              # Hook handler, pending.jsonl, background worker
 ├── scanner.py               # Reconciliation scanner + watermark I/O
 ├── schedule.py              # Cron parsing, projection math (croniter)
-├── cli.py                   # Standalone terminal interface
+├── cli.py                   # Standalone terminal interface (dashboard + pip)
 ├── logger.py                # Simple prefixed logger
 ├── checkpoint.py            # Session state serialization for multi-session dev
+├── skills/
+│   └── devops/
+│       └── cronalytics/
+│           └── SKILL.md     # Built-in diagnostic skill for agents
 ├── dashboard/
 │   ├── manifest.json        # Dashboard plugin manifest
 │   ├── plugin_api.py        # FastAPI router (importlib-safe)
@@ -368,7 +426,7 @@ cronalytics/
 │   ├── src/                 # Modular frontend source (13 components)
 │   └── dist/
 │       └── index.js         # Frontend bundle (React + HERMES_PLUGIN_SDK)
-└── tests/                   # 83 pytest tests
+└── tests/                   # 149 pytest tests (83 original + 66 CLI)
 ```
 
 ---
@@ -381,5 +439,5 @@ See what your cron jobs are costing before background automation becomes backgro
 
 ---
 
-*Version: 1.0.0*  
-*Last updated: 2026-05-11*
+*Version: 1.1.0*  
+*Last updated: 2026-05-16*

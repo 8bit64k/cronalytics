@@ -187,7 +187,7 @@ The `mode` parameter accepts `all`, `agent`, `no_agent`.
   "label": "Cronalytics",
   "description": "Cost and operational observability for Hermes cron jobs",
   "icon": "Clock",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "tab": {"path": "/cronalytics", "position": "end", "hidden": false},
   "slots": ["pre-main", "post-main"],
   "entry": "dist/index.js",
@@ -295,7 +295,7 @@ python -m cronalytics.cli <command> [--days N]
 
 | Command | Output |
 |---------|--------|
-| `summary` | Headline runs, cost, tokens, trend arrow, cost-by-model table |
+| `summary` | Headline runs, cost, tokens, trend arrow, cost-by-model table, **Leader Board** (top runs, cost, tokens, pace) |
 | `jobs` | Per-job table with ID, runs, cost, tokens, pace |
 | `runs --job ID` | Individual run history (time, duration, cost, tokens, model) |
 | `models` | Per-model aggregate table |
@@ -432,5 +432,5 @@ These are **intentional boundaries or acknowledged gaps**, not bugs.
 
 ---
 
-*Version: 1.0.0*  
-*Last updated: 2026-05-11*
+*Version: 1.1.0*  
+*Last updated: 2026-05-16*

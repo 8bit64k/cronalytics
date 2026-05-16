@@ -47,4 +47,5 @@ cp ~/cronalytics-backup-YYYYMMDD.db ~/.hermes/plugins/cronalytics/facts.db
 
 ---
 
-*Version: 1.0.0*
+*Version: 1.1.0*  
+*Last updated: 2026-05-16*
