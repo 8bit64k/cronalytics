@@ -64,6 +64,8 @@ Items to be delivered on the `vNext` branch and merged when ready.
 | V1 | **Leader Board "% of total"** | ✅ Merged to vNext | Top Runs, Top Cost, Top Tokens cards show leader's share of the aggregate (e.g. "83% of all runs"). Replaces the empty `3rem` spacer. |
 | V2 | **Summary Board token trend** | Pending | Deferred until a non-redundant metric is identified. Raw token count correlates with run count. Candidate: tokens-per-run trend. Needs Tokens card space analysis first. |
 | V3 | **Docs audience separation** | ✅ Merged | Move dev-only docs to `dev/`; keep user docs in `docs/`. Separate concerns. |
+| V4 | **CLI cross-reference to `hermes insights`** | Deferred | Add tip at end of `cronalytics all` output pointing users to `hermes insights --source cron` for session-level detail (tools, models, skills). Deferred until Cronalytics has established primary muscle memory among users. Framing must position insights as diagnostic zoom, not replacement. |
+| V5 | **Dashboard "Export JSON" button** | **Rejected** | *Dashboard for people, CLI for agents.* If users want programmatic data, they have `cronalytics <subcommand> --json` with exact matching filters. Dashboard should remain visual-first; adding JSON export blurs tool identity and invites feature-creep ("why doesn't it export runs too?"). CLI is the canonical machine-readable interface. |
 
 ---
 
