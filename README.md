@@ -133,33 +133,47 @@ Multi-profile cron support is on our roadmap.
 
 ### Dashboard Plugin (Recommended)
 
-Open the Hermes dashboard, navigate to the **Plugins** tab, and use the **Install from GitHub / Git URL** field. Enter:
+```bash
+hermes plugins install 8bit64k/cronalytics --enable
+```
 
-- `owner/repo` shorthand (e.g. `8bit64k/cronalytics`)
-- Or a full `https://` or `git@` clone URL
+Or open the Hermes dashboard, go to the **Plugins** tab, enter `8bit64k/cronalytics`, check **Enable after install**, and click **Install**.
 
-Check **Enable after install**, then click **Install**.
+The **Cronalytics** tab appears in the sidebar. The CLI and skill are included automatically — no separate install needed. The CLI is available at `~/.hermes/plugins/cronalytics/cli.py`.
 
-Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS.
+### CLI (Optional — Advanced)
 
-The **Cronalytics** tab appears in the sidebar. The CLI is available automatically at `~/.hermes/plugins/cronalytics/cli.py`.
-
-### CLI via pip
+The CLI comes with the plugin. If you want a global `cronalytics` command usable from any directory:
 
 ```bash
 pip install cronalytics
 ```
 
-This installs the `cronalytics` command globally, auto-detects your plugin's fact database, and works outside the Hermes environment:
+Then:
 
 ```bash
 cronalytics summary --days 14
 cronalytics jobs --json | jq '.data[] | {id: .job_id, cost: .total_cost}'
 ```
 
-> **Reverse proxy users:** If you run the Hermes dashboard behind Caddy or Nginx, ensure `/api/*` routes are forwarded directly to the dashboard backend. A misconfigured proxy will return HTML instead of JSON for plugin API calls. See [`docs/INSTALL.md`](docs/INSTALL.md#reverse-proxy-setup) for a minimal Caddy example.
->
-> For development setup, see [`dev/DEV_SETUP.md`](dev/DEV_SETUP.md).
+Or skip pip and add a shell alias:
+
+```bash
+# In ~/.bashrc or ~/.zshrc
+alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'
+```
+
+### Skill (Optional)
+
+The diagnostic skill is bundled at `skills/devops/cronalytics/SKILL.md`. Enable it:
+
+```bash
+hermes skills install \
+  https://raw.githubusercontent.com/8bit64k/cronalytics/main/skills/devops/cronalytics/SKILL.md \
+  --category devops --name cronalytics --yes
+```
+
+Once enabled, the agent automatically uses it when you ask about cron jobs.
 
 ---
 

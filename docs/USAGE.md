@@ -276,13 +276,23 @@ If you installed via the dashboard plugin tab, the CLI is already available:
 python ~/.hermes/plugins/cronalytics/cli.py summary --days 14
 ```
 
-For global access, install via pip:
+For global access from any directory, install via pip:
 
 ```bash
 pip install cronalytics
 ```
 
-This creates the `cronalytics` command, auto-detects your fact database, and works outside the Hermes environment.
+Or use the bundled CLI that comes with the plugin:
+
+```bash
+python ~/.hermes/plugins/cronalytics/cli.py summary --days 14
+```
+
+Or add a shell alias to your `~/.bashrc` or `~/.zshrc`:
+
+```bash
+alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'
+```
 
 ### Commands
 

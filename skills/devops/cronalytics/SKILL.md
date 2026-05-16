@@ -37,29 +37,34 @@ The dashboard exists as a fallback for visual exploration, but the CLI is the pr
 
 ### Installation
 
-Cronalytics installs as a Hermes plugin. The CLI works two ways depending on how the package was installed:
+Cronalytics installs as a Hermes plugin. The CLI works three ways depending on preference:
 
-**Primary install method — plugin path (dashboard install):**
+**Primary — plugin path (default, already installed):**
 
-This is the path most users take. Cronalytics is symlinked into `~/.hermes/plugins/cronalytics/` as a dashboard plugin. The CLI entry point is the plugin directory itself:
+When Cronalytics is installed as a dashboard plugin, the CLI entry point is already on disk:
 
 ```bash
-cd ~/.hermes/plugins/cronalytics
-python cli.py --help
+python ~/.hermes/plugins/cronalytics/cli.py --help
 ```
 
-**Secondary install method — pip install (advanced):**
+Run from any directory. The CLI auto-detects its own fact DB (`~/.hermes/plugins/cronalytics/facts.db`).
 
-For standalone CLI access outside the Hermes gateway context, or for programmatic consumption by other agents/scripts:
+**Secondary — pip install (advanced):**
+
+For a global `cronalytics` command from any directory, without typing the full path:
 
 ```bash
-pip install cronalytics          # from PyPI
-# or
-pip install -e .                 # editable install from source
+pip install cronalytics       # from PyPI
 cronalytics --help
 ```
 
-Both paths share the same auto-detection logic for the fact DB. No `--db` flag is required if the database exists in the standard plugin location (`~/.hermes/plugins/cronalytics/facts.db`).
+**Tertiary — shell alias:**
+
+If you don't use pip, add an alias in `~/.bashrc` or `~/.zshrc`:
+
+```bash
+alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'
+```
 
 ### Subcommands
 

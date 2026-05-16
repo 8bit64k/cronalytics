@@ -1,6 +1,6 @@
 """Cronalytics CLI — standalone terminal data dump.
 
-Usage (dashboard plugin install):
+Usage (dashboard plugin install — primary):
     python ~/.hermes/plugins/cronalytics/cli.py [--days N] [--outcome both|success|failure] [--mode all|agent|no_agent]
     python ~/.hermes/plugins/cronalytics/cli.py summary [--days N] [--outcome ...] [--mode ...] [--json]
     python ~/.hermes/plugins/cronalytics/cli.py jobs    [--days N] [--outcome ...] [--mode ...] [--json]
@@ -10,18 +10,15 @@ Usage (dashboard plugin install):
     python ~/.hermes/plugins/cronalytics/cli.py all   [--days N] [--outcome ...] [--mode ...]
     python ~/.hermes/plugins/cronalytics/cli.py health [--json]
 
-Usage (pip install):
+Usage (pip install — secondary):
     pip install cronalytics
     cronalytics [--days N] [--outcome both|success|failure] [--mode all|agent|no_agent]
     cronalytics summary [--days N] [--outcome ...] [--mode ...] [--json]
     ... (same commands)
 
-JSON output (pipe-friendly):
-    cronalytics jobs --days 7 --json | jq '.data[] | select(.runs > 10) | .job_id'
-
-The CLI auto-detects your plugin's fact database. If installed via pip and the
-auto-detection fails, pass --db explicitly:
-    cronalytics summary --db ~/.hermes/plugins/cronalytics/facts.db --days 7
+Usage (shell alias — tertiary):
+    alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'
+    cronalytics summary --days 14
 """
 
 from __future__ import annotations
