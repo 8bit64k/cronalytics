@@ -930,7 +930,6 @@ def _add_standard_flags(parser: argparse.ArgumentParser) -> None:
 def _build_parser() -> argparse.ArgumentParser:
     """Construct and return the top-level ArgumentParser."""
     parser = argparse.ArgumentParser(
-        prog="python cli.py",
         description="Cronalytics CLI — dump cron run insights to the terminal",
     )
     parser.add_argument(
@@ -1001,6 +1000,13 @@ def _build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point. Parse arguments, resolve DB, dispatch command."""
     parser = _build_parser()
+
+    try:
+        import argcomplete
+        argcomplete.autocomplete(parser)
+    except ImportError:
+        pass
+
     args = parser.parse_args(argv)
 
     db_path = _resolve_db(args.db)
