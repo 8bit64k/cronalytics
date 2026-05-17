@@ -9,6 +9,9 @@ dependencies = [
     "fastapi>=0.100",
 ]
 
+[project.scripts]
+cronalytics = "cronalytics.cli:main"
+
 [dependency-groups]
 dev = [
     "httpx>=0.27",
@@ -16,6 +19,9 @@ dev = [
     "pytest>=9.0.3",
     "ruff>=0.15.12",
 ]
+
+[tool.setuptools]
+packages = ["cronalytics"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
