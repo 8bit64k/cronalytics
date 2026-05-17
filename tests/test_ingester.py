@@ -85,7 +85,7 @@ def temp_pending(tmp_path: Path):
 def mock_fact_db(tmp_path: Path):
     """Create a temp fact DB and patch FACT_DB."""
     db_path = tmp_path / "facts.db"
-    import facts  # noqa: E402 — conftest has this on sys.path
+    from cronalytics import facts  # noqa: E402 — conftest has this on sys.path
     facts.ensure_schema(db_path)
     orig = ingester.FACT_DB
     ingester.FACT_DB = db_path
