@@ -34,7 +34,7 @@ STATE_DB: Path = HERMES_HOME / "state.db"
 # Plugin-owned fact DB  —  stores derived cron run data.
 # Lives inside the plugin directory so it survives migrations,
 # but is .gitignored so the repo stays clean.
-PLUGIN_DIR: Path = Path(__file__).resolve().parent.parent
+PLUGIN_DIR: Path = HERMES_HOME / "plugins" / "cronalytics"
 FACT_DB: Path = PLUGIN_DIR / "facts.db"
 
 # Watermark file for reconciliation scanner (Phase 2).
