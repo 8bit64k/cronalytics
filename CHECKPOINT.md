@@ -4,7 +4,7 @@
 
 - **Repo:** `/home/nick/builds/cronalytics`
 - **Branch:** `feat/cli-terminal-access`
-- **Commit:** `515ab28` ("fix: use relative imports in root __init__.py for Hermes plugin loading")
+- **Commit:** `1e0a1a9` ("docs(skill): add shell completion setup instructions")
 - **Remote:** `8bit64k/cronalytics` (public GitHub)
 - **UAT repo:** `8bit64k/cronalytics-uat` (private), `master` at `81aced7` (pre-restructure baseline)
 - **Plugin install:** `~/.hermes/plugins/cronalytics` → symlink → `/home/nick/builds/cronalytics`
@@ -16,8 +16,10 @@
 
 1. **Dashboard plugin** (same as v1.0, moved into `cronalytics/` namespace)
 2. **CLI tool** (`cronalytics summary`, `cronalytics report`, `cronalytics jobs`, etc.)
-3. **Package restructure** — flat root modules moved into `cronalytics/` package directory
-3. **Version diagnostics** — `plugin.yaml` shows `version: 1.1.0 (a58b0e9)` for quick diagnostics
+3. **`cronalytics sync` subcommand** — backfill cron sessions from `state.db` → `facts.db`, with `--json` support
+4. **Package restructure** — flat root modules moved into `cronalytics/` package directory
+5. **Version diagnostics** — `plugin.yaml` shows `version: 1.1.0 (a58b0e9)` for quick diagnostics
+6. **Shell completion** — `argcomplete` for bash/zsh tab completion on all subcommands and flags
 4. **Auto-linked skill** — `_ensure_skill_linked()` in `register()` symlinks the entire `skills/devops/cronalytics/` directory into `~/.hermes/skills/` on every plugin load, so agents discover the CLI capability
 5. **Root `__init__.py` relative imports** — fixed absolute import bug that caused silent plugin load failures on every restart
 
