@@ -50,7 +50,11 @@ Hard-refresh your browser to pick up the new frontend bundle.
 
 The CLI is bundled with the plugin. You have it as soon as the plugin is installed.
 
-### Primary: Plugin Path (Default)
+### CLI Access
+
+The CLI is bundled with the plugin. You have it as soon as the plugin is installed.
+
+**Primary: Plugin Path (Default)**
 
 ```bash
 python ~/.hermes/plugins/cronalytics/cli.py summary --days 14
@@ -59,33 +63,15 @@ python ~/.hermes/plugins/cronalytics/cli.py jobs --json
 
 No `cd` needed — run from any directory. The CLI auto-detects its own fact DB.
 
-### Secondary: pip Install (Advanced)
+**Secondary: Shell Alias**
 
-For global terminal access outside the Hermes environment:
-
-```bash
-pip install cronalytics
-```
-
-This installs the `cronalytics` command, which auto-detects the plugin's fact database and works from any directory:
+If you want a shorter command, add an alias in `~/.bashrc` or `~/.zshrc`:
 
 ```bash
-cronalytics summary --days 14
-cronalytics jobs --json | jq '.data[] | select(.pace > 1.0)'
-```
-
-**No additional setup needed** if you already installed the dashboard plugin — the pip CLI discovers `~/.hermes/plugins/cronalytics/facts.db` automatically.
-
-### Tertiary: Shell Alias
-
-If you don't use pip — or just don't want to — add an alias:
-
-```bash
-# In ~/.bashrc or ~/.zshrc
 alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'
 ```
 
-Then use it as a command:
+Then use it anywhere:
 
 ```bash
 cronalytics summary --days 14

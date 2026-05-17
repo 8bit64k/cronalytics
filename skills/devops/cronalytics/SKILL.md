@@ -49,18 +49,9 @@ python ~/.hermes/plugins/cronalytics/cli.py --help
 
 Run from any directory. The CLI auto-detects its own fact DB (`~/.hermes/plugins/cronalytics/facts.db`).
 
-**Secondary — pip install (advanced):**
+**Secondary — shell alias:**
 
-For a global `cronalytics` command from any directory, without typing the full path:
-
-```bash
-pip install cronalytics       # from PyPI
-cronalytics --help
-```
-
-**Tertiary — shell alias:**
-
-If you don't use pip, add an alias in `~/.bashrc` or `~/.zshrc`:
+If you want a shorter command, add an alias in `~/.bashrc` or `~/.zshrc`:
 
 ```bash
 alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'

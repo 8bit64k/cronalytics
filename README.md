@@ -141,26 +141,20 @@ Or open the Hermes dashboard, go to the **Plugins** tab, enter `8bit64k/cronalyt
 
 The **Cronalytics** tab appears in the sidebar. The CLI and skill are included automatically — no separate install needed. The CLI is available at `~/.hermes/plugins/cronalytics/cli.py`.
 
-### CLI (Optional — Advanced)
+### CLI (Optional)
 
-The CLI comes with the plugin. If you want a global `cronalytics` command usable from any directory:
-
-```bash
-pip install cronalytics
-```
-
-Then:
-
-```bash
-cronalytics summary --days 14
-cronalytics jobs --json | jq '.data[] | {id: .job_id, cost: .total_cost}'
-```
-
-Or skip pip and add a shell alias:
+The CLI is bundled with the plugin at `~/.hermes/plugins/cronalytics/cli.py`. For a shorter command, add an alias to your shell profile:
 
 ```bash
 # In ~/.bashrc or ~/.zshrc
 alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'
+```
+
+Then use it from anywhere:
+
+```bash
+cronalytics summary --days 14
+cronalytics jobs --json | jq '.data[] | {id: .job_id, cost: .total_cost}'
 ```
 
 ### Skill (Optional)
@@ -444,7 +438,7 @@ MIT — see [`LICENSE`](LICENSE) for full text.
 
 ### v1.1.0 (2026-05-19)
 
-- **Standalone CLI** — `cronalytics` command with 7 subcommands: `summary`, `jobs`, `runs`, `models`, `trends`, `health`, `all`. Full `--json` output, `--days`, `--outcome`, `--mode` filters on every data command. Leader Board spotlight in `summary`. Job name resolution from `jobs.json`. Dual-path: `python cli.py` (plugin directory) or `pip install cronalytics` (global).
+- **Standalone CLI** — `python ~/.hermes/plugins/cronalytics/cli.py` with 7 subcommands: `summary`, `jobs`, `runs`, `models`, `trends`, `health`, `all`. Full `--json` output, `--days`, `--outcome`, `--mode` filters on every data command. Leader Board spotlight in `summary`. Job name resolution from `jobs.json`. Shell alias recommended for shorthand.
 - **Agent Diagnostic Skill** — Built-in `cronalytics` skill with structured 3-step workflow (health → summary → jobs → per-run drill-down). Confidence-graded anomaly detection (HIGH / MEDIUM / LOW) with supporting evidence requirements. "Known Ways to Fool Yourself" guardrails (age-gating, script job awareness, variance checks). Cross-references `jobs.json` for scheduling context and silent failure detection.
 - **Test suite: 149 tests** (83 original + 66 CLI tests) — all passing, `ruff` + `mypy` clean.
 

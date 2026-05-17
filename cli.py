@@ -10,13 +10,7 @@ Usage (dashboard plugin install — primary):
     python ~/.hermes/plugins/cronalytics/cli.py all   [--days N] [--outcome ...] [--mode ...]
     python ~/.hermes/plugins/cronalytics/cli.py health [--json]
 
-Usage (pip install — secondary):
-    pip install cronalytics
-    cronalytics [--days N] [--outcome both|success|failure] [--mode all|agent|no_agent]
-    cronalytics summary [--days N] [--outcome ...] [--mode ...] [--json]
-    ... (same commands)
-
-Usage (shell alias — tertiary):
+Usage (shell alias — secondary):
     alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'
     cronalytics summary --days 14
 """

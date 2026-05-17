@@ -381,8 +381,8 @@ User / Agent
 
 ### CLI Design Decisions
 
-1. **Single file** (`cli.py`, ~1000 lines) — self-contained, no external deps beyond Python stdlib + croniter. Works whether installed via plugin tab or `pip install`.
-2. **Dual-path distribution** — `python ~/.hermes/plugins/cronalytics/cli.py` (plugin directory) or `cronalytics` (pip global).
+1. **Single file** (`cli.py`, ~1000 lines) — self-contained, no external deps beyond Python stdlib + croniter. Works from the plugin directory directly.
+2. **Shell alias** — `python ~/.hermes/plugins/cronalytics/cli.py` (direct) or `alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'` (shorthand).
 3. **Every data command supports `--json`** — structured envelopes with `period`, `start_date`, `end_date`, `outcome`, `mode`, and `data`. Pipe-friendly.
 4. **Job name resolution** — reads `~/.hermes/cron/jobs.json` to map `job_id` → human-readable name, applies truncation + `[N]` badge.
 5. **Projection computation** — calls `schedule.get_job_projections()` per-job to compute `pace`, `drift_ratio`, `scheduled_runs_*`, etc. JSON path mirrors rendered path exactly.
