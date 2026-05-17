@@ -11,7 +11,7 @@ import logging
 import threading
 from pathlib import Path
 
-from cronalytics import config, facts, ingester
+from .cronalytics import config, facts, ingester
 
 
 def _ensure_skill_linked() -> None:
@@ -58,7 +58,7 @@ def register(ctx) -> None:
     # gateway was down or the plugin was disabled.
     def _bootstrap():
         try:
-            from cronalytics import scanner
+            from .cronalytics import scanner
             result = scanner.run_sync(config.STATE_DB, config.FACT_DB, config.WATERMARK_FILE)
             if result.get("inserted") or result.get("skipped"):
                 logging.getLogger("cronalytics").info(
