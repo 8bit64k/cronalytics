@@ -221,12 +221,10 @@ def run_sync(
     since = float(wm.get("last_ended_at") or 0.0)
 
     logger.info("[scanner] Starting sync since ended_at=%s", since)
-    t0 = time.perf_counter()
+    started = time.perf_counter()
 
     # --- Track A: Agent jobs from state.db ---
-    t_query = time.perf_counter()
     rows = _fetch_new_sessions(state_db, since)
-    t_query_done = time.perf_counter()
     agent_inserted, agent_skipped = 0, 0
     if rows:
         agent_inserted, agent_skipped = _ingest_batch(fact_db, rows)
@@ -242,10 +240,8 @@ def run_sync(
     else:
         logger.info("[scanner] No new agent sessions found")
         _write_watermark(watermark_path, since, wm.get("rows_synced", 0))
-    t_agent_done = time.perf_counter()
 
     # --- Track B: No-agent jobs from output directories ---
-    t_script = time.perf_counter()
     script_inserted, script_skipped = 0, 0
     try:
         script_inserted, script_skipped = _scan_output_dirs(
@@ -260,9 +256,8 @@ def run_sync(
             )
     except Exception:
         logger.error("[scanner] Script sync failed", exc_info=True)
-    t_script_done = time.perf_counter()
 
-    elapsed = time.perf_counter() - t0
+    elapsed = time.perf_counter() - started
     logger.info(
         "[scanner] Sync complete: agent=%d/%d, script=%d/%d, %.2fs",
         agent_inserted, agent_skipped,
@@ -280,13 +275,6 @@ def run_sync(
         "total_candidates": len(rows),
         "new_watermark": since if not rows else max(since, *(float(r["ended_at"] or 0) for r in rows)),
         "elapsed_ms": round(elapsed * 1000, 1),
-        "timings_ms": {
-            "read_watermark": round((t_query - t0) * 1000, 1),
-            "query_state_db": round((t_query_done - t_query) * 1000, 1),
-            "agent_ingest": round((t_agent_done - t_query_done) * 1000, 1),
-            "script_scan": round((t_script_done - t_script) * 1000, 1),
-            "total": round(elapsed * 1000, 1),
-        },
     }
 
 
