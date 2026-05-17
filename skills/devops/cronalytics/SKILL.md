@@ -57,6 +57,21 @@ If you want a shorter command, add an alias in `~/.bashrc` or `~/.zshrc`:
 alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'
 ```
 
+### Shell Completion
+
+After pip/uv install, enable tab completion for subcommands and flags:
+
+```bash
+# Bash
+eval "$(register-python-argcomplete cronalytics)"
+
+# Zsh
+autoload -U bashcompinit && bashcompinit
+eval "$(register-python-argcomplete cronalytics)"
+```
+
+Add the `eval` line to `~/.bashrc` or `~/.zshrc` for persistence. Completion works for subcommands (`summary`, `jobs`, `sync`, etc.) and all flags (`--days`, `--json`, `--outcome`, ...).
+
 ### Subcommands
 
 | Command | What it returns | Key flags |
