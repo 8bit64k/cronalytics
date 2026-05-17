@@ -29,18 +29,19 @@ def _ensure_skill_linked() -> None:
         home = Path.home() / ".hermes"
 
     plugin_dir = Path(__file__).parent
-    skill_src = plugin_dir / "skills" / "devops" / "cronalytics" / "SKILL.md"
-    if not skill_src.exists():
+    skill_src_dir = plugin_dir / "skills" / "devops" / "cronalytics"
+    if not skill_src_dir.exists():
         return
 
-    skill_dst_dir = home / "skills" / "devops" / "cronalytics"
-    skill_dst = skill_dst_dir / "SKILL.md"
+    skill_dst_dir = home / "skills" / "devops"
+    skill_dst = skill_dst_dir / "cronalytics"
 
+    # Idempotent: if already linked or a real directory exists, do nothing
     if skill_dst.exists() or skill_dst.is_symlink():
         return
 
     skill_dst_dir.mkdir(parents=True, exist_ok=True)
-    skill_dst.symlink_to(skill_src)
+    skill_dst.symlink_to(skill_src_dir)
 
 
 def register(ctx) -> None:
