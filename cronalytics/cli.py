@@ -864,6 +864,32 @@ def _cmd_health(args: argparse.Namespace, db_path: Path) -> int:
     return 0
 
 
+def _cmd_sync(args: argparse.Namespace, db_path: Path) -> int:
+    """Backfill historical cron sessions from state.db into facts.db."""
+    from cronalytics import scanner, config
+
+    result = scanner.run_sync(
+        config.STATE_DB,
+        db_path,
+        config.WATERMARK_FILE,
+    )
+    if args.json:
+        print(json.dumps({"data": result}, indent=2, default=str))
+        return 0
+
+    lines: list[str] = []
+    lines.append("")
+    lines.extend(_banner("🔄 Cronalytics Sync", inner_width=_W_STD))
+    lines.append(_banner_line(f"Agent sessions:  {result['agent_inserted']} inserted, {result['agent_skipped']} skipped", _W_STD))
+    lines.append(_banner_line(f"Script sessions: {result['script_inserted']} inserted, {result['script_skipped']} skipped", _W_STD))
+    lines.append(_banner_line(f"Elapsed:         {result['elapsed_ms']}ms", _W_STD))
+    if result["inserted"] == 0:
+        lines.append(_banner_line("No new data found.", _W_STD))
+    lines.append(f"  ╚{'═' * _W_STD}╝")
+    print("\n".join(lines))
+    return 0
+
+
 # =============================================================================
 # ARGUMENT PARSING
 # =============================================================================
@@ -956,6 +982,19 @@ def _build_parser() -> argparse.ArgumentParser:
     all_parser = subparsers.add_parser("all", help="Run health + summary + jobs + models + trends")
     _add_standard_flags(all_parser)
 
+    sync_parser = subparsers.add_parser("sync", help="Backfill cron sessions from state.db into fact DB")
+    sync_parser.add_argument(
+        "--db",
+        type=Path,
+        default=argparse.SUPPRESS,
+        help="Path to fact DB (default: auto-detected from plugin directory)",
+    )
+    sync_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output raw JSON instead of formatted tables",
+    )
+
     return parser
 
 
@@ -1003,6 +1042,7 @@ def main(argv: list[str] | None = None) -> int:
         "models": _cmd_models,
         "trends": _cmd_trends,
         "health": _cmd_health,
+        "sync": _cmd_sync,
     }
     handler = handler_map[args.command]
 

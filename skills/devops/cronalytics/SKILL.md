@@ -65,9 +65,10 @@ alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'
 | `summary` | Headline aggregates: total runs, cost, tokens, success/failure split | `--days`, `--outcome`, `--mode`, `--json` |
 | `jobs` | Per-job table: runs, cost, pace, avg duration, mode | `--days`, `--outcome`, `--mode`, `--json` |
 | `models` | Per-model cost and token attribution | `--days`, `--outcome`, `--mode`, `--json` |
-| `trends` | Daily run-count / cost sparklines | `--days`, `--outcome`, `--mode`, `--json` |
+| `trends` | Daily run-count / cost sparkline | `--days`, `--outcome`, `--mode`, `--json` |
 | `runs` | Individual run rows for a specific job ID | `--job <id>` (required), `--days`, `--outcome`, `--mode`, `--json` |
 | `health` | Fact DB row counts, last sync watermark, schema version | `--db`, `--json` |
+| `sync` | Backfill cron sessions from `state.db` → `facts.db` | `--db`, `--json` |
 
 ### Universal Filters
 
@@ -106,6 +107,24 @@ cronalytics all --days 30
 ```
 
 Read the **health** block first: confirm `last_sync` is recent. A stale sync means the data is incomplete.
+
+### When Data Is Stale — Agent Self-Healing
+
+If `health` shows `last_sync` older than 6 hours (or older than the `--days` window), do **not** end the assessment. The agent should:
+
+1. **Note the staleness explicitly** in the assessment — include exact timestamp and age
+2. **Run `cronalytics sync`** to backfill missing data:
+   ```bash
+   cronalytics sync --json
+   ```
+3. **Re-query the data** and continue the assessment with fresh numbers
+4. **Flag the sync anomaly** — stale data means the ingestion pipeline is not keeping up. Possible causes:
+   - Gateway was down during cron runs
+   - Plugin failed to load (check gateway logs)
+   - `state.db` busy/locked during session writes
+   - No cron jobs have completed since the sync (legitimate but rare)
+
+**Agent principle:** The user asked for analysis, not a health check. The agent should recover the data and continue, surfacing the pipeline issue as a secondary finding. Never tell the user "fix your sync and come back."
 
 Then read the **summary** block for headline red flags:
 - `success_rate` < 80% → investigate failures
