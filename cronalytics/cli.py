@@ -224,21 +224,14 @@ class JsonEnvelope(TypedDict, total=False):
 # =============================================================================
 
 def _resolve_db(cli_db: Path | None) -> Path:
-    """Resolve the fact DB path, preferring the plugin directory when possible.
+    """Resolve the fact DB path.
 
     Priority:
         1. Explicit --db flag
-        2. config.FACT_DB (works when run from plugin directory)
-        3. ~/.hermes/plugins/cronalytics/facts.db (pip install fallback)
-        4. config.FACT_DB as final fallback (creates empty DB if absent)
+        2. config.FACT_DB (resolved via HERMES_HOME env var)
     """
     if cli_db is not None:
         return cli_db
-    if config.FACT_DB.exists():
-        return config.FACT_DB
-    plugin_db = Path.home() / ".hermes" / "plugins" / "cronalytics" / "facts.db"
-    if plugin_db.exists():
-        return plugin_db
     return config.FACT_DB
 
 

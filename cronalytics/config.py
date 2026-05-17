@@ -12,7 +12,12 @@ try:
     from hermes_constants import get_hermes_home
     _HERMES_HOME = Path(get_hermes_home())
 except Exception:
-    _HERMES_HOME = Path.home() / ".hermes"
+    import os
+    hermes_home = os.environ.get("HERMES_HOME", "")
+    if hermes_home:
+        _HERMES_HOME = Path(hermes_home)
+    else:
+        _HERMES_HOME = Path.home() / ".hermes"
 
 # ---------------------------------------------------------------------------
 # Polling / retry schedule

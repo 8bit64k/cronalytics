@@ -26,7 +26,12 @@ def _ensure_skill_linked() -> None:
         home = get_hermes_home()
     except Exception:
         # Fallback for standalone usage outside Hermes context.
-        home = Path.home() / ".hermes"
+        import os
+        hermes_home = os.environ.get("HERMES_HOME", "")
+        if hermes_home:
+            home = Path(hermes_home)
+        else:
+            home = Path.home() / ".hermes"
 
     plugin_dir = Path(__file__).parent
     skill_src_dir = plugin_dir / "skills" / "devops" / "cronalytics"
