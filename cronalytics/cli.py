@@ -880,11 +880,16 @@ def _cmd_sync(args: argparse.Namespace, db_path: Path) -> int:
     lines: list[str] = []
     lines.append("")
     lines.extend(_banner("🔄 Cronalytics Sync", inner_width=_W_STD))
-    lines.append(_banner_line(f"Agent sessions:  {result['agent_inserted']} inserted, {result['agent_skipped']} skipped", _W_STD))
-    lines.append(_banner_line(f"Script sessions: {result['script_inserted']} inserted, {result['script_skipped']} skipped", _W_STD))
-    lines.append(_banner_line(f"Elapsed:         {result['elapsed_ms']}ms", _W_STD))
-    if result["inserted"] == 0:
+    total_inserted = result["agent_inserted"] + result["script_inserted"]
+    if total_inserted > 0:
+        lines.append(_banner_line(f"Inserted: {total_inserted} new sessions", _W_STD))
+        if result["agent_inserted"]:
+            lines.append(_banner_line(f"  Agent:   {result['agent_inserted']}", _W_STD))
+        if result["script_inserted"]:
+            lines.append(_banner_line(f"  Script:  {result['script_inserted']}", _W_STD))
+    else:
         lines.append(_banner_line("No new data found.", _W_STD))
+    lines.append(_banner_line(f"Elapsed: {result['elapsed_ms']}ms", _W_STD))
     lines.append(f"  ╚{'═' * _W_STD}╝")
     print("\n".join(lines))
     return 0
