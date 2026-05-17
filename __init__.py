@@ -21,12 +21,19 @@ def _ensure_skill_linked() -> None:
     the user ever invokes the CLI. The symlink points into the plugin
     directory so it stays in sync when the plugin is updated via git pull.
     """
+    try:
+        from hermes_constants import get_hermes_home
+        home = get_hermes_home()
+    except Exception:
+        # Fallback for standalone usage outside Hermes context.
+        home = Path.home() / ".hermes"
+
     plugin_dir = Path(__file__).parent
     skill_src = plugin_dir / "skills" / "devops" / "cronalytics" / "SKILL.md"
     if not skill_src.exists():
         return
 
-    skill_dst_dir = Path.home() / ".hermes" / "skills" / "devops" / "cronalytics"
+    skill_dst_dir = home / "skills" / "devops" / "cronalytics"
     skill_dst = skill_dst_dir / "SKILL.md"
 
     if skill_dst.exists() or skill_dst.is_symlink():
