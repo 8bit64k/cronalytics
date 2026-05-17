@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from schedule import _count_occurrences, get_job_projections
+from cronalytics.schedule import _count_occurrences, get_job_projections
 
 
 class TestCountOccurrences:

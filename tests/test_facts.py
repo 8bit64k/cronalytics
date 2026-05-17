@@ -7,7 +7,7 @@ import time
 
 import pytest
 
-from facts import (
+from cronalytics.facts import (
     ensure_schema,
     ingest_row,
     ingest_script_row,

@@ -28,13 +28,13 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 # ---------------------------------------------------------------------------
-# Path bootstrap — must stay before other imports so facts.py is discoverable
+# Path bootstrap — add plugin root so `cronalytics` package is discoverable
 # ---------------------------------------------------------------------------
-_HERE = Path(__file__).parent.resolve()
-sys.path.insert(0, str(_HERE))
+_PLUGIN_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(_PLUGIN_ROOT))
 
-import config  # noqa: I001
-from facts import (
+from cronalytics import config  # noqa: I001
+from cronalytics.facts import (
     get_conn,
     query_health,
     query_job_runs,
@@ -43,7 +43,7 @@ from facts import (
     query_summary,
     query_trends,
 )
-from schedule import get_job_projections
+from cronalytics.schedule import get_job_projections
 
 
 # =============================================================================

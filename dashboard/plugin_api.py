@@ -28,9 +28,9 @@ _plugin_dir = _plugin_api_dir.parent
 
 
 def _load_module(name: str):
-    """Load a .py file from the plugin root as a namespaced module."""
+    """Load a .py file from the plugin package as a namespaced module."""
     mod_name = f"cronalytics_auto_{name}"
-    path = _plugin_dir / f"{name}.py"
+    path = _plugin_dir / "cronalytics" / f"{name}.py"
     spec = importlib.util.spec_from_file_location(mod_name, path)
     if spec is None or spec.loader is None:
         raise ImportError(f"Cannot load {path}")

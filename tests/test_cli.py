@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 # cli.py manipulates sys.path at module level; conftest handles the setup.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from cli import (  # noqa: I001
+from cronalytics.cli import (  # noqa: I001
     JOBS_LAYOUT,
     JOBS_SEP_WIDTH,
     LEADER_BOARD_LAYOUT,
@@ -195,7 +195,7 @@ class TestResolveDb:
     def test_none_checks_config_then_fallback(self, monkeypatch):
         # When cli_db is None, config.FACT_DB is checked first.
         fake = Path("/nonexistent/config.db")
-        import config as _config
+        from cronalytics import config as _config
         monkeypatch.setattr(_config, "FACT_DB", fake)
         # Since fake doesn't exist, fallback to home plugin dir (also nonexistent)
         result = _resolve_db(None)
@@ -274,7 +274,7 @@ class TestJsonDates:
 
     def test_positive_days(self):
         fake_now = datetime(2026, 5, 15, 12, 0, 0)
-        with patch("cli.datetime") as mock_dt:
+        with patch("cronalytics.cli.datetime") as mock_dt:
             mock_dt.now.return_value = fake_now
             start, end = _json_dates(7, Path("/dev/null"))
             assert start == "2026-05-09"
@@ -289,7 +289,7 @@ class TestHumanDateRange:
         assert result == ""
 
     def test_positive_days(self):
-        with patch("cli.datetime") as mock_dt:
+        with patch("cronalytics.cli.datetime") as mock_dt:
             mock_dt.now.return_value = datetime(2026, 5, 15)
             result = _human_date_range(7, Path("/dev/null"))
             assert "May 09" in result
@@ -301,7 +301,7 @@ class TestJsonEnvelope:
 
     def test_basic_envelope(self):
         args = MagicMock(days=7, outcome="both", mode="all")
-        with patch("cli.datetime") as mock_dt:
+        with patch("cronalytics.cli.datetime") as mock_dt:
             mock_dt.now.return_value = datetime(2026, 5, 15)
             envelope = _json_envelope([{"x": 1}], args, Path("/dev/null"))
         assert envelope["period"] == "Last 7 days"

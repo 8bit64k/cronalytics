@@ -101,7 +101,9 @@ def api_module(tmp_path: Path):
     dashboard_dir.mkdir()
 
     # Mock config.py — sets all paths inside tmp_path
-    (plugin_dir / "config.py").write_text(
+    cronalytics_pkg = plugin_dir / "cronalytics"
+    cronalytics_pkg.mkdir(exist_ok=True)
+    (cronalytics_pkg / "config.py").write_text(
         f"""
 from pathlib import Path
 RETRY_DELAYS = [3.0, 8.0, 15.0]
@@ -118,7 +120,7 @@ PLUGIN_DIR = Path("{plugin_dir}")
     )
 
     # Mock logger.py
-    (plugin_dir / "logger.py").write_text(
+    (cronalytics_pkg / "logger.py").write_text(
         """
 import logging
 logger = logging.getLogger("cronalytics")
@@ -126,8 +128,9 @@ logger = logging.getLogger("cronalytics")
     )
 
     # Copy real modules (stdlib-only imports, safe in temp dir)
-    for fname in ("facts.py", "scanner.py", "schedule.py"):
-        shutil.copy(_PLUGIN_ROOT / fname, plugin_dir / fname)
+    for fname in ("__init__.py", "facts.py", "scanner.py", "schedule.py"):
+        if (_PLUGIN_ROOT / "cronalytics" / fname).exists():
+            shutil.copy(_PLUGIN_ROOT / "cronalytics" / fname, cronalytics_pkg / fname)
 
     # Copy plugin_api.py
     shutil.copy(
@@ -137,7 +140,7 @@ logger = logging.getLogger("cronalytics")
 
     # Seed a real fact DB via the temp copy of facts.py
     spec = importlib.util.spec_from_file_location(
-        "_test_facts", plugin_dir / "facts.py"
+        "_test_facts", cronalytics_pkg / "facts.py"
     )
     facts_mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(facts_mod)
