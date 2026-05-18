@@ -102,8 +102,8 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
 - **docs/INSTALL.md** — Installation guide (dashboard plugin + pip CLI + skill setup)
 - **docs/UNINSTALL.md** — Clean removal instructions
 - **docs/USAGE.md** — Dashboard and CLI usage guide
-
 - **docs/TROUBLESHOOTING.md** — Common issues and fixes
+- **docs/RELEASE_NOTES.md** — Per-release upgrade notes and highlights
 
 ### Developer Documentation (`dev/`)
 
@@ -111,6 +111,10 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
 - **dev/DESIGN.md** — Architecture, data flow, and technical decisions
 - **dev/FEATURES.md** — Complete feature catalog with formulas
 - **dev/DEV_SETUP.md** — Development environment setup
+
+### Project Meta
+
+- **CHANGELOG.md** — Full version history
 
 ---
 
