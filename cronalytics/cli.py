@@ -61,8 +61,8 @@ _CHAR_VERT = "║"
 _CHAR_SEP = "─"
 
 # Banner inner widths (content area between ║ borders)
-_W_STD = 58   # Standard: health, summary, models, trends, runs, full report
-_W_JOBS = 68  # Wider for jobs table
+_W_STD = 72   # Standard: health, summary, models, trends, runs, full report
+_W_JOBS = 82  # Wider for jobs table
 
 # Column layouts: list of (header, width) tuples.
 # Total separator width == sum(widths) + (count - 1) spaces.
@@ -96,7 +96,8 @@ RUNS_LAYOUT: list[tuple[str, int]] = [
 ]
 LEADER_BOARD_LAYOUT: list[tuple[str, int]] = [
     ("", 14),   # Category (e.g., "Top Runs")
-    ("", 18),   # Job name
+    ("", 14),   # Job name
+    ("", 12),   # Job ID
     ("", 10),   # Value
     ("", 8),    # Share
 ]
@@ -155,6 +156,7 @@ class JobData(TypedDict, total=False):
     """Shape returned by facts.query_jobs."""
 
     job_id: str
+    job_name: str | None
     runs: int
     total_cost: float | None
     total_tokens: int
@@ -188,6 +190,7 @@ class RunData(TypedDict, total=False):
 
     session_id: str
     job_id: str
+    job_name: str | None
     run_time: float | None
     estimated_cost_usd: float | None
     input_tokens: int
@@ -430,7 +433,11 @@ def _fetch_summary(db_path: Path, args: argparse.Namespace) -> Any:
 
 def _fetch_jobs(db_path: Path, args: argparse.Namespace) -> Any:
     """Fetch per-job breakdown."""
-    return query_jobs(db_path, days=args.days, outcome=args.outcome, mode=args.mode)
+    jobs = query_jobs(db_path, days=args.days, outcome=args.outcome, mode=args.mode)
+    job_names = _load_job_names()
+    for j in jobs:
+        j["job_name"] = job_names.get(j["job_id"], "") or None
+    return jobs
 
 
 def _fetch_models(db_path: Path, args: argparse.Namespace) -> Any:
@@ -445,7 +452,7 @@ def _fetch_trends(db_path: Path, args: argparse.Namespace) -> Any:
 
 def _fetch_runs(db_path: Path, args: argparse.Namespace) -> Any:
     """Fetch individual runs for a specific job."""
-    return query_job_runs(
+    runs = query_job_runs(
         db_path,
         job_id=args.job,
         limit=50,
@@ -453,6 +460,10 @@ def _fetch_runs(db_path: Path, args: argparse.Namespace) -> Any:
         outcome=args.outcome,
         mode=args.mode,
     )
+    job_names = _load_job_names()
+    for r in runs:
+        r["job_name"] = job_names.get(r["job_id"], "") or None
+    return runs
 
 
 def _fetch_health(db_path: Path) -> Any:
@@ -593,7 +604,7 @@ def _render_summary(data: Any, args: argparse.Namespace, db_path: Path) -> list[
         lines.append(_build_separator(LEADER_BOARD_SEP_WIDTH))
         for leader in leader_board:
             lines.append(
-                f"  {leader['category']:<14} {leader['job_name']:<18} {leader['value']:>10} {leader['share']:>8}"
+                f"  {leader['category']:<14} {leader['job_name']:<14} {leader['job_id']:<12} {leader['value']:>10} {leader['share']:>8}"
             )
         lines.append("")
 

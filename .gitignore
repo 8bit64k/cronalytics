@@ -11,6 +11,7 @@ build/
 *.db-journal
 *.db-wal
 *.db-shm
+!docs/demos/plugins/cronalytics/facts.db
 
 # Watermark (generated at runtime)
 watermark.json
