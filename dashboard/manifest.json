@@ -3,7 +3,7 @@
   "label": "Cronalytics",
   "description": "Cost and operational observability for Hermes cron jobs",
   "icon": "Clock",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "tab": {
     "path": "/cronalytics",
     "position": "end",
