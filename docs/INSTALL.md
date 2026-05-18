@@ -1,8 +1,8 @@
 # Installation Guide
 
-Cronalytics installs as a **Hermes dashboard plugin** (primary). The CLI and agent skill are included automatically — no separate install needed.
+Cronalytics installs as a **Hermes dashboard plugin**. The CLI and agent skill ship inside the plugin directory but must be enabled separately — see below.
 
-> **Install path mantra:** Use Hermes-native methods first. Fallback to manual copy only when the native tools don't fit.
+> **Install path mantra:** Use Hermes-native methods first.
 
 ---
 
@@ -19,7 +19,7 @@ Check **Enable after install**, then click **Install**.
 
 Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS. The **Cronalytics** tab appears in the sidebar.
 
-The CLI and skill are available immediately from the plugin directory — no extra steps.
+The CLI and skill are present in the plugin directory but require separate activation (see sections 2 and 3 below).
 
 ### Secondary: CLI
 
@@ -27,93 +27,69 @@ The CLI and skill are available immediately from the plugin directory — no ext
 hermes plugins install 8bit64k/cronalytics --enable
 ```
 
-### Tertiary: Manual Copy
-
-If you prefer to install from a local clone or prefer to audit every file:
+Or if you cloned the repo locally:
 
 ```bash
-mkdir -p ~/.hermes/plugins
-cp -r /path/to/cronalytics ~/.hermes/plugins/cronalytics
+hermes plugins install /path/to/cronalytics --enable
 ```
-
-Then restart the gateway so hooks register and API routes mount:
-
-```bash
-hermes gateway restart
-```
-
-Hard-refresh your browser to pick up the new frontend bundle.
 
 ---
 
 ## 2. CLI Access
 
-The CLI is bundled with the plugin. You have it as soon as the plugin is installed.
+The CLI is bundled with the plugin, but it must be installed separately via `pip` to get the `cronalytics` command on your `$PATH`.
 
-### CLI Access
-
-The CLI is bundled with the plugin. You have it as soon as the plugin is installed.
-
-**Primary: Plugin Path (Default)**
+**Editable pip install (Recommended)**
 
 ```bash
-python ~/.hermes/plugins/cronalytics/cli.py summary --days 14
-python ~/.hermes/plugins/cronalytics/cli.py jobs --json
+pip install -e ~/.hermes/plugins/cronalytics --break-system-packages
 ```
 
-No `cd` needed — run from any directory. The CLI auto-detects its own fact DB.
+*(Arch Linux requires `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
 
-**Secondary: Shell Alias**
-
-If you want a shorter command, add an alias in `~/.bashrc` or `~/.zshrc`:
-
-```bash
-alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'
-```
-
-Then use it anywhere:
+Then use it from any directory:
 
 ```bash
 cronalytics summary --days 14
+cronalytics jobs --json
 cronalytics runs --job 67541bf6e230 --days 30
 ```
+
+**Alternative: Shell alias (no pip)**
+
+If you prefer not to use `pip`, add an alias to your shell profile:
+
+```bash
+# In ~/.bashrc or ~/.zshrc
+alias cronalytics='python -m cronalytics.cli'
+```
+
+> **Note:** With the alias method, auto-completion via `argcomplete` is not available. The `cronalytics` command is the fully featured path.
 
 ---
 
 ## 3. Skill Setup
 
-The agent diagnostic skill ships inside the plugin at `skills/devops/cronalytics/SKILL.md`.
+The agent diagnostic skill ships inside the plugin at `skills/devops/cronalytics/SKILL.md`. It must be installed manually — it is not auto-enabled by the plugin install.
 
-### Primary: Native Hermes Install
+### Install via HTTPS URL
 
 ```bash
 hermes skills install \
   https://raw.githubusercontent.com/8bit64k/cronalytics/main/skills/devops/cronalytics/SKILL.md \
-  --category devops \
-  --name cronalytics \
-  --yes
+  --category devops --name cronalytics --yes
 ```
 
-This is the native Hermes path. It handles directory creation (`~/.hermes/skills/devops/`), conflict resolution, and skill validation automatically.
+Once enabled, the agent automatically uses the skill when you ask about cron jobs.
 
-### Secondary: Manual Copy
+### Install from local clone
 
-If you already installed the plugin and want to enable the skill manually:
+If you cloned the repo locally or have the skill file on disk:
 
 ```bash
-mkdir -p ~/.hermes/skills/devops
-cp -r ~/.hermes/plugins/cronalytics/skills/devops/cronalytics \
-  ~/.hermes/skills/devops/cronalytics
+hermes skills install ~/.hermes/plugins/cronalytics/skills/devops/cronalytics/SKILL.md \
+  --category devops --name cronalytics --yes
 ```
-
-Verify it loads:
-
-```bash
-hermes skills list | grep cronalytics
-# → cronalytics ✓
-```
-
-Once enabled, the agent automatically uses the skill when you ask about cron jobs. No manual invocation required — the skill's trigger conditions match natural language queries like "check my cron jobs" or "what's burning tokens?".
 
 ---
 
@@ -123,17 +99,19 @@ Once enabled, the agent automatically uses the skill when you ask about cron job
 ~/.hermes/plugins/cronalytics/
 ├── plugin.yaml              # Plugin manifest (hooks, version)
 ├── __init__.py              # Register hook + bootstrap scanner
-├── facts.py                 # SQLite fact database
-├── scanner.py               # Backfill + watermark logic
-├── ingester.py              # Deferred ingestion worker
-├── config.py                # Paths + defaults
-├── logger.py                # Shared logger
-├── checkpoint.py            # Session state persistence
-├── cli.py                   # Standalone terminal interface
+├── cronalytics/             # Core package
+│   ├── cli.py              # Terminal interface (entry point)
+│   ├── config.py           # Paths + defaults
+│   ├── facts.py            # SQLite fact database
+│   ├── ingester.py         # Deferred ingestion worker
+│   ├── scanner.py          # Backfill + watermark logic
+│   ├── schedule.py         # Cron parsing + projection math
+│   ├── logger.py           # Shared logger
+│   └── checkpoint.py       # Session state persistence
 ├── skills/
 │   └── devops/
 │       └── cronalytics/
-│           └── SKILL.md     # Built-in diagnostic skill for agents
+│           └── SKILL.md    # Built-in diagnostic skill for agents
 ├── dashboard/
 │   ├── manifest.json        # Slot registration + routes
 │   ├── plugin_api.py        # REST API mounted at /api/plugins/cronalytics/
@@ -179,7 +157,7 @@ reverse_proxy /api/* localhost:9119
 reverse_proxy localhost:9119
 ```
 
-If you see `Unexpected token '<'` errors in the Cronalytics tab after installing behind a proxy, check this configuration first. See [Troubleshooting](#troubleshooting) for more details.
+If you see `Unexpected token '<'` errors in the Cronalytics tab after installing behind a proxy, check this configuration first. See [Troubleshooting](TROUBLESHOOTING.md) for more details.
 
 ---
 
@@ -201,50 +179,10 @@ After install:
 ---
 
 *Version: 1.1.0*  
-*Last updated: 2026-05-16*
+*Last updated: 2026-05-17*
 
 ---
 
 ## Troubleshooting
 
-### Reverse proxy (Caddy, Nginx) returns HTML for API routes
-
-If you run the Hermes dashboard behind a reverse proxy and see JSON parse errors (`Unexpected token '<'`), the proxy may be routing API requests incorrectly. The Hermes dashboard serves the SPA fallback (`index.html`) for any unmatched route, so any proxy misconfiguration sends HTML instead of JSON to `/api/plugins/cronalytics/*`.
-
-**Common cause:** Caddy (or Nginx) `try_files` or `rewrite` rules intercepting `/api/*` paths before they reach the dashboard server.
-
-**Fix:** Ensure your reverse proxy forwards `/api/plugins/cronalytics/*` directly to the Hermes dashboard backend without rewriting or serving static files. A minimal Caddy example:
-
-```caddy
-# Forward all /api/* routes to the Hermes dashboard backend
-reverse_proxy /api/* localhost:9119
-
-# Serve the SPA for everything else
-reverse_proxy localhost:9119
-```
-
-After updating the proxy config, hard-refresh the browser.
-
-### "Unexpected token '<'" error in the dashboard
-
-If the Cronalytics tab shows a JSON parse error mentioning `<!doctype`, the dashboard's cached JavaScript bundle is requesting an old or unmounted API route. The Hermes dashboard server serves the SPA fallback (HTML) for any unmatched path, and the browser tries to parse that HTML as JSON.
-
-**Fix:** Perform a **hard refresh** (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear the browser cache and load the latest frontend bundle. If you're behind a reverse proxy, also verify the [reverse proxy configuration](#reverse-proxy-setup) above.
-
-### API routes are mounted but requests return HTML
-
-If you see plugin API routes mounted in the dashboard server logs (e.g., `/api/plugins/cronalytics/`) but requests still return HTML, the dashboard server may have been restarted after the plugin loaded.
-
-**Fix:** Restart the dashboard server (`hermes dashboard --stop` then `hermes dashboard`) and hard-refresh the browser.
-
-### `curl` returns `{"detail":"unauthorized"}`
-
-The Cronalytics API (and all Hermes plugin APIs) requires the dashboard's ephemeral session token. This token is generated when the dashboard starts and is injected into the SPA's `index.html`.
-
-**Fix:** Use the dashboard **Sync Now** button instead. If you must use `curl` from a script, extract `window.__HERMES_SESSION_TOKEN__` from the dashboard page source and pass it in the `X-Hermes-Session-Token` header.
-
-### "No cron jobs captured" after install
-
-Cronalytics only captures jobs from the `on_session_end` hook going forward. Historical runs are backfilled via the reconciliation scanner.
-
-**Fix:** Click **Sync Now** in the dashboard toolbar. The scanner reads `state.db` and inserts any cron sessions newer than the last watermark.
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for common issues and fixes.

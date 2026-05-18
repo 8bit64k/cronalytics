@@ -25,6 +25,12 @@ scratchpad/
 # Auto-checkpoint state (generated at runtime)
 cronalytics-checkpoint.json
 CHECKPOINT.md
+
+# Internal planning docs — not for public repo
+PLAN.md
+dev/AGENTS.md
+dev/LAUNCH_PLAN.md
+dev/LAUNCH_POSTS.md
 # Test artifacts
 .pytest_cache/
 .coverage

@@ -12,7 +12,7 @@ Observe. Measure. Optimize.
 Cronalytics is a Hermes Agent plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them through **three interfaces**:
 
 1. **Dashboard** — A dedicated `/cronalytics` tab inside `hermes dashboard` for visual exploration
-2. **CLI** — A standalone terminal interface (`cronalytics` or `python cli.py`) for programmatic access, `--json` output, and agent consumption
+2. **CLI** — A terminal tool for programmatic access, `--json` output, and agent consumption. Requires the plugin's `facts.db` to function — not a standalone product.
 3. **Agent Skill** — A built-in diagnostic skill that teaches Hermes agents how to analyze your cron jobs with confidence-graded anomaly detection
 
 > Turn hidden automation into visible spend.
@@ -27,8 +27,6 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
 Visual exploration with cards, tables, charts, and modals. Best for human pattern recognition.
 
 ### CLI (for agents)
-Terminal data dump with `--json` support. Best for scripts, agents, and programmatic analysis.
-
 ```bash
 # Full report (chains all commands)
 cronalytics summary --days 14
@@ -89,7 +87,7 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
   - Job name resolution from `~/.hermes/cron/jobs.json`
 
   **Skill** — agent-guided diagnostics:
-  - Structured 3-step workflow: health → summary → jobs → per-run drill-down
+  - Structured 6-step workflow: baseline → jobs → per-run drill-down → failures → models → trends
   - Confidence-graded anomaly detection (HIGH / MEDIUM / LOW)
   - `jobs.json` cross-reference for temporal context and silent failure detection
   - "Known Ways to Fool Yourself" guardrails prevent false positives
@@ -105,15 +103,14 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
 - **docs/UNINSTALL.md** — Clean removal instructions
 - **docs/USAGE.md** — Dashboard and CLI usage guide
 
+- **docs/TROUBLESHOOTING.md** — Common issues and fixes
+
 ### Developer Documentation (`dev/`)
 
 - **dev/BRIEF.md** — Product opportunity brief & positioning
 - **dev/DESIGN.md** — Architecture, data flow, and technical decisions
 - **dev/FEATURES.md** — Complete feature catalog with formulas
-- **dev/LAUNCH_PLAN.md** — V1.0 launch timeline
-- **dev/AGENTS.md** — Contributor conventions & release gates
 - **dev/DEV_SETUP.md** — Development environment setup
-- **PLAN.md** — Phased build plan and backlog (root)
 
 ---
 
@@ -139,16 +136,17 @@ hermes plugins install 8bit64k/cronalytics --enable
 
 Or open the Hermes dashboard, go to the **Plugins** tab, enter `8bit64k/cronalytics`, check **Enable after install**, and click **Install**.
 
-The **Cronalytics** tab appears in the sidebar. The CLI and skill are included automatically — no separate install needed. The CLI is available at `~/.hermes/plugins/cronalytics/cli.py`.
+The **Cronalytics** tab appears in the sidebar.
 
-### CLI (Optional)
+### CLI (Optional Add-On)
 
-The CLI is bundled with the plugin at `~/.hermes/plugins/cronalytics/cli.py`. For a shorter command, add an alias to your shell profile:
+The CLI requires the plugin's `facts.db` to function and must be installed separately via `pip`:
 
 ```bash
-# In ~/.bashrc or ~/.zshrc
-alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'
+pip install -e ~/.hermes/plugins/cronalytics --break-system-packages
 ```
+
+*(Arch Linux requires `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
 
 Then use it from anywhere:
 
@@ -157,9 +155,15 @@ cronalytics summary --days 14
 cronalytics jobs --json | jq '.data[] | {id: .job_id, cost: .total_cost}'
 ```
 
+To remove only the CLI command while keeping the plugin:
+
+```bash
+pip uninstall cronalytics --break-system-packages
+```
+
 ### Skill (Optional)
 
-The diagnostic skill is bundled at `skills/devops/cronalytics/SKILL.md`. Enable it:
+The diagnostic skill is bundled at `skills/devops/cronalytics/SKILL.md`. It must be installed manually:
 
 ```bash
 hermes skills install \
@@ -202,7 +206,7 @@ provides_hooks:
 
 ### `config.py` (static defaults)
 
-All current settings are hardcoded defaults. There is no user-editable config file yet (planned for v1.1).
+All current settings are hardcoded defaults. There is no user-editable config file yet (planned for a future release).
 
 | Setting | Default | Meaning |
 |---------|---------|---------|
@@ -369,14 +373,15 @@ Key fields captured per run:
 cronalytics/
 ├─── plugin.yaml              # Plugin manifest (hooks, version)
 ├─── __init__.py              # Register hook + bootstrap scanner
-├─── config.py                # Paths + defaults
-├─── facts.py                 # SQLite fact DB: schema, insert, queries
-├─── ingester.py              # Deferred ingestion worker + crash recovery
-├─── scanner.py               # Reconciliation scanner + watermark I/O
-├─── schedule.py              # Cron parsing + projection math
-├─── cli.py                   # Standalone terminal interface (dashboard + pip)
-├─── logger.py                # Shared logger
-├─── checkpoint.py            # Session state persistence
+├─── cronalytics/             # Core package
+│   ├── cli.py                # Terminal interface (entry point)
+│   ├── config.py             # Paths + defaults
+│   ├── facts.py              # SQLite fact DB: schema, insert, queries
+│   ├── ingester.py           # Deferred ingestion worker + crash recovery
+│   ├── scanner.py            # Reconciliation scanner + watermark I/O
+│   ├── schedule.py           # Cron parsing + projection math
+│   ├── logger.py             # Shared logger
+│   └── checkpoint.py         # Session state persistence
 ├─── skills/
 │   └─── devops/
 │       └─── cronalytics/
@@ -399,10 +404,9 @@ cronalytics/
 2. **Abandoned sessions are invisible.** Sessions where the gateway crashed or the job got stuck are never ingested (they never reach `ended_at`).
 3. **No user-editable config file yet.** All tuning values are hardcoded in `config.py`.
 4. **Actual cost is often null.** Most runs only populate `estimated_cost_usd`; `actual_cost_usd` depends on provider billing data.
-5. **Plugin directory is a static copy.** Changes in the build directory are not reflected in `~/.hermes/plugins/cronalytics/` unless manually copied or symlinked.
-6. **Dashboard server caches plugins per-process.** Changes to `manifest.json` or `plugin_api.py` require a full dashboard restart.
-7. **Mobile layout tested but not optimized.** The table may require horizontal scroll on narrow viewports.
-8. **Job detail modal capped at 200 runs.** High-frequency jobs show full count in the table but the drill-down is limited.
+5. **Dashboard server caches plugins per-process.** Changes to `manifest.json` or `plugin_api.py` require a full dashboard restart.
+6. **Mobile layout tested but not optimized.** The table may require horizontal scroll on narrow viewports.
+7. **Job detail modal capped at 200 runs.** High-frequency jobs show full count in the table but the drill-down is limited.
 
 ---
 
@@ -438,7 +442,7 @@ MIT — see [`LICENSE`](LICENSE) for full text.
 
 ### v1.1.0 (2026-05-19)
 
-- **Standalone CLI** — `python ~/.hermes/plugins/cronalytics/cli.py` with 7 subcommands: `summary`, `jobs`, `runs`, `models`, `trends`, `health`, `all`. Full `--json` output, `--days`, `--outcome`, `--mode` filters on every data command. Leader Board spotlight in `summary`. Job name resolution from `jobs.json`. Shell alias recommended for shorthand.
+- **Terminal CLI** — `cronalytics` (via `pip install -e`) or `python -m cronalytics.cli` with 7 subcommands: `summary`, `jobs`, `runs`, `models`, `trends`, `health`, `all`. Full `--json` output, `--days`, `--outcome`, `--mode` filters on every data command. Leader Board spotlight in `summary`. Job name resolution from `jobs.json`.
 - **Agent Diagnostic Skill** — Built-in `cronalytics` skill with structured 3-step workflow (health → summary → jobs → per-run drill-down). Confidence-graded anomaly detection (HIGH / MEDIUM / LOW) with supporting evidence requirements. "Known Ways to Fool Yourself" guardrails (age-gating, script job awareness, variance checks). Cross-references `jobs.json` for scheduling context and silent failure detection.
 - **Test suite: 149 tests** (83 original + 66 CLI tests) — all passing, `ruff` + `mypy` clean.
 

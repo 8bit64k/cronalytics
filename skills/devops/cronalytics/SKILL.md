@@ -54,7 +54,11 @@ The `cronalytics` command is available after the plugin is installed. If it is
 not on `$PATH`, run via the plugin path:
 
 ```bash
-python ~/.hermes/plugins/cronalytics/cli.py --help
+python ~/.hermes/plugins/cronalytics/cronalytics/cli.py --help
+```
+Or install via pip for the full command:
+```bash
+pip install -e ~/.hermes/plugins/cronalytics --break-system-packages
 ```
 
 ### Subcommands

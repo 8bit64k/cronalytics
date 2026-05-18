@@ -266,26 +266,28 @@ All interactive elements are keyboard-accessible:
 
 ## CLI Usage
 
-Cronalytics includes a standalone terminal interface with the same data as the dashboard, plus `--json` output for scripts and agents.
+Cronalytics includes a terminal data tool with the same data as the dashboard, plus `--json` output for scripts and agents.
 
 ### Installation
 
-If you installed via the dashboard plugin tab, the CLI is already available:
+If you installed via the dashboard plugin tab, the CLI code is already present. Install it via `pip` to get the `cronalytics` command on your `$PATH`:
 
 ```bash
-python ~/.hermes/plugins/cronalytics/cli.py summary --days 14
+pip install -e ~/.hermes/plugins/cronalytics --break-system-packages
 ```
 
-Or use the bundled CLI that comes with the plugin:
+*(Arch Linux requires `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
+
+Then use it from any directory:
 
 ```bash
-python ~/.hermes/plugins/cronalytics/cli.py summary --days 14
+cronalytics summary --days 14
 ```
 
-Or add a shell alias to your `~/.bashrc` or `~/.zshrc`:
+Or, without `pip`, run the module directly from the plugin directory:
 
 ```bash
-alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'
+cd ~/.hermes/plugins/cronalytics && python -m cronalytics.cli summary --days 14
 ```
 
 ### Commands

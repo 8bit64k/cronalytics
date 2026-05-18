@@ -1,6 +1,6 @@
 # Features — Cronalytics
 
-> **Version:** 1.0.0
+> **Version:** 1.1.0
 > **Scope:** Living catalog of all implemented functionality.
 
 This document lists every implemented feature, the rationale for its inclusion, and the formulas or data sources it relies on. If something is not listed here, it is not implemented.
@@ -285,12 +285,12 @@ If no data exists at all:
 
 ---
 
-## 6. Standalone CLI
+## 6. Terminal CLI
 
 A terminal interface that mirrors the dashboard data without requiring a browser.
 
 ```
-python -m cronalytics.cli <command> [--days N]
+cronalytics <command> [--days N]
 ```
 
 | Command | Output |
@@ -302,7 +302,7 @@ python -m cronalytics.cli <command> [--days N]
 | `trends` | Daily bar chart (ASCII) of cost + runs |
 | `health` | Fact DB metadata, job count, last sync |
 
-**Shared flag:** `--days N` (default 30, `0` = all time).
+**Shared flags:** `--days N`, `--outcome both|success|failure`, `--mode all|agent|no_agent`, `--json`.
 
 Formatting conventions:
 - Cost: `$X.XX`
@@ -404,14 +404,15 @@ Paths:
 
 ## 9. Test Coverage
 
-83 pytest tests covering:
+149 pytest tests covering:
 - `facts.py` — schema creation, ingestion, aggregation queries, job_id parsing
 - `scanner.py` — watermark I/O, session fetching, batch insert, script scanning
 - `schedule.py` — cron expression parsing, projection math, edge cases
 - `ingester.py` — hook handler, pending file ops, worker loop, retry logic
 - `plugin_api.py` — all 7 API endpoints, response shapes, filter params
+- `cli.py` — all commands, `--json` output, filters, error handling
 
-Run: `uv run pytest -q`
+Run: `python -m pytest tests/ -v --tb=short`
 
 Lint/type: `uv run ruff check . && uv run mypy .`
 
@@ -428,7 +429,7 @@ These are **intentional boundaries or acknowledged gaps**, not bugs.
 5. **Job detail modal capped at 200 runs.** High-frequency jobs show full count in the table but drill-down is limited.
 6. **Native `title` tooltips on table headers only.** Column headers use browser-native `title` for simple explanations. Custom tooltips were explored and reverted due to viewport-edge positioning complexity on iPad Safari.
 7. **Mobile layout functional but not optimized.** The table uses horizontal scroll on narrow viewports.
-8. **Focus trap deferred to v1.1.** Modal focus management works for typical usage but does not trap Tab cycles inside the modal.
+8. **Focus trap deferred to a future release.** Modal focus management works for typical usage but does not trap Tab cycles inside the modal.
 
 ---
 

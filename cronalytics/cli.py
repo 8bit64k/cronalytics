@@ -1,17 +1,18 @@
-"""Cronalytics CLI — standalone terminal data dump.
+"""Cronalytics CLI — terminal data tool.
 
 Usage (dashboard plugin install — primary):
-    python ~/.hermes/plugins/cronalytics/cli.py [--days N] [--outcome both|success|failure] [--mode all|agent|no_agent]
-    python ~/.hermes/plugins/cronalytics/cli.py summary [--days N] [--outcome ...] [--mode ...] [--json]
-    python ~/.hermes/plugins/cronalytics/cli.py jobs    [--days N] [--outcome ...] [--mode ...] [--json]
-    python ~/.hermes/plugins/cronalytics/cli.py runs   --job JOB_ID [--days N] [--outcome ...] [--mode ...] [--json]
-    python ~/.hermes/plugins/cronalytics/cli.py models [--days N] [--outcome ...] [--mode ...] [--json]
-    python ~/.hermes/plugins/cronalytics/cli.py trends [--days N] [--outcome ...] [--mode ...] [--json]
-    python ~/.hermes/plugins/cronalytics/cli.py all   [--days N] [--outcome ...] [--mode ...]
-    python ~/.hermes/plugins/cronalytics/cli.py health [--json]
+    cronalytics [--days N] [--outcome both|success|failure] [--mode all|agent|no_agent]
+    cronalytics summary [--days N] [--outcome ...] [--mode ...] [--json]
+    cronalytics jobs    [--days N] [--outcome ...] [--mode ...] [--json]
+    cronalytics runs   --job JOB_ID [--days N] [--outcome ...] [--mode ...] [--json]
+    cronalytics models [--days N] [--outcome ...] [--mode ...] [--json]
+    cronalytics trends [--days N] [--outcome ...] [--mode ...] [--json]
+    cronalytics all   [--days N] [--outcome ...] [--mode ...]
+    cronalytics health [--json]
 
-Usage (shell alias — secondary):
-    alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'
+Usage (pip install -e / direct module):
+    pip install -e ~/.hermes/plugins/cronalytics --break-system-packages
+    alias cronalytics='python ~/.hermes/plugins/cronalytics/cronalytics/cli.py'
     cronalytics summary --days 14
 """
 

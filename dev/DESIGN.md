@@ -22,7 +22,7 @@ The result: automation is easy to start, but ongoing cron cost compounds quietly
 
 ## 2. Solution
 
-Cronalytics is a **dashboard plugin** (plus a standalone CLI) that attributes session-level usage and estimated cost to cron-originated runs. It lives inside `hermes dashboard` as a standalone tab at `/cronalytics`.
+Cronalytics is a **dashboard plugin** with an optional terminal CLI that attributes session-level usage and estimated cost to cron-originated runs. It lives inside `hermes dashboard` as a dedicated tab at `/cronalytics`.
 
 > **Terminology (as of Hermes 2026-05):**
 > - **Hermes Agent plugin** — Has a `plugin.yaml`, registers hooks (e.g. `on_session_end`), runs inside the gateway process. Cronalytics is this.
@@ -319,7 +319,7 @@ run_job() ──▶ run_conversation() ──▶ on_session_end(platform="cron")
 - Surface aggregates (total cost, runs, tokens, pace) in a dashboard tab.
 - Project future spend based on schedule (nominal) and current pace (trend).
 - Distinguish agent vs script-only jobs.
-- Provide a standalone CLI for terminal-based inspection.
+- Provide a terminal CLI for terminal-based inspection.
 
 ### What Cronalytics Does NOT Do
 - **Create or edit jobs** — use the built-in `/cron` page.
@@ -347,9 +347,9 @@ run_job() ──▶ run_conversation() ──▶ on_session_end(platform="cron")
 
 ---
 
-## 8. Standalone CLI
+## 8. Terminal CLI
 
-Cronalytics ships a standalone terminal interface (`cli.py`) that queries `facts.db` directly and renders monospace-aligned ASCII tables or `--json` envelopes. It is designed for **scripts, agents, and programmatic consumption** — not human visual exploration.
+Cronalytics ships a terminal data tool (`cronalytics/cli.py`) that queries `facts.db` directly and renders monospace-aligned ASCII tables or `--json` envelopes. It is designed for **scripts, agents, and programmatic consumption** — not human visual exploration.
 
 ### Design Philosophy: Dashboard for People, CLI for Agents
 
@@ -382,7 +382,7 @@ User / Agent
 ### CLI Design Decisions
 
 1. **Single file** (`cli.py`, ~1000 lines) — self-contained, no external deps beyond Python stdlib + croniter. Works from the plugin directory directly.
-2. **Shell alias** — `python ~/.hermes/plugins/cronalytics/cli.py` (direct) or `alias cronalytics='python ~/.hermes/plugins/cronalytics/cli.py'` (shorthand).
+2. **Shell entry point** — `cronalytics` (via `pip install -e`) or `alias cronalytics='python -m cronalytics.cli'` for the module path.
 3. **Every data command supports `--json`** — structured envelopes with `period`, `start_date`, `end_date`, `outcome`, `mode`, and `data`. Pipe-friendly.
 4. **Job name resolution** — reads `~/.hermes/cron/jobs.json` to map `job_id` → human-readable name, applies truncation + `[N]` badge.
 5. **Projection computation** — calls `schedule.get_job_projections()` per-job to compute `pace`, `drift_ratio`, `scheduled_runs_*`, etc. JSON path mirrors rendered path exactly.
@@ -407,14 +407,15 @@ This means `cronalytics jobs --days 7 --json` and `cronalytics models --days 7 -
 cronalytics/
 ├── plugin.yaml              # Manifest: name, version, hooks
 ├── __init__.py              # register(ctx): schema, recovery, hook, bootstrap scanner
-├── config.py                # Paths, retry delays, jitter
-├── facts.py                 # Fact DB: schema, insert, queries
-├── ingester.py              # Hook handler, pending.jsonl, background worker
-├── scanner.py               # Reconciliation scanner + watermark I/O
-├── schedule.py              # Cron parsing, projection math (croniter)
-├── cli.py                   # Standalone terminal interface (dashboard + pip)
-├── logger.py                # Simple prefixed logger
-├── checkpoint.py            # Session state serialization for multi-session dev
+├── cronalytics/             # Core package
+│   ├── cli.py             # Terminal interface (entry point)
+│   ├── config.py          # Paths, retry delays, jitter
+│   ├── facts.py           # Fact DB: schema, insert, queries
+│   ├── ingester.py        # Hook handler, pending.jsonl, background worker
+│   ├── scanner.py         # Reconciliation scanner + watermark I/O
+│   ├── schedule.py        # Cron parsing, projection math (croniter)
+│   ├── logger.py          # Simple prefixed logger
+│   └── checkpoint.py      # Session state serialization for multi-session dev
 ├── skills/
 │   └── devops/
 │       └── cronalytics/
