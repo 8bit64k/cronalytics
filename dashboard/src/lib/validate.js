@@ -101,6 +101,12 @@ export function validateJobRuns(d) {
   assertType("/jobs/:id/runs", d.job_id, "string", "job_id");
   assertType("/jobs/:id/runs", d.limit, "number", "limit");
   assertType("/jobs/:id/runs", d.runs, Array, "runs");
+  if (d.total_runs != null) {
+    assertType("/jobs/:id/runs", d.total_runs, "number", "total_runs");
+  }
+  if (d.more_available != null) {
+    assertType("/jobs/:id/runs", d.more_available, "boolean", "more_available");
+  }
   if (IS_DEV && Array.isArray(d.runs)) {
     d.runs.forEach((r, i) => {
       assertType("/jobs/:id/runs", r.session_id, "string", `runs[${i}].session_id`);

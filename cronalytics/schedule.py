@@ -108,7 +108,7 @@ def get_job_projections(
     minutes: int | None = None
 
     if job_def:
-        sched = job_def.get("schedule", {})
+        sched = job_def.get("schedule") or {}
         kind = sched.get("kind")
         expr = sched.get("expr")
         minutes = sched.get("minutes")

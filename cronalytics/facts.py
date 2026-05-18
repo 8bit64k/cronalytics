@@ -488,7 +488,7 @@ def query_jobs(db_path: Path, days: int = 30, outcome: str = "both", mode: str =
 
 
 def query_job_runs(
-    db_path: Path, job_id: str, limit: int = 50, days: int = 0,
+    db_path: Path, job_id: str, limit: int = 0, days: int = 0,
     outcome: str = "both", sort_key: str = "run_time", sort_dir: str = "desc",
     mode: str = "all",
 ) -> list[dict[str, Any]]:
@@ -532,9 +532,9 @@ def query_job_runs(
         FROM cron_runs
         {where}
         ORDER BY {order_col} {order_dir}
-        LIMIT ?
+        {("LIMIT ?" if limit > 0 else "")}
         """,
-        params + [limit],
+        (params + [limit]) if limit > 0 else params,
     )
     cols = [
         "session_id", "job_id", "run_time", "ended_at",

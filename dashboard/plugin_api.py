@@ -14,6 +14,7 @@ import importlib.util
 import json
 import sqlite3
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -231,7 +232,7 @@ async def jobs(
 @router.get("/jobs/{job_id}/runs")
 async def job_runs(
     job_id: str,
-    limit: int = Query(default=50, ge=1, le=500),
+    limit: int = Query(default=250, ge=0, le=500),
     days: int = Query(default=0, ge=0),
     outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
     sort_key: str = Query(
@@ -252,10 +253,31 @@ async def job_runs(
     )
     if not rows:
         raise HTTPException(status_code=404, detail=f"No runs found for job {job_id}")
+    # Also fetch total count for "more available" indicator
+    total_conn = sqlite3.connect(FACT_DB)
+    total_conditions = ["job_id = ?"]
+    total_params: list[Any] = [job_id]
+    if days > 0:
+        total_conditions.append("run_time >= ?")
+        total_params.append(time.time() - (days * 86400))
+    if outcome in ("success", "failure"):
+        total_conditions.append("success = ?")
+        total_params.append(1 if outcome == "success" else 0)
+    if mode in ("agent", "no_agent"):
+        total_conditions.append("job_mode = ?")
+        total_params.append(mode)
+    total_where = " WHERE " + " AND ".join(total_conditions)
+    total_cursor = total_conn.execute(
+        f"SELECT COUNT(*) FROM cron_runs{total_where}", total_params
+    )
+    total_runs = total_cursor.fetchone()[0]
+
     return _api_wrap(
         {
             "job_id": job_id,
             "limit": limit,
+            "total_runs": total_runs,
+            "more_available": total_runs > len(rows),
             "days": days,
             "outcome": outcome,
             "sort_key": sort_key,

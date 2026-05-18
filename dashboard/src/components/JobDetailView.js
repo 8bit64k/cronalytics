@@ -21,7 +21,7 @@ export function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir 
   const [sKey, setSKey] = useState(sortKey);
   const [sDir, setSDir] = useState(sortDir);
 
-  const path = `/api/plugins/cronalytics/jobs/${encodeURIComponent(jobId)}/runs?days=${days}&outcome=${outcome}&sort_key=${sKey}&sort_dir=${sDir}&limit=200`;
+  const path = `/api/plugins/cronalytics/jobs/${encodeURIComponent(jobId)}/runs?days=${days}&outcome=${outcome}&sort_key=${sKey}&sort_dir=${sDir}&limit=250`;
   const runs = useApi(path);
 
   const sortedRuns = runs.data && runs.data.runs
@@ -189,6 +189,27 @@ export function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir 
                     )
                   )
                 )
+              ),
+              runs.data && runs.data.more_available && React.createElement(
+                "div",
+                {
+                  style: {
+                    marginTop: "0.75rem",
+                    padding: "0.5rem 0.75rem",
+                    fontSize: "0.72rem",
+                    opacity: 0.7,
+                    background: "rgba(255,255,255,0.03)",
+                    borderRadius: "0.35rem",
+                    lineHeight: 1.5,
+                  },
+                },
+                "Showing ", React.createElement("strong", null, runs.data.runs.length),
+                " of ", React.createElement("strong", null, runs.data.total_runs.toLocaleString()),
+                " runs. Use ",
+                React.createElement("code", { style: { fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.9 } },
+                  "cronalytics runs --job " + jobId + " --days " + (days === 0 ? "0" : days)
+                ),
+                " for full history."
               )
             )
   );

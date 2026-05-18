@@ -392,6 +392,42 @@ Anomalies (confidence-graded):
 
 > **"Dashboard for people, CLI for agents, skill for reasoning."**
 
+### Tailoring Assessments to Your Environment
+
+The same assessment prompt produces different depth depending on your fleet size and how you frame the request. Our testing (see `references/prompt-engineering-suite.md`) found six distinct prompt angles, each surfacing different signals:
+
+| Angle | Surfaces Best | Good For |
+|-------|---------------|----------|
+| Cost forensics | Ranked burners, model economics, annualized projections | "My bill is high" |
+| Failure hunting | Silent failures, broken `no_agent` jobs, error patterns | "Something is broken" |
+| Growth / acceleration | Context creep, cost acceleration, session archaeology | "Is anything getting worse?" |
+| Temporal patterns | Schedule clustering, UTC drift, off-peak gaps | "When are my jobs actually running?" |
+| Value / frustration | Blunt bottom-line, "what to fix first" priority list | "Am I wasting money?" |
+| Weekly status check | Concise top-5 digest, borderline cases | "Quick check — what's up?" |
+
+**Composite prompt** (catches all angles in one shot):
+
+> "I think my cron jobs are wasting money and some might be broken without me knowing. Show me which jobs are burning the most money, which are failing silently, and whether anything is accelerating out of control. Include day-of-week and hour-of-day patterns, rank by cost, and give me a blunt bottom line of what's broken and what to fix first."
+
+**Time window matters.** The CLI defaults to 30 days, but long-term creep and cost acceleration are invisible inside a month. If you do not specify a window, the skill defaults to the **full dataset span** (`--days 0`). Specify only when you want a narrow slice (e.g., "this week" → `--days 7`).
+
+### Model Choice for Assessments
+
+You do **not** need a frontier model to run a cronalytics assessment. Pattern detection on structured data is what cheap models excel at.
+
+| Model | Est. Cost per Assessment | Best For |
+|-------|-------------------------|----------|
+| gemini-3-flash | ~$0.01–0.05 | Weekly recurring assessments |
+| gpt-5.4-mini | ~$0.02–0.08 | Weekly with deeper reasoning |
+| kimi-k2.6 | ~$0.10–0.50 | Monthly deep-dives, full composite prompt |
+| claude-sonnet / gpt-5.5 | $2.00–5.00+ | **Overkill — avoid for routine assessments** |
+
+At weekly cadence:
+- gemini-flash: ~$0.04–0.20/month to monitor a fleet
+- gpt-5.5: ~$8–20/month — a 100× waste for the same signal
+
+**Rule:** Use the cheapest model that reliably produces the structured output you need. If the assessment misses a signal, upgrade the model, not the prompt.
+
 ---
 
 ## Advanced: Multiple Profiles

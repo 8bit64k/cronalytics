@@ -455,7 +455,7 @@ def _fetch_runs(db_path: Path, args: argparse.Namespace) -> Any:
     runs = query_job_runs(
         db_path,
         job_id=args.job,
-        limit=50,
+        limit=args.limit,
         days=args.days,
         outcome=args.outcome,
         mode=args.mode,
@@ -994,6 +994,12 @@ def _build_parser() -> argparse.ArgumentParser:
     runs_parser = subparsers.add_parser("runs", help="Individual runs for a job")
     _add_standard_flags(runs_parser)
     runs_parser.add_argument("--job", required=True, help="Job ID filter")
+    runs_parser.add_argument(
+        "--limit",
+        type=int,
+        default=0,
+        help="Max runs to return (0 = no limit, default: 0)",
+    )
 
     all_parser = subparsers.add_parser("all", help="Run health + summary + jobs + models + trends")
     _add_standard_flags(all_parser)
