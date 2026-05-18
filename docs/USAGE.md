@@ -296,7 +296,7 @@ cd ~/.hermes/plugins/cronalytics && python -m cronalytics.cli summary --days 14
 |---------|-------------|---------|
 | `summary` | Headline aggregates + Leader Board + cost-by-model table | `cronalytics summary --days 14` |
 | `jobs` | Per-job table with ID, runs, cost, tokens, pace, avg duration | `cronalytics jobs --days 7 --json` |
-| `runs --job <id>` | Individual run history for a specific job | `cronalytics runs --job 67541bf6e230 --days 30` |
+| `runs --job <id>` | Individual run history for a specific job | `cronalytics runs --job _demo_f1561526d8 --days 30` |
 | `models` | Per-model aggregate table | `cronalytics models --days 14` |
 | `trends` | Daily bar chart (ASCII) of cost + runs | `cronalytics trends --days 90` |
 | `health` | Fact DB metadata: total runs, unique jobs, last sync | `cronalytics health --json` |

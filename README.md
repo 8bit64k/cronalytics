@@ -35,7 +35,7 @@ cronalytics summary --days 14
 cronalytics jobs --days 7 --json | jq '.data[] | select(.pace > 1.2)'
 
 # Drill into a specific job
-cronalytics runs --job 67541bf6e230 --days 30 --json
+cronalytics runs --job _demo_f1561526d8 --days 30 --json
 ```
 
 ### Skill (for reasoning)
@@ -448,7 +448,7 @@ MIT — see [`LICENSE`](LICENSE) for full text.
 
 - **Terminal CLI** — `cronalytics` (via `pip install -e`) or `python -m cronalytics.cli` with 7 subcommands: `summary`, `jobs`, `runs`, `models`, `trends`, `health`, `all`. Full `--json` output, `--days`, `--outcome`, `--mode` filters on every data command. Leader Board spotlight in `summary`. Job name resolution from `jobs.json`.
 - **Agent Diagnostic Skill** — Built-in `cronalytics` skill with structured 3-step workflow (health → summary → jobs → per-run drill-down). Confidence-graded anomaly detection (HIGH / MEDIUM / LOW) with supporting evidence requirements. "Known Ways to Fool Yourself" guardrails (age-gating, script job awareness, variance checks). Cross-references `jobs.json` for scheduling context and silent failure detection.
-- **Test suite: 149 tests** (83 original + 66 CLI tests) — all passing, `ruff` + `mypy` clean.
+- **Test suite: 149 tests** — all passing, `ruff` + `mypy` clean.
 
 ### v1.0.1 (2026-05-13)
 

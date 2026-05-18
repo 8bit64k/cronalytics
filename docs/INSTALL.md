@@ -52,7 +52,7 @@ Then use it from any directory:
 ```bash
 cronalytics summary --days 14
 cronalytics jobs --json
-cronalytics runs --job 67541bf6e230 --days 30
+cronalytics runs --job _demo_f1561526d8 --days 30
 ```
 
 **Alternative: Shell alias (no pip)**
