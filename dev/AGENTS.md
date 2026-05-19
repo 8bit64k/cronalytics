@@ -18,6 +18,28 @@ Review the architecture and design as needed located here: ./DESIGN.md
 
 ## Conventions
 
+### Phosphor Session Start Protocol (Mandatory)
+
+1. **Read `dev/AGENTS.md`** — every session, no exceptions. It is 62 lines.
+2. **Read `CHECKPOINT.md`** — before any file operation. Know where we left off.
+3. **Load referenced skills** — `checkpoint-resume-pattern` is explicitly required.
+
+### Skill Document Integrity
+
+- **Never declare a document "good to go" without reading every section**, including appendixes, reference lists, and example blocks. The `both` → `all` bug and the `--json` on `all` bug both survived because I reviewed the body and ignored the periphery.
+- **Verify reference files exist in the repo before claiming they exist.** The installed `~/.hermes/skills/` tree is not source of truth. If it's not in `builds/cronalytics/`, it's not canonical.
+- **Never write working notes into the skill directory.** Skill directory = committed, canonical, repo-synced. Working notes = `scratchpad/` only. This boundary is absolute.
+
+### Integration Testing > Unit Testing
+
+- **Unit tests passing does not mean the feature works.** The dashboard sending stale `"both"` to the API was an integration bug. pytest was green the entire time.
+- After any change that touches CLI → API → frontend surfaces, verify the actual end-to-end path: dashboard request with cached old value, CLI smoke test with real args, API regex acceptance.
+
+### No False Coverage Claims
+
+- **"I reviewed it" means I opened every file, read every line, and can justify its presence.** Not "I skimmed the body and assumed the appendix was fine."
+- **"All tests pass" means integration verified, not just `pytest -q`.**
+
 ## Plan
 
 Reference the build plan ./PLAN.md

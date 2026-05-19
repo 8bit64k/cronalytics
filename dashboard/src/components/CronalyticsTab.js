@@ -29,9 +29,15 @@ export function CronalyticsTab() {
   const [outcome, setOutcomeRaw] = useState(() => {
     try {
       const saved = localStorage.getItem("cronalytics:outcome");
-      if (saved) return saved;
+      if (saved) {
+        if (saved === "both") {
+          localStorage.setItem("cronalytics:outcome", "all");
+          return "all";
+        }
+        return saved;
+      }
     } catch {}
-    return "both";
+    return "all";
   });
   const setOutcome = (v) => {
     try { localStorage.setItem("cronalytics:outcome", v); } catch {}

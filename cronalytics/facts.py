@@ -299,7 +299,7 @@ def row_exists(db_path: Path, session_id: str) -> bool:
 # Aggregation queries (Phase 3 API)
 # ---------------------------------------------------------------------------
 
-def query_summary(db_path: Path, days: int = 30, outcome: str = "both", mode: str = "all") -> dict[str, Any]:
+def query_summary(db_path: Path, days: int = 30, outcome: str = "all", mode: str = "all") -> dict[str, Any]:
     """Return aggregate stats for cron runs in the last N days (0 = all time)."""
     conn = get_conn(db_path)
 
@@ -418,7 +418,7 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "both", mode: st
     }
 
 
-def query_jobs(db_path: Path, days: int = 30, outcome: str = "both", mode: str = "all") -> list[dict[str, Any]]:
+def query_jobs(db_path: Path, days: int = 30, outcome: str = "all", mode: str = "all") -> list[dict[str, Any]]:
     """Return per-job aggregates (0 = all time)."""
     conn = get_conn(db_path)
 
@@ -489,12 +489,12 @@ def query_jobs(db_path: Path, days: int = 30, outcome: str = "both", mode: str =
 
 def query_job_runs(
     db_path: Path, job_id: str, limit: int = 0, days: int = 0,
-    outcome: str = "both", sort_key: str = "run_time", sort_dir: str = "desc",
+    outcome: str = "all", sort_key: str = "run_time", sort_dir: str = "desc",
     mode: str = "all",
 ) -> list[dict[str, Any]]:
     """Return individual run history for a specific job (0 = all time).
 
-    Supports filtering by outcome (both/success/failure) and custom sorting:
+    Supports filtering by outcome (all/success/failure) and custom sorting:
     run_time, estimated_cost_usd, duration_seconds, success, model.
     """
     conn = get_conn(db_path)
@@ -583,7 +583,7 @@ def query_health(db_path: Path) -> dict[str, Any]:
     }
 
 
-def query_models(db_path: Path, days: int = 30, outcome: str = "both", mode: str = "all") -> list[dict[str, Any]]:
+def query_models(db_path: Path, days: int = 30, outcome: str = "all", mode: str = "all") -> list[dict[str, Any]]:
     """Return per-model usage aggregates (0 = all time)."""
     conn = get_conn(db_path)
 
@@ -629,7 +629,7 @@ def query_models(db_path: Path, days: int = 30, outcome: str = "both", mode: str
     ]
 
 
-def query_trends(db_path: Path, days: int = 30, outcome: str = "both", mode: str = "all") -> list[dict[str, Any]]:
+def query_trends(db_path: Path, days: int = 30, outcome: str = "all", mode: str = "all") -> list[dict[str, Any]]:
     """Return daily cost and run-count trend (0 = all time)."""
     conn = get_conn(db_path)
 

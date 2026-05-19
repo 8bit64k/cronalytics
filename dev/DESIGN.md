@@ -383,7 +383,7 @@ User / Agent
 
 1. **Single file** (`cli.py`, ~1000 lines) — self-contained, no external deps beyond Python stdlib + croniter. Works from the plugin directory directly.
 2. **Shell entry point** — `cronalytics` (via `pip install -e`) or `alias cronalytics='python -m cronalytics.cli'` for the module path.
-3. **Every data command supports `--json`** — structured envelopes with `period`, `start_date`, `end_date`, `outcome`, `mode`, and `data`. Pipe-friendly.
+3. **Every data command except `all` supports `--json`** — structured envelopes with `period`, `start_date`, `end_date`, `outcome`, `mode`, and `data`. Pipe-friendly.
 4. **Job name resolution** — reads `~/.hermes/cron/jobs.json` to map `job_id` → human-readable name, applies truncation + `[N]` badge.
 5. **Projection computation** — calls `schedule.get_job_projections()` per-job to compute `pace`, `drift_ratio`, `scheduled_runs_*`, etc. JSON path mirrors rendered path exactly.
 6. **Leader Board** — `summary` command selects top job per category (runs, cost, tokens, pace) and computes `% of total` share, matching the dashboard's spotlight cards.
@@ -394,7 +394,7 @@ User / Agent
 Every data command shares the same filter surface:
 
 - `--days N` — window in days (`0` = all time)
-- `--outcome both|success|failure` — outcome filter
+- `--outcome all|success|failure` — outcome filter
 - `--mode all|agent|no_agent` — job mode filter
 
 This means `cronalytics jobs --days 7 --json` and `cronalytics models --days 7 --json` apply identical filters. An agent reading the skill learns one grammar and applies it everywhere.

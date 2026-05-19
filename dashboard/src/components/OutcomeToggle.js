@@ -2,7 +2,7 @@ import { React } from "../lib/sdk.js";
 import { Button } from "../lib/sdk.js";
 
 const OPTIONS = [
-  { label: "All", value: "both" },
+  { label: "All", value: "all" },
   { label: "Success", value: "success" },
   { label: "Failure", value: "failure" },
 ];

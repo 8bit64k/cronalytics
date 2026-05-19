@@ -404,7 +404,7 @@
 
   // src/components/OutcomeToggle.js
   var OPTIONS = [
-    { label: "All", value: "both" },
+    { label: "All", value: "all" },
     { label: "Success", value: "success" },
     { label: "Failure", value: "failure" }
   ];
@@ -1851,10 +1851,16 @@
     const [outcome, setOutcomeRaw] = useState(() => {
       try {
         const saved = localStorage.getItem("cronalytics:outcome");
-        if (saved) return saved;
+        if (saved) {
+          if (saved === "both") {
+            localStorage.setItem("cronalytics:outcome", "all");
+            return "all";
+          }
+          return saved;
+        }
       } catch {
       }
-      return "both";
+      return "all";
     });
     const setOutcome = (v) => {
       try {

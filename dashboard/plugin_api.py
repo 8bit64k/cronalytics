@@ -148,7 +148,7 @@ async def sync() -> dict[str, Any]:
 @router.get("/summary")
 async def summary(
     days: int = Query(default=30, ge=0),
-    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
+    outcome: str = Query(default="all", pattern="^(all|both|success|failure)$"),
     mode: str = Query(default="all", pattern="^(all|agent|no_agent)$"),
 ) -> dict[str, Any]:
     """Aggregated stats for cron runs over the last N days (0 = all time).
@@ -200,7 +200,7 @@ async def summary(
 async def jobs(
     days: int = Query(default=30, ge=0),
     skip_projections: bool = Query(default=False, description="Set true to omit schedule-aware projections (faster)"),
-    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
+    outcome: str = Query(default="all", pattern="^(all|both|success|failure)$"),
     mode: str = Query(default="all", pattern="^(all|agent|no_agent)$"),
 ) -> dict[str, Any]:
     """Per-job aggregates: runs, total cost, avg cost, projections (0 = all time)."""
@@ -234,7 +234,7 @@ async def job_runs(
     job_id: str,
     limit: int = Query(default=250, ge=0, le=500),
     days: int = Query(default=0, ge=0),
-    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
+    outcome: str = Query(default="all", pattern="^(all|both|success|failure)$"),
     sort_key: str = Query(
         default="run_time",
         pattern="^(run_time|estimated_cost_usd|duration_seconds|success|model|input_tokens)$",
@@ -290,7 +290,7 @@ async def job_runs(
 @router.get("/models")
 async def models(
     days: int = Query(default=30, ge=0),
-    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
+    outcome: str = Query(default="all", pattern="^(all|both|success|failure)$"),
     mode: str = Query(default="all", pattern="^(all|agent|no_agent)$"),
 ) -> dict[str, Any]:
     """Per-model usage aggregates (0 = all time)."""
@@ -306,7 +306,7 @@ async def models(
 @router.get("/trends")
 async def trends(
     days: int = Query(default=30, ge=0),
-    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
+    outcome: str = Query(default="all", pattern="^(all|both|success|failure)$"),
     mode: str = Query(default="all", pattern="^(all|agent|no_agent)$"),
 ) -> dict[str, Any]:
     """Daily cost trend (0 = all time)."""

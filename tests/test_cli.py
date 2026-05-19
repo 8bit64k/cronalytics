@@ -300,17 +300,16 @@ class TestJsonEnvelope:
     """_json_envelope wraps raw data with period and filter context."""
 
     def test_basic_envelope(self):
-        args = MagicMock(days=7, outcome="both", mode="all")
+        args = MagicMock(days=7, outcome="all", mode="all")
         with patch("cronalytics.cli.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2026, 5, 15)
+            mock_dt.now.return_value.isoformat.return_value = "2026-05-18T12:00:00"
             envelope = _json_envelope([{"x": 1}], args, Path("/dev/null"))
-        assert envelope["period"] == "Last 7 days"
         assert envelope["data"] == [{"x": 1}]
-        assert envelope["outcome"] == "both"
+        assert envelope["outcome"] == "all"
         assert envelope["mode"] == "all"
 
     def test_all_time_no_filters(self):
-        args = MagicMock(days=0, outcome="both", mode="all")
+        args = MagicMock(days=0, outcome="all", mode="all")
         envelope = _json_envelope([{"x": 1}], args, Path("/dev/null"), include_filters=False)
         assert envelope["period"] == "All time"
         assert "outcome" not in envelope

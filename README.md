@@ -341,11 +341,11 @@ All endpoints are mounted at `/api/plugins/cronalytics/`.
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/health` | `GET` | Plugin health + sync metadata |
-| `/summary?days=N&outcome=both&mode=all` | `GET` | Aggregated totals with projections |
-| `/jobs?days=N&outcome=both&mode=all` | `GET` | Per-job rolled-up stats with projections |
+| `/summary?days=N&outcome=all&mode=all` | `GET` | Aggregated totals with projections |
+| `/jobs?days=N&outcome=all&mode=all` | `GET` | Per-job rolled-up stats with projections |
 | `/jobs/{job_id}/runs` | `GET` | Individual runs for a specific job |
-| `/models?days=N&outcome=both&mode=all` | `GET` | Cost breakdown by model |
-| `/trends?days=N&outcome=both&mode=all` | `GET` | Daily cost + runs time series |
+| `/models?days=N&outcome=all&mode=all` | `GET` | Cost breakdown by model |
+| `/trends?days=N&outcome=all&mode=all` | `GET` | Daily cost + runs time series |
 | `/sync` | `POST` | Run reconciliation scanner manually |
 
 ---
@@ -446,7 +446,7 @@ MIT — see [`LICENSE`](LICENSE) for full text.
 
 ### v1.1.0 (2026-05-19)
 
-- **Terminal CLI** — `cronalytics` (via `pip install -e`) or `python -m cronalytics.cli` with 7 subcommands: `summary`, `jobs`, `runs`, `models`, `trends`, `health`, `all`. Full `--json` output, `--days`, `--outcome`, `--mode` filters on every data command. Leader Board spotlight in `summary`. Job name resolution from `jobs.json`.
+- **Terminal CLI** — `cronalytics` (via `pip install -e`) or `python -m cronalytics.cli` with 7 subcommands: `summary`, `jobs`, `runs`, `models`, `trends`, `health`, `all`. Full `--json` output on every data command except `all`. `--days`, `--outcome`, `--mode` filters on every data command. Leader Board spotlight in `summary`. Job name resolution from `jobs.json`.
 - **Agent Diagnostic Skill** — Built-in `cronalytics` skill with structured 3-step workflow (health → summary → jobs → per-run drill-down). Confidence-graded anomaly detection (HIGH / MEDIUM / LOW) with supporting evidence requirements. "Known Ways to Fool Yourself" guardrails (age-gating, script job awareness, variance checks). Cross-references `jobs.json` for scheduling context and silent failure detection.
 - **Test suite: 149 tests** — all passing, `ruff` + `mypy` clean.
 

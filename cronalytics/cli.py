@@ -1,7 +1,7 @@
 """Cronalytics CLI — terminal data tool.
 
 Usage (dashboard plugin install — primary):
-    cronalytics [--days N] [--outcome both|success|failure] [--mode all|agent|no_agent]
+    cronalytics [--days N] [--outcome all|success|failure] [--mode all|agent|no_agent]
     cronalytics summary [--days N] [--outcome ...] [--mode ...] [--json]
     cronalytics jobs    [--days N] [--outcome ...] [--mode ...] [--json]
     cronalytics runs   --job JOB_ID [--days N] [--outcome ...] [--mode ...] [--json]
@@ -921,9 +921,9 @@ def _add_standard_flags(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--outcome",
-        choices=["both", "success", "failure"],
-        default="both",
-        help="Filter by outcome (default: both)",
+        choices=["all", "success", "failure"],
+        default="all",
+        help="Filter by outcome (default: all)",
     )
     parser.add_argument(
         "--mode",
@@ -963,9 +963,9 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--outcome",
-        choices=["both", "success", "failure"],
-        default="both",
-        help="Filter by outcome (default: both)",
+        choices=["all", "success", "failure"],
+        default="all",
+        help="Filter by outcome (default: all)",
     )
     parser.add_argument(
         "--mode",

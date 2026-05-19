@@ -163,16 +163,16 @@ All endpoints are mounted at `/api/plugins/cronalytics/`.
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/health` | `GET` | Fact DB health, total runs, unique jobs, last sync watermark |
-| `/summary?days=N&outcome=both&mode=all` | `GET` | Aggregated headline stats + schedule-aware projections |
-| `/jobs?days=N&outcome=both&mode=all` | `GET` | Per-job aggregates with projections |
+| `/summary?days=N&outcome=all&mode=all` | `GET` | Aggregated headline stats + schedule-aware projections |
+| `/jobs?days=N&outcome=all&mode=all` | `GET` | Per-job aggregates with projections |
 | `/jobs/{job_id}/runs` | `GET` | Individual run history for a specific job |
-| `/models?days=N&outcome=both&mode=all` | `GET` | Per-model cost/token breakdown |
-| `/trends?days=N&outcome=both&mode=all` | `GET` | Daily cost + runs bars over time |
+| `/models?days=N&outcome=all&mode=all` | `GET` | Per-model cost/token breakdown |
+| `/trends?days=N&outcome=all&mode=all` | `GET` | Daily cost + runs bars over time |
 | `/sync` | `POST` | Trigger manual reconciliation scan |
 
 All endpoints return JSON wrapped as `{"plugin": "cronalytics", ...}`.
 The `days` parameter accepts `0` (all time) or `1–365`.
-The `outcome` parameter accepts `both`, `success`, `failure`.
+The `outcome` parameter accepts `all`, `success`, `failure`.
 The `mode` parameter accepts `all`, `agent`, `no_agent`.
 
 ---
@@ -302,7 +302,7 @@ cronalytics <command> [--days N]
 | `trends` | Daily bar chart (ASCII) of cost + runs |
 | `health` | Fact DB metadata, job count, last sync |
 
-**Shared flags:** `--days N`, `--outcome both|success|failure`, `--mode all|agent|no_agent`, `--json`.
+**Shared flags:** `--days N`, `--outcome all|success|failure`, `--mode all|agent|no_agent`. `--json` is supported by every data subcommand except `all`.
 
 Formatting conventions:
 - Cost: `$X.XX`
@@ -410,7 +410,7 @@ Paths:
 - `schedule.py` — cron expression parsing, projection math, edge cases
 - `ingester.py` — hook handler, pending file ops, worker loop, retry logic
 - `plugin_api.py` — all 7 API endpoints, response shapes, filter params
-- `cli.py` — all commands, `--json` output, filters, error handling
+- `cli.py` — all commands, filters, error handling. `--json` output on every data subcommand except `all`.
 
 Run: `python -m pytest tests/ -v --tb=short`
 

@@ -23,7 +23,7 @@ The sticky toolbar stays at the top of the viewport as you scroll.
 
 ### Outcome Toggle: `All | Success | Failure`
 
-Filters every metric and table row to show only successful runs, only failed runs, or both.
+Filters every metric and table row to show only successful runs, only failed runs, or all.
 
 - **All** (default) — shows everything.
 - **Success** — Cost card shows only successful-run cost; Jobs table shows only jobs with successful runs; Leader Board spotlights top successful jobs.
@@ -307,7 +307,7 @@ cd ~/.hermes/plugins/cronalytics && python -m cronalytics.cli summary --days 14
 Every data command accepts:
 
 - `--days N` — Look-back window (default: 30, `0` = all time)
-- `--outcome both|success|failure` — Filter by run outcome
+- `--outcome all|success|failure` — Filter by run outcome
 - `--mode all|agent|no_agent` — Filter by job mode
 - `--json` — Emit JSON instead of rendered tables (pipe to `jq`, Python, etc.)
 

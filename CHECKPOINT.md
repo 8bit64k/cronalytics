@@ -1,137 +1,100 @@
-# Checkpoint — 2026-05-18 (Session 2)
+# Checkpoint — 2026-05-19 (Session 3)
 
 ## Where we left off
 
-**Current position: T13 complete. All 6 prompt tests (T8–T13) archived. Series complete.**
+**Branch:** `feat/cli-terminal-access`
+**Latest commit:** `0d961be` — "fix: rename outcome filter 'both' → 'all' + audit skill references"
+**Tests:** 149 passing, ruff + mypy clean
 
-T8–T13 assessments saved to `scratchpad/test-skill-archive/`. T12 agent output surfaced one real CLI bug (50-run cap) and one false bug (agent reasoning error on outcome-filter semantics). Dashboard runs limit raised to 250 with "more available" notice.
+---
 
-### Bug Fixes (3 total, all committed)
+## Session Summary
 
-| # | Bug | File(s) | Fix |
-|---|-----|---------|-----|
-| 1 | Dashboard [Refresh] button layout shift + lost spinner | `dashboard/src/components/CronalyticsTab.js` | `min-width: 4.5rem` + loading state icon |
-| 2 | CLI crash on `schedule: null` orphan jobs | `cronalytics/schedule.py:112` | `or {}` instead of `get(..., {})` |
-| 3 | `runs` CLI hard-capped at 50 rows (silent truncation) | `cli.py`, `facts.py` | `--limit` arg added (default 0 = no limit); `query_job_runs` default changed from 50 → 0 |
+Renamed CLI outcome filter value from `both` to `all` across all surfaces (CLI, Python queries, API, frontend, tests, docs, skill). Audited skill reference directory: 15 files triaged to 5 canonical reference docs, 10 session artifacts moved to `scratchpad/working-notes/`. Fixed three documentation inaccuracies Nick caught during review.
 
-**Note on false bug:** T12 agent reported `--outcome failure` on `jobs` as "corrupted aggregation" with `success_runs` always 0. This was a **reasoning error, not a code bug**. The outcome filter correctly pre-filters runs before aggregation, producing subset-relative metrics. `success_runs = 0` is expected when only failures are in the dataset. Skill documentation updated to clarify this semantics (see `SKILL.md` Step 4). Phosphor failed to verify before acting — lesson learned.
+---
 
-### Dashboard Enhancement
-- `JobDetailView.js`: Raised limit from 200 → 250
-- `plugin_api.py`: API default 50 → 250, `ge=0` allows no-limit; added `total_runs` + `more_available` to response
-- Frontend notice: "Showing N of M runs. Use `cronalytics runs --job <id> --days 0` for full history."
+## Decisions Made
 
-## Session Arc: Prompt Engineering → Load Test → Bug Fixes → Skill Patch → Docs
+1. **Canonical outcome filter value is `all`**, not `both`. `both` accepted by API regex temporarily for backward compat with cached dashboard state; frontend normalizes on read.
+2. **Skill `references/` directory is canonical** — 5 files kept, fixed, committed to repo. No more session artifacts in skill tree.
+3. **`scratchpad/` = working notes, `skills/` = committed canonical docs.** Boundary is absolute.
+4. **AGENTS.md now contains Phosphor session-start protocol** — must read AGENTS.md and CHECKPOINT.md every session before any file operation.
 
-### Phase 1: Prompt Engineering (T8–T13)
-- Tested 6 prompt framings against identical 30-day dataset (214 runs, 14 jobs)
-- Produced comparative analysis in `scratchpad/test-skill-archive/OUTCOMES_ANALYSIS.md`
-- Key finding: composite prompt surfaces all 6 angles; 30-day default hides long-term creep
+---
 
-### Phase 2: Load Test Generator
-- Built `scratchpad/generate_load_test.py` — synthetic data generator
-- Scale: 100 jobs (all paused/disabled), 38K runs, 313-day span
-- Cost scaled to $5,000 (was $153K before 3.25% token scale-down)
-- Failure model: clustered (85% stable, 10% flaky, 5% broken)
-- Model mix: 10 models at real OpenRouter rates
-- Real backups saved to `~/.hermes/cronalytics-backup/`
+## Files Changed (committed to `feat/cli-terminal-access`)
 
-### Phase 3: Bug Fixes (both committed to branch)
-1. **Dashboard [Refresh] button layout shift + lost spinner**
-   - File: `dashboard/src/components/CronalyticsTab.js` line 214-225
-   - Fix: loading state now shows spinning icon + "…" with `min-width: 4.5rem`
-   - Built: `dashboard/dist/index.js` (117.5 KB)
-   - Status: ✅ Fixed
+### Core code
+- `cronalytics/cli.py` — argparse `choices`/`default`: `both` → `all` (2 places)
+- `cronalytics/facts.py` — function defaults: `outcome="both"` → `outcome="all"` (5 query functions); docstrings updated
+- `dashboard/plugin_api.py` — FastAPI `Query` defaults + regex backward compat `^(all|both|success|failure)$` across 5 endpoints
+- `dashboard/src/components/OutcomeToggle.js` — toggle value `both` → `all`
+- `dashboard/src/components/CronalyticsTab.js` — localStorage default `both` → `all` + migration for cached stale values
+- `dashboard/dist/index.js` — rebuilt bundle (118.7 KB)
 
-2. **CLI crash on `schedule: null` (orphan jobs)**
-   - File: `cronalytics/schedule.py` line 112
-   - Fix: `job_def.get("schedule") or {}` instead of `job_def.get("schedule", {})`
-   - Status: ✅ Fixed
+### Tests
+- `tests/test_cli.py` — `_json_envelope` expectations updated (`"both"` → `"all"`)
 
-### Phase 4: T8–T11 Assessment Results (38K synthetic dataset)
+### Documentation
+- `README.md` — v1.1.0 changelog line corrected
+- `CHANGELOG.md` — v1.1.0 summary corrected
+- `docs/USAGE.md` — CLI usage text and toggle description updated
+- `dev/FEATURES.md` — shared flags text + `cli.py` module description corrected
+- `dev/DESIGN.md` — CLI design principle #3 corrected
+- `dev/AGENTS.md` — **NEW:** Phosphor Session Start Protocol, Skill Document Integrity rules, Integration Testing > Unit Testing rule, No False Coverage Claims rule
 
-| Test | Prompt Framing | Window | Cost | Duration | Key Finding |
-|------|----------------|--------|------|----------|-------------|
-| **T8** | Composite (cost + broken) | 365-day | $0.42 | 10m 11s | 63.8% cost concentration, 5.2× context creep, 80× model ratio, synthetic data NOT detected |
-| **T9** | Failure hunting | 365-day | $0.47 | 4m 49s | Flat 8% failure rate = synthetic signature, 5 zombie orphan jobs, hyper-concentrated failures |
-| **T10** | Growth/acceleration | 365-day | $0.47 | 17m 47s | Fleet stable (flat slope), negative creep on 2 jobs, context creep monarch confirmed, 5,964 double-fires |
-| **T11** | Weekly status (“What’s up?”) | 7-day | ~$0.40 | 8m 58s | 76% weekly burn from one job, May 14 spike day, 19 broken jobs, 25.5× model cost ratio, best tool transparency |
+### Skill
+- `skills/devops/cronalytics/SKILL.md` — intro + table row + pitfall block: `both` → `all`; removed `--json` from `all` command; fixed `--limit` default description; added `silent-failure-detection.md` to Reference Materials; softened reference file trust language
+- `skills/devops/cronalytics/references/data-model.md` — **NEW in repo**; fixed `job_mode = null` → `"no_agent"`
+- `skills/devops/cronalytics/references/direct-sqlite-workarounds.md` — **NEW in repo**; removed stale 50-run cap bug references
+- `skills/devops/cronalytics/references/jq-diagnostic-patterns.md` — **NEW in repo**
+- `skills/devops/cronalytics/references/silent-failure-detection.md` — **NEW in repo**
+- `skills/devops/cronalytics/references/time-window-blind-spot.md` — **NEW in repo**; removed Nick-specific dataset references
 
-All results saved to `scratchpad/test-skill-archive/` with Phosphor analysis.
+### Moved to `scratchpad/working-notes/` (not committed, not canonical)
+- `vhs-demo-patterns.md`, `prompt-framing-analysis.md`, `cli-performance-benchmarks.md`, `cross-surface-filter-parameter-checklist.md`, `signal-validation-queries.md`, `assessment-economics.md`, `sqlite-diagnostic-patterns.md`, `null-schedule-crash.md`, `cost-remediation-pitfalls.md`, `cli-default-flag-pitfalls.md`
 
-### Phase 5: Skill Patch (Smart Defaults)
-- File: `~/.hermes/skills/devops/cronalytics/SKILL.md`
-- Changes:
-  - Step 0 = HARD GATE: `health --json` mandatory before any tool call
-  - Agent default = full span (`--days 0`), not 30 days
-  - CLI default stays 30 for Hermes Insights alignment
-  - All examples updated to `--days 0` with note to use Step 0's value
-- Status: ✅ Patched
+---
 
-### Phase 6: Docs Update
-- File: `docs/USAGE.md`
-- Added: "Tailoring Assessments to Your Environment" section
-  - Prompt angle taxonomy (6 angles + composite prompt)
-  - Time window guidance
-- Added: "Model Choice for Assessments" section
-  - Cost table: flash $0.01-0.05 vs gpt-5.5 $2-5+
-  - Monthly cadence math
-  - Rule: cheapest model first, upgrade only if signals missed
+## Verification Performed
 
-## Active Git Status
+```bash
+uv run pytest -x -q          # 149 passed
+node build.js                # dist/index.js rebuilt
+```
 
-- Branch: `feat/cli-terminal-access`
-- Modified tracked files (ready to commit):
-  - `cronalytics/schedule.py` — null schedule crash fix
-  - `cronalytics/cli.py` — `--limit` arg for runs command
-  - `cronalytics/facts.py` — `query_job_runs` default 0 (no hidden cap); `query_jobs` reverted to correct pre-filter behavior
-  - `dashboard/src/components/CronalyticsTab.js` — Refresh button layout fix
-  - `dashboard/src/components/JobDetailView.js` — Limit 200→250, "more available" notice
-  - `dashboard/plugin_api.py` — API limit 50→250, `ge=0`, `total_runs`/`more_available` fields
-  - `dashboard/src/lib/validate.js` — `total_runs`/`more_available` schema validation
-  - `dashboard/dist/index.js` — Rebuilt bundle
-  - `docs/USAGE.md` — Prompt angle taxonomy + model choice guidance
-  - `CHECKPOINT.md` — Session state updated
-- Untracked (gitignored, not committed):
-  - `scratchpad/generate_load_test.py`
-  - `scratchpad/test-skill-archive/` (T8–T15 + COMPARATIVE_ANALYSIS)
-  - `~/.hermes/cronalytics-backup/`
+Integration: Dashboard API accepts `"both"` and `"all"` (backward compat). Frontend normalizes cached `"both"` → `"all"`.
 
-## Synthetic Data State
+---
 
-- `~/.hermes/cron/jobs.json` — 114 jobs (100 synthetic paused, 14 real paused)
-- `~/.hermes/plugins/cronalytics/facts.db` — 38K runs, $5K total cost
-- Real backups: `~/.hermes/cronalytics-backup/jobs.json.real.bak` + `facts.db.real.bak`
+## Known Constraints / Gotchas
 
-## Open Decisions / Next Actions
+1. **API regex accepts `both` temporarily** — migration safety. Remove `both` from regex only after confirming no active cached states send it.
+2. **`~/.hermes/skills/devops/cronalytics/` is a copy**, not a symlink to repo. After any skill change: `cp` modified files to installed location, or reinstall skill.
+3. **Synthetic data still active** — `~/.hermes/cron/jobs.json` has 114 jobs (100 synthetic paused, 14 real paused). `~/.hermes/plugins/cronalytics/facts.db` has 38K runs. Real backups exist at `~/.hermes/cronalytics-backup/`.
+4. **All `no_agent` jobs show `job_mode = "no_agent"`** in JSON output, not `null`. The reference `data-model.md` now reflects this.
 
-1. **T12 bugs just fixed** — need test coverage added for 50-run cap and outcome-filter corruption
-2. **T13?** — Run temporal-histograms test, or call series complete?
-3. **Synthetic data cleanup** — Restore real backups when testing done:
+---
+
+## Open Questions / Next Actions
+
+1. **Synthetic data cleanup** — Restore real backups when testing done:
    ```bash
    cp ~/.hermes/cronalytics-backup/jobs.json.real.bak ~/.hermes/cron/jobs.json
    cp ~/.hermes/cronalytics-backup/facts.db.real.bak ~/.hermes/plugins/cronalytics/facts.db
    ```
-4. **Commit scope** — Bug fixes (3 total now) + docs + skill patch. Decide before restore.
+2. **Remove `both` from API regex** — After confirming no stale cached states.
+3. **AGENTS.md compliance** — Next session: read AGENTS.md before any file operation. Verify.
+
+---
 
 ## Resume Instructions
 
 When Nick returns (or if compression hits):
-1. Confirm T9 session ID and results
-2. Review T9 findings vs T8 (365-day should surface same or more signals)
-3. Decide on commit scope (bug fixes + docs = minimal, safe)
-4. If testing complete, revert synthetic data:
-   ```bash
-   cp ~/.hermes/cronalytics-backup/jobs.json.real.bak ~/.hermes/cron/jobs.json
-   cp ~/.hermes/cronalytics-backup/facts.db.real.bak ~/.hermes/plugins/cronalytics/facts.db
-   ```
-5. Continue any remaining prompt tests (T10-T13 on 38K data if desired)
-
-## Known Limitations / Warnings
-
-- 38K dataset is gitignored (in plugin dir), so no risk of repo bloat
-- All synthetic jobs are `enabled=false, state="paused"` — cron scheduler will not run them
-- Real jobs.json was backed up but current version has all jobs paused (including real ones)
-  - Must restore from backup when synthetic testing is done
-- `state.db` cross-contamination: CLI `sync` command reads from `state.db` and could mix real + synthetic sessions
-  - Avoid `cronalytics sync` during testing; data is already in facts.db
+1. Read `dev/AGENTS.md` — session start protocol is mandatory
+2. Read this `CHECKPOINT.md` — current state is captured above
+3. Verify branch: `git branch` should show `feat/cli-terminal-access`
+4. Verify commit: `git log --oneline -1` should show `0d961be`
+5. Decide on synthetic data restoration (see Open Questions)
+6. Continue any remaining work on the branch
