@@ -291,23 +291,36 @@ A terminal interface that mirrors the dashboard data without requiring a browser
 
 ```
 cronalytics <command> [--days N]
-```
+### 6.1 Full Report Chain (Default)
+
+Executing `cronalytics` (bare) or `cronalytics all` triggers an orchestrated **Full Report Chain**. It sequentially executes and renders five sub-commands into a unified terminal view:
+1. `health`
+2. `summary`
+3. `jobs`
+4. `models`
+5. `trends`
+
+**Note:** The `--json` flag is explicitly forbidden with the `all` command to prevent ambiguous multi-schema output.
+
+### 6.2 Data Sub-commands
 
 | Command | Output |
 |---------|--------|
-| `summary` | Headline runs, cost, tokens, trend arrow, cost-by-model table, **Leader Board** (top runs, cost, tokens, pace) |
-| `jobs` | Per-job table with ID, runs, cost, tokens, pace |
-| `runs --job ID` | Individual run history (time, duration, cost, tokens, model) |
+| `summary` | Headline runs, cost, tokens, trend arrow, cost-by-model table, **Leader Board** |
+| `jobs` | Per-job table with ID, Human Name, Runs, Cost, Avg Duration, Tokens, and Pace |
+| `runs --job ID` | Individual run history (time, duration, cost, tokens, model, success) |
 | `models` | Per-model aggregate table |
 | `trends` | Daily bar chart (ASCII) of cost + runs |
 | `health` | Fact DB metadata, job count, last sync |
 
-**Shared flags:** `--days N`, `--outcome all|success|failure`, `--mode all|agent|no_agent`. `--json` is supported by every data subcommand except `all`.
+### 6.3 Experimental & Deep Analytics (JSON only)
 
-Formatting conventions:
-- Cost: `$X.XX`
-- Tokens: `K`/`M` suffixes
-- Tables: monospace-aligned ASCII boxes matching `hermes insights` style
+The following metrics are implemented and available in `--json` output for advanced diagnostic work, but are considered **experimental**. They are not surfaced in the primary UI/CLI tables as they may be unreliable depending on model provider reporting or Hermes core version.
+
+- **Drift Ratio** (`drift_ratio`) — `observed_runs / scheduled_in_window`. Detects over-firing (retries) or missed ticks.
+- **Iteration Depth** (`api_call_count`, `tool_call_count`) — Measure of how "hard" an agent is working per run.
+- **Message Depth** (`message_count`) — Conversation length per run.
+- **Actual Cost** (`actual_cost_usd`) — Matches provider billing exactly; currently suppressed in summaries due to inconsistent provider coverage.
 
 ---
 
