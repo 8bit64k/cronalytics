@@ -176,7 +176,7 @@ mkdir -p ~/.hermes/skills/devops/cronalytics
 cp -r skills/cronalytics/* ~/.hermes/skills/devops/cronalytics/
 ```
 
-Once copied, the agent automatically discovers it when you ask about cron jobs.
+Once copied, the agent automatically discovers it when you ask about cron jobs. You can also manually load the skill in any chat session with `/cronalytics`.
 
 Alternatively, you can install the skill directly from the GitHub repository using the Hermes CLI:
 
@@ -184,6 +184,8 @@ Alternatively, you can install the skill directly from the GitHub repository usi
 # Fetches the skill from the specific directory and places it in devops/cronalytics/
 hermes skills install 8bit64k/cronalytics/skills/cronalytics --category devops
 ```
+
+Once installed, you can ensure the skill gets loaded in any chat session with `/cronalytics`.
 
 ---
 2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard, or run:
