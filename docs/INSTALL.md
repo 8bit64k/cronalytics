@@ -70,17 +70,21 @@ alias cronalytics='python -m cronalytics.cli'
 
 ## 3. Skill Setup
 
-The agent diagnostic skill ships inside the plugin at `skills/devops/cronalytics/SKILL.md`. It must be installed manually — it is not auto-enabled by the plugin install.
+### Skill Installation
 
-### Install via HTTPS URL
+The diagnostic skill is bundled in the plugin directory. Use the `cp` method to install it along with all supporting reference documents:
 
 ```bash
-hermes skills install \
-  https://raw.githubusercontent.com/8bit64k/cronalytics/main/skills/devops/cronalytics/SKILL.md \
-  --category devops --name cronalytics --yes
+# Create the skill directory if it doesn't exist
+mkdir -p ~/.hermes/skills/devops/cronalytics
+
+# Copy the skill and its references
+cp -r skills/devops/cronalytics/* ~/.hermes/skills/devops/cronalytics/
 ```
 
-Once enabled, the agent automatically uses the skill when you ask about cron jobs.
+This ensures the `SKILL.md` and the `references/` subdirectory (containing `data-model.md`, etc.) are correctly placed for the agent to use.
+
+---
 
 ### Install from local clone
 

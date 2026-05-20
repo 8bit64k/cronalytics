@@ -23,10 +23,12 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
 
 ## Three Ways to Use Cronalytics
 
+>The dashboard is insightful, but the CLI + Skill is the real super-power.
+
 ### Dashboard (for people)
 Visual exploration with cards, tables, charts, and modals. Best for human pattern recognition.
 
-### CLI (for agents)
+### CLI (for agents and tooling)
 ```bash
 # Full report (bare command or 'all' subcommand)
 cronalytics --days 14
@@ -35,11 +37,11 @@ cronalytics --days 14
 cronalytics jobs --days 7 --json | jq '.data[] | select(.pace > 1.2)'
 
 # Drill into a specific job
-cronalytics runs --job _demo_f1561526d8 --days 30 --json
+cronalytics runs --job f1561526d8 --days 30 --json
 ```
 
-### Skill (for reasoning)
-Built-in diagnostic skill that guides agents through structured cron health checks. Ask your agent:
+### Agent Skill (for reasoning)
+An agent skill that guides agents through structured cron health checks and diagnostics. Ask your agent:
 
 > "Check my cron jobs for the last two weeks — flag anything that looks off."
 
@@ -47,7 +49,6 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
 
 > **"Dashboard for people, CLI for agents, skill for reasoning."**
 
->"The dashboard is insightful, but the CLI + Skill is the real super-power."
 ---
 
 ## Mini-Tour
@@ -143,15 +144,15 @@ Or open the Hermes dashboard, go to the **Plugins** tab, enter `8bit64k/cronalyt
 
 The **Cronalytics** tab appears in the sidebar.
 
-### CLI (Optional Add-On)
+### CLI (Included)
 
-The CLI requires the plugin's `facts.db` to function and must be installed separately via `pip`:
+The CLI requires the plugin's `facts.db` to function and should be installed via `pip` to get full features like arg completion (you can also just create a shell alias to path/to/plugins/cronalytics/cronalytics.cli):
 
 ```bash
-pip install -e ~/.hermes/plugins/cronalytics --break-system-packages
+pip install -e ~/.hermes/plugins/cronalytics
 ```
 
-*(Arch Linux requires `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
+* I use Arch (by the way) and if you do too you'll need to add `--break-system-packages` to pip command due to PEP 668. Other distros omit that flag.*
 
 Then use it from anywhere:
 
@@ -168,15 +169,14 @@ pip uninstall cronalytics --break-system-packages
 
 ### Skill (Optional)
 
-The diagnostic skill is bundled at `skills/devops/cronalytics/SKILL.md`. It must be installed manually:
+The diagnostic skill and its supporting references are bundled in the repository. To install it locally:
 
 ```bash
-hermes skills install \
-  https://raw.githubusercontent.com/8bit64k/cronalytics/main/skills/devops/cronalytics/SKILL.md \
-  --category devops --name cronalytics --yes
+mkdir -p ~/.hermes/skills/devops/cronalytics
+cp -r skills/devops/cronalytics/* ~/.hermes/skills/devops/cronalytics/
 ```
 
-Once enabled, the agent automatically uses it when you ask about cron jobs.
+Once copied, the agent automatically discovers it when you ask about cron jobs.
 
 ---
 
