@@ -124,6 +124,8 @@ We deliberately chose **non-blocking** ingestion: the hook writes the `session_i
 ~/.hermes/plugins/cronalytics/facts.db
 ```
 
+**Concurrency:** The database explicitly enables **WAL (Write-Ahead Logging)** mode via `PRAGMA journal_mode=WAL;`. This ensures the background ingester thread can write new runs while the Dashboard API performs aggregation queries simultaneously without "Database is locked" errors.
+
 Why separate?
 - `state.db` is operational. It may be purged, migrated, or schema-migrated by Hermes core.
 - Fact DB rows are **INSERT-only**. No updates, no deletes. If upstream data changes, the snapshot remains.

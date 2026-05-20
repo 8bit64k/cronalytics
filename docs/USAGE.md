@@ -240,6 +240,16 @@ All interactive elements are keyboard-accessible:
 
 ---
 
+## Resetting the UI
+
+The dashboard saves your filter preferences to `localStorage`. If the UI behaves unexpectedly or you wish to clear your settings, you can clear these keys in your browser's Developer Tools (Console):
+
+- `cron_outcome_filter` — Stores `all`, `success`, or `failure`.
+- `cron_mode_filter` — Stores `all`, `agent`, or `no_agent`.
+- `cron_day_filter` — Stores the selected day window (e.g., `30`).
+
+---
+
 ## Common Workflows
 
 ### "Why did my cost spike this week?"
