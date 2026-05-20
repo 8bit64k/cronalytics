@@ -144,7 +144,7 @@ Or open the Hermes dashboard, go to the **Plugins** tab, enter `8bit64k/cronalyt
 
 The **Cronalytics** tab appears in the sidebar.
 
-### CLI (Included)
+### CLI (Recommended)
 
 The CLI requires the plugin's `facts.db` to function and should be installed via `pip` to get full features like arg completion (you can also just create a shell alias to path/to/plugins/cronalytics/cronalytics.cli):
 
@@ -167,7 +167,7 @@ To remove only the CLI command while keeping the plugin:
 pip uninstall cronalytics --break-system-packages
 ```
 
-### Skill (Optional)
+### Skill (Recommended)
 
 The diagnostic skill and its supporting references are bundled in the repository. To install it locally:
 
@@ -176,7 +176,7 @@ mkdir -p ~/.hermes/skills/devops/cronalytics
 cp -r skills/devops/cronalytics/* ~/.hermes/skills/devops/cronalytics/
 ```
 
-Once copied, the agent automatically discovers it when you ask about cron jobs.
+Once copied, the agent automatically discovers it when you ask about cron jobs, but if it doesn't you can ensure the skill gets loaded with /cronalytics in your chat session.
 
 ---
 
