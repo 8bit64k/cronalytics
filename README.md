@@ -167,24 +167,25 @@ To remove only the CLI command while keeping the plugin:
 pip uninstall cronalytics --break-system-packages
 ```
 
-### Skill (Recommended)
+### Skill (Optional)
 
 The diagnostic skill and its supporting references are bundled in the repository. To install it locally:
 
 ```bash
 mkdir -p ~/.hermes/skills/devops/cronalytics
-cp -r skills/devops/cronalytics/* ~/.hermes/skills/devops/cronalytics/
+cp -r skills/cronalytics/* ~/.hermes/skills/devops/cronalytics/
 ```
 
-Once copied, the agent automatically discovers it when you ask about cron jobs, but if it doesn't you can ensure the skill gets loaded with /cronalytics in your chat session.
+Once copied, the agent automatically discovers it when you ask about cron jobs.
+
+Alternatively, you can install the skill directly from the GitHub repository using the Hermes CLI:
+
+```bash
+# Fetches the skill from the specific directory and places it in devops/cronalytics/
+hermes skills install 8bit64k/cronalytics/skills/cronalytics --category devops
+```
 
 ---
-
-## First-Time Setup
-
-After install, the plugin needs data:
-
-1. **Wait for a cron job to run** — the `on_session_end` hook captures it automatically.
 2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard, or run:
 
 ```bash
