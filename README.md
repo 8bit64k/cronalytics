@@ -1,4 +1,4 @@
-# Cronalytics 1.1
+# Cronalytics v1.1.0
 
 
 /ˈkrɒn.əˌlɪt.ɪks/ (noun)
@@ -47,6 +47,7 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
 
 > **"Dashboard for people, CLI for agents, skill for reasoning."**
 
+>"The dashboard is insightful, but the CLI + Skill is the real super-power."
 ---
 
 ## Mini-Tour
