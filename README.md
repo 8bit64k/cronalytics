@@ -33,7 +33,7 @@ cronalytics --days 14
 
 # Per-job economics with pace and projections
 cronalytics jobs --days 7 --json | jq '.data[] | select(.pace > 1.2)'
-```
+
 # Drill into a specific job
 cronalytics runs --job _demo_f1561526d8 --days 30 --json
 ```
