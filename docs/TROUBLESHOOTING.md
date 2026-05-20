@@ -58,6 +58,29 @@ Cronalytics only captures jobs from the `on_session_end` hook going forward. His
 
 ---
 
+### Problem: CLI reports "No runs found" but the Dashboard shows data.
+
+**Check Path Resolution:**
+Cronalytics resolves `$HERMES_HOME` with the following priority:
+1. `hermes_constants.get_hermes_home()` (if running inside Hermes)
+2. `os.environ["HERMES_HOME"]`
+3. Default to `~/.hermes`
+
+If your CLI is environment-isolated (e.g. running in a raw shell without your usual exports), it may be looking at a different profile. Explicitly export your path:
+`export HERMES_HOME=/home/nick/.hermes`
+
+---
+
+### Problem: Dashboard is not updating after a cron run.
+
+**Check the Ingestion Queue:**
+Cronalytics uses a durable queue file: `~/.hermes/plugins/cronalytics/pending.jsonl`.
+- If this file exists and is growing, the gateway is capturing sessions but the background worker is failing to ingest them into the fact DB.
+- Check the gateway logs: `hermes logs --gateway`. Look for `[cronalytics]` warnings about `state.db` timeouts or retries.
+- The worker waits up to 17 seconds for Hermes to flush the session to disk; if your system is under heavy load, it may require manual sync.
+
+---
+
 ## CLI Not Found (`command not found: cronalytics`)
 
 If you see `command not found: cronalytics`, the CLI hasn't been installed yet. The CLI requires a separate `pip` install:
