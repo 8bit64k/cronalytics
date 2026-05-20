@@ -28,12 +28,12 @@ Visual exploration with cards, tables, charts, and modals. Best for human patter
 
 ### CLI (for agents)
 ```bash
-# Full report (chains all commands)
-cronalytics summary --days 14
+# Full report (bare command or 'all' subcommand)
+cronalytics --days 14
 
 # Per-job economics with pace and projections
 cronalytics jobs --days 7 --json | jq '.data[] | select(.pace > 1.2)'
-
+```
 # Drill into a specific job
 cronalytics runs --job _demo_f1561526d8 --days 30 --json
 ```
@@ -155,7 +155,7 @@ pip install -e ~/.hermes/plugins/cronalytics --break-system-packages
 Then use it from anywhere:
 
 ```bash
-cronalytics summary --days 14
+cronalytics --days 14
 cronalytics jobs --json | jq '.data[] | {id: .job_id, cost: .total_cost}'
 ```
 
