@@ -72,14 +72,14 @@ alias cronalytics='python -m cronalytics.cli'
 
 ### Skill Installation
 
-The diagnostic skill is bundled in the plugin directory. Use the `cp` method to install it along with all supporting reference documents:
+The diagnostic skill is bundled in the `skills/` directory. Use the `cp` method to install it along with all supporting reference documents:
 
 ```bash
 # Create the skill directory if it doesn't exist
 mkdir -p ~/.hermes/skills/devops/cronalytics
 
 # Copy the skill and its references
-cp -r skills/devops/cronalytics/* ~/.hermes/skills/devops/cronalytics/
+cp -r skills/* ~/.hermes/skills/devops/cronalytics/
 ```
 
 This ensures the `SKILL.md` and the `references/` subdirectory (containing `data-model.md`, etc.) are correctly placed for the agent to use.
