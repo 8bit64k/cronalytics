@@ -17,17 +17,21 @@ The `cron_runs` table is the canonical store for all ingested cron activity.
 | `cache_write_tokens`| INTEGER | 0 | Count of tokens written to cache |
 | `estimated_cost_usd`| REAL | NULL | Calculated cost based on pricing metadata |
 | `actual_cost_usd` | REAL | NULL | Actual billed cost (if available) |
-| `cost_status` | TEXT | NULL | status of cost calculation |
-| `cost_source` | TEXT | NULL | source of pricing data |
-| `billing_provider` | TEXT | NULL | Provider for cost reference |
-| `api_call_count` | INTEGER | 0 | Total API requests in session |
-| `message_count` | INTEGER | 0 | Total messages sent/received |
-| `tool_call_count` | INTEGER | 0 | Total tool calls executed |
-| `end_reason` | TEXT | NULL | Hermes exit state |
-| `success` | BOOLEAN | NULL | 1 if completed, 0 if failed |
-| `job_mode` | TEXT | 'agent' | 'agent' or 'no_agent' |
-| `ingested_at` | REAL | unixepoch | Timestamp of fact ingestion |
+| `cache_write_tokens`| INTEGER | 0 | Count of tokens written to cache |
+| `estimated_cost_usd`| REAL    | NULL | Calculated cost based on pricing metadata |
+| `actual_cost_usd`   | REAL    | NULL | Actual billed cost (if available) |
+| `cost_status`       | TEXT    | NULL | Status of cost calculation (e.g., 'verified') |
+| `cost_source`       | TEXT    | NULL | Source of pricing data (e.g., 'provider_api') |
+| `billing_provider`  | TEXT    | NULL | Provider for cost reference |
+| `api_call_count`    | INTEGER | 0 | Total API requests in session |
+| `message_count`     | INTEGER | 0 | Total messages sent/received |
+| `tool_call_count`   | INTEGER | 0 | Total tool calls executed |
+| `end_reason`        | TEXT    | NULL | Hermes exit state |
+| `success`           | BOOLEAN | NULL | 1 if completed, 0 if failed |
+| `job_mode`          | TEXT    | 'agent' | 'agent' or 'no_agent' |
+| `ingested_at`       | REAL    | (unixepoch) | Timestamp of fact ingestion |
 
+## Indices
 ## Indices
 - `idx_cron_runs_job_id` on `job_id`
 - `idx_cron_runs_run_time` on `run_time DESC`

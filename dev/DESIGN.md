@@ -141,6 +141,9 @@ CREATE TABLE cron_runs (
     input_tokens INTEGER DEFAULT 0,
     output_tokens INTEGER DEFAULT 0,
     reasoning_tokens INTEGER DEFAULT 0,
+    input_tokens INTEGER DEFAULT 0,
+    output_tokens INTEGER DEFAULT 0,
+    reasoning_tokens INTEGER DEFAULT 0,
     cache_read_tokens INTEGER DEFAULT 0,
     cache_write_tokens INTEGER DEFAULT 0,
     estimated_cost_usd REAL,
@@ -160,17 +163,19 @@ CREATE TABLE cron_runs (
 
 ### 4.4 Reconciliation Scanner
 
-The scanner exists because hooks can crash, the plugin can be disabled, or the gateway can restart. It is **not** the primary data path — hooks capture ~99% of events in real time — but it is the safety net.
+The scanner exists because hooks can crash, the plugin can be disabled, or the gateway can restart. It is **not** the primary data path — hooks capture ~99% of events in real time — but it is the safety net. It specifically targets both `state.db` (for agent sessions) and `~/.hermes/cron/output/` (for script-only `no_agent` jobs).
 
 **Algorithm:**
-1. Read watermark JSON (`last_ended_at`).
+1. Read watermark JSON (`last_ended_at` for agent jobs; `last_modified` for script offsets).
 2. Query `state.db` for `source='cron'` rows with `ended_at > watermark`.
-3. Batch-insert new rows into fact DB.
-4. Write new watermark = `max(ended_at)`.
+3. Scan filesystem for script output artifacts newer than watermark.
+4. Batch-insert new rows into fact DB.
+5. Write new watermark.
 
 **Trigger sources:**
 - Bootstrap thread on every plugin load (catches gaps from downtime).
 - Manual `POST /api/plugins/cronalytics/sync` ("Sync Now" button).
+- Background worker fallback if `on_session_end` fails to resolve a session.
 
 ### 4.5 Standalone `/cronalytics` Tab
 
