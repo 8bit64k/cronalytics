@@ -87,8 +87,8 @@ This ensures the `SKILL.md` and the `references/` subdirectory (containing `data
 Alternatively, you can install the skill directly from the GitHub repository using the Hermes CLI:
 
 ```bash
-# Fetches the skill and places it in devops/cronalytics/
-hermes skills install 8bit64k/cronalytics --category devops
+# Fetches the skill from the specific directory and places it in devops/cronalytics/
+hermes skills install 8bit64k/cronalytics/skills/cronalytics --category devops
 ```
 
 ---
