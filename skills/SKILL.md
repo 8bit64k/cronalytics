@@ -1,7 +1,7 @@
 ---
 name: cronalytics
 description: "Analyze, diagnose, and optimize Hermes cron jobs via the cronalytics CLI. Terminal-based health checks, cost attribution, failure analysis, trend detection, and schedule drift. Also references the Cronalytics dashboard plugin for visual exploration."
-version: 1.2.0
+version: 1.1.0
 author: Hermes Agent
 license: MIT
 metadata:
