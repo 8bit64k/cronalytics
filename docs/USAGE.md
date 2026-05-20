@@ -39,7 +39,11 @@ Filters between LLM agent jobs and script-only (`no_agent`) jobs.
 - **Agent** — shows only jobs that invoke an LLM (have cost, tokens, model).
 - **No agent** — shows only script-only jobs (zero cost, zero tokens). These are invisible in most Hermes views; this toggle makes them visible.
 
-Script jobs display a `[No agent]` badge in the Jobs table and Job Detail Modal.
+**Note on Badges:** Script jobs are marked with shorthand badges. These are synonymous:
+- **`[No agent]`** — The full badge shown in the Dashboard Jobs table.
+- **`[N]`** — The compact suffix used in CLI tables and the Dashboard Job Detail Modal.
+
+**Technical Difference:** An **Agent** job executes within a Hermes agent session, generating a `state.db` entry and incurring token costs. A **No agent** job (script-only) executes a raw shell command or script; it generates no session record in `state.db` and its presence is detected by Cronalytics via its output artifacts in `~/.hermes/cron/output/`.
 
 Your selection is saved to `localStorage`.
 
