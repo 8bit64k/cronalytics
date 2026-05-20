@@ -152,7 +152,7 @@ The CLI requires the plugin's `facts.db` to function and should be installed via
 pip install -e ~/.hermes/plugins/cronalytics
 ```
 
-* I use Arch (by the way) and if you do too you'll need to add `--break-system-packages` to pip command due to PEP 668. Other distros omit that flag.*
+* Arch based users (btw) may need to add `--break-system-packages` to pip command due to PEP 668. Other distros omit that flag.*
 
 Then use it from anywhere:
 
@@ -176,8 +176,6 @@ mkdir -p ~/.hermes/skills/devops/cronalytics
 cp -r skills/cronalytics/* ~/.hermes/skills/devops/cronalytics/
 ```
 
-Once copied, the agent automatically discovers it when you ask about cron jobs. You can also manually load the skill in any chat session with `/cronalytics`.
-
 Alternatively, you can install the skill directly from the GitHub repository using the Hermes CLI:
 
 ```bash
@@ -185,9 +183,16 @@ Alternatively, you can install the skill directly from the GitHub repository usi
 hermes skills install 8bit64k/cronalytics/skills/cronalytics --category devops
 ```
 
-Once installed, you can ensure the skill gets loaded in any chat session with `/cronalytics`.
+Once installed, the agent automatically discovers the skill when you ask about cron jobs. You can also manually load the skill in any chat session with `/cronalytics`.
+
 
 ---
+
+## First-Time Setup
+
+After install, the plugin needs data:
+
+1. **Wait for a cron job to run** — the `on_session_end` hook captures it automatically.
 2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard, or run:
 
 ```bash
@@ -197,6 +202,7 @@ curl -H "X-Hermes-Session-Token: <token>" -X POST http://localhost:9119/api/plug
 If the dashboard shows "No cron jobs captured," click **Sync Now**.
 
 > **Note:** The sync endpoint requires the dashboard's ephemeral session token for security (injected into the SPA at startup). Most users should use the dashboard **Sync Now** button instead of curl.
+
 
 ---
 
