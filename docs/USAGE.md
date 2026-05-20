@@ -330,7 +330,7 @@ cronalytics jobs --days 30 --json | jq -r '.data[] | [.job_id, .runs, .total_cos
 
 **"Full report in one command"**
 ```bash
-cronalytics all --days 14
+cronalytics all
 ```
 
 ### Formatting Conventions

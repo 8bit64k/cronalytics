@@ -85,8 +85,7 @@ Integration: Dashboard API accepts `"both"` and `"all"` (backward compat). Front
    cp ~/.hermes/cronalytics-backup/facts.db.real.bak ~/.hermes/plugins/cronalytics/facts.db
    ```
 2. **Remove `both` from API regex** — After confirming no stale cached states.
-3. **AGENTS.md compliance** — Next session: read AGENTS.md before any file operation. Verify.
-
+3. ~~Dashboard job-runs modal limit~~ — **COMPLETED.** Raised from 50 -> 250. Added `total_runs` and `more_available` to `/jobs/{job_id}/runs` response. Frontend renders truncation notice with exact CLI fallback command when `more_available` is true.
 ---
 
 ## Resume Instructions

@@ -1,4 +1,4 @@
-# Cronalytics
+# Cronalytics 1.1
 
 
 /ˈkrɒn.əˌlɪt.ɪks/ (noun)

@@ -1,4 +1,4 @@
-# Project Context: Cron-Insights
+# Project Context: Cronalytics
 
 This is a custom Hermes Agent plugin/dashboard-plugin.
 
