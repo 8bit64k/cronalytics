@@ -287,10 +287,9 @@ Cronalytics includes a terminal data tool with the same data as the dashboard, p
 If you installed via the dashboard plugin tab, the CLI code is already present. Install it via `pip` to get the `cronalytics` command on your `$PATH`:
 
 ```bash
-pip install -e ~/.hermes/plugins/cronalytics --break-system-packages
+pip install -e ~/.hermes/plugins/cronalytics
 ```
-
-*(Arch Linux requires `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
+*(Arch Linux users (btw) may need to add `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
 
 Then use it from any directory:
 

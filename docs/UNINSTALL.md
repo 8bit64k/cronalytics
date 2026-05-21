@@ -6,9 +6,9 @@ Navigate to the **Plugins** tab in the Hermes dashboard. Find Cronalytics in the
 
 > **Important:** If you installed the CLI via `pip`, it must be uninstalled separately:
 > ```bash
-> pip uninstall cronalytics --break-system-packages
+> pip uninstall cronalytics
 > ```
-> *(Arch Linux requires `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
+> *(Arch Linux users (btw) may need to add `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
 
 ## Method 2: Manual Removal
 

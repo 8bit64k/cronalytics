@@ -86,10 +86,9 @@ Cronalytics uses a durable queue file: `~/.hermes/plugins/cronalytics/pending.js
 If you see `command not found: cronalytics`, the CLI hasn't been installed yet. The CLI requires a separate `pip` install:
 
 ```bash
-pip install -e ~/.hermes/plugins/cronalytics --break-system-packages
+pip install -e ~/.hermes/plugins/cronalytics
 ```
-
-*(Arch Linux requires `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
+*(Arch Linux users (btw) may need to add `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
 
 Alternatively, run through the plugin directory without pip:
 

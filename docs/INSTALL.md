@@ -42,10 +42,9 @@ The CLI is bundled with the plugin, but it must be installed separately via `pip
 **Editable pip install (Recommended)**
 
 ```bash
-pip install -e ~/.hermes/plugins/cronalytics --break-system-packages
+pip install -e ~/.hermes/plugins/cronalytics
 ```
-
-*(Arch Linux requires `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
+*(Arch Linux users (btw) may need to add `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
 
 Then use it from any directory:
 
