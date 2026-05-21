@@ -44,7 +44,7 @@ The skill guides the agent through a 6-step workflow: baseline → jobs → per-
 
 ### From v1.0.x
 
-1. **Dashboard plugin:** Use the dashboard **Plugins** tab → **Update**, or run `hermes plugins update cronalytics`. Then **stop and start the dashboard** via `hermes dashboard --stop && hermes dashboard` for changes to take effect.
+1. **Dashboard plugin:** Use the dashboard **Plugins** tab → **Update**, or run `hermes plugins update cronalytics`. Then **stop and start the dashboard** with a 2-second delay to ensure the port is released (`hermes dashboard --stop && sleep 2 && hermes dashboard`) for changes to take effect.
 2. **CLI (new):** If you want the terminal command, run:
    ```bash
    pip install -e ~/.hermes/plugins/cronalytics
