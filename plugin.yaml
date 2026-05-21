@@ -1,5 +1,5 @@
 name: cronalytics
-version: 1.1.0 (a58b0e9)
+version: 1.1.0 (2026.05.21)
 description: Cost and operational observability for Hermes cron jobs
 provides_hooks:
   - on_session_end

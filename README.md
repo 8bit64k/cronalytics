@@ -51,7 +51,7 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
 
 ---
 
-## Getting Started
+## Ready to jump in? Start here
 
 | I am... | Path |
 | :--- | :--- |
@@ -66,14 +66,11 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
 
 [YouTube](https://youtu.be/nbeViSt9hCk?si=EH2u7Ys2vDTVDqka): short video showing basic install and usage.
 
-## Getting Started
-
-- **New Users**: See the [Installation Guide](docs/INSTALL.md)
-- **Upgrading from v1.0**: See the [Upgrade Guide](docs/UPGRADE.md)
-
 ---
 
-## What It Does
+## A Closer Look into Cronalytics
+
+### What Cronalytics Does
 
 - **Captures** every cron job run as it completes via the `on_session_end` hook
 - **Persists** cost, token counts, model, duration, and success state to a local fact database
@@ -109,98 +106,6 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
   - `jobs.json` cross-reference for temporal context and silent failure detection
   - "Known Ways to Fool Yourself" guardrails prevent false positives
   - Works in any terminal session or messaging channel
-
----
-
-## Documentation Index
-
-### User Documentation (`docs/`)
-
-- **docs/INSTALL.md** — Installation guide (dashboard plugin + pip CLI + skill setup)
-- **docs/UPGRADE.md** — Transition guide for v1.0.x users (Namespace restructure)
-- **docs/UNINSTALL.md** — Clean removal instructions
-- **docs/USAGE.md** — Dashboard and CLI usage guide
-- **docs/TROUBLESHOOTING.md** — Common issues and fixes
-- **docs/RELEASE_NOTES.md** — Per-release upgrade notes and highlights
-
-### Developer Documentation (`dev/`)
-
-- **dev/BRIEF.md** — Product opportunity brief & positioning
-- **dev/DESIGN.md** — Architecture, data flow, and technical decisions
-- **dev/FEATURES.md** — Complete feature catalog with formulas
-- **dev/DEV_SETUP.md** — Development environment setup
-
-### Project Meta
-
-- **CHANGELOG.md** — Full version history
-
----
-
-## ⚠️ Important Notes
-
-**Cost data is estimated, not exact.** Cronalytics reports the estimated cost that Hermes computed and stored in `state.db`. Your actual invoice may differ due to rate changes, credits, or rounding. Use this for directional awareness, not accounting.
-
-**Single-profile cron by default.** Cronalytics monitors the Hermes profile where it is installed. Most users — even those with multiple profiles configured — run cron jobs in the **default** profile. For them, Cronalytics works fully.
-
-The edge case: if you explicitly create a cron job under a non-default profile (`hermes --profile <name> cron create ...`), that job runs in an isolated gateway with its own `state.db`. Cronalytics, installed in the default profile, cannot see it. To monitor those jobs, install Cronalytics in that profile's `plugins/` directory as well.
-
-Multi-profile cron support is on our roadmap.
-
----
-
-## Installing and/or Upgrading
-
-- Installing for the first time follow the [Install Guide](docs/INSTALL.md).
-
-- Upgrading from previous install follow the [Upgrade Guide](docs/UPGRADE.md).
-
----
-
-## First-Time Setup
-
-After install, the plugin needs data:
-
-1. **Wait for a cron job to run** — the `on_session_end` hook captures it automatically.
-2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard, or run:
-
-```bash
-curl -H "X-Hermes-Session-Token: <token>" -X POST http://localhost:9119/api/plugins/cronalytics/sync
-```
-
-If the dashboard shows "No cron jobs captured," click **Sync Now**.
-
-> **Note:** The sync endpoint requires the dashboard's ephemeral session token for security (injected into the SPA at startup). Most users should use the dashboard **Sync Now** button instead of curl.
-
-
----
-
-## Configuration
-
-### `plugin.yaml`
-
-```yaml
-name: cronalytics
-version: 1.1.0
-description: Cost and operational observability for Hermes cron jobs
-provides_hooks:
-  - on_session_end
-```
-
-### `config.py` (static defaults)
-
-All current settings are hardcoded defaults. There is no user-editable config file yet (planned for a future release).
-
-| Setting | Default | Meaning |
-|---------|---------|---------|
-| `RETRY_DELAYS` | `[3.0, 8.0, 15.0]` | Seconds to wait before each worker retry |
-| `JITTER_MAX` | `2.0` | Max random seconds added to each retry delay |
-| `MAX_RETRIES` | `3` | Total attempts to read a session from `state.db` |
-
-Paths are resolved automatically:
-- `STATE_DB`: `~/.hermes/state.db` (Hermes core session store)
-- `FACT_DB`: `~/.hermes/plugins/cronalytics/facts.db` (plugin-owned SQLite)
-- `WATERMARK_FILE`: `~/.hermes/plugins/cronalytics/watermark.json`
-- `PENDING_FILE`: `~/.hermes/plugins/cronalytics/pending.jsonl`
 
 ---
 
@@ -265,7 +170,7 @@ Full run history for the selected job:
 
 ---
 
-## Understanding Success
+### Understanding Success
 
 Cronalytics tracks two different notions of "success":
 
@@ -281,6 +186,59 @@ Cronalytics tracks two different notions of "success":
 - **Failure = high** → Investigate timeouts, API errors, or wrapper crashes.
 
 > The Success/Failure toggle is a **reliability** signal, not a **correctness** signal.
+
+---
+
+## ⚠️ Important Notes
+
+**Cost data is estimated, not exact.** Cronalytics reports the estimated cost that Hermes computed and stored in `state.db`. Your actual invoice may differ due to rate changes, credits, or rounding. Use this for directional awareness, not accounting.
+
+**Single-profile cron by default.** Cronalytics monitors the Hermes profile where it is installed. Most users — even those with multiple profiles configured — run cron jobs in the **default** profile. For them, Cronalytics works fully.
+
+The edge case: if you explicitly create a cron job under a non-default profile (`hermes --profile <name> cron create ...`), that job runs in an isolated gateway with its own `state.db`. Cronalytics, installed in the default profile, cannot see it. To monitor those jobs, install Cronalytics in that profile's `plugins/` directory as well.
+
+Multi-profile cron support is on our roadmap.
+
+---
+
+### Documentation Index
+
+#### User Documentation (`docs/`)
+
+- **docs/INSTALL.md** — Installation guide (dashboard plugin + pip CLI + skill setup)
+- **docs/UPGRADE.md** — Transition guide for v1.0.x users (Namespace restructure)
+- **docs/UNINSTALL.md** — Clean removal instructions
+- **docs/USAGE.md** — Dashboard and CLI usage guide
+- **docs/TROUBLESHOOTING.md** — Common issues and fixes
+- **docs/RELEASE_NOTES.md** — Per-release upgrade notes and highlights
+
+#### Developer Documentation (`dev/`)
+
+- **dev/BRIEF.md** — Product opportunity brief & positioning
+- **dev/DESIGN.md** — Architecture, data flow, and technical decisions
+- **dev/FEATURES.md** — Complete feature catalog with formulas
+- **dev/DEV_SETUP.md** — Development environment setup
+
+#### Project Meta
+
+- **CHANGELOG.md** — Full version history
+
+---
+
+## First-Time Setup
+
+After install, the plugin needs data:
+
+1. **Wait for a cron job to run** — the `on_session_end` hook captures it automatically.
+2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard, or run:
+
+```bash
+curl -H "X-Hermes-Session-Token: <token>" -X POST http://localhost:9119/api/plugins/cronalytics/sync
+```
+
+If the dashboard shows "No cron jobs captured," click **Sync Now**.
+
+> **Note:** The sync endpoint requires the dashboard's ephemeral session token for security (injected into the SPA at startup). Most users should use the dashboard **Sync Now** button instead of curl.
 
 ---
 
@@ -380,6 +338,36 @@ cronalytics/
 
 ---
 
+## Configuration
+
+### `plugin.yaml`
+
+```yaml
+name: cronalytics
+version: 1.1.0
+description: Cost and operational observability for Hermes cron jobs
+provides_hooks:
+  - on_session_end
+```
+
+### `config.py` (static defaults)
+
+All current settings are hardcoded defaults. There is no user-editable config file yet (planned for a future release).
+
+| Setting | Default | Meaning |
+|---------|---------|---------|
+| `RETRY_DELAYS` | `[3.0, 8.0, 15.0]` | Seconds to wait before each worker retry |
+| `JITTER_MAX` | `2.0` | Max random seconds added to each retry delay |
+| `MAX_RETRIES` | `3` | Total attempts to read a session from `state.db` |
+
+Paths are resolved automatically:
+- `STATE_DB`: `~/.hermes/state.db` (Hermes core session store)
+- `FACT_DB`: `~/.hermes/plugins/cronalytics/facts.db` (plugin-owned SQLite)
+- `WATERMARK_FILE`: `~/.hermes/plugins/cronalytics/watermark.json`
+- `PENDING_FILE`: `~/.hermes/plugins/cronalytics/pending.jsonl`
+
+---
+
 ## Known Limitations
 
 1. **Wrapper-level success only.** The `success` boolean reflects whether the session wrapper completed, not whether the agent task succeeded.
@@ -389,9 +377,6 @@ cronalytics/
 5. **Dashboard server caches plugins per-process.** Changes to `manifest.json` or `plugin_api.py` require a full dashboard restart.
 6. **Mobile layout tested but not optimized.** The table may require horizontal scroll on narrow viewports.
 7. **Job detail modal capped at 200 runs.** High-frequency jobs show full count in the table but the drill-down is limited.
-
----
-
 
 ---
 
