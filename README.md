@@ -148,59 +148,11 @@ Multi-profile cron support is on our roadmap.
 
 ---
 
-## Installation
+## Installing and/or Upgrading
 
-### Dashboard Plugin (Recommended)
+- Installing for the first time follow the [Install Guide](docs/INSTALL.md).
 
-```bash
-hermes plugins install 8bit64k/cronalytics --enable
-```
-
-Or open the Hermes dashboard, go to the **Plugins** tab, enter `8bit64k/cronalytics`, check **Enable after install**, and click **Install**.
-
-The **Cronalytics** tab appears in the sidebar.
-
-### CLI (Recommended)
-
-The CLI requires the plugin's `facts.db` to function and should be installed via `pip` to get full features like arg completion (you can also just create a shell alias to path/to/plugins/cronalytics/cronalytics.cli):
-
-```bash
-pip install -e ~/.hermes/plugins/cronalytics
-```
-
-* Arch based users (btw) may need to add `--break-system-packages` to pip command due to PEP 668. Other distros omit that flag.*
-
-Then use it from anywhere:
-
-```bash
-cronalytics --days 14
-cronalytics jobs --json | jq '.data[] | {id: .job_id, cost: .total_cost}'
-```
-
-To remove only the CLI command while keeping the plugin:
-
-```bash
-pip uninstall cronalytics --break-system-packages
-```
-
-### Skill (Optional)
-
-The diagnostic skill and its supporting references are bundled in the repository. To install it locally:
-
-```bash
-mkdir -p ~/.hermes/skills/devops/cronalytics
-cp -r skills/cronalytics/* ~/.hermes/skills/devops/cronalytics/
-```
-
-Alternatively, you can install the skill directly from the GitHub repository using the Hermes CLI:
-
-```bash
-# Fetches the skill from the specific directory and places it in devops/cronalytics/
-hermes skills install 8bit64k/cronalytics/skills/cronalytics --category devops
-```
-
-Once installed, the agent automatically discovers the skill when you ask about cron jobs. You can also manually load the skill in any chat session with `/cronalytics`.
-
+- Upgrading from previous install follow the [Upgrade Guide](docs/UPGRADE.md).
 
 ---
 
