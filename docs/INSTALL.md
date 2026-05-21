@@ -17,7 +17,9 @@ Open the Hermes dashboard and navigate to the **Plugins** tab. Find the **Instal
 
 Check **Enable after install**, then click **Install**.
 
-Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS. The **Cronalytics** tab appears in the sidebar.
+![Screenshot of plugin-tab installer](screenshots/github-install.png)
+
+Click `Rescan Dashboard Extensions` and Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS. The **Cronalytics** tab appears in the sidebar.
 
 The CLI and skill are present in the plugin directory but require separate activation (see sections 3 and 4 below).
 

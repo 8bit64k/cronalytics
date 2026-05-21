@@ -10,9 +10,9 @@ This guide covers the transition to **Cronalytics v1.1.0**, which introduces a s
 
 Open the Hermes dashboard and navigate to the **Plugins** tab. Find the Cronalytics plugin listed in the ***Installed Plugins*** section. Click on 'Git Pull' to pull the latest code.
 
-![Screenshot of Plugin Listing](docs/screenshots/gitpull.png)
+![Screenshot of Plugin Listing](screenshots/gitpull.png)
 
-Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS. The **Cronalytics** tab appears in the sidebar.
+Click `Rescan Dashboard Extensions` and Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS. The **Cronalytics** tab appears in the sidebar.
 
 ### Secondary: Hermes CLI (Alternate)
 
