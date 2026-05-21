@@ -37,3 +37,10 @@ pip install -e ~/.hermes/plugins/cronalytics
 ### Missing Command: `cronalytics`
 **Cause:** The CLI is an optional entry point that must be registered via pip.
 **Fix:** Run the `pip install -e` command listed in Step 3 above.
+
+---
+
+## More Resources
+
+- [Installation Guide](INSTALL.md)
+- [Troubleshooting Guide](TROUBLESHOOTING.md) — See here for more details on 422 errors and dashboard issues.

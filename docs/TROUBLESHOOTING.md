@@ -81,10 +81,26 @@ Cronalytics uses a durable queue file: `~/.hermes/plugins/cronalytics/pending.js
 
 ---
 
-## CLI Not Found (`command not found: cronalytics`)
+## Dashboard Errors
 
-If you see `command not found: cronalytics`, the CLI hasn't been installed yet. The CLI requires a separate `pip` install:
+### 422: Unprocessable Entity (string_pattern_mismatch)
+**Symptoms:** The dashboard fails to load data and the browser console shows a 422 error mentioning `outcome` or `mode` pattern mismatch.
 
+**Cause:** This happens immediately after upgrading to v1.1.0 if the old plugin code is still resident in memory. The browser is sending the new default value (`all`) but the old backend only recognizes `both`.
+
+**Fix:** Stop and start the Hermes Dashboard with a small delay to force a reload of the plugin code:
+```bash
+hermes dashboard --stop && sleep 2 && hermes dashboard
+```
+
+---
+
+## CLI Errors
+
+### command not found: `cronalytics`
+**Cause:** The CLI hasn't been registered yet. It is an optional add-on that requires a `pip` install.
+
+**Fix:** Run the following command in the plugin directory:
 ```bash
 pip install -e ~/.hermes/plugins/cronalytics
 ```
