@@ -1,5 +1,10 @@
 # Python artifacts
 __pycache__/
+*.venv/
+venv/
+ENV/
+.mypy_cache/
+.ruff_cache/
 *.py[cod]
 *$py.class
 *.egg-info/
@@ -44,5 +49,6 @@ htmlcov/
 
 # Node artifacts (dashboard build)
 node_modules/
+**/node_modules/
 *.backup*
 *.bak
