@@ -47,9 +47,9 @@ The skill guides the agent through a 6-step workflow: baseline → jobs → per-
 1. **Dashboard plugin:** Use the dashboard **Plugins** tab → **Update**, or run `hermes plugins update cronalytics`.
 2. **CLI (new):** If you want the terminal command, run:
    ```bash
-   pip install -e ~/.hermes/plugins/cronalytics --break-system-packages
+   pip install -e ~/.hermes/plugins/cronalytics
    ```
-3. **Skill (new):** If you want agent diagnostics, install manually:
+   *(Arch Linux users (btw) may need to add `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
    ```bash
    hermes skills install \
      https://raw.githubusercontent.com/8bit64k/cronalytics/main/skills/devops/cronalytics/SKILL.md \

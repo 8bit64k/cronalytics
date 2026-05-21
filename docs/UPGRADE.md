@@ -20,8 +20,10 @@ hermes dashboard restart
 ### 3. Register the CLI Add-on
 To enable the new `cronalytics` terminal command, register the entry point from the updated plugin directory:
 ```bash
-pip install -e ~/.hermes/plugins/cronalytics --break-system-packages
+pip install -e ~/.hermes/plugins/cronalytics
 ```
+*Note: Arch Linux users (btw) may need to add `--break-system-packages` to the pip command due to PEP 668. Other distros should omit this flag.*
+
 
 ---
 
