@@ -11,9 +11,9 @@ hermes plugins update cronalytics
 ```
 
 ### 2. Restart the Dashboard (Required)
-Because v1.1.0 changes the internal Python namespace and API validation patterns, you **must** restart the dashboard to clear the old code from memory:
+Because v1.1.0 changes the internal Python namespace and API validation patterns, you **must** stop and start the dashboard to clear the old code from memory:
 ```bash
-hermes dashboard restart
+hermes dashboard --stop && hermes dashboard
 ```
 *Note: Failure to restart may result in `422 Unprocessable Entity` errors in the browser.*
 
@@ -32,7 +32,7 @@ pip install -e ~/.hermes/plugins/cronalytics
 ### 422 Error: string_pattern_mismatch
 **Symptoms:** Dashboard fails to load; browser console shows 422 error on `outcome` or `mode`.
 **Cause:** Old v1.0 code is still running in the Gateway/Dashboard memory.
-**Fix:** Run `hermes dashboard restart` and perform a hard refresh in your browser ($Ctrl+Shift+R$).
+**Fix:** Run `hermes dashboard --stop && hermes dashboard` and perform a hard refresh in your browser ($Ctrl+Shift+R$).
 
 ### Missing Command: `cronalytics`
 **Cause:** The CLI is an optional entry point that must be registered via pip.
