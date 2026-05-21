@@ -57,7 +57,7 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
 | :--- | :--- |
 | **A New User** | [Install Guide (Fresh Start)](docs/INSTALL.md) |
 | **An Existing v1.0.x User** | [Upgrade Guide (v1.1 Migration)](docs/UPGRADE.md) |
-| **Exploring Features** | [Complete Feature Catalog](dev/FEATURES.md) |
+| **Exploring Features** | [Usage & Workflows](docs/USAGE.md) or [Feature Catalog](dev/FEATURES.md) |
 
 ---
 
