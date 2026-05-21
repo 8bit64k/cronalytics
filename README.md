@@ -51,10 +51,25 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
 
 ---
 
+## Getting Started
+
+| I am... | Path |
+| :--- | :--- |
+| **A New User** | [Install Guide (Fresh Start)](docs/INSTALL.md) |
+| **An Existing v1.0.x User** | [Upgrade Guide (v1.1 Migration)](docs/UPGRADE.md) |
+| **Exploring Features** | [Complete Feature Catalog](dev/FEATURES.md) |
+
+---
+
 ## Mini-Tour
 ![Short Tour](docs/screenshots/cronalytics-tour.gif)
 
 [YouTube](https://youtu.be/nbeViSt9hCk?si=EH2u7Ys2vDTVDqka): short video showing basic install and usage.
+
+## Getting Started
+
+- **New Users**: See the [Installation Guide](docs/INSTALL.md)
+- **Upgrading from v1.0**: See the [Upgrade Guide](docs/UPGRADE.md)
 
 ---
 
@@ -102,6 +117,7 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
 ### User Documentation (`docs/`)
 
 - **docs/INSTALL.md** — Installation guide (dashboard plugin + pip CLI + skill setup)
+- **docs/UPGRADE.md** — Transition guide for v1.0.x users (Namespace restructure)
 - **docs/UNINSTALL.md** — Clean removal instructions
 - **docs/USAGE.md** — Dashboard and CLI usage guide
 - **docs/TROUBLESHOOTING.md** — Common issues and fixes
