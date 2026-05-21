@@ -23,7 +23,7 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
 
 ## Three Ways to Use Cronalytics
 
->The dashboard is insightful, but the CLI + Skill is the real super-power.
+>The dashboard is insightful, but the CLI + Skill are the real superpower.
 
 ### 1. Dashboard (for people)
 Visual exploration with cards, tables, charts, and modals. Best for human pattern recognition.
@@ -49,7 +49,7 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
 
 ---
 
-## Ready to jump in? Start here
+## Ready to jump in?
 
 | I am... | Path |
 | :--- | :--- |
@@ -153,7 +153,7 @@ Eight sortable columns: **Job**, **Runs**, **Avg Time**, **Total Cost**, **Avg C
 ### Job Detail Modal
 
 Full run history for the selected job:
-- 95% width modal with sticky hSeaders
+- 95% width modal with sticky headers
 - Sortable by run time, cost, duration, success, model
 - 200-run default limit (backend ceiling: 500)
 - Mode column showing Agent vs No agent
