@@ -92,17 +92,6 @@ hermes skills install 8bit64k/cronalytics/skills/cronalytics --category devops
 
 ---
 
-### Install from local clone
-
-If you cloned the repo locally or have the skill file on disk:
-
-```bash
-hermes skills install ~/.hermes/plugins/cronalytics/skills/devops/cronalytics/SKILL.md \
-  --category devops --name cronalytics --yes
-```
-
----
-
 ## Structure After Install
 
 ```
