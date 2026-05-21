@@ -25,10 +25,10 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
 
 >The dashboard is insightful, but the CLI + Skill is the real super-power.
 
-### Dashboard (for people)
+### 1. Dashboard (for people)
 Visual exploration with cards, tables, charts, and modals. Best for human pattern recognition.
 
-### CLI (for agents and tooling)
+### 2. CLI (for agents and tooling)
 ```bash
 # Full report (bare command or 'all' subcommand)
 cronalytics --days 14
@@ -40,14 +40,12 @@ cronalytics jobs --days 7 --json | jq '.data[] | select(.pace > 1.2)'
 cronalytics runs --job f1561526d8 --days 30 --json
 ```
 
-### Agent Skill (for reasoning)
+### 3. Agent Skill (for reasoning and superpowers)
 An agent skill that guides agents through structured cron health checks and diagnostics. Ask your agent:
 
 > "Check my cron jobs for the last two weeks — flag anything that looks off."
 
 The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-references `jobs.json`, and grades every finding by confidence (HIGH / MEDIUM / LOW) with supporting evidence.
-
-> **"Dashboard for people, CLI for agents, skill for reasoning."**
 
 ---
 
@@ -155,7 +153,7 @@ Eight sortable columns: **Job**, **Runs**, **Avg Time**, **Total Cost**, **Avg C
 ### Job Detail Modal
 
 Full run history for the selected job:
-- 95% width modal with sticky headers
+- 95% width modal with sticky hSeaders
 - Sortable by run time, cost, duration, success, model
 - 200-run default limit (backend ceiling: 500)
 - Mode column showing Agent vs No agent
