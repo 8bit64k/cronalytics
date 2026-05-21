@@ -1,46 +1,27 @@
 # Project Checkpoints — Cronalytics
 
-## Release Readiness & Final Audit (2026-05-20)
-**Context:** Final validation of the `feat/cli-terminal-access` branch before release. Systematic audit of code, tests, and documentation to ensure 1.1.0 parity across all surfaces.
+## v1.1.0 Certification & Documentation Finalization (2026-05-20)
+**Context:** Final release preparation and destructive testing for the v1.1.0 upgrade path. Documentation architecture was refined for maximum clarity and minimal landing-page density.
 
 ### Technical Achievements:
-- **Comprehensive Audit**: Verified 22 canonical documents against live source code (`cli.py`, `facts.py`, `api.py`).
-- **Path Resolution Hardening**: Implemented a fallback chain in the `cronalytics` CLI to resolve `facts.db` path regardless of whether the install is editable (`-e`) or copied to `site-packages`.
-- **Test Suite Perfection**: 149 tests PASSED in an isolated `.venv` environment on Arch Linux.
-- **Organization**: Moved speculative infographic documentation and logic to `scratchpad/infographic/` to keep the primary `docs/` and repository clean.
-- **UAT Synchronization**: Synchronized the latest verified state with the `uat` remote (Master branch).
+- **Upgrade Path Certified**: Verified a complete v1.0 -> v1.1.0 simulation starting with the 8bit64k-uat (master) baseline, restoring the 38k-run demo DB, and performing `hermes plugins update`.
+- **Namespace Verification**: Confirmed that the Dashboard correctly loads the new package-based restructure (`cronalytics/` namespace) after a process restart.
+- **Documentation Decoupling**: Extracted the dense técnico background into `docs/UPGRADE.md`, keeping `README.md` as a high-level funnel with a "Getting Started" table pointing to Usage, Installation, and Upgrades.
+- **Robust Restart Protocol**: Documented the mandatory `hermes dashboard --stop && sleep 2 && hermes dashboard` sequence to remediate 422 pattern mismatches and clear old memory.
+- **Identity Correction**: Applied repository-local git config to ensure all release commits are attributed to `8bit64k <8bit64k@pm.me>`.
 
 ### Metadata:
-- **Version**: 1.1.0 (Canonical)
-- **Branch**: `feat/cli-terminal-access`
-- **Latest Commit**: `42d8a01` — "docs: move infographics to scratchpad and finalize audit"
-- **Environment**: Linux (7.0.3-arch1-2), Python 3.12.x
+- **Major Branch**: `feat/cli-terminal-access` (Local & UAT)
+- **Latest Commit**: `2671963` — "docs: prioritize Usage & Workflows in README pathways"
+- **Author Identity**: `8bit64k`
+- **Release Status**: **GOLD CERTIFIED** — Ready for PR to main repo master.
 
 ### Decisions Made:
-1. **Repository Hygiene**: Infographic speculative work belongs in `scratchpad/`. Only finalized, high-fidelity art belongs in `docs/`.
-2. **Branch Cleanup**: The `feat/cli-terminal-access-review` branch on UAT was identified as redundant and its work was merged into the master branch of the UAT remote.
-3. **Release Status**: Branch is confirmed **Release Ready**.
+1. **Repository Hygiene**: Standardized the Arch Linux "btw" footnote for `--break-system-packages` across all docs, removing the mandatory flags from default examples.
+2. **Simplified Funnel**: Prioritized `docs/USAGE.md` over the technical Feature Catalog in the README pathways for better user engagement.
+3. **Data Safety**: Verified that `facts.db` survives the directory restructure and remains authoritative for both CLI and Dashboard.
 
----
-
-## Skill Installation & Structure Refinement (2026-05-20 - Part II)
-**Context:** Standardized repository structure for various skill installation methods and added user guidance for manual skill loading.
-
-### Technical Achievements:
-- **Repo Restructuring**: Flattened `/skills` and moved content to `/skills/cronalytics/`. This ensures `hermes skills install owner/repo/path` correctly places the skill in the user's `devops` category without redundant nesting.
-- **Manual Load Guidance**: Documented the `/cronalytics` slash-command in `README.md` to help users who need to force-load the skill in active chat sessions.
-- **Dual-Install Methods**: Updated `README.md` and `INSTALL.md` to support both the robust `cp -r` method (preserving local references) and the automated CLI method (targeting the new sub-path).
-
-### Metadata:
-- **Path Compatibility**: Targeted `8bit64k/cronalytics/skills/cronalytics` as the canonical remote install path.
-- **Branch Parity**: Local `feat/cli-terminal-access` and UAT `master` are fully synchronized.
-
----
-
-## Checkpoint — 2026-05-19 (Session 3)
-**Branch:** `feat/cli-terminal-access`
-**Latest commit:** `0d961be` — "fix: rename outcome filter 'both' → 'all' + audit skill references"
-**Tests:** 149 passing, ruff + mypy clean
-
-### Session Summary:
-Renamed CLI outcome filter value from `both` to `all` across all surfaces. Audited skill reference directory: 15 files triaged to 5 canonical reference docs, 10 session artifacts moved to `scratchpad/working-notes/`. 
+### Instructions for Next Session:
+1. In the build repo, simply `git push origin feat/cli-terminal-access` to stage the public PR.
+2. Open the PR on GitHub focusing on the v1.1.0 namespace and CLI features.
+3. Once merged, delete the `-uat` testing remote.

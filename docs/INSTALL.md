@@ -6,7 +6,7 @@ Cronalytics installs as a **Hermes dashboard plugin**. The CLI and agent skill s
 
 ---
 
-## 1. Plugin Install
+## 1. Install the Plugin
 
 ### Primary: Dashboard UI (Recommended)
 
@@ -19,27 +19,31 @@ Check **Enable after install**, then click **Install**.
 
 Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS. The **Cronalytics** tab appears in the sidebar.
 
-The CLI and skill are present in the plugin directory but require separate activation (see sections 2 and 3 below).
+The CLI and skill are present in the plugin directory but require separate activation (see sections 3 and 4 below).
 
-### Secondary: CLI
+### Alternative: Hermes CLI
 
 ```bash
 hermes plugins install 8bit64k/cronalytics --enable
 ```
 
-Or if you cloned the repo locally:
+---
+
+## 2. Restart the Dashboard (Required)
+To ensure the plugin and api routes get registered correctly we recommend restarting the Hermes dashboard. Use a small delay (`sleep 2`) to ensure the network port is fully released by the OS before starting the new process:
 
 ```bash
-hermes plugins install /path/to/cronalytics --enable
+hermes dashboard --stop && sleep 2 && hermes dashboard
 ```
+*Note: Failure to restart may result in `422 Unprocessable Entity` errors in the browser.*
 
 ---
 
-## 2. CLI Access
+## 3. Register the CLI Add-on
 
-The CLI is bundled with the plugin, but it must be installed separately via `pip` to get the `cronalytics` command on your `$PATH`.
+The cronalytics cli tool is bundled with the plugin, but it must be registered separately via `pip` to get the `cronalytics` command on your `$PATH`.
 
-**Editable pip install (Recommended)**
+### Primary: Editable pip install (Recommended)
 
 ```bash
 pip install -e ~/.hermes/plugins/cronalytics
@@ -54,7 +58,7 @@ cronalytics jobs --json
 cronalytics runs --job _demo_f1561526d8 --days 30
 ```
 
-**Alternative: Shell alias (no pip)**
+### Alternative: Shell alias (no pip)
 
 If you prefer not to use `pip`, add an alias to your shell profile:
 
@@ -67,11 +71,20 @@ alias cronalytics='python -m cronalytics.cli'
 
 ---
 
-## 3. Skill Setup
+## 4. Skill Setup
 
-### Skill Installation
+This ensures the `SKILL.md` and the `references/` subdirectory (containing `data-model.md`, etc.) are correctly placed for the agent to use.
 
-The diagnostic skill is bundled in the `skills/cronalytics/` directory. Use the `cp` method to install it along with all supporting reference documents:
+### Primary: Hermes CLI (Recommended) 
+
+```bash
+# Fetches the skill from the specific directory and places it in devops/cronalytics/
+hermes skills install 8bit64k/cronalytics/skills/cronalytics --category devops
+```
+
+### Alternative: The `cp` method 
+
+The diagnostic skill is bundled in the `skills/cronalytics/` directory, so you can use the `cp` method to install it along with all supporting reference documents:
 
 ```bash
 # Create the skill directory if it doesn't exist
@@ -79,15 +92,6 @@ mkdir -p ~/.hermes/skills/devops/cronalytics
 
 # Copy the skill and its references
 cp -r skills/cronalytics/* ~/.hermes/skills/devops/cronalytics/
-```
-
-This ensures the `SKILL.md` and the `references/` subdirectory (containing `data-model.md`, etc.) are correctly placed for the agent to use.
-
-Alternatively, you can install the skill directly from the GitHub repository using the Hermes CLI:
-
-```bash
-# Fetches the skill from the specific directory and places it in devops/cronalytics/
-hermes skills install 8bit64k/cronalytics/skills/cronalytics --category devops
 ```
 
 ---
