@@ -985,8 +985,8 @@ def _build_parser() -> argparse.ArgumentParser:
     for name, help_text in (
         ("summary", "Aggregate headline summary"),
         ("jobs", "Per-job breakdown with pace"),
-        ("models", "Per-model cost breakdown"),
-        ("trends", "Daily run-count / cost sparkline"),
+        ("models", "Per-model estimated cost breakdown"),
+        ("trends", "Daily run-count / estimated cost sparkline"),
         ("health", "Fact DB health check"),
     ):
         p = subparsers.add_parser(name, help=help_text)
