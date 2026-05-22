@@ -141,7 +141,7 @@ Proportional bar chart showing the top 5 models by cost, with run counts. Remain
 
 ### Jobs Breakdown Table
 
-Eight sortable columns: **Job**, **Runs**, **Avg Time**, **Total Cost**, **Avg Cost**, **Nominal/mo**, **Trend/mo**, **Pace**.
+Eight sortable columns: **Job**, **Runs**, **Avg Duration**, **Total Cost**, **Avg Cost**, **Nominal/mo**, **Trend/mo**, **Pace**.
 
 - Click a column header to sort ascending/descending
 - Click any row to expand a detail panel showing:

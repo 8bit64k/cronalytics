@@ -54,7 +54,7 @@ export function JobBreakdown({
           React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
             React.createElement("thead", null,
               React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
-                ["Job", "Runs", "Avg Time", "Est Cost", "Avg Est Cost", "Nominal/mo", "Trend/mo", "Pace"].map(h => {
+                ["Job", "Runs", "Avg Duration", "Est Cost", "Avg Est Cost", "Nominal/mo", "Trend/mo", "Pace"].map(h => {
                   const isActive = sortConfig.key === h;
                   return React.createElement("th", {
                     key: h,

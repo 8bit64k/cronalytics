@@ -154,7 +154,7 @@ export function CronalyticsTab() {
     switch (key) {
       case "Job": return j.name || j.job_id;
       case "Runs": return j.runs || 0;
-      case "Avg Time": return j.avg_duration || 0;
+      case "Avg Duration": return j.avg_duration || 0;
       case "Est Cost": return j.tot_estimated_cost || 0;
       case "Avg Est Cost": return j.avg_estimated_cost || 0;
       case "Nominal/mo": return j.projections && j.projections.projected_cost_30d != null ? j.projections.projected_cost_30d : -Infinity;
@@ -246,7 +246,7 @@ export function CronalyticsTab() {
       jobName: (jobList.find(j => j.job_id === selectedJobId) || {}).name,
       days: days,
       outcome: outcome,
-      sortKey: ({"Job":"run_time","Runs":"run_time","Avg Time":"duration_seconds","Est Cost":"estimated_cost","Avg Est Cost":"estimated_cost","Nominal/mo":"run_time","Trend/mo":"run_time","Pace":"run_time"}[sortConfig.key] || "run_time"),
+      sortKey: ({"Job":"run_time","Runs":"run_time","Avg Duration":"duration_seconds","Est Cost":"estimated_cost","Avg Est Cost":"estimated_cost","Nominal/mo":"run_time","Trend/mo":"run_time","Pace":"run_time"}[sortConfig.key] || "run_time"),
       sortDir: sortConfig.direction || "desc",
     })),
 
