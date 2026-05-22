@@ -70,7 +70,7 @@ JOBS_LAYOUT: list[tuple[str, int]] = [
     ("Job ID", 12),
     ("Job", 14),
     ("Runs", 5),
-    ("Cost", 10),
+    ("Est Cost", 10),
     ("Dur", 6),
     ("Tokens", 10),
     ("Pace", 5),
@@ -78,18 +78,18 @@ JOBS_LAYOUT: list[tuple[str, int]] = [
 SUMMARY_MODEL_LAYOUT: list[tuple[str, int]] = [
     ("Model", 30),
     ("Runs", 8),
-    ("Cost", 12),
+    ("Est Cost", 12),
 ]
 MODELS_LAYOUT: list[tuple[str, int]] = [
     ("Model", 30),
     ("Runs", 8),
-    ("Cost", 10),
+    ("Est Cost", 10),
     ("Tokens", 10),
 ]
 RUNS_LAYOUT: list[tuple[str, int]] = [
     ("Time", 16),
     ("Dur", 5),
-    ("Cost", 8),
+    ("Est Cost", 8),
     ("Tks", 7),
     ("M", 22),
     ("✓", 2),
@@ -406,7 +406,7 @@ def _banner(
 
 def _build_table_header(layout: list[tuple[str, int]]) -> str:
     """Return a formatted header string from a column layout."""
-    _right_aligned = {"Runs", "Cost", "Dur", "Tokens", "Pace", "Tks", "M", "✓"}
+    _right_aligned = {"Runs", "Est Cost", "Dur", "Tokens", "Pace", "Tks", "M", "✓"}
     parts: list[str] = []
     for header, width in layout:
         align = ">" if header in _right_aligned else "<"
@@ -493,14 +493,14 @@ def _compute_leader_board(
         return []
 
     total_runs = summary_data.get("total_runs", 0)
-    total_cost = summary_data.get("total_estimated_cost") or 0
+    total_cost = summary_data.get("tot_estimated_cost") or 0
     total_tokens = summary_data.get("total_tokens", 0)
 
     def _get_pace(job: Any) -> float | None:
         proj = get_job_projections(
             job["job_id"],
-            avg_cost=job.get("avg_cost"),
-            total_cost=job["total_cost"],
+            avg_estimated_cost=job.get("avg_estimated_cost"),
+            tot_estimated_cost=job["tot_estimated_cost"],
             runs=job["runs"],
             first_run=job.get("first_run"),
             last_run=job.get("last_run"),
@@ -510,7 +510,7 @@ def _compute_leader_board(
         return proj.get("pace")
 
     top_runs_job = max(jobs, key=lambda j: j["runs"])
-    top_cost_job = max(jobs, key=lambda j: j.get("total_cost") or 0)
+    top_cost_job = max(jobs, key=lambda j: j.get("tot_estimated_cost") or 0)
     top_tokens_job = max(jobs, key=lambda j: j.get("total_tokens", 0))
 
     jobs_with_pace = [(j, _get_pace(j)) for j in jobs if _get_pace(j) is not None]
@@ -532,9 +532,9 @@ def _compute_leader_board(
         })
 
     if total_cost > 0:
-        cost = top_cost_job.get("total_cost") or 0
+        cost = top_cost_job.get("tot_estimated_cost") or 0
         leaders.append({
-            "category": "Top Cost",
+            "category": "Top Est Cost",
             "job_id": top_cost_job["job_id"],
             "job_name": _job_label(top_cost_job["job_id"], job_names, top_cost_job.get("job_mode")),
             "value": _fmt_cost(cost),
@@ -579,8 +579,8 @@ def _render_summary(data: Any, args: argparse.Namespace, db_path: Path) -> list[
     lines.append("  📋 Summary Board")
     lines.append(_build_separator(_W_STD))
     lines.append(f"  Runs:              {data['total_runs']:,}")
-    lines.append(f"  Estimated cost:    {_fmt_cost(data['total_estimated_cost'])}")
-    lines.append(f"  Actual cost:       {_fmt_cost(data['total_actual_cost'])}")
+    lines.append(f"  Estimated cost:    {_fmt_cost(data['tot_estimated_cost'])}")
+    lines.append(f"  Actual cost:       {_fmt_cost(data['tot_actual_cost'])}")
     lines.append(
         f"  Tokens:            {_fmt_tokens(data['total_tokens'])}  "
         f"(In: {_fmt_tokens(data['total_input_tokens'])}  "
@@ -593,7 +593,7 @@ def _render_summary(data: Any, args: argparse.Namespace, db_path: Path) -> list[
     if prev:
         lines.append(
             f"  Previous period:   {prev.get('runs', 0):,} runs, "
-            f"{_fmt_cost(prev.get('cost'))}"  # type: ignore[arg-type]
+            f"{_fmt_cost(prev.get('estimated_cost'))}"  # type: ignore[arg-type]
         )
         lines.append(f"  Trend:             {data['trend']}")
         lines.append("")
@@ -604,7 +604,8 @@ def _render_summary(data: Any, args: argparse.Namespace, db_path: Path) -> list[
         lines.append(_build_separator(LEADER_BOARD_SEP_WIDTH))
         for leader in leader_board:
             lines.append(
-                f"  {leader['category']:<14} {leader['job_name']:<14} {leader['job_id']:<12} {leader['value']:>10} {leader['share']:>8}"
+                f"  {leader['category']:<14} {leader['job_name']:<14} "
+                f"{leader['job_id']:<12} {leader['value']:>10} {leader['share']:>8}"
             )
         lines.append("")
 
@@ -616,7 +617,7 @@ def _render_summary(data: Any, args: argparse.Namespace, db_path: Path) -> list[
         for m in by_model:
             model_name = (m["model"] or "unknown")[:28]
             lines.append(
-                f"  {model_name:<30} {m['runs']:>8,} {_fmt_cost(m['total_cost']):>12}"
+                f"  {model_name:<30} {m['runs']:>8,} {_fmt_cost(m['tot_estimated_cost']):>12}"
             )
         lines.append("")
 
@@ -644,15 +645,15 @@ def _render_jobs(
     for j in jobs:
         job_id = j["job_id"]
         job_label = _job_label(job_id, job_names, j.get("job_mode"))
-        cost = _fmt_cost(j["total_cost"])
+        cost = _fmt_cost(j["tot_estimated_cost"])
         tokens = _fmt_tokens(j["total_tokens"])
         dur = j.get("avg_duration")
         dur_str = f"{dur:.0f}s" if dur is not None else "—"
 
         proj = get_job_projections(
             job_id,
-            avg_cost=j.get("avg_cost"),
-            total_cost=j["total_cost"],
+            avg_estimated_cost=j.get("avg_estimated_cost"),
+            tot_estimated_cost=j["tot_estimated_cost"],
             runs=j["runs"],
             first_run=j.get("first_run"),
             last_run=j.get("last_run"),
@@ -690,7 +691,7 @@ def _render_runs(
         t = _fmt_dt(r.get("run_time"))
         dur = r.get("duration_seconds")
         dur_str = f"{dur:.0f}s" if dur is not None else "—"
-        cost = _fmt_cost(r.get("estimated_cost_usd"))
+        cost = _fmt_cost(r.get("estimated_cost"))
         tok = _fmt_tokens(
             r.get("input_tokens", 0)
             + r.get("output_tokens", 0)
@@ -726,7 +727,7 @@ def _render_models(
 
     for m in models:
         model = (m["model"] or "unknown")[:28]
-        cost = _fmt_cost(m["total_cost"])
+        cost = _fmt_cost(m["tot_estimated_cost"])
         tokens = _fmt_tokens(m.get("total_input_tokens", 0) + m.get("total_output_tokens", 0))
         lines.append(
             f"  {model:<30} {m['runs']:>8,} {cost:>10} {tokens:>10}"
@@ -799,8 +800,8 @@ def _cmd_jobs(args: argparse.Namespace, db_path: Path) -> int:
         for j in jobs:
             proj = get_job_projections(
                 j["job_id"],
-                avg_cost=j.get("avg_cost"),
-                total_cost=j["total_cost"],
+                avg_estimated_cost=j.get("avg_estimated_cost"),
+                tot_estimated_cost=j["tot_estimated_cost"],
                 runs=j["runs"],
                 first_run=j.get("first_run"),
                 last_run=j.get("last_run"),

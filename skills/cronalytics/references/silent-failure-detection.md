@@ -30,7 +30,7 @@ Are there no_agent jobs with total_tokens == 0?
 
 | What you need | cronalytics --json | jobs.json |
 |---|---|---|
-| Did it burn tokens? | `total_tokens`, `total_cost` | N/A |
+| Did it burn tokens? | `total_tokens`, `tot_estimated_cost` | N/A |
 | Did it actually run? | `avg_duration` (null = hollow) | N/A |
 | What did the scheduler say? | `success_runs` / `failure_runs` | `last_status` |
 | Exact error string? | Not stored | `last_error` |

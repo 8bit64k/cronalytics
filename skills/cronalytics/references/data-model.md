@@ -18,7 +18,7 @@ The `cron_runs` table is the canonical store for all ingested cron activity.
 | `estimated_cost_usd`| REAL | NULL | Calculated cost based on pricing metadata |
 | `actual_cost_usd` | REAL | NULL | Actual billed cost (if available) |
 | `cache_write_tokens`| INTEGER | 0 | Count of tokens written to cache |
-| `estimated_cost_usd`| REAL    | NULL | Calculated cost based on pricing metadata |
+| `estimated_cost_usd`| REAL | NULL | Calculated cost based on pricing metadata |
 | `actual_cost_usd`   | REAL    | NULL | Actual billed cost (if available) |
 | `cost_status`       | TEXT    | NULL | Status of cost calculation (e.g., 'verified') |
 | `cost_source`       | TEXT    | NULL | Source of pricing data (e.g., 'provider_api') |

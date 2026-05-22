@@ -5,7 +5,7 @@ import { fmtTime, fmtCost, fmtCompact, fmtDuration } from "../lib/formatters.js"
 
 const COLUMNS = [
   { label: "Time", key: "run_time", align: "left" },
-  { label: "Cost", key: "estimated_cost_usd", align: "right" },
+  { label: "Est Cost", key: "estimated_cost", align: "right" },
   { label: "Duration", key: "duration_seconds", align: "right" },
   { label: "Tokens", key: "input_tokens", align: "right" },
   { label: "Model", key: "model", align: "left" },
@@ -29,7 +29,7 @@ export function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir 
         const dir = sDir === "desc" ? -1 : 1;
         const av = a[sKey], bv = b[sKey];
         if (sKey === "input_tokens") return dir * (tokTotal(a) - tokTotal(b));
-        if (sKey === "run_time" || sKey === "estimated_cost_usd" || sKey === "duration_seconds") return dir * (av - bv);
+        if (sKey === "run_time" || sKey === "estimated_cost" || sKey === "duration_seconds") return dir * (av - bv);
         if (sKey === "success") return dir * ((av ? 1 : 0) - (bv ? 1 : 0));
         if (av == null || av === "") return 1;
         if (bv == null || bv === "") return -1;
@@ -159,7 +159,7 @@ export function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir 
                           style: { borderBottom: "1px solid rgba(255,255,255,0.04)" },
                         },
                         React.createElement("td", { style: { padding: "0.4rem 0.35rem", whiteSpace: "nowrap" } }, fmtTime(r.run_time)),
-                        React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCost(r.estimated_cost_usd)),
+                        React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCost(r.estimated_cost)),
                         React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtDuration(r.duration_seconds)),
                         React.createElement(
                           "td",

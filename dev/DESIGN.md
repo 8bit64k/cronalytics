@@ -197,9 +197,9 @@ Early versions used the *data span* (actual days between first and last run) as 
 
 | Metric | Formula |
 |--------|---------|
-| Daily cost | `total_cost / days_filter` *(or all-time span if days=0)* |
+| Daily cost | `tot_estimated_cost / days_filter` *(or all-time span if days=0)* |
 | Trend 30d | `daily_cost × 30` |
-| Nominal 30d | `avg_cost × scheduled_runs_30d` *(from croniter)* |
+| Nominal 30d | `avg_estimated_cost × scheduled_runs_30d` *(from croniter)* |
 | Pace | `trend_30d / nominal_30d` |
 | Drift | `observed_runs / scheduled_runs_in_window` *(API only; not surfaced in UI yet)* |
 

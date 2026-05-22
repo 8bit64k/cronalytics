@@ -164,8 +164,8 @@ async def summary(
     for j in raw_jobs:
         proj = _schedule_mod.get_job_projections(
             job_id=j["job_id"],
-            avg_cost=j.get("avg_cost"),
-            total_cost=j.get("total_cost"),
+            avg_estimated_cost=j.get("avg_estimated_cost"),
+            tot_estimated_cost=j.get("tot_estimated_cost"),
             runs=j.get("runs", 0),
             first_run=j.get("first_run", 0),
             last_run=j.get("last_run", 0),
@@ -211,8 +211,8 @@ async def jobs(
         for j in enriched:
             proj = _schedule_mod.get_job_projections(
                 job_id=j["job_id"],
-                avg_cost=j.get("avg_cost"),
-                total_cost=j.get("total_cost"),
+                avg_estimated_cost=j.get("avg_estimated_cost"),
+                tot_estimated_cost=j.get("tot_estimated_cost"),
                 runs=j.get("runs", 0),
                 first_run=j.get("first_run", 0),
                 last_run=j.get("last_run", 0),
@@ -237,14 +237,14 @@ async def job_runs(
     outcome: str = Query(default="all", pattern="^(all|both|success|failure)$"),
     sort_key: str = Query(
         default="run_time",
-        pattern="^(run_time|estimated_cost_usd|duration_seconds|success|model|input_tokens)$",
+        pattern="^(run_time|estimated_cost|duration_seconds|success|model|input_tokens)$",
     ),
     sort_dir: str = Query(default="desc", pattern="^(asc|desc)$"),
     mode: str = Query(default="all", pattern="^(all|agent|no_agent)$"),
 ) -> dict[str, Any]:
     """Individual run history for a specific job (0 = all time).
 
-    Inherits the global outcome filter and allows sorting by cost, duration, model, success,
+    Inherits the global outcome filter and allows sorting by estimated_cost, duration, model, success,
     or time. Defaults to the parent table's sort preference if passed through sort_key.
     """
     rows = _facts_mod.query_job_runs(

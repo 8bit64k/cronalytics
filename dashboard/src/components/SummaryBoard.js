@@ -8,7 +8,7 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
     ? ((s.total_runs - s.previous_period.runs) / s.previous_period.runs) * 100
     : null;
   const costPct = s.previous_period && s.previous_period.cost != null && s.previous_period.cost !== 0
-    ? ((s.total_estimated_cost - s.previous_period.cost) / s.previous_period.cost) * 100
+    ? ((s.tot_estimated_cost - s.previous_period.cost) / s.previous_period.cost) * 100
     : null;
 
   const cardHover = {
@@ -57,18 +57,18 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
       )
     ),
     // Cost
-    React.createElement("div", cardProps(onCostClick, outcome === "failure" ? "Wasted cost details" : "Cost details", { minWidth: 0, overflow: "hidden" }),
+    React.createElement("div", cardProps(onCostClick, outcome === "failure" ? "Est wasted cost details" : "Est cost details", { minWidth: 0, overflow: "hidden" }),
       React.createElement(Card, { style: { flex: 1 } },
         React.createElement(CardHeader, null,
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
             React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, BanknoteIcon(14)),
-            React.createElement(CardTitle, null, outcome === "failure" ? "Wasted" : "Cost"),
+            React.createElement(CardTitle, null, outcome === "failure" ? "Est Wasted" : "Est Cost"),
             React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
           )
         ),
         React.createElement(CardContent, null,
           React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: outcome === "failure" ? "#ef4444" : "#f5a623" } },
-            fmtCost(s.total_estimated_cost)
+            fmtCost(s.tot_estimated_cost)
           ),
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: costPct != null ? (costPct > 0 ? "#ef4444" : "#4ade80") : null } },
             costPct != null ? (costPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(costPct).toFixed(0) + "%" : "\u2014"
@@ -77,13 +77,13 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
             "vs prior ", days === 0 ? "period" : days + "d"
           ),
           React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.3rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.25rem" } },
-            "Actual: ", s.total_actual_cost != null ? fmtCost(s.total_actual_cost) : "\u2014"
+            "Actual: ", s.tot_actual_cost != null ? fmtCost(s.tot_actual_cost) : "\u2014"
           ),
           React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem" } },
             React.createElement("span", { style: { color: "#4ade80" } }, "\u2713 ", s.success_runs || 0),
             " \u00b7 ",
             React.createElement("span", { style: { color: (s.failure_runs || 0) > 0 ? "#ef4444" : null } }, "\u2717 ", s.failure_runs || 0),
-            (s.failure_cost != null && s.failure_cost > 0) ? " (" + fmtCost(s.failure_cost) + " wasted)" : ""
+            (s.failure_estimated_cost != null && s.failure_estimated_cost > 0) ? " (" + fmtCost(s.failure_estimated_cost) + " wasted)" : ""
           )
         )
       )

@@ -295,7 +295,7 @@ Key fields captured per run:
 - `run_time` / `ended_at` / `duration_seconds`
 - `model`
 - `input_tokens` / `output_tokens` / `reasoning_tokens` / `cache_read_tokens` / `cache_write_tokens`
-- `estimated_cost_usd` — primary cost metric
+- `estimated_cost` — primary cost metric
 - `actual_cost_usd` — ground-truth when available
 - `cost_status`, `cost_source`, `billing_provider`
 - `api_call_count`, `message_count`, `tool_call_count`

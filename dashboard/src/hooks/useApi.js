@@ -16,15 +16,15 @@ import { validatorForPath } from "../lib/validate.js";
 /**
  * @typedef {Object} SummaryResponse
  * @property {number} total_runs
- * @property {number} total_estimated_cost
- * @property {number} total_actual_cost
+ * @property {number} tot_estimated_cost
+ * @property {number} tot_actual_cost
  * @property {number} total_tokens
  * @property {number} total_input_tokens
  * @property {number} total_output_tokens
  * @property {number} [total_cache_read_tokens]
  * @property {number} success_runs
  * @property {number} failure_runs
- * @property {number} [failure_cost]
+ * @property {number} [failure_estimated_cost]
  * @property {number} [nominal_monthly_total]
  * @property {number} [trend_monthly_total]
  * @property {number} [pace]
@@ -37,8 +37,8 @@ import { validatorForPath } from "../lib/validate.js";
  * @property {string} job_id
  * @property {string} [name]
  * @property {number} runs
- * @property {number} total_cost
- * @property {number} [avg_cost]
+ * @property {number} tot_estimated_cost
+ * @property {number} [avg_estimated_cost]
  * @property {number} [total_tokens]
  * @property {number} [total_duration]
  * @property {number} [avg_duration]
@@ -57,7 +57,7 @@ import { validatorForPath } from "../lib/validate.js";
  * @typedef {Object} RunRecord
  * @property {string} session_id
  * @property {number} run_time
- * @property {number} estimated_cost_usd
+ * @property {number} estimated_cost
  * @property {number} [duration_seconds]
  * @property {boolean} [success]
  * @property {string} [model]
@@ -81,7 +81,7 @@ import { validatorForPath } from "../lib/validate.js";
  * @typedef {Object} ModelAggregate
  * @property {string} model
  * @property {number} runs
- * @property {number} total_cost
+ * @property {number} tot_estimated_cost
  */
 
 /**

@@ -54,7 +54,7 @@ export function JobBreakdown({
           React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
             React.createElement("thead", null,
               React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
-                ["Job", "Runs", "Avg Time", "Total Cost", "Avg Cost", "Nominal/mo", "Trend/mo", "Pace"].map(h => {
+                ["Job", "Runs", "Avg Time", "Est Cost", "Avg Est Cost", "Nominal/mo", "Trend/mo", "Pace"].map(h => {
                   const isActive = sortConfig.key === h;
                   return React.createElement("th", {
                     key: h,
@@ -104,8 +104,8 @@ export function JobBreakdown({
                   ),
                   React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, (j.runs || 0).toLocaleString()),
                   React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtDuration(j.avg_duration)),
-                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.total_cost)),
-                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.avg_cost)),
+                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.tot_estimated_cost)),
+                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.avg_estimated_cost)),
                   React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } },
                     j.projections && j.projections.projected_cost_30d != null
                       ? fmtCost(j.projections.projected_cost_30d) + "/mo"

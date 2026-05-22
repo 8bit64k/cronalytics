@@ -69,8 +69,8 @@ class TestGetJobProjections:
         """When nominal == trend, pace should be exactly 1.0."""
         result = get_job_projections(
             "daily_digest",
-            avg_cost=0.10,
-            total_cost=3.00,
+            avg_estimated_cost=0.10,
+            tot_estimated_cost=3.00,
             runs=30,
             first_run=1_000_000.0,
             last_run=1_002_592.0,
@@ -86,8 +86,8 @@ class TestGetJobProjections:
         jobs_json.write_text('{"jobs": []}')
         result = get_job_projections(
             "missing_job",
-            avg_cost=0.10,
-            total_cost=1.00,
+            avg_estimated_cost=0.10,
+            tot_estimated_cost=1.00,
             runs=10,
             first_run=1_000_000.0,
             last_run=1_000_864.0,
@@ -101,8 +101,8 @@ class TestGetJobProjections:
         """When actual runs < expected, drift < 1.0."""
         result = get_job_projections(
             "daily_digest",
-            avg_cost=0.10,
-            total_cost=1.00,
+            avg_estimated_cost=0.10,
+            tot_estimated_cost=1.00,
             runs=15,  # only half the expected 30 daily runs
             first_run=1_000_000.0,
             last_run=1_002_592.0,
@@ -117,8 +117,8 @@ class TestGetJobProjections:
         now = datetime.now(UTC).timestamp()
         result = get_job_projections(
             "daily_digest",
-            avg_cost=0.10,
-            total_cost=3.00,
+            avg_estimated_cost=0.10,
+            tot_estimated_cost=3.00,
             runs=30,
             first_run=now - 2_592_000,  # 30 days ago
             last_run=now,

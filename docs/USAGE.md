@@ -333,12 +333,12 @@ cronalytics jobs --days 7 --json | jq '.data[] | select(.pace > 1.2) | {id: .job
 
 **"Get total cost for the last week"**
 ```bash
-cronalytics summary --days 7 --json | jq '.data.total_estimated_cost'
+cronalytics summary --days 7 --json | jq '.data.tot_estimated_cost'
 ```
 
 **"Export job list as CSV"**
 ```bash
-cronalytics jobs --days 30 --json | jq -r '.data[] | [.job_id, .runs, .total_cost, .total_tokens] | @csv'
+cronalytics jobs --days 30 --json | jq -r '.data[] | [.job_id, .runs, .tot_estimated_cost, .total_tokens] | @csv'
 ```
 
 **"Full report in one command"**
