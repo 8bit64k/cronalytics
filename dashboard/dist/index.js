@@ -1917,6 +1917,21 @@
     const topCostModal = useModal();
     const topTokensModal = useModal();
     const topPaceModal = useModal();
+    const toolbarRef = useRef(null);
+    const [compact, setCompact] = useState(false);
+    useEffect(() => {
+      const el = toolbarRef.current;
+      if (!el) return;
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const width = entry.contentRect?.width || entry.borderBoxSize?.[0]?.inlineSize || entry.target.getBoundingClientRect().width;
+          setCompact(width < 1080);
+          console.log("[Cronalytics] toolbar width:", width, "compact:", width < 1080);
+        }
+      });
+      ro.observe(el);
+      return () => ro.disconnect();
+    }, []);
     useEffect(() => {
       fetchJSON("/api/plugins/cronalytics/health").then((d) => {
         if (d && d.sync) {
@@ -2042,7 +2057,8 @@
             background: "var(--background, rgba(12,12,12,0.88))",
             backdropFilter: "blur(8px)",
             borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))"
-          }
+          },
+          ref: toolbarRef
         },
         // Toggles group — nowrap so they stay together as one unit.
         React.createElement(
@@ -2057,7 +2073,7 @@
         React.createElement("div", { style: { flex: "1 1 0%", minWidth: "0.25rem" } }),
         // DaySelector returns [label, presets, custom] — flattened as direct flex children
         // of the toolbar so presets, custom input, and Refresh wrap progressively.
-        React.createElement(DaySelector, { selected: days, onChange: setDays, label: "Days" }),
+        React.createElement(DaySelector, { selected: days, onChange: setDays, label: compact ? null : "Days" }),
         // Refresh — its own flex item so it breaks away first at 110%.
         React.createElement(
           Button,
