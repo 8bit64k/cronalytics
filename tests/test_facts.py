@@ -82,7 +82,7 @@ class TestQuerySummary:
         """An empty DB should return zeroes across the board."""
         result = query_summary(fact_db, days=30)
         assert result["total_runs"] == 0
-        assert result["total_estimated_cost"] is None
+        assert result["tot_estimated_cost"] is None
 
     def test_outcome_filtering(self, fact_db):
         """Outcome=success should only count successful runs."""
@@ -134,7 +134,7 @@ class TestQuerySummary:
         })
         result = query_summary(fact_db, days=30, outcome="success")
         assert result["total_runs"] == 1
-        assert result["total_estimated_cost"] == pytest.approx(0.01)
+        assert result["tot_estimated_cost"] == pytest.approx(0.01)
 
     def test_mode_filtering(self, fact_db):
         """Mode=agent should exclude no_agent rows."""
@@ -235,8 +235,8 @@ class TestQueryJobRuns:
         }
         ingest_row(fact_db, {**base, "id": "cron_job_a_20260101_120000", "estimated_cost_usd": 0.01})
         ingest_row(fact_db, {**base, "id": "cron_job_a_20260101_130000", "estimated_cost_usd": 0.05})
-        runs = query_job_runs(fact_db, "job_a", limit=10, sort_key="estimated_cost_usd", sort_dir="desc")
-        assert runs[0]["estimated_cost_usd"] == pytest.approx(0.05)
+        runs = query_job_runs(fact_db, "job_a", limit=10, sort_key="estimated_cost", sort_dir="desc")
+        assert runs[0]["estimated_cost"] == pytest.approx(0.05)
 
     def test_invalid_sort_key_fallback(self, fact_db):
         """An unknown sort_key falls back to run_time."""

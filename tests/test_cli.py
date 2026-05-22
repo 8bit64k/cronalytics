@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -370,31 +371,31 @@ class TestComputeLeaderBoard:
 
     def test_runs_cost_tokens(self):
         jobs = [
-            {"job_id": "job_a", "runs": 10, "total_cost": 5.0, "total_tokens": 1000, "job_mode": "agent"},
-            {"job_id": "job_b", "runs": 5, "total_cost": 10.0, "total_tokens": 500, "job_mode": "agent"},
-            {"job_id": "job_c", "runs": 20, "total_cost": 2.0, "total_tokens": 2000, "job_mode": "agent"},
+            {"job_id": "job_a", "runs": 10, "tot_estimated_cost": 5.0, "total_tokens": 1000, "job_mode": "agent"},
+            {"job_id": "job_b", "runs": 5, "tot_estimated_cost": 10.0, "total_tokens": 500, "job_mode": "agent"},
+            {"job_id": "job_c", "runs": 20, "tot_estimated_cost": 2.0, "total_tokens": 2000, "job_mode": "agent"},
         ]
-        summary = {"total_runs": 35, "total_estimated_cost": 17.0, "total_tokens": 3500}
+        summary = {"total_runs": 35, "tot_estimated_cost": 17.0, "total_tokens": 3500}
         names = {"job_a": "Alpha", "job_b": "Beta", "job_c": "Gamma"}
         result = _compute_leader_board(jobs, summary, names, 30)
         categories = [r["category"] for r in result]
         assert "Top Runs" in categories
-        assert "Top Cost" in categories
+        assert "Top Est Cost" in categories
         assert "Top Tokens" in categories
         # job_c has most runs and most tokens; job_b has most cost
         top_runs = next(r for r in result if r["category"] == "Top Runs")
         assert top_runs["job_id"] == "job_c"
         assert top_runs["share"] == "57.1%"
-        top_cost = next(r for r in result if r["category"] == "Top Cost")
+        top_cost = next(r for r in result if r["category"] == "Top Est Cost")
         assert top_cost["job_id"] == "job_b"
         assert top_cost["share"] == "58.8%"
 
     def test_no_pace_when_no_schedule(self):
         """If no jobs have schedule definitions, Top Pace is omitted."""
         jobs = [
-            {"job_id": "job_a", "runs": 10, "total_cost": 5.0, "total_tokens": 1000, "job_mode": "agent"},
+            {"job_id": "job_a", "runs": 10, "tot_estimated_cost": 5.0, "total_tokens": 1000, "job_mode": "agent"},
         ]
-        summary = {"total_runs": 10, "total_estimated_cost": 5.0, "total_tokens": 1000}
+        summary = {"total_runs": 10, "tot_estimated_cost": 5.0, "total_tokens": 1000}
         result = _compute_leader_board(jobs, summary, {}, 30)
         categories = [r["category"] for r in result]
         assert "Top Pace" not in categories
@@ -433,7 +434,7 @@ class TestMainIntegration:
         """Summary command includes leader board when jobs exist."""
         conn = sqlite3.connect(str(fact_db))
         cur = conn.cursor()
-        now = datetime(2026, 5, 15, 12, 0, 0).timestamp()
+        now = time.time()
         # Insert two jobs with different stats
         cur.execute(
             "INSERT INTO cron_runs (session_id, job_id, run_time, estimated_cost_usd, "
@@ -461,14 +462,14 @@ class TestMainIntegration:
         assert result == 0
         assert "🏆 Leader Board" in captured.out
         assert "Top Runs" in captured.out
-        assert "Top Cost" in captured.out
+        assert "Top Est Cost" in captured.out
         assert "Top Tokens" in captured.out
 
     def test_summary_leader_board_json(self, fact_db, capsys):
         """Summary JSON includes leader_board array with correct structure."""
         conn = sqlite3.connect(str(fact_db))
         cur = conn.cursor()
-        now = datetime(2026, 5, 15, 12, 0, 0).timestamp()
+        now = time.time()
         cur.execute(
             "INSERT INTO cron_runs (session_id, job_id, run_time, estimated_cost_usd, "
             "input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, "
@@ -487,7 +488,7 @@ class TestMainIntegration:
         assert len(lb) >= 3  # runs, cost, tokens
         categories = {item["category"] for item in lb}
         assert "Top Runs" in categories
-        assert "Top Cost" in categories
+        assert "Top Est Cost" in categories
         assert "Top Tokens" in categories
         # Each entry has the expected keys
         for item in lb:

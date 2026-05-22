@@ -5,7 +5,7 @@ import { ZapIcon, BanknoteIcon, BlocksIcon, MetronomeIcon, InfoIcon } from "../l
 export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopTokensClick, onTopPaceClick }) {
   // Precompute totals for "% of total" context on leader cards
   const totalRuns = jobList.reduce((sum, j) => sum + (j.runs || 0), 0);
-  const totalCost = jobList.reduce((sum, j) => sum + (j.total_cost || 0), 0);
+  const totalCost = jobList.reduce((sum, j) => sum + (j.tot_estimated_cost || 0), 0);
   const totalTokens = jobList.reduce((sum, j) => sum + (j.total_tokens || 0), 0);
 
   const cardHover = {
@@ -62,9 +62,9 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
     })(),
     // Top Cost
     (() => {
-      const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.total_cost || 0) > (a.total_cost || 0) ? b : a, jobList[0]) : null;
+      const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.tot_estimated_cost || 0) > (a.tot_estimated_cost || 0) ? b : a, jobList[0]) : null;
       const label = j ? (j.name || j.job_id) : "\u2014";
-      return React.createElement("div", cardProps(onTopCostClick, "Top Cost details", { minWidth: 0, overflow: "hidden" }),
+      return React.createElement("div", cardProps(onTopCostClick, "Top est cost details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
@@ -74,15 +74,18 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
             )
           ),
           React.createElement(CardContent, null,
-            React.createElement("div", {
-              style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#f5a623", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
-            }, j ? fmtCost(j.total_cost) : "\u2014"),
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+              React.createElement("div", {
+                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#f5a623", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
+              }, j ? fmtCost(j.tot_estimated_cost) : "\u2014"),
+              j && React.createElement("span", { style: { fontSize: "0.7rem", opacity: 0.95, fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "0.25rem", padding: "0.05rem 0.4rem" } }, "Estimated")
+            ),
             React.createElement("div", {
               style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
               title: label
             }, label),
             React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.6, marginTop: "0.15rem" } },
-              totalCost > 0 ? (Math.round(((j.total_cost || 0) / totalCost) * 100)) + "% of total cost" : ""
+              totalCost > 0 ? (Math.round(((j.tot_estimated_cost || 0) / totalCost) * 100)) + "% of total est cost" : ""
             )
           )
         )

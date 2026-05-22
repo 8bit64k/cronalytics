@@ -28,7 +28,7 @@ export function SparkLine({ runs }) {
   if (!runs || runs.length === 0) return null;
 
   const chrono = [...runs].sort((a, b) => a.run_time - b.run_time);
-  const maxCost = Math.max(...chrono.map(r => r.estimated_cost_usd || 0), 0.0001);
+  const maxCost = Math.max(...chrono.map(r => r.estimated_cost || 0), 0.0001);
   const maxTok = Math.max(...chrono.map(_tokTotal), 1);
   const maxDur = Math.max(...chrono.map(r => r.duration_seconds || 0), 0.1);
 
@@ -71,7 +71,7 @@ export function SparkLine({ runs }) {
       }),
       // Cost bars (top layer — model color)
       chrono.map((r, i) => {
-        const barH = ((r.estimated_cost_usd || 0) / maxCost) * h;
+        const barH = ((r.estimated_cost || 0) / maxCost) * h;
         return React.createElement("rect", {
           key: r.session_id,
           x: i * (w + gap),
@@ -124,7 +124,7 @@ export function SparkLine({ runs }) {
         },
         fmtTime(hoverRun.run_time) +
           " · " +
-          fmtCost(hoverRun.estimated_cost_usd) +
+          fmtCost(hoverRun.estimated_cost) +
           " · " +
           fmtCompact(_tokTotal(hoverRun)) +
           " toks · " +

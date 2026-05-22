@@ -6,7 +6,7 @@ export function ModelBreakdown({ costByModel }) {
   if (!costByModel || costByModel.length === 0) return null;
   const topModels = costByModel.slice(0, 5);
   const remaining = costByModel.length - 5;
-  const maxCost = (topModels[0] && topModels[0].total_cost) || 1;
+  const maxCost = (topModels[0] && topModels[0].tot_estimated_cost) || 1;
 
   return React.createElement(Card, { style: { marginBottom: "1.5rem" } },
     React.createElement(CardHeader, null,
@@ -30,13 +30,13 @@ export function ModelBreakdown({ costByModel }) {
             style: { flex: 1, background: "rgba(255,255,255,0.04)", height: "0.4rem", borderRadius: "0.2rem", overflow: "hidden" }
           },
             React.createElement("div", {
-              style: { width: (Math.min(100, ((m.total_cost || 0) / maxCost) * 100)) + "%", background: "#f5a623", height: "100%", borderRadius: "0.2rem", transition: "width 0.5s ease" }
+              style: { width: (Math.min(100, ((m.tot_estimated_cost || 0) / maxCost) * 100)) + "%", background: "#f5a623", height: "100%", borderRadius: "0.2rem", transition: "width 0.5s ease" }
             })
           ),
           React.createElement("span", {
             style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", flexShrink: 0, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "0.35rem", minWidth: 0, flex: "0 0 9rem", justifyContent: "flex-end" }
           },
-            React.createElement("span", { style: { color: "#f5a623", width: "4.5rem", textAlign: "right", display: "inline-block" } }, fmtCost(m.total_cost)),
+            React.createElement("span", { style: { color: "#f5a623", width: "4.5rem", textAlign: "right", display: "inline-block" } }, fmtCost(m.tot_estimated_cost)),
             React.createElement("span", { style: { opacity: 0.45, width: "3.5rem", textAlign: "right", display: "inline-block" } }, "\u00b7 " + (m.runs || 0).toLocaleString())
           )
         )),

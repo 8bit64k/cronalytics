@@ -4,13 +4,13 @@ import { useApi } from "../hooks/useApi.js";
 import { fmtTime, fmtCost, fmtCompact, fmtDuration } from "../lib/formatters.js";
 
 const COLUMNS = [
-  { label: "Time", key: "run_time", align: "left" },
-  { label: "Cost", key: "estimated_cost_usd", align: "right" },
-  { label: "Duration", key: "duration_seconds", align: "right" },
-  { label: "Tokens", key: "input_tokens", align: "right" },
-  { label: "Model", key: "model", align: "left" },
-  { label: "Mode", key: "job_mode", align: "center" },
-  { label: "Result", key: "success", align: "center" },
+  { label: "Time", key: "run_time", align: "left", width: "10rem" },
+  { label: "Est Cost", key: "estimated_cost", align: "right", width: "6rem" },
+  { label: "Duration", key: "duration_seconds", align: "right", width: "5rem" },
+  { label: "Tokens", key: "input_tokens", align: "right", width: "6rem" },
+  { label: "Model", key: "model", align: "left", width: "auto" },
+  { label: "Mode", key: "job_mode", align: "center", width: "4rem" },
+  { label: "Result", key: "success", align: "center", width: "3.5rem" },
 ];
 
 function tokTotal(r) {
@@ -29,7 +29,7 @@ export function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir 
         const dir = sDir === "desc" ? -1 : 1;
         const av = a[sKey], bv = b[sKey];
         if (sKey === "input_tokens") return dir * (tokTotal(a) - tokTotal(b));
-        if (sKey === "run_time" || sKey === "estimated_cost_usd" || sKey === "duration_seconds") return dir * (av - bv);
+        if (sKey === "run_time" || sKey === "estimated_cost" || sKey === "duration_seconds") return dir * (av - bv);
         if (sKey === "success") return dir * ((av ? 1 : 0) - (bv ? 1 : 0));
         if (av == null || av === "") return 1;
         if (bv == null || bv === "") return -1;
@@ -127,9 +127,16 @@ export function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir 
                             cursor: "pointer",
                             userSelect: "none",
                             whiteSpace: "nowrap",
+                            width: col.width || "auto",
                           },
                         },
-                        col.label + (isActive ? (sDir === "desc" ? " ↓" : " ↑") : "")
+                        [
+                          col.label,
+                          React.createElement("span", {
+                            key: "arrow",
+                            style: { display: "inline-block", width: "1em", marginLeft: "0.15rem", textAlign: "center" }
+                          }, isActive ? (sDir === "desc" ? "\u2193" : "\u2191") : "")
+                        ]
                       );
                     })
                   )
@@ -158,29 +165,29 @@ export function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir 
                           key: r.session_id,
                           style: { borderBottom: "1px solid rgba(255,255,255,0.04)" },
                         },
-                        React.createElement("td", { style: { padding: "0.4rem 0.35rem", whiteSpace: "nowrap" } }, fmtTime(r.run_time)),
-                        React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCost(r.estimated_cost_usd)),
-                        React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtDuration(r.duration_seconds)),
+                        React.createElement("td", { style: { padding: "0.4rem 0.35rem", whiteSpace: "nowrap", width: "10rem" } }, fmtTime(r.run_time)),
+                        React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 1.85rem 0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)", width: "6rem" } }, fmtCost(r.estimated_cost)),
+                        React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 1.35rem 0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)", width: "5rem" } }, fmtDuration(r.duration_seconds)),
                         React.createElement(
                           "td",
-                          { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)", whiteSpace: "nowrap" } },
+                          { style: { textAlign: "right", padding: "0.4rem 1.35rem 0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)", whiteSpace: "nowrap", width: "6rem" } },
                           (() => {
                             const total = tokTotal(r);
                             if (total === 0) return "—";
                             return fmtCompact(total);
                           })()
                         ),
-                        React.createElement("td", { style: { padding: "0.4rem 0.35rem" } }, r.model || "—"),
+                        React.createElement("td", { style: { padding: "0.4rem 0.35rem", overflow: "hidden", textOverflow: "ellipsis", width: "auto" } }, r.model || "—"),
                         React.createElement(
                           "td",
-                          { style: { textAlign: "center", padding: "0.4rem 0.35rem" } },
+                          { style: { textAlign: "center", padding: "0.4rem 0.35rem", width: "4rem" } },
                           r.job_mode === "no_agent"
                             ? React.createElement(Badge, { size: "xs", style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.7 } }, "No agent")
                             : React.createElement("span", { style: { fontSize: "0.65rem", opacity: 0.45 } }, "Agent")
                         ),
                         React.createElement(
                           "td",
-                          { style: { textAlign: "center", padding: "0.4rem 0.35rem" } },
+                          { style: { textAlign: "center", padding: "0.4rem 0.35rem", width: "3.5rem" } },
                           r.success
                             ? React.createElement("span", { style: { color: "#22c55e" } }, "✓")
                             : React.createElement("span", { style: { color: "#ef4444" } }, "✗")

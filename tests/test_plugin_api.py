@@ -230,7 +230,7 @@ class TestSummary:
         data = response.json()
         assert data["plugin"] == "cronalytics"
         assert data["total_runs"] == 3
-        assert data["total_estimated_cost"] > 0
+        assert data["tot_estimated_cost"] > 0
         assert "nominal_monthly_total" in data
         assert "trend_monthly_total" in data
         assert "pace" in data

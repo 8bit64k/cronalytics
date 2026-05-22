@@ -85,7 +85,7 @@
   function validateSummary(d) {
     assertType("/summary", d, Object);
     assertType("/summary", d.total_runs, "number", "total_runs");
-    assertType("/summary", d.total_estimated_cost, "number", "total_estimated_cost");
+    assertType("/summary", d.tot_estimated_cost, "number", "tot_estimated_cost");
     assertType("/summary", d.total_tokens, "number", "total_tokens");
     assertType("/summary", d.success_runs, "number", "success_runs");
     assertType("/summary", d.failure_runs, "number", "failure_runs");
@@ -99,7 +99,7 @@
       d.jobs.forEach((j, i) => {
         assertType("/jobs", j.job_id, "string", `jobs[${i}].job_id`);
         assertType("/jobs", j.runs, "number", `jobs[${i}].runs`);
-        assertType("/jobs", j.total_cost, "number", `jobs[${i}].total_cost`);
+        assertType("/jobs", j.tot_estimated_cost, "number", `jobs[${i}].tot_estimated_cost`);
         assertType("/jobs", j.projections, "object", `jobs[${i}].projections`);
       });
     }
@@ -119,7 +119,7 @@
       d.runs.forEach((r, i) => {
         assertType("/jobs/:id/runs", r.session_id, "string", `runs[${i}].session_id`);
         assertType("/jobs/:id/runs", r.run_time, "number", `runs[${i}].run_time`);
-        assertType("/jobs/:id/runs", r.estimated_cost_usd, "number", `runs[${i}].estimated_cost_usd`);
+        assertType("/jobs/:id/runs", r.estimated_cost, "number", `runs[${i}].estimated_cost`);
       });
     }
   }
@@ -130,7 +130,7 @@
       d.models.forEach((m, i) => {
         assertType("/models", m.model, "string", `models[${i}].model`);
         assertType("/models", m.runs, "number", `models[${i}].runs`);
-        assertType("/models", m.total_cost, "number", `models[${i}].total_cost`);
+        assertType("/models", m.tot_estimated_cost, "number", `models[${i}].tot_estimated_cost`);
       });
     }
   }
@@ -140,7 +140,7 @@
     if (IS_DEV && Array.isArray(d.trend)) {
       d.trend.forEach((t, i) => {
         assertType("/trends", t.day, "string", `trend[${i}].day`);
-        assertType("/trends", t.cost, "number", `trend[${i}].cost`);
+        assertType("/trends", t.estimated_cost, "number", `trend[${i}].estimated_cost`);
         assertType("/trends", t.runs, "number", `trend[${i}].runs`);
       });
     }
@@ -553,13 +553,13 @@
 
   // src/components/JobDetailView.js
   var COLUMNS = [
-    { label: "Time", key: "run_time", align: "left" },
-    { label: "Cost", key: "estimated_cost_usd", align: "right" },
-    { label: "Duration", key: "duration_seconds", align: "right" },
-    { label: "Tokens", key: "input_tokens", align: "right" },
-    { label: "Model", key: "model", align: "left" },
-    { label: "Mode", key: "job_mode", align: "center" },
-    { label: "Result", key: "success", align: "center" }
+    { label: "Time", key: "run_time", align: "left", width: "10rem" },
+    { label: "Est Cost", key: "estimated_cost", align: "right", width: "6rem" },
+    { label: "Duration", key: "duration_seconds", align: "right", width: "5rem" },
+    { label: "Tokens", key: "input_tokens", align: "right", width: "6rem" },
+    { label: "Model", key: "model", align: "left", width: "auto" },
+    { label: "Mode", key: "job_mode", align: "center", width: "4rem" },
+    { label: "Result", key: "success", align: "center", width: "3.5rem" }
   ];
   function tokTotal(r) {
     return (r.input_tokens || 0) + (r.output_tokens || 0) + (r.cache_read_tokens || 0) + (r.cache_write_tokens || 0);
@@ -573,7 +573,7 @@
       const dir = sDir === "desc" ? -1 : 1;
       const av = a[sKey], bv = b[sKey];
       if (sKey === "input_tokens") return dir * (tokTotal(a) - tokTotal(b));
-      if (sKey === "run_time" || sKey === "estimated_cost_usd" || sKey === "duration_seconds") return dir * (av - bv);
+      if (sKey === "run_time" || sKey === "estimated_cost" || sKey === "duration_seconds") return dir * (av - bv);
       if (sKey === "success") return dir * ((av ? 1 : 0) - (bv ? 1 : 0));
       if (av == null || av === "") return 1;
       if (bv == null || bv === "") return -1;
@@ -661,10 +661,17 @@
                       borderBottom: "2px solid var(--color-border)",
                       cursor: "pointer",
                       userSelect: "none",
-                      whiteSpace: "nowrap"
+                      whiteSpace: "nowrap",
+                      width: col.width || "auto"
                     }
                   },
-                  col.label + (isActive ? sDir === "desc" ? " \u2193" : " \u2191" : "")
+                  [
+                    col.label,
+                    React.createElement("span", {
+                      key: "arrow",
+                      style: { display: "inline-block", width: "1em", marginLeft: "0.15rem", textAlign: "center" }
+                    }, isActive ? sDir === "desc" ? "\u2193" : "\u2191" : "")
+                  ]
                 );
               })
             )
@@ -693,27 +700,27 @@
                     key: r.session_id,
                     style: { borderBottom: "1px solid rgba(255,255,255,0.04)" }
                   },
-                  React.createElement("td", { style: { padding: "0.4rem 0.35rem", whiteSpace: "nowrap" } }, fmtTime(r.run_time)),
-                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCost(r.estimated_cost_usd)),
-                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtDuration(r.duration_seconds)),
+                  React.createElement("td", { style: { padding: "0.4rem 0.35rem", whiteSpace: "nowrap", width: "10rem" } }, fmtTime(r.run_time)),
+                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 1.85rem 0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)", width: "6rem" } }, fmtCost(r.estimated_cost)),
+                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 1.35rem 0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)", width: "5rem" } }, fmtDuration(r.duration_seconds)),
                   React.createElement(
                     "td",
-                    { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)", whiteSpace: "nowrap" } },
+                    { style: { textAlign: "right", padding: "0.4rem 1.35rem 0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)", whiteSpace: "nowrap", width: "6rem" } },
                     (() => {
                       const total = tokTotal(r);
                       if (total === 0) return "\u2014";
                       return fmtCompact(total);
                     })()
                   ),
-                  React.createElement("td", { style: { padding: "0.4rem 0.35rem" } }, r.model || "\u2014"),
+                  React.createElement("td", { style: { padding: "0.4rem 0.35rem", overflow: "hidden", textOverflow: "ellipsis", width: "auto" } }, r.model || "\u2014"),
                   React.createElement(
                     "td",
-                    { style: { textAlign: "center", padding: "0.4rem 0.35rem" } },
+                    { style: { textAlign: "center", padding: "0.4rem 0.35rem", width: "4rem" } },
                     r.job_mode === "no_agent" ? React.createElement(Badge, { size: "xs", style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.7 } }, "No agent") : React.createElement("span", { style: { fontSize: "0.65rem", opacity: 0.45 } }, "Agent")
                   ),
                   React.createElement(
                     "td",
-                    { style: { textAlign: "center", padding: "0.4rem 0.35rem" } },
+                    { style: { textAlign: "center", padding: "0.4rem 0.35rem", width: "3.5rem" } },
                     r.success ? React.createElement("span", { style: { color: "#22c55e" } }, "\u2713") : React.createElement("span", { style: { color: "#ef4444" } }, "\u2717")
                   )
                 )
@@ -1059,7 +1066,7 @@
   function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick, onTokensClick, onPaceClick }) {
     const s = summary || {};
     const runPct = s.previous_period && s.previous_period.runs != null && s.previous_period.runs !== 0 ? (s.total_runs - s.previous_period.runs) / s.previous_period.runs * 100 : null;
-    const costPct = s.previous_period && s.previous_period.cost != null && s.previous_period.cost !== 0 ? (s.total_estimated_cost - s.previous_period.cost) / s.previous_period.cost * 100 : null;
+    const costPct = s.previous_period && s.previous_period.estimated_cost != null && s.previous_period.estimated_cost !== 0 ? (s.tot_estimated_cost - s.previous_period.estimated_cost) / s.previous_period.estimated_cost * 100 : null;
     const cardHover = {
       onMouseEnter: (e) => {
         e.currentTarget.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.18), 0 0 22px rgba(255,255,255,0.10), 0 0 6px rgba(255,255,255,0.15)";
@@ -1133,7 +1140,7 @@
       // Cost
       React.createElement(
         "div",
-        cardProps(onCostClick, outcome === "failure" ? "Wasted cost details" : "Cost details", { minWidth: 0, overflow: "hidden" }),
+        cardProps(onCostClick, outcome === "failure" ? "Est wasted cost details" : "Est cost details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(
           Card,
           { style: { flex: 1 } },
@@ -1153,12 +1160,17 @@
             null,
             React.createElement(
               "div",
-              { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: outcome === "failure" ? "#ef4444" : "#f5a623" } },
-              fmtCost(s.total_estimated_cost)
+              { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+              React.createElement(
+                "div",
+                { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: outcome === "failure" ? "#ef4444" : "#f5a623" } },
+                fmtCost(s.tot_estimated_cost)
+              ),
+              React.createElement("span", { style: { fontSize: "0.7rem", opacity: 0.95, fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "0.25rem", padding: "0.05rem 0.4rem" } }, "Estimated")
             ),
             React.createElement(
               "div",
-              { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: costPct != null ? costPct > 0 ? "#ef4444" : "#4ade80" : null } },
+              { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: costPct != null ? (costPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(costPct).toFixed(0) + "%" : "\u2014" } },
               costPct != null ? (costPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(costPct).toFixed(0) + "%" : "\u2014"
             ),
             React.createElement(
@@ -1171,7 +1183,7 @@
               "div",
               { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.3rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.25rem" } },
               "Actual: ",
-              s.total_actual_cost != null ? fmtCost(s.total_actual_cost) : "\u2014"
+              s.tot_actual_cost != null ? fmtCost(s.tot_actual_cost) : "\u2014"
             ),
             React.createElement(
               "div",
@@ -1179,7 +1191,7 @@
               React.createElement("span", { style: { color: "#4ade80" } }, "\u2713 ", s.success_runs || 0),
               " \xB7 ",
               React.createElement("span", { style: { color: (s.failure_runs || 0) > 0 ? "#ef4444" : null } }, "\u2717 ", s.failure_runs || 0),
-              s.failure_cost != null && s.failure_cost > 0 ? " (" + fmtCost(s.failure_cost) + " wasted)" : ""
+              s.failure_estimated_cost != null && s.failure_estimated_cost > 0 ? " (" + fmtCost(s.failure_estimated_cost) + " wasted)" : ""
             )
           )
         )
@@ -1314,7 +1326,7 @@
   // src/components/LeaderBoard.js
   function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopTokensClick, onTopPaceClick }) {
     const totalRuns = jobList.reduce((sum, j) => sum + (j.runs || 0), 0);
-    const totalCost = jobList.reduce((sum, j) => sum + (j.total_cost || 0), 0);
+    const totalCost = jobList.reduce((sum, j) => sum + (j.tot_estimated_cost || 0), 0);
     const totalTokens = jobList.reduce((sum, j) => sum + (j.total_tokens || 0), 0);
     const cardHover = {
       onMouseEnter: (e) => {
@@ -1392,11 +1404,11 @@
       })(),
       // Top Cost
       (() => {
-        const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.total_cost || 0) > (a.total_cost || 0) ? b : a, jobList[0]) : null;
+        const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.tot_estimated_cost || 0) > (a.tot_estimated_cost || 0) ? b : a, jobList[0]) : null;
         const label = j ? j.name || j.job_id : "\u2014";
         return React.createElement(
           "div",
-          cardProps(onTopCostClick, "Top Cost details", { minWidth: 0, overflow: "hidden" }),
+          cardProps(onTopCostClick, "Top est cost details", { minWidth: 0, overflow: "hidden" }),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1414,9 +1426,14 @@
             React.createElement(
               CardContent,
               null,
-              React.createElement("div", {
-                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#f5a623", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
-              }, j ? fmtCost(j.total_cost) : "\u2014"),
+              React.createElement(
+                "div",
+                { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+                React.createElement("div", {
+                  style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#f5a623", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
+                }, j ? fmtCost(j.tot_estimated_cost) : "\u2014"),
+                j && React.createElement("span", { style: { fontSize: "0.7rem", opacity: 0.95, fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "0.25rem", padding: "0.05rem 0.4rem" } }, "Estimated")
+              ),
               React.createElement("div", {
                 style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
                 title: label
@@ -1424,7 +1441,7 @@
               React.createElement(
                 "div",
                 { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.6, marginTop: "0.15rem" } },
-                totalCost > 0 ? Math.round((j.total_cost || 0) / totalCost * 100) + "% of total cost" : ""
+                totalCost > 0 ? Math.round((j.tot_estimated_cost || 0) / totalCost * 100) + "% of total est cost" : ""
               )
             )
           )
@@ -1519,7 +1536,7 @@
     if (!costByModel || costByModel.length === 0) return null;
     const topModels = costByModel.slice(0, 5);
     const remaining = costByModel.length - 5;
-    const maxCost = topModels[0] && topModels[0].total_cost || 1;
+    const maxCost = topModels[0] && topModels[0].tot_estimated_cost || 1;
     return React.createElement(
       Card,
       { style: { marginBottom: "1.5rem" } },
@@ -1560,7 +1577,7 @@
                 style: { flex: 1, background: "rgba(255,255,255,0.04)", height: "0.4rem", borderRadius: "0.2rem", overflow: "hidden" }
               },
               React.createElement("div", {
-                style: { width: Math.min(100, (m.total_cost || 0) / maxCost * 100) + "%", background: "#f5a623", height: "100%", borderRadius: "0.2rem", transition: "width 0.5s ease" }
+                style: { width: Math.min(100, (m.tot_estimated_cost || 0) / maxCost * 100) + "%", background: "#f5a623", height: "100%", borderRadius: "0.2rem", transition: "width 0.5s ease" }
               })
             ),
             React.createElement(
@@ -1568,7 +1585,7 @@
               {
                 style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", flexShrink: 0, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "0.35rem", minWidth: 0, flex: "0 0 9rem", justifyContent: "flex-end" }
               },
-              React.createElement("span", { style: { color: "#f5a623", width: "4.5rem", textAlign: "right", display: "inline-block" } }, fmtCost(m.total_cost)),
+              React.createElement("span", { style: { color: "#f5a623", width: "4.5rem", textAlign: "right", display: "inline-block" } }, fmtCost(m.tot_estimated_cost)),
               React.createElement("span", { style: { opacity: 0.45, width: "3.5rem", textAlign: "right", display: "inline-block" } }, "\xB7 " + (m.runs || 0).toLocaleString())
             )
           )),
@@ -1661,7 +1678,7 @@
               React.createElement(
                 "tr",
                 { style: { borderBottom: "1px solid var(--color-border)" } },
-                ["Job", "Runs", "Avg Time", "Total Cost", "Avg Cost", "Nominal/mo", "Trend/mo", "Pace"].map((h) => {
+                ["Job", "Runs", "Avg Time", "Est Cost", "Avg Est Cost", "Nominal/mo", "Trend/mo", "Pace"].map((h) => {
                   const isActive = sortConfig.key === h;
                   return React.createElement("th", {
                     key: h,
@@ -1721,8 +1738,8 @@
                   ),
                   React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, (j.runs || 0).toLocaleString()),
                   React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtDuration(j.avg_duration)),
-                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.total_cost)),
-                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.avg_cost)),
+                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.tot_estimated_cost)),
+                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.avg_estimated_cost)),
                   React.createElement(
                     "td",
                     { style: { textAlign: "right", padding: "0.4rem 0.35rem" } },
@@ -1962,7 +1979,7 @@
     const s = summary.data || {};
     const jobList = jobs.data && jobs.data.jobs ? jobs.data.jobs : [];
     const windowLabel = days === 0 ? "All time" : "Last " + days + " days";
-    const costPct = s.previous_period && s.previous_period.cost != null && s.previous_period.cost !== 0 ? (s.total_estimated_cost - s.previous_period.cost) / s.previous_period.cost * 100 : null;
+    const costPct = s.previous_period && s.previous_period.estimated_cost != null && s.previous_period.estimated_cost !== 0 ? (s.tot_estimated_cost - s.previous_period.estimated_cost) / s.previous_period.estimated_cost * 100 : null;
     const runPct = s.previous_period && s.previous_period.runs != null && s.previous_period.runs !== 0 ? (s.total_runs - s.previous_period.runs) / s.previous_period.runs * 100 : null;
     const getSortValue = (j, key) => {
       switch (key) {
@@ -1972,10 +1989,10 @@
           return j.runs || 0;
         case "Avg Time":
           return j.avg_duration || 0;
-        case "Total Cost":
-          return j.total_cost || 0;
-        case "Avg Cost":
-          return j.avg_cost || 0;
+        case "Est Cost":
+          return j.tot_estimated_cost || 0;
+        case "Avg Est Cost":
+          return j.avg_estimated_cost || 0;
         case "Nominal/mo":
           return j.projections && j.projections.projected_cost_30d != null ? j.projections.projected_cost_30d : -Infinity;
         case "Trend/mo":
@@ -2078,7 +2095,7 @@
         jobName: (jobList.find((j) => j.job_id === selectedJobId) || {}).name,
         days,
         outcome,
-        sortKey: { "Job": "run_time", "Runs": "run_time", "Avg Time": "duration_seconds", "Total Cost": "estimated_cost_usd", "Avg Cost": "estimated_cost_usd", "Nominal/mo": "run_time", "Trend/mo": "run_time", "Pace": "run_time" }[sortConfig.key] || "run_time",
+        sortKey: { "Job": "run_time", "Runs": "run_time", "Avg Time": "duration_seconds", "Est Cost": "estimated_cost", "Avg Est Cost": "estimated_cost", "Nominal/mo": "run_time", "Trend/mo": "run_time", "Pace": "run_time" }[sortConfig.key] || "run_time",
         sortDir: sortConfig.direction || "desc"
       })),
       React.createElement(SummaryBoard, {
@@ -2254,15 +2271,15 @@
             React.createElement(
               "span",
               { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
-              fmtCost(s.total_estimated_cost)
+              fmtCost(s.tot_estimated_cost)
             ),
             React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Estimated Cost")
           ),
-          s.total_actual_cost != null && React.createElement(
+          s.tot_actual_cost != null && React.createElement(
             "div",
             { style: { marginBottom: "0.75rem", fontSize: "0.8rem", opacity: 0.85 } },
             "Actual: ",
-            React.createElement("span", { style: { fontWeight: 700 } }, fmtCost(s.total_actual_cost))
+            React.createElement("span", { style: { fontWeight: 700 } }, fmtCost(s.tot_actual_cost))
           ),
           costPct != null && React.createElement(
             "div",
@@ -2395,7 +2412,7 @@
                   { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
                   j ? (j.runs || 0).toLocaleString() : "\u2014"
                 ),
-                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "runs")
+                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Job Runs")
               ),
               j && React.createElement(
                 "div",
@@ -2423,7 +2440,7 @@
           "div",
           { style: { padding: "1.5rem", fontFamily: "var(--theme-font-mono, monospace)", textTransform: "none" } },
           (() => {
-            const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.total_cost || 0) > (a.total_cost || 0) ? b : a, jobList[0]) : null;
+            const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.tot_estimated_cost || 0) > (a.tot_estimated_cost || 0) ? b : a, jobList[0]) : null;
             const label = j ? j.name || j.job_id : "\u2014";
             return React.createElement(
               "div",
@@ -2435,9 +2452,9 @@
                 React.createElement(
                   "span",
                   { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
-                  j ? fmtCost(j.total_cost) : "\u2014"
+                  j ? fmtCost(j.tot_estimated_cost) : "\u2014"
                 ),
-                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "total cost")
+                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Estimated Cost")
               ),
               j && React.createElement(
                 "div",
@@ -2450,7 +2467,7 @@
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                   React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
                   React.createElement("div", null, "Avg duration: " + (j.avg_duration != null ? fmtDuration(j.avg_duration) : "\u2014")),
-                  React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \xB7 Avg: " + (j.avg_cost != null ? fmtCost(j.avg_cost) : "\u2014"))
+                  React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \xB7 Avg: " + (j.avg_estimated_cost != null ? fmtCost(j.avg_estimated_cost) : "\u2014"))
                 )
               )
             );
@@ -2479,7 +2496,7 @@
                   { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
                   j ? fmtCompact(j.total_tokens) : "\u2014"
                 ),
-                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "tokens")
+                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Tokens")
               ),
               j && React.createElement(
                 "div",
@@ -2525,7 +2542,7 @@
                   { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(p) } },
                   p != null ? p.toFixed(2) + "\xD7" : "\u2014"
                 ),
-                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "pace")
+                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Pace")
               ),
               React.createElement(
                 "div",
@@ -2567,7 +2584,7 @@
                   React.createElement("div", null, "Schedule: " + (j.schedule && j.schedule.display || "\u2014")),
                   React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                   React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
-                  React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \xB7 Avg cost: " + (j.avg_cost != null ? fmtCost(j.avg_cost) : "\u2014"))
+                  React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \xB7 Avg cost: " + (j.avg_estimated_cost != null ? fmtCost(j.avg_estimated_cost) : "\u2014"))
                 )
               )
             );

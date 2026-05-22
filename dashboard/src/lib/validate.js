@@ -69,7 +69,7 @@ export function validateSync(d) {
 export function validateSummary(d) {
   assertType("/summary", d, Object);
   assertType("/summary", d.total_runs, "number", "total_runs");
-  assertType("/summary", d.total_estimated_cost, "number", "total_estimated_cost");
+  assertType("/summary", d.tot_estimated_cost, "number", "tot_estimated_cost");
   assertType("/summary", d.total_tokens, "number", "total_tokens");
   assertType("/summary", d.success_runs, "number", "success_runs");
   assertType("/summary", d.failure_runs, "number", "failure_runs");
@@ -87,7 +87,7 @@ export function validateJobs(d) {
     d.jobs.forEach((j, i) => {
       assertType("/jobs", j.job_id, "string", `jobs[${i}].job_id`);
       assertType("/jobs", j.runs, "number", `jobs[${i}].runs`);
-      assertType("/jobs", j.total_cost, "number", `jobs[${i}].total_cost`);
+      assertType("/jobs", j.tot_estimated_cost, "number", `jobs[${i}].tot_estimated_cost`);
       assertType("/jobs", j.projections, "object", `jobs[${i}].projections`);
     });
   }
@@ -111,7 +111,7 @@ export function validateJobRuns(d) {
     d.runs.forEach((r, i) => {
       assertType("/jobs/:id/runs", r.session_id, "string", `runs[${i}].session_id`);
       assertType("/jobs/:id/runs", r.run_time, "number", `runs[${i}].run_time`);
-      assertType("/jobs/:id/runs", r.estimated_cost_usd, "number", `runs[${i}].estimated_cost_usd`);
+      assertType("/jobs/:id/runs", r.estimated_cost, "number", `runs[${i}].estimated_cost`);
     });
   }
 }
@@ -126,7 +126,7 @@ export function validateModels(d) {
     d.models.forEach((m, i) => {
       assertType("/models", m.model, "string", `models[${i}].model`);
       assertType("/models", m.runs, "number", `models[${i}].runs`);
-      assertType("/models", m.total_cost, "number", `models[${i}].total_cost`);
+      assertType("/models", m.tot_estimated_cost, "number", `models[${i}].tot_estimated_cost`);
     });
   }
 }
@@ -140,7 +140,7 @@ export function validateTrends(d) {
   if (IS_DEV && Array.isArray(d.trend)) {
     d.trend.forEach((t, i) => {
       assertType("/trends", t.day, "string", `trend[${i}].day`);
-      assertType("/trends", t.cost, "number", `trend[${i}].cost`);
+      assertType("/trends", t.estimated_cost, "number", `trend[${i}].estimated_cost`);
       assertType("/trends", t.runs, "number", `trend[${i}].runs`);
     });
   }

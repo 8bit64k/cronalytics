@@ -143,8 +143,8 @@ export function CronalyticsTab() {
   const jobList = (jobs.data && jobs.data.jobs) ? jobs.data.jobs : [];
   const windowLabel = days === 0 ? "All time" : "Last " + days + " days";
 
-  const costPct = s.previous_period && s.previous_period.cost != null && s.previous_period.cost !== 0
-    ? ((s.total_estimated_cost - s.previous_period.cost) / s.previous_period.cost) * 100
+  const costPct = s.previous_period && s.previous_period.estimated_cost != null && s.previous_period.estimated_cost !== 0
+    ? ((s.tot_estimated_cost - s.previous_period.estimated_cost) / s.previous_period.estimated_cost) * 100
     : null;
   const runPct = s.previous_period && s.previous_period.runs != null && s.previous_period.runs !== 0
     ? ((s.total_runs - s.previous_period.runs) / s.previous_period.runs) * 100
@@ -155,8 +155,8 @@ export function CronalyticsTab() {
       case "Job": return j.name || j.job_id;
       case "Runs": return j.runs || 0;
       case "Avg Time": return j.avg_duration || 0;
-      case "Total Cost": return j.total_cost || 0;
-      case "Avg Cost": return j.avg_cost || 0;
+      case "Est Cost": return j.tot_estimated_cost || 0;
+      case "Avg Est Cost": return j.avg_estimated_cost || 0;
       case "Nominal/mo": return j.projections && j.projections.projected_cost_30d != null ? j.projections.projected_cost_30d : -Infinity;
       case "Trend/mo": return j.projections && j.projections.trend_projected_cost_30d != null ? j.projections.trend_projected_cost_30d : -Infinity;
       case "Pace": return j.projections && j.projections.pace != null ? j.projections.pace : -Infinity;
@@ -246,7 +246,7 @@ export function CronalyticsTab() {
       jobName: (jobList.find(j => j.job_id === selectedJobId) || {}).name,
       days: days,
       outcome: outcome,
-      sortKey: ({"Job":"run_time","Runs":"run_time","Avg Time":"duration_seconds","Total Cost":"estimated_cost_usd","Avg Cost":"estimated_cost_usd","Nominal/mo":"run_time","Trend/mo":"run_time","Pace":"run_time"}[sortConfig.key] || "run_time"),
+      sortKey: ({"Job":"run_time","Runs":"run_time","Avg Time":"duration_seconds","Est Cost":"estimated_cost","Avg Est Cost":"estimated_cost","Nominal/mo":"run_time","Trend/mo":"run_time","Pace":"run_time"}[sortConfig.key] || "run_time"),
       sortDir: sortConfig.direction || "desc",
     })),
 
@@ -363,12 +363,12 @@ export function CronalyticsTab() {
       React.createElement("div", { style: { padding: "1.5rem", fontFamily: "var(--theme-font-mono, monospace)", textTransform: "none" } },
         React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" } },
           React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
-            fmtCost(s.total_estimated_cost)
+            fmtCost(s.tot_estimated_cost)
           ),
           React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Estimated Cost")
         ),
-        s.total_actual_cost != null && React.createElement("div", { style: { marginBottom: "0.75rem", fontSize: "0.8rem", opacity: 0.85 } },
-          "Actual: ", React.createElement("span", { style: { fontWeight: 700 } }, fmtCost(s.total_actual_cost))
+        s.tot_actual_cost != null && React.createElement("div", { style: { marginBottom: "0.75rem", fontSize: "0.8rem", opacity: 0.85 } },
+          "Actual: ", React.createElement("span", { style: { fontWeight: 700 } }, fmtCost(s.tot_actual_cost))
         ),
         costPct != null && React.createElement("div", { style: { marginBottom: "1rem" } },
           React.createElement("div", { style: { fontSize: "0.82rem", color: costPct > 0 ? "#ef4444" : "#4ade80" } },
@@ -451,7 +451,7 @@ export function CronalyticsTab() {
               React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
                 j ? (j.runs || 0).toLocaleString() : "\u2014"
               ),
-              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "runs")
+              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Job Runs")
             ),
             j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
               React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
@@ -472,15 +472,15 @@ export function CronalyticsTab() {
     React.createElement(Modal, { isOpen: topCostModal.isOpen, onClose: topCostModal.close },
       React.createElement("div", { style: { padding: "1.5rem", fontFamily: "var(--theme-font-mono, monospace)", textTransform: "none" } },
         (() => {
-          const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.total_cost || 0) > (a.total_cost || 0) ? b : a, jobList[0]) : null;
+          const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.tot_estimated_cost || 0) > (a.tot_estimated_cost || 0) ? b : a, jobList[0]) : null;
           const label = j ? (j.name || j.job_id) : "\u2014";
           return React.createElement("div", null,
             React.createElement("div", { style: { fontSize: "1.1rem", fontWeight: 700, marginBottom: "0.5rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, label),
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" } },
               React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
-                j ? fmtCost(j.total_cost) : "\u2014"
+                j ? fmtCost(j.tot_estimated_cost) : "\u2014"
               ),
-              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "total cost")
+              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Estimated Cost")
             ),
             j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
               React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
@@ -489,7 +489,7 @@ export function CronalyticsTab() {
                 React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                 React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
                 React.createElement("div", null, "Avg duration: " + (j.avg_duration != null ? fmtDuration(j.avg_duration) : "\u2014")),
-                React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \u00b7 Avg: " + (j.avg_cost != null ? fmtCost(j.avg_cost) : "\u2014"))
+                React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \u00b7 Avg: " + (j.avg_estimated_cost != null ? fmtCost(j.avg_estimated_cost) : "\u2014"))
               )
             )
           );
@@ -509,7 +509,7 @@ export function CronalyticsTab() {
               React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
                 j ? fmtCompact(j.total_tokens) : "\u2014"
               ),
-              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "tokens")
+              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Tokens")
             ),
             j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
               React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
@@ -544,7 +544,7 @@ export function CronalyticsTab() {
               React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(p) } },
                 p != null ? p.toFixed(2) + "\u00d7" : "\u2014"
               ),
-              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "pace")
+              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Pace")
             ),
             React.createElement("div", { style: { marginBottom: "1rem" } },
               React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.2rem" } },
@@ -570,7 +570,7 @@ export function CronalyticsTab() {
                 React.createElement("div", null, "Schedule: " + ((j.schedule && j.schedule.display) || "\u2014")),
                 React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
                 React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
-                React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \u00b7 Avg cost: " + (j.avg_cost != null ? fmtCost(j.avg_cost) : "\u2014"))
+                React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \u00b7 Avg cost: " + (j.avg_estimated_cost != null ? fmtCost(j.avg_estimated_cost) : "\u2014"))
               )
             )
           );

@@ -227,7 +227,7 @@ All four cards are clickable and open educational modals.
 
 Four spotlight cards derived live from `jobList`, icon accent `#ff5722`:
 - **Top Runs** — highest `runs` job; `% of total runs` sub-line.
-- **Top Cost** — highest `total_cost` job; amber headline `#f5a623`; `% of total cost` sub-line.
+- **Top Cost** — highest `tot_estimated_cost` job; amber headline `#f5a623`; `% of total cost` sub-line.
 - **Top Tokens** — highest `total_tokens` job; blue headline `#5b8def`; `% of total tokens` sub-line.
 - **Top Pace** — highest `projections.pace` job; font-colored via `paceColor()`. Surfaces the job most at risk of exceeding its nominal budget.
 
@@ -245,9 +245,9 @@ Eight sortable columns: **Job**, **Runs**, **Avg Time**, **Total Cost**, **Avg C
 - **Runs** — number of executions in the window.
 - **Avg Time** — average duration per run.
 - **Total Cost** — sum of `estimated_cost_usd`.
-- **Avg Cost** — `total_cost / runs`.
-- **Nominal/mo** — `avg_cost × scheduled_runs_30d` (what it *should* cost if run exactly on schedule).
-- **Trend/mo** — `(total_cost / days_filter) × 30` (what it *will* cost if current pace continues).
+- **Avg Cost** — `tot_estimated_cost / runs`.
+- **Nominal/mo** — `avg_estimated_cost × scheduled_runs_30d` (what it *should* cost if run exactly on schedule).
+- **Trend/mo** — `(tot_estimated_cost / days_filter) × 30` (what it *will* cost if current pace continues).
 - **Pace** — `trend / nominal`. Color-coded badge with background tint.
 
 Clicking a row expands a detail panel (colSpan 8) showing:
@@ -331,7 +331,7 @@ The following metrics are implemented and available in `--json` output for advan
 All trend calculations use the **user-selected filter window** as the denominator, not the actual data span.
 
 ```
-daily_cost = total_cost / days_filter         # days_filter = 7, 30, 90, or all-time span
+daily_cost = tot_estimated_cost / days_filter         # days_filter = 7, 30, 90, or all-time span
 trend_30d  = daily_cost * 30
 trend_90d  = daily_cost * 90
 trend_1yr  = daily_cost * 365
@@ -346,7 +346,7 @@ trend_1yr  = daily_cost * 365
 
 ```
 scheduled_runs_30d = count_occurrences(schedule_expr, now, now + 30 days)
-nominal_30d        = avg_cost * scheduled_runs_30d
+nominal_30d        = avg_estimated_cost * scheduled_runs_30d
 ```
 
 Uses `croniter` for cron expressions and simple `timedelta` math for interval schedules (`every N minutes`).

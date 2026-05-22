@@ -116,7 +116,7 @@ aggregate client-side. Never claim `--json` works with `all`.
 JSON keys. Always inspect `data[0].keys()` from a live `--json` call before
 writing aggregation scripts. The canonical keys in `cronalytics jobs --json`
 are: `job_id`, `job_name`, `job_mode`, `runs`, `success_runs`, `failure_runs`,
-`total_cost`, `avg_cost`, `total_tokens`, `total_input_tokens`,
+`tot_estimated_cost`, `avg_estimated_cost`, `total_tokens`, `total_input_tokens`,
 `total_output_tokens`, `total_cache_*_tokens`, `total_duration`, `avg_duration`,
 `last_run`, `first_run`, `last_model`, `schedule_display`, `pace`, `drift_ratio`.
 
@@ -153,7 +153,7 @@ user to "fix your sync and come back."
 
 Then read the **summary** block for headline red flags:
 - `success_rate` < 80% → investigate failures
-- `failure_cost` > 10% of `total_cost` → wasted spend
+- `failure_estimated_cost` > 10% of `tot_estimated_cost` → wasted spend
 - `total_tokens` growing week-over-week → model or frequency creep
 
 ### Step 2: Job-Level Drill (`jobs --json`)
