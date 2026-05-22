@@ -1,5 +1,5 @@
 (() => {
-  // src/lib/sdk.js
+  // dashboard/src/lib/sdk.js
   var SDK = window.__HERMES_PLUGIN_SDK__;
   var PLUGINS = window.__HERMES_PLUGINS__;
   if (!SDK || !PLUGINS) {
@@ -10,7 +10,7 @@
   var fetchJSON = SDK.fetchJSON;
   var { Card, CardHeader, CardTitle, CardContent, Badge, Button } = SDK.components;
 
-  // src/components/ErrorBoundary.js
+  // dashboard/src/components/ErrorBoundary.js
   var PluginErrorBoundary = class extends React.Component {
     constructor(props) {
       super(props);
@@ -39,7 +39,7 @@
     }
   };
 
-  // src/lib/validate.js
+  // dashboard/src/lib/validate.js
   var IS_DEV = (() => {
     try {
       return typeof process !== "undefined" && process.env && false;
@@ -148,7 +148,7 @@
     return void 0;
   }
 
-  // src/hooks/useApi.js
+  // dashboard/src/hooks/useApi.js
   function useApi(path) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -189,7 +189,7 @@
     return { isOpen, open, close };
   }
 
-  // src/i18n/index.js
+  // dashboard/src/i18n/index.js
   var CATALOGS = {};
   function registerCatalog(lang, messages) {
     CATALOGS[lang] = messages;
@@ -239,7 +239,7 @@
     };
   }
 
-  // src/components/Modal.js
+  // dashboard/src/components/Modal.js
   function Modal({ isOpen, onClose, children, maxWidth }) {
     const t = useCronalyticsI18n();
     const backdropRef = useRef(null);
@@ -341,7 +341,7 @@
     );
   }
 
-  // src/components/DaySelector.js
+  // dashboard/src/components/DaySelector.js
   var PRESETS = [
     { label: "7D", value: 7 },
     { label: "30D", value: 30 },
@@ -446,8 +446,8 @@
     return elements;
   }
 
-  // src/components/OutcomeToggle.js
-  function OutcomeToggle({ selected, onChange }) {
+  // dashboard/src/components/OutcomeToggle.js
+  function OutcomeToggle({ selected, onChange, label }) {
     const t = useCronalyticsI18n();
     const OPTIONS = [
       { label: t("outcome_toggle.all", "All"), value: "all" },
@@ -457,6 +457,20 @@
     return React.createElement(
       "div",
       { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
+      label ? React.createElement(
+        "span",
+        {
+          style: {
+            fontFamily: "var(--theme-font-mono, monospace)",
+            fontSize: "0.65rem",
+            fontWeight: 700,
+            opacity: 0.7,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase"
+          }
+        },
+        label
+      ) : null,
       ...OPTIONS.map(
         (o) => React.createElement(
           Button,
@@ -473,7 +487,7 @@
     );
   }
 
-  // src/components/ModeToggle.js
+  // dashboard/src/components/ModeToggle.js
   function ModeToggle({ selected, onChange, label }) {
     const t = useCronalyticsI18n();
     const OPTIONS = [
@@ -514,7 +528,7 @@
     );
   }
 
-  // src/lib/formatters.js
+  // dashboard/src/lib/formatters.js
   function fmtCost(n) {
     if (n == null) return "\u2014";
     if (n === 0) return "$0.00";
@@ -583,7 +597,7 @@
     return "transparent";
   }
 
-  // src/components/SparkLine.js
+  // dashboard/src/components/SparkLine.js
   var SPARK_BAR_W = 4;
   var SPARK_BAR_GAP = 1;
   var SPARK_H = 60;
@@ -702,7 +716,7 @@
     );
   }
 
-  // src/components/JobDetailView.js
+  // dashboard/src/components/JobDetailView.js
   function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir }) {
     const t = useCronalyticsI18n();
     const [sKey, setSKey] = useState(sortKey);
@@ -904,7 +918,7 @@
     );
   }
 
-  // src/components/HeroBanner.js
+  // dashboard/src/components/HeroBanner.js
   function HeroBanner() {
     const t = useCronalyticsI18n();
     const [collapsed, setCollapsed] = useState(() => {
@@ -1023,7 +1037,7 @@
     );
   }
 
-  // src/lib/icons.js
+  // dashboard/src/lib/icons.js
   function CpuIcon(size) {
     return React.createElement(
       "svg",
@@ -1210,7 +1224,7 @@
     );
   }
 
-  // src/components/SummaryBoard.js
+  // dashboard/src/components/SummaryBoard.js
   function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick, onTokensClick, onPaceClick }) {
     const t = useCronalyticsI18n();
     const s = summary || {};
@@ -1472,7 +1486,7 @@
     );
   }
 
-  // src/components/LeaderBoard.js
+  // dashboard/src/components/LeaderBoard.js
   function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopTokensClick, onTopPaceClick }) {
     const t = useCronalyticsI18n();
     const totalRuns = jobList.reduce((sum, j) => sum + (j.runs || 0), 0);
@@ -1681,7 +1695,7 @@
     );
   }
 
-  // src/components/ModelBreakdown.js
+  // dashboard/src/components/ModelBreakdown.js
   function ModelBreakdown({ costByModel }) {
     const t = useCronalyticsI18n();
     if (!costByModel || costByModel.length === 0) return null;
@@ -1748,7 +1762,7 @@
     );
   }
 
-  // src/components/JobBreakdown.js
+  // dashboard/src/components/JobBreakdown.js
   function JobBreakdown({
     jobList,
     sortedJobs,
@@ -2010,7 +2024,7 @@
     );
   }
 
-  // src/components/CronalyticsTab.js
+  // dashboard/src/components/CronalyticsTab.js
   function CronalyticsTab() {
     const t = useCronalyticsI18n();
     const [days, setDaysRaw] = useState(() => {
@@ -2751,7 +2765,7 @@
     );
   }
 
-  // src/i18n/en.js
+  // dashboard/src/i18n/en.js
   registerCatalog("en", {
     // HeroBanner — the greeting
     hero: {
@@ -2932,7 +2946,7 @@
     }
   });
 
-  // src/i18n/es.js
+  // dashboard/src/i18n/es.js
   registerCatalog("es", {
     // HeroBanner — the greeting
     hero: {
@@ -3113,7 +3127,7 @@
     }
   });
 
-  // src/index.js
+  // dashboard/src/index.js
   PLUGINS.register("cronalytics", function CronalyticsWrapped() {
     return React.createElement(
       PluginErrorBoundary,
