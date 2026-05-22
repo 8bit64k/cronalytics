@@ -1,5 +1,6 @@
 import { React, useState } from "../lib/sdk.js";
 import { fmtTime, fmtCost, fmtCompact, fmtDuration } from "../lib/formatters.js";
+import { useCronalyticsI18n } from "../i18n/index.js";
 
 const SPARK_BAR_W = 4;
 const SPARK_BAR_GAP = 1;
@@ -15,7 +16,7 @@ function _modelColor(m) {
 }
 
 function _shortModel(m) {
-  if (!m) return "—";
+  if (!m) return "\u2014";
   return m.split("/").pop();
 }
 
@@ -24,6 +25,7 @@ function _tokTotal(r) {
 }
 
 export function SparkLine({ runs }) {
+  const t = useCronalyticsI18n();
   const [hoverIdx, setHoverIdx] = useState(-1);
   if (!runs || runs.length === 0) return null;
 
@@ -103,10 +105,10 @@ export function SparkLine({ runs }) {
       React.createElement(
         "span",
         null,
-        "— cost (bar) · ",
-        React.createElement("span", { style: { color: "#60a5fa" } }, "— tokens"),
-        " · ",
-        React.createElement("span", { style: { color: "#fcd34d" } }, "- - duration")
+        t("sparkline.cost_bar", "\u2014 cost (bar) \u00b7 "),
+        React.createElement("span", { style: { color: "#60a5fa" } }, t("sparkline.tokens_line", "\u2014 tokens")),
+        " \u00b7 ",
+        React.createElement("span", { style: { color: "#fcd34d" } }, t("sparkline.duration_line", "- - duration"))
       )
     ),
     hoverRun &&
@@ -123,13 +125,12 @@ export function SparkLine({ runs }) {
           },
         },
         fmtTime(hoverRun.run_time) +
-          " · " +
+          " \u00b7 " +
           fmtCost(hoverRun.estimated_cost) +
-          " · " +
-          fmtCompact(_tokTotal(hoverRun)) +
-          " toks · " +
+          " \u00b7 " +
+          fmtCompact(_tokTotal(hoverRun)) + " " + t("summary.tokens", "toks") + " \u00b7 " +
           fmtDuration(hoverRun.duration_seconds) +
-          " · " +
+          " \u00b7 " +
           _shortModel(hoverRun.model)
       )
   );

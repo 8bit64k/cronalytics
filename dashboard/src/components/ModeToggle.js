@@ -1,13 +1,15 @@
 import { React } from "../lib/sdk.js";
 import { Button } from "../lib/sdk.js";
-
-const OPTIONS = [
-  { label: "All", value: "all" },
-  { label: "Agent", value: "agent" },
-  { label: "No Agent", value: "no_agent" },
-];
+import { useCronalyticsI18n } from "../i18n/index.js";
 
 export function ModeToggle({ selected, onChange, label }) {
+  const t = useCronalyticsI18n();
+  const OPTIONS = [
+    { label: t("mode_toggle.all", "All"), value: "all" },
+    { label: t("mode_toggle.agent", "Agent"), value: "agent" },
+    { label: t("mode_toggle.no_agent", "No Agent"), value: "no_agent" },
+  ];
+
   return React.createElement(
     "div",
     { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },

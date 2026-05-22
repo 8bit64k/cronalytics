@@ -26,21 +26,13 @@
           {
             style: {
               padding: "2rem",
-              color: "var(--color-destructive, #ef4444)",
               textAlign: "center",
-              fontFamily: "var(--theme-font-mono, monospace)"
+              fontFamily: "var(--theme-font-mono, monospace)",
+              color: "var(--foreground)"
             }
           },
-          React.createElement(
-            "div",
-            { style: { fontWeight: 700, marginBottom: "0.5rem" } },
-            "Cronalytics Error"
-          ),
-          React.createElement(
-            "div",
-            { style: { fontSize: "0.85rem", opacity: 0.8 } },
-            "Something went wrong. Please refresh or contact support."
-          )
+          React.createElement("h3", { style: { marginBottom: "0.5rem" } }, "Cronalytics Error"),
+          React.createElement("p", { style: { opacity: 0.7 } }, "Something went wrong. Please refresh or contact support.")
         );
       }
       return this.props.children;
@@ -197,8 +189,59 @@
     return { isOpen, open, close };
   }
 
+  // src/i18n/index.js
+  var CATALOGS = {};
+  function registerCatalog(lang, messages) {
+    CATALOGS[lang] = messages;
+  }
+  function getSDK() {
+    return window.__HERMES_PLUGIN_SDK__ || {};
+  }
+  function getLocale() {
+    const sdk = getSDK();
+    if (sdk.useI18n) {
+      try {
+        return sdk.useI18n().locale || "en";
+      } catch {
+      }
+    }
+    return navigator.language?.split("-")[0] || "en";
+  }
+  function resolve(key, catalog) {
+    const parts = key.split(".");
+    let node = catalog;
+    for (const p of parts) {
+      if (node == null || typeof node !== "object") return void 0;
+      node = node[p];
+    }
+    return typeof node === "string" ? node : void 0;
+  }
+  function interpolate(template, vars) {
+    if (!vars || typeof template !== "string") return template;
+    return template.replace(/\{(\w+)\}/g, (_match, name) => {
+      return vars[name] !== void 0 ? String(vars[name]) : _match;
+    });
+  }
+  function useCronalyticsI18n() {
+    const locale = getLocale();
+    const catalog = CATALOGS[locale] || CATALOGS["en"] || {};
+    return function t(key, fallbackOrVars, maybeVars) {
+      let fallback;
+      let vars;
+      if (typeof fallbackOrVars === "string") {
+        fallback = fallbackOrVars;
+        vars = maybeVars;
+      } else {
+        fallback = key;
+        vars = fallbackOrVars;
+      }
+      return interpolate(resolve(key, catalog) ?? fallback, vars);
+    };
+  }
+
   // src/components/Modal.js
   function Modal({ isOpen, onClose, children, maxWidth }) {
+    const t = useCronalyticsI18n();
     const backdropRef = useRef(null);
     const [bounds, setBounds] = useState(null);
     useEffect(() => {
@@ -264,7 +307,7 @@
           "button",
           {
             type: "button",
-            "aria-label": "Close",
+            "aria-label": t("modal.close", "Close"),
             onClick: onClose,
             style: {
               position: "absolute",
@@ -306,6 +349,7 @@
   ];
   var MAX_DAYS = 365;
   function DaySelector({ selected, onChange, label = null }) {
+    const t = useCronalyticsI18n();
     const [custom, setCustom] = useState("");
     const applyCustom = () => {
       const v = parseInt(custom, 10);
@@ -373,9 +417,9 @@
             size: "sm",
             outlined: true,
             onClick: applyCustom,
-            title: "Apply custom days"
+            title: t("day_selector.apply_custom", "Apply custom days")
           },
-          "Go"
+          t("day_selector.go", "Go")
         )
       )
     ];
@@ -403,12 +447,40 @@
   }
 
   // src/components/OutcomeToggle.js
-  var OPTIONS = [
-    { label: "All", value: "all" },
-    { label: "Success", value: "success" },
-    { label: "Failure", value: "failure" }
-  ];
-  function OutcomeToggle({ selected, onChange, label }) {
+  function OutcomeToggle({ selected, onChange }) {
+    const t = useCronalyticsI18n();
+    const OPTIONS = [
+      { label: t("outcome_toggle.all", "All"), value: "all" },
+      { label: t("outcome_toggle.success", "Success"), value: "success" },
+      { label: t("outcome_toggle.failure", "Failure"), value: "failure" }
+    ];
+    return React.createElement(
+      "div",
+      { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
+      ...OPTIONS.map(
+        (o) => React.createElement(
+          Button,
+          {
+            key: o.value,
+            type: "button",
+            size: "sm",
+            outlined: selected !== o.value,
+            onClick: () => onChange(o.value)
+          },
+          o.label
+        )
+      )
+    );
+  }
+
+  // src/components/ModeToggle.js
+  function ModeToggle({ selected, onChange, label }) {
+    const t = useCronalyticsI18n();
+    const OPTIONS = [
+      { label: t("mode_toggle.all", "All"), value: "all" },
+      { label: t("mode_toggle.agent", "Agent"), value: "agent" },
+      { label: t("mode_toggle.no_agent", "No Agent"), value: "no_agent" }
+    ];
     return React.createElement(
       "div",
       { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
@@ -427,46 +499,6 @@
         label
       ) : null,
       ...OPTIONS.map(
-        (o) => React.createElement(
-          Button,
-          {
-            key: o.value,
-            type: "button",
-            size: "sm",
-            outlined: selected !== o.value,
-            onClick: () => onChange(o.value)
-          },
-          o.label
-        )
-      )
-    );
-  }
-
-  // src/components/ModeToggle.js
-  var OPTIONS2 = [
-    { label: "All", value: "all" },
-    { label: "Agent", value: "agent" },
-    { label: "No Agent", value: "no_agent" }
-  ];
-  function ModeToggle({ selected, onChange, label }) {
-    return React.createElement(
-      "div",
-      { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
-      label ? React.createElement(
-        "span",
-        {
-          style: {
-            fontFamily: "var(--theme-font-mono, monospace)",
-            fontSize: "0.65rem",
-            fontWeight: 700,
-            opacity: 0.7,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase"
-          }
-        },
-        label
-      ) : null,
-      ...OPTIONS2.map(
         (o) => React.createElement(
           Button,
           {
@@ -551,22 +583,142 @@
     return "transparent";
   }
 
-  // src/components/JobDetailView.js
-  var COLUMNS = [
-    { label: "Time", key: "run_time", align: "left", width: "10rem" },
-    { label: "Est Cost", key: "estimated_cost", align: "right", width: "6rem" },
-    { label: "Duration", key: "duration_seconds", align: "right", width: "5rem" },
-    { label: "Tokens", key: "input_tokens", align: "right", width: "6rem" },
-    { label: "Model", key: "model", align: "left", width: "auto" },
-    { label: "Mode", key: "job_mode", align: "center", width: "4rem" },
-    { label: "Result", key: "success", align: "center", width: "3.5rem" }
-  ];
-  function tokTotal(r) {
+  // src/components/SparkLine.js
+  var SPARK_BAR_W = 4;
+  var SPARK_BAR_GAP = 1;
+  var SPARK_H = 60;
+  function _modelColor(m) {
+    if (!m) return "var(--foreground-base, #888)";
+    if (m.includes("kimi")) return "#22c55e";
+    if (m.includes("gemini")) return "#f59e0b";
+    if (m.includes("gpt")) return "#3b82f6";
+    if (m.includes("claude")) return "#d946ef";
+    return "var(--foreground-base, #888)";
+  }
+  function _shortModel(m) {
+    if (!m) return "\u2014";
+    return m.split("/").pop();
+  }
+  function _tokTotal(r) {
     return (r.input_tokens || 0) + (r.output_tokens || 0) + (r.cache_read_tokens || 0) + (r.cache_write_tokens || 0);
   }
+  function SparkLine({ runs }) {
+    const t = useCronalyticsI18n();
+    const [hoverIdx, setHoverIdx] = useState(-1);
+    if (!runs || runs.length === 0) return null;
+    const chrono = [...runs].sort((a, b) => a.run_time - b.run_time);
+    const maxCost = Math.max(...chrono.map((r) => r.estimated_cost || 0), 1e-4);
+    const maxTok = Math.max(...chrono.map(_tokTotal), 1);
+    const maxDur = Math.max(...chrono.map((r) => r.duration_seconds || 0), 0.1);
+    const h = SPARK_H;
+    const w = SPARK_BAR_W;
+    const gap = SPARK_BAR_GAP;
+    const totalW = chrono.length * (w + gap);
+    const cx = (i) => i * (w + gap) + w / 2;
+    const cy = (v, max) => h - v / max * h;
+    const tokPts = chrono.map((r, i) => `${cx(i)},${cy(_tokTotal(r), maxTok)}`).join(" ");
+    const durPts = chrono.map((r, i) => `${cx(i)},${cy(r.duration_seconds || 0, maxDur)}`).join(" ");
+    const hoverRun = hoverIdx >= 0 ? chrono[hoverIdx] : null;
+    return React.createElement(
+      "div",
+      { style: { marginBottom: "0.5rem", position: "relative" } },
+      React.createElement(
+        "svg",
+        {
+          viewBox: `0 0 ${totalW} ${h}`,
+          style: { width: "100%", height: h + "px", display: "block" }
+        },
+        // Token line
+        React.createElement("polyline", {
+          points: tokPts,
+          fill: "none",
+          stroke: "#60a5fa",
+          strokeWidth: "1.5",
+          opacity: 0.85
+        }),
+        // Duration line (dashed)
+        React.createElement("polyline", {
+          points: durPts,
+          fill: "none",
+          stroke: "#fcd34d",
+          strokeWidth: "1.5",
+          strokeDasharray: "3,2",
+          opacity: 0.85
+        }),
+        // Cost bars (top layer — model color)
+        chrono.map((r, i) => {
+          const barH = (r.estimated_cost || 0) / maxCost * h;
+          return React.createElement("rect", {
+            key: r.session_id,
+            x: i * (w + gap),
+            y: h - barH,
+            width: w,
+            height: Math.max(barH, 1),
+            fill: _modelColor(r.model),
+            opacity: hoverIdx >= 0 && hoverIdx !== i ? 0.35 : 0.92,
+            style: { transition: "opacity 0.15s", cursor: "pointer" },
+            onMouseEnter: () => setHoverIdx(i),
+            onMouseLeave: () => setHoverIdx(-1)
+          });
+        })
+      ),
+      // Legend
+      React.createElement(
+        "div",
+        {
+          style: {
+            fontSize: "0.6rem",
+            fontFamily: "var(--theme-font-mono, monospace)",
+            opacity: 0.4,
+            display: "flex",
+            gap: "0.6rem",
+            marginTop: "0.15rem",
+            marginBottom: "0.25rem"
+          }
+        },
+        React.createElement(
+          "span",
+          null,
+          t("sparkline.cost_bar", "\u2014 cost (bar) \xB7 "),
+          React.createElement("span", { style: { color: "#60a5fa" } }, t("sparkline.tokens_line", "\u2014 tokens")),
+          " \xB7 ",
+          React.createElement("span", { style: { color: "#fcd34d" } }, t("sparkline.duration_line", "- - duration"))
+        )
+      ),
+      hoverRun && React.createElement(
+        "div",
+        {
+          style: {
+            fontSize: "0.68rem",
+            fontFamily: "var(--theme-font-mono, monospace)",
+            opacity: 0.65,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis"
+          }
+        },
+        fmtTime(hoverRun.run_time) + " \xB7 " + fmtCost(hoverRun.estimated_cost) + " \xB7 " + fmtCompact(_tokTotal(hoverRun)) + " " + t("summary.tokens", "toks") + " \xB7 " + fmtDuration(hoverRun.duration_seconds) + " \xB7 " + _shortModel(hoverRun.model)
+      )
+    );
+  }
+
+  // src/components/JobDetailView.js
   function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir }) {
+    const t = useCronalyticsI18n();
     const [sKey, setSKey] = useState(sortKey);
     const [sDir, setSDir] = useState(sortDir);
+    const COLUMNS = [
+      { label: t("job_detail.time", "Time"), key: "run_time", align: "left", width: "10rem" },
+      { label: t("job_detail.est_cost", "Est Cost"), key: "estimated_cost", align: "right", width: "6rem" },
+      { label: t("job_detail.duration", "Duration"), key: "duration_seconds", align: "right", width: "5rem" },
+      { label: t("summary.tokens", "Tokens"), key: "input_tokens", align: "right", width: "6rem" },
+      { label: t("model_breakdown.model", "Model"), key: "model", align: "left", width: "auto" },
+      { label: t("job_detail.mode", "Mode"), key: "job_mode", align: "center", width: "4rem" },
+      { label: t("job_detail.result", "Result"), key: "success", align: "center", width: "3.5rem" }
+    ];
+    function tokTotal(r) {
+      return (r.input_tokens || 0) + (r.output_tokens || 0) + (r.cache_read_tokens || 0) + (r.cache_write_tokens || 0);
+    }
     const path = `/api/plugins/cronalytics/jobs/${encodeURIComponent(jobId)}/runs?days=${days}&outcome=${outcome}&sort_key=${sKey}&sort_dir=${sDir}&limit=250`;
     const runs = useApi(path);
     const sortedRuns = runs.data && runs.data.runs ? [...runs.data.runs].sort((a, b) => {
@@ -620,11 +772,11 @@
                 fontFamily: "var(--theme-font-mono, monospace)"
               }
             },
-            runs.data && runs.data.runs ? runs.data.runs.length + " run" + (runs.data.runs.length === 1 ? "" : "s") : ""
+            runs.data && runs.data.runs ? runs.data.runs.length + " " + t("job_detail.run", "run") + (runs.data.runs.length === 1 ? "" : "s") : ""
           )
         )
       ),
-      runs.loading ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, "Loading runs...") : runs.error ? React.createElement("div", { style: { color: "#ef4444", padding: "1rem 0" } }, "Error: " + runs.error) : !sortedRuns.length ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, "No runs captured for this job.") : React.createElement(
+      runs.loading ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, t("job_detail.loading", "Loading runs...")) : runs.error ? React.createElement("div", { style: { color: "#ef4444", padding: "1rem 0" } }, t("job_detail.error_prefix", "Error: ") + runs.error) : !sortedRuns.length ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } }, t("job_detail.no_runs", "No runs captured for this job.")) : React.createElement(
         React.Fragment,
         null,
         React.createElement(
@@ -716,7 +868,7 @@
                   React.createElement(
                     "td",
                     { style: { textAlign: "center", padding: "0.4rem 0.35rem", width: "4rem" } },
-                    r.job_mode === "no_agent" ? React.createElement(Badge, { size: "xs", style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.7 } }, "No agent") : React.createElement("span", { style: { fontSize: "0.65rem", opacity: 0.45 } }, "Agent")
+                    r.job_mode === "no_agent" ? React.createElement(Badge, { size: "xs", style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.7 } }, t("job_breakdown.mode_no_agent", "No agent")) : React.createElement("span", { style: { fontSize: "0.65rem", opacity: 0.45 } }, t("mode_toggle.agent", "Agent"))
                   ),
                   React.createElement(
                     "td",
@@ -741,17 +893,12 @@
               lineHeight: 1.5
             }
           },
-          "Showing ",
-          React.createElement("strong", null, runs.data.runs.length),
-          " of ",
-          React.createElement("strong", null, runs.data.total_runs.toLocaleString()),
-          " runs. Use ",
-          React.createElement(
+          t("job_detail.showing", "Showing ") + runs.data.runs.length + t("job_detail.of", " of ") + runs.data.total_runs.toLocaleString() + " " + t("job_detail.runs", "runs") + ". " + t("job_detail.use_cli", "Use ") + React.createElement(
             "code",
             { style: { fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.9 } },
             "cronalytics runs --job " + jobId + " --days " + (days === 0 ? "0" : days)
           ),
-          " for full history."
+          t("job_detail.for_full_history", " for full history.")
         )
       )
     );
@@ -759,6 +906,7 @@
 
   // src/components/HeroBanner.js
   function HeroBanner() {
+    const t = useCronalyticsI18n();
     const [collapsed, setCollapsed] = useState(() => {
       try {
         return localStorage.getItem("cronalytics:hero:collapsed") === "1";
@@ -789,13 +937,13 @@
             cursor: "pointer"
           },
           onClick: toggle,
-          title: "Expand hero banner"
+          title: t("hero.expand_tooltip", "Expand hero banner")
         },
         React.createElement(
           "div",
           { style: { display: "flex", alignItems: "baseline", gap: "0.5rem" } },
-          React.createElement("span", { style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", fontWeight: 700, opacity: 0.8, letterSpacing: "0.08em", textTransform: "uppercase" } }, "CRONALYTICS"),
-          React.createElement("span", { style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.65rem", opacity: 0.5, letterSpacing: "0.1em", textTransform: "uppercase" } }, "Observe. Measure. Optimize.")
+          React.createElement("span", { style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", fontWeight: 700, opacity: 0.8, letterSpacing: "0.08em", textTransform: "uppercase" } }, t("hero.title", "CRONALYTICS")),
+          React.createElement("span", { style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.65rem", opacity: 0.5, letterSpacing: "0.1em", textTransform: "uppercase" } }, t("hero.tagline", "Observe. Measure. Optimize."))
         ),
         React.createElement("span", { style: { fontSize: "0.7rem", opacity: 0.5 } }, "\u25BC")
       );
@@ -814,7 +962,7 @@
       // Collapse toggle
       React.createElement("button", {
         onClick: toggle,
-        title: "Collapse hero banner",
+        title: t("hero.collapse_tooltip", "Collapse hero banner"),
         style: {
           position: "absolute",
           top: 4,
@@ -839,8 +987,8 @@
             marginBottom: "0.15rem"
           }
         },
-        "/\u02C8kr\u0252n.\u0259\u02CCl\u026At.\u026Aks/",
-        React.createElement("i", { style: { opacity: 0.5, marginLeft: "0.5rem", fontSize: "0.65rem" } }, "(noun)")
+        t("hero.pronunciation", "/\u02C8kr\u0252n.\u0259\u02CCl\u026At.\u026Aks/"),
+        React.createElement("i", { style: { opacity: 0.5, marginLeft: "0.5rem", fontSize: "0.65rem" } }, t("hero.noun", "(noun)"))
       ),
       React.createElement("div", {
         style: {
@@ -851,7 +999,7 @@
           maxWidth: "42rem",
           marginBottom: "0.15rem"
         }
-      }, "1. Cron analytics and observability."),
+      }, t("hero.definition_1", "1. Cron analytics and observability.")),
       React.createElement("div", {
         style: {
           fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -861,7 +1009,7 @@
           maxWidth: "42rem",
           marginBottom: "0.35rem"
         }
-      }, "2. The dashboard for agentic automations in Hermes."),
+      }, t("hero.definition_2", "2. The dashboard for agentic automations in Hermes.")),
       React.createElement("div", {
         style: {
           fontFamily: "var(--theme-font-mono, monospace)",
@@ -871,7 +1019,7 @@
           textTransform: "uppercase",
           opacity: 0.6
         }
-      }, "Observe. Measure. Optimize.")
+      }, t("hero.tagline", "Observe. Measure. Optimize."))
     );
   }
 
@@ -1064,6 +1212,7 @@
 
   // src/components/SummaryBoard.js
   function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick, onTokensClick, onPaceClick }) {
+    const t = useCronalyticsI18n();
     const s = summary || {};
     const runPct = s.previous_period && s.previous_period.runs != null && s.previous_period.runs !== 0 ? (s.total_runs - s.previous_period.runs) / s.previous_period.runs * 100 : null;
     const costPct = s.previous_period && s.previous_period.estimated_cost != null && s.previous_period.estimated_cost !== 0 ? (s.tot_estimated_cost - s.previous_period.estimated_cost) / s.previous_period.estimated_cost * 100 : null;
@@ -1104,7 +1253,7 @@
       // Job Runs
       React.createElement(
         "div",
-        cardProps(onRunsClick, "Job Runs details", { minWidth: 0, overflow: "hidden" }),
+        cardProps(onRunsClick, t("summary.job_runs", "Job Runs") + " details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(
           Card,
           { style: { flex: 1 } },
@@ -1115,7 +1264,7 @@
               "div",
               { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
               React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, ZapIcon(14)),
-              React.createElement(CardTitle, null, "Job Runs"),
+              React.createElement(CardTitle, null, t("summary.job_runs", "Job Runs")),
               React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
             )
           ),
@@ -1140,7 +1289,7 @@
       // Cost
       React.createElement(
         "div",
-        cardProps(onCostClick, outcome === "failure" ? "Est wasted cost details" : "Est cost details", { minWidth: 0, overflow: "hidden" }),
+        cardProps(onCostClick, outcome === "failure" ? t("summary.estimated", "Est") + " " + t("summary.wasted", "Wasted") + " cost details" : t("summary.estimated", "Est") + " cost details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(
           Card,
           { style: { flex: 1 } },
@@ -1151,7 +1300,7 @@
               "div",
               { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
               React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, BanknoteIcon(14)),
-              React.createElement(CardTitle, null, outcome === "failure" ? "Wasted" : "Cost"),
+              React.createElement(CardTitle, null, outcome === "failure" ? t("summary.wasted", "Wasted") : t("summary.cost", "Cost")),
               React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
             )
           ),
@@ -1166,7 +1315,7 @@
                 { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: outcome === "failure" ? "#ef4444" : "#f5a623" } },
                 fmtCost(s.tot_estimated_cost)
               ),
-              React.createElement("span", { style: { fontSize: "0.7rem", opacity: 0.95, fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "0.25rem", padding: "0.05rem 0.4rem" } }, "Estimated")
+              React.createElement("span", { style: { fontSize: "0.7rem", opacity: 0.95, fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "0.25rem", padding: "0.05rem 0.4rem" } }, t("summary.estimated", "Estimated"))
             ),
             React.createElement(
               "div",
@@ -1182,7 +1331,7 @@
             React.createElement(
               "div",
               { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.3rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.25rem" } },
-              "Actual: ",
+              t("summary.actual", "Actual") + ": ",
               s.tot_actual_cost != null ? fmtCost(s.tot_actual_cost) : "\u2014"
             ),
             React.createElement(
@@ -1191,7 +1340,7 @@
               React.createElement("span", { style: { color: "#4ade80" } }, "\u2713 ", s.success_runs || 0),
               " \xB7 ",
               React.createElement("span", { style: { color: (s.failure_runs || 0) > 0 ? "#ef4444" : null } }, "\u2717 ", s.failure_runs || 0),
-              s.failure_estimated_cost != null && s.failure_estimated_cost > 0 ? " (" + fmtCost(s.failure_estimated_cost) + " wasted)" : ""
+              s.failure_estimated_cost != null && s.failure_estimated_cost > 0 ? " (" + fmtCost(s.failure_estimated_cost) + " " + t("summary.wasted", "wasted") + ")" : ""
             )
           )
         )
@@ -1199,7 +1348,7 @@
       // Tokens
       React.createElement(
         "div",
-        cardProps(onTokensClick, "Tokens details", { minWidth: 0, overflow: "hidden" }),
+        cardProps(onTokensClick, t("summary.tokens", "Tokens") + " details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(
           Card,
           { style: { flex: 1 } },
@@ -1210,7 +1359,7 @@
               "div",
               { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
               React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, BlocksIcon(14)),
-              React.createElement(CardTitle, null, "Tokens"),
+              React.createElement(CardTitle, null, t("summary.tokens", "Tokens")),
               React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
             )
           ),
@@ -1250,7 +1399,7 @@
               React.createElement(
                 "div",
                 { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Cached"),
+                React.createElement("span", { style: { width: "2.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, t("summary.cached", "Cached")),
                 React.createElement(
                   "div",
                   { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
@@ -1269,7 +1418,7 @@
         const maxPace = Math.max(nominalPace, trendPace, 1);
         return React.createElement(
           "div",
-          cardProps(onPaceClick, "Pace details", { minWidth: 0, overflow: "hidden" }),
+          cardProps(onPaceClick, t("summary.pace", "Pace") + " details", { minWidth: 0, overflow: "hidden" }),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1280,7 +1429,7 @@
                 "div",
                 { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
                 React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, MetronomeIcon(14)),
-                React.createElement(CardTitle, null, "Pace"),
+                React.createElement(CardTitle, null, t("summary.pace", "Pace")),
                 React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
               )
             ),
@@ -1325,6 +1474,7 @@
 
   // src/components/LeaderBoard.js
   function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopTokensClick, onTopPaceClick }) {
+    const t = useCronalyticsI18n();
     const totalRuns = jobList.reduce((sum, j) => sum + (j.runs || 0), 0);
     const totalCost = jobList.reduce((sum, j) => sum + (j.tot_estimated_cost || 0), 0);
     const totalTokens = jobList.reduce((sum, j) => sum + (j.total_tokens || 0), 0);
@@ -1368,7 +1518,7 @@
         const label = j ? j.name || j.job_id : "\u2014";
         return React.createElement(
           "div",
-          cardProps(onTopRunsClick, "Top Runs details", { minWidth: 0, overflow: "hidden" }),
+          cardProps(onTopRunsClick, t("leaderboard.top_runs", "Top Runs") + " details", { minWidth: 0, overflow: "hidden" }),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1379,7 +1529,7 @@
                 "div",
                 { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
                 React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, ZapIcon(14)),
-                React.createElement(CardTitle, null, "Top Runs"),
+                React.createElement(CardTitle, null, t("leaderboard.top_runs", "Top Runs")),
                 React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
               )
             ),
@@ -1396,7 +1546,7 @@
               React.createElement(
                 "div",
                 { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.6, marginTop: "0.15rem" } },
-                totalRuns > 0 ? Math.round((j.runs || 0) / totalRuns * 100) + "% of total runs" : ""
+                totalRuns > 0 ? Math.round((j.runs || 0) / totalRuns * 100) + "% " + t("leaderboard.of_total_runs", "% of total runs") : ""
               )
             )
           )
@@ -1408,7 +1558,7 @@
         const label = j ? j.name || j.job_id : "\u2014";
         return React.createElement(
           "div",
-          cardProps(onTopCostClick, "Top est cost details", { minWidth: 0, overflow: "hidden" }),
+          cardProps(onTopCostClick, t("leaderboard.top_est_cost", "Top Est Cost") + " details", { minWidth: 0, overflow: "hidden" }),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1419,7 +1569,7 @@
                 "div",
                 { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
                 React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BanknoteIcon(14)),
-                React.createElement(CardTitle, null, "Top Cost"),
+                React.createElement(CardTitle, null, t("leaderboard.top_est_cost", "Top Est Cost")),
                 React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
               )
             ),
@@ -1432,7 +1582,7 @@
                 React.createElement("div", {
                   style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#f5a623", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
                 }, j ? fmtCost(j.tot_estimated_cost) : "\u2014"),
-                j && React.createElement("span", { style: { fontSize: "0.7rem", opacity: 0.95, fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "0.25rem", padding: "0.05rem 0.4rem" } }, "Estimated")
+                j && React.createElement("span", { style: { fontSize: "0.7rem", opacity: 0.95, fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "0.25rem", padding: "0.05rem 0.4rem" } }, t("summary.estimated", "Estimated"))
               ),
               React.createElement("div", {
                 style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
@@ -1441,7 +1591,7 @@
               React.createElement(
                 "div",
                 { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.6, marginTop: "0.15rem" } },
-                totalCost > 0 ? Math.round((j.tot_estimated_cost || 0) / totalCost * 100) + "% of total est cost" : ""
+                totalCost > 0 ? Math.round((j.tot_estimated_cost || 0) / totalCost * 100) + "% " + t("leaderboard.of_total_est_cost", "% of total est cost") : ""
               )
             )
           )
@@ -1453,7 +1603,7 @@
         const label = j ? j.name || j.job_id : "\u2014";
         return React.createElement(
           "div",
-          cardProps(onTopTokensClick, "Top Tokens details", { minWidth: 0, overflow: "hidden" }),
+          cardProps(onTopTokensClick, t("leaderboard.top_tokens", "Top Tokens") + " details", { minWidth: 0, overflow: "hidden" }),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1464,7 +1614,7 @@
                 "div",
                 { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
                 React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BlocksIcon(14)),
-                React.createElement(CardTitle, null, "Top Tokens"),
+                React.createElement(CardTitle, null, t("leaderboard.top_tokens", "Top Tokens")),
                 React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
               )
             ),
@@ -1481,7 +1631,7 @@
               React.createElement(
                 "div",
                 { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.6, marginTop: "0.15rem" } },
-                totalTokens > 0 ? Math.round((j.total_tokens || 0) / totalTokens * 100) + "% of total tokens" : ""
+                totalTokens > 0 ? Math.round((j.total_tokens || 0) / totalTokens * 100) + "% " + t("leaderboard.of_total_tokens", "% of total tokens") : ""
               )
             )
           )
@@ -1498,7 +1648,7 @@
         const p = j && j.projections && j.projections.pace != null ? j.projections.pace : null;
         return React.createElement(
           "div",
-          cardProps(onTopPaceClick, "Top Pace details", { minWidth: 0, overflow: "hidden" }),
+          cardProps(onTopPaceClick, t("leaderboard.most_efficient", "Most Efficient") + " details", { minWidth: 0, overflow: "hidden" }),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1509,7 +1659,7 @@
                 "div",
                 { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
                 React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, MetronomeIcon(14)),
-                React.createElement(CardTitle, null, "Top Pace"),
+                React.createElement(CardTitle, null, t("leaderboard.most_efficient", "Most Efficient")),
                 React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
               )
             ),
@@ -1533,6 +1683,7 @@
 
   // src/components/ModelBreakdown.js
   function ModelBreakdown({ costByModel }) {
+    const t = useCronalyticsI18n();
     if (!costByModel || costByModel.length === 0) return null;
     const topModels = costByModel.slice(0, 5);
     const remaining = costByModel.length - 5;
@@ -1547,7 +1698,7 @@
           "div",
           { style: { display: "flex", alignItems: "center", gap: "0.5rem" } },
           CpuIcon(16),
-          React.createElement(CardTitle, null, "Per-Model Breakdown")
+          React.createElement(CardTitle, null, t("model_breakdown.title", "Per-Model Breakdown"))
         )
       ),
       React.createElement(
@@ -1591,7 +1742,7 @@
           )),
           remaining > 0 && React.createElement("div", {
             style: { textAlign: "center", fontSize: "0.65rem", opacity: 0.35, marginTop: "0.3rem", fontFamily: "var(--theme-font-mono, monospace)" }
-          }, "and " + remaining + " more")
+          }, t("model_breakdown.and_more", "and {n} more", { n: remaining }))
         )
       )
     );
@@ -1612,6 +1763,17 @@
     onExpandToggle,
     onSelectJob
   }) {
+    const t = useCronalyticsI18n();
+    const HEADERS = [
+      t("job_breakdown.job", "Job"),
+      t("job_breakdown.runs", "Runs"),
+      t("job_breakdown.avg_time", "Avg Time"),
+      t("job_breakdown.est_cost", "Est Cost"),
+      t("job_breakdown.avg_est_cost", "Avg Est Cost"),
+      t("job_breakdown.nominal_mo", "Nominal/mo"),
+      t("job_breakdown.trend_mo", "Trend/mo"),
+      t("job_breakdown.pace", "Pace")
+    ];
     return React.createElement(
       Card,
       { style: { marginBottom: "1.5rem" } },
@@ -1625,7 +1787,7 @@
             "div",
             { style: { display: "flex", alignItems: "center", gap: "0.5rem" } },
             ClockIcon(16),
-            React.createElement(CardTitle, null, "Jobs Breakdown")
+            React.createElement(CardTitle, null, t("job_breakdown.title", "Jobs Breakdown"))
           ),
           React.createElement(
             "div",
@@ -1642,8 +1804,8 @@
                 "span",
                 { style: { display: "inline-flex", alignItems: "center", gap: "0.35rem" } },
                 RefreshCwIcon(14, { style: { animation: "cronalytics-spin 1s linear infinite" } }),
-                "Syncing"
-              ) : "Sync Now"
+                t("shared.loading", "Syncing")
+              ) : t("shared.sync_now", "Sync Now")
             ),
             syncInfo && syncInfo.lastSync && (() => {
               const age = fmtSyncAge(syncInfo.lastSync);
@@ -1665,7 +1827,7 @@
         jobList.length === 0 ? React.createElement(
           "div",
           { style: { opacity: 0.6, padding: "1rem 0" } },
-          syncing ? "Syncing cron sessions..." : syncInfo && syncInfo.lastSync ? "No jobs in " + windowLabel.toLowerCase() + ". Last sync: " + syncInfo.lastSync.split("T").join(" ").slice(0, 19) + " UTC" : "No cron jobs captured. Click Sync Now to backfill from state.db."
+          syncing ? t("shared.loading", "Syncing cron sessions...") : syncInfo && syncInfo.lastSync ? t("job_breakdown.no_jobs_window", "No jobs in {window}. Last sync: {time} UTC", { window: windowLabel.toLowerCase(), time: syncInfo.lastSync.split("T").join(" ").slice(0, 19) }) : t("job_breakdown.no_jobs_sync", "No cron jobs captured. Click Sync Now to backfill from state.db.")
         ) : React.createElement(
           "div",
           { style: { overflow: "auto" } },
@@ -1678,13 +1840,13 @@
               React.createElement(
                 "tr",
                 { style: { borderBottom: "1px solid var(--color-border)" } },
-                ["Job", "Runs", "Avg Time", "Est Cost", "Avg Est Cost", "Nominal/mo", "Trend/mo", "Pace"].map((h) => {
+                HEADERS.map((h) => {
                   const isActive = sortConfig.key === h;
                   return React.createElement("th", {
                     key: h,
                     tabIndex: 0,
                     role: "button",
-                    "aria-label": isActive ? "Sorted by " + h + ", " + (sortConfig.direction === "asc" ? "ascending" : "descending") : "Sort by " + h,
+                    "aria-label": isActive ? t("job_breakdown.sorted_by", "Sorted by {col}, {dir}", { col: h, dir: sortConfig.direction === "asc" ? t("job_breakdown.ascending", "ascending") : t("job_breakdown.descending", "descending") }) : t("job_breakdown.sort_by", "Sort by {col}", { col: h }),
                     onClick: () => onSort(h),
                     onKeyDown: (e) => {
                       if (e.key === "Enter" || e.key === " ") {
@@ -1693,7 +1855,7 @@
                       }
                     },
                     style: {
-                      textAlign: h === "Job" ? "left" : "right",
+                      textAlign: h === HEADERS[0] ? "left" : "right",
                       padding: "0.5rem 0.35rem",
                       cursor: "pointer",
                       fontFamily: "var(--theme-font-mono, monospace)",
@@ -1701,7 +1863,7 @@
                       userSelect: "none",
                       borderBottom: "2px solid var(--color-border)"
                     },
-                    title: h === "Pace" ? "Pace = Trend \xF7 Nominal. Under 1.0\xD7 = under budget. Over 2.0\xD7 = over budget." : void 0
+                    title: h === t("job_breakdown.pace", "Pace") ? "Pace = Trend \xF7 Nominal. Under 1.0\xD7 = under budget. Over 2.0\xD7 = over budget." : void 0
                   }, h + (isActive ? sortConfig.direction === "asc" ? " \u2191" : " \u2193" : ""));
                 })
               )
@@ -1733,7 +1895,7 @@
                       j.job_mode === "no_agent" && React.createElement(Badge, {
                         size: "xs",
                         style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.7 }
-                      }, "No agent")
+                      }, t("job_breakdown.mode_no_agent", "No agent"))
                     )
                   ),
                   React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, (j.runs || 0).toLocaleString()),
@@ -1784,7 +1946,7 @@
                         {
                           style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.72rem" }
                         },
-                        "Tokens: " + fmtCompact(j.total_tokens) + " total (" + fmtCompact(j.total_input_tokens) + " in / " + fmtCompact(j.total_output_tokens) + " out / " + fmtCompact(j.total_cache_read_tokens) + " cached)"
+                        t("summary.tokens", "Tokens") + ": " + fmtCompact(j.total_tokens) + " total (" + fmtCompact(j.total_input_tokens) + " " + t("summary.in", "in") + " / " + fmtCompact(j.total_output_tokens) + " " + t("summary.out", "out") + " / " + fmtCompact(j.total_cache_read_tokens) + " " + t("summary.cached", "cached") + ")"
                       ),
                       React.createElement(
                         "div",
@@ -1803,13 +1965,13 @@
                           {
                             style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "flex", alignItems: "center", gap: "0.5rem" }
                           },
-                          j.projections && j.projections.schedule_display ? j.projections.schedule_display : "No schedule",
-                          "   Last: ",
+                          j.projections && j.projections.schedule_display ? j.projections.schedule_display : t("job_breakdown.no_schedule", "No schedule"),
+                          "   " + t("job_breakdown.last", "Last") + ": ",
                           fmtTime(j.last_run),
-                          j.last_model ? "   using " + j.last_model : "",
-                          "   Next: ",
+                          j.last_model ? "   " + t("job_breakdown.using", "using") + " " + j.last_model : "",
+                          "   " + t("job_breakdown.next", "Next") + ": ",
                           j.projections && j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014",
-                          j.job_mode === "no_agent" && React.createElement("span", { style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.5, marginLeft: "0.25rem" } }, "[No agent]")
+                          j.job_mode === "no_agent" && React.createElement("span", { style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.5, marginLeft: "0.25rem" } }, "[" + t("job_breakdown.mode_no_agent", "No agent") + "]")
                         ),
                         React.createElement("button", {
                           type: "button",
@@ -1835,7 +1997,7 @@
                           onMouseLeave: (e) => {
                             e.currentTarget.style.background = "rgba(255,255,255,0.08)";
                           }
-                        }, "See Runs")
+                        }, t("job_breakdown.see_runs", "See Runs"))
                       )
                     )
                   )
@@ -1850,6 +2012,7 @@
 
   // src/components/CronalyticsTab.js
   function CronalyticsTab() {
+    const t = useCronalyticsI18n();
     const [days, setDaysRaw] = useState(() => {
       try {
         const saved = localStorage.getItem("cronalytics:days");
@@ -1958,7 +2121,7 @@
         setSyncing(false);
         if (syncResult && syncResult.result) {
           const { inserted, elapsed_ms } = syncResult.result;
-          setSyncToast({ msg: "\u2713 Synced " + inserted + " runs \xB7 " + (elapsed_ms / 1e3).toFixed(1) + "s" });
+          setSyncToast({ msg: "\u2713 " + t("shared.synced_n_runs", "Synced {n} runs") + " \xB7 " + (elapsed_ms / 1e3).toFixed(1) + "s", n: inserted });
           setTimeout(() => setSyncToast(null), 5e3);
         }
         summary.refetch();
@@ -1973,31 +2136,31 @@
       return React.createElement(
         "div",
         { style: { padding: "0 0.25rem 1rem 0", color: "var(--color-destructive)" } },
-        "Error: " + (summary.error || jobs.error)
+        t("job_detail.error_prefix", "Error: ") + (summary.error || jobs.error)
       );
     }
     const s = summary.data || {};
     const jobList = jobs.data && jobs.data.jobs ? jobs.data.jobs : [];
-    const windowLabel = days === 0 ? "All time" : "Last " + days + " days";
+    const windowLabel = days === 0 ? t("summary.all_time", "All time") : t("summary.last_n_days", "Last {n} days", { n: days });
     const costPct = s.previous_period && s.previous_period.estimated_cost != null && s.previous_period.estimated_cost !== 0 ? (s.tot_estimated_cost - s.previous_period.estimated_cost) / s.previous_period.estimated_cost * 100 : null;
     const runPct = s.previous_period && s.previous_period.runs != null && s.previous_period.runs !== 0 ? (s.total_runs - s.previous_period.runs) / s.previous_period.runs * 100 : null;
     const getSortValue = (j, key) => {
       switch (key) {
-        case "Job":
+        case t("job_breakdown.job", "Job"):
           return j.name || j.job_id;
-        case "Runs":
+        case t("job_breakdown.runs", "Runs"):
           return j.runs || 0;
-        case "Avg Time":
+        case t("job_breakdown.avg_time", "Avg Time"):
           return j.avg_duration || 0;
-        case "Est Cost":
+        case t("job_breakdown.est_cost", "Est Cost"):
           return j.tot_estimated_cost || 0;
-        case "Avg Est Cost":
+        case t("job_breakdown.avg_est_cost", "Avg Est Cost"):
           return j.avg_estimated_cost || 0;
-        case "Nominal/mo":
+        case t("job_breakdown.nominal_mo", "Nominal/mo"):
           return j.projections && j.projections.projected_cost_30d != null ? j.projections.projected_cost_30d : -Infinity;
-        case "Trend/mo":
+        case t("job_breakdown.trend_mo", "Trend/mo"):
           return j.projections && j.projections.trend_projected_cost_30d != null ? j.projections.trend_projected_cost_30d : -Infinity;
-        case "Pace":
+        case t("job_breakdown.pace", "Pace"):
           return j.projections && j.projections.pace != null ? j.projections.pace : -Infinity;
         default:
           return 0;
@@ -2048,16 +2211,13 @@
         React.createElement(
           "div",
           { style: { display: "flex", flexWrap: "nowrap", gap: "0.75rem", alignItems: "center" } },
-          React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome, label: "Outcomes" }),
-          React.createElement(ModeToggle, { selected: mode, onChange: setMode, label: "Mode" })
+          React.createElement(OutcomeToggle, { selected: outcome, onChange: setOutcome, label: t("outcome_toggle.label", "Outcomes") }),
+          React.createElement(ModeToggle, { selected: mode, onChange: setMode, label: t("mode_toggle.label", "Mode") })
         ),
         // Spacer pushes DaySelector + Refresh to the right edge.
-        // Using a flex child instead of marginLeft: auto so that when items wrap,
-        // each wrapped line starts from the left and uses full toolbar width.
         React.createElement("div", { style: { flex: "1 1 0%", minWidth: "0.25rem" } }),
         // DaySelector returns [label, presets, custom] — flattened as direct flex children
-        // of the toolbar so presets, custom input, and Refresh wrap progressively.
-        React.createElement(DaySelector, { selected: days, onChange: setDays, label: "Days" }),
+        React.createElement(DaySelector, { selected: days, onChange: setDays, label: t("day_selector.label", "Days") }),
         // Refresh — its own flex item so it breaks away first at 110%.
         React.createElement(
           Button,
@@ -2080,7 +2240,7 @@
             "span",
             { style: { display: "flex", alignItems: "center", gap: "0.25rem", minWidth: "4.5rem" } },
             RefreshCwIcon(14),
-            "Refresh"
+            t("shared.refresh", "Refresh")
           )
         )
       ),
@@ -2095,7 +2255,7 @@
         jobName: (jobList.find((j) => j.job_id === selectedJobId) || {}).name,
         days,
         outcome,
-        sortKey: { "Job": "run_time", "Runs": "run_time", "Avg Time": "duration_seconds", "Est Cost": "estimated_cost", "Avg Est Cost": "estimated_cost", "Nominal/mo": "run_time", "Trend/mo": "run_time", "Pace": "run_time" }[sortConfig.key] || "run_time",
+        sortKey: { [t("job_breakdown.job", "Job")]: "run_time", [t("job_breakdown.runs", "Runs")]: "run_time", [t("job_breakdown.avg_time", "Avg Time")]: "duration_seconds", [t("job_breakdown.est_cost", "Est Cost")]: "estimated_cost", [t("job_breakdown.avg_est_cost", "Avg Est Cost")]: "estimated_cost", [t("job_breakdown.nominal_mo", "Nominal/mo")]: "run_time", [t("job_breakdown.trend_mo", "Trend/mo")]: "run_time", [t("job_breakdown.pace", "Pace")]: "run_time" }[sortConfig.key] || "run_time",
         sortDir: sortConfig.direction || "desc"
       })),
       React.createElement(SummaryBoard, {
@@ -2129,7 +2289,7 @@
               { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(s.pace) } },
               s.pace != null ? s.pace.toFixed(2) + "\xD7" : "\u2014"
             ),
-            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Pace")
+            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, t("summary.pace", "Pace"))
           ),
           React.createElement(
             "div",
@@ -2140,7 +2300,7 @@
               React.createElement(
                 "div",
                 { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.8rem" } }, "Nominal"),
+                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.8rem" } }, t("summary.nominal", "Nominal")),
                 React.createElement(
                   "div",
                   { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
@@ -2151,7 +2311,7 @@
               React.createElement(
                 "div",
                 { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.8rem" } }, "Trend"),
+                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.8rem" } }, t("summary.trend", "Trend")),
                 React.createElement(
                   "div",
                   { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
@@ -2161,48 +2321,7 @@
               )
             )
           ),
-          React.createElement(
-            "div",
-            { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "What this means"),
-            React.createElement(
-              "p",
-              { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85, marginBottom: "0.75rem", textTransform: "none" } },
-              "Pace compares your actual spending trend against the budget you set in your cron job definitions. It answers: \u2018At this rate, am I over or under budget?\u2019"
-            ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "How it\u2019s calculated"),
-            React.createElement(
-              "div",
-              { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6, textTransform: "none" } },
-              React.createElement("div", null, "Nominal = scheduled runs \xD7 average cost per run"),
-              React.createElement("div", null, "Trend     = actual runs \xD7 average cost per run"),
-              React.createElement("div", null, "Pace      = Trend / Nominal"),
-              React.createElement("div", { style: { marginTop: "0.25rem", opacity: 0.6, textTransform: "none" } }, "All scaled to a 30\u2011day month using the selected window.")
-            ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Color guide"),
-            React.createElement(
-              "div",
-              { style: { display: "flex", flexDirection: "column", gap: "0.35rem", fontSize: "0.78rem", marginBottom: "0.75rem", textTransform: "none" } },
-              React.createElement(
-                "div",
-                { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                React.createElement("span", { style: { display: "inline-block", width: "0.6rem", height: "0.6rem", borderRadius: "50%", background: "#4ade80" } }),
-                React.createElement("span", null, "Green (< 1.0\xD7) \u2014 Under budget. Spending less than scheduled.")
-              ),
-              React.createElement(
-                "div",
-                { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                React.createElement("span", { style: { display: "inline-block", width: "0.6rem", height: "0.6rem", borderRadius: "50%", background: "var(--foreground)" } }),
-                React.createElement("span", null, "Neutral (1.0\u20132.0\xD7) \u2014 On track. Slight variance within normal range.")
-              ),
-              React.createElement(
-                "div",
-                { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
-                React.createElement("span", { style: { display: "inline-block", width: "0.6rem", height: "0.6rem", borderRadius: "50%", background: "#ef4444" } }),
-                React.createElement("span", null, "Red (\u2265 2.0\xD7) \u2014 Over budget. Actual spend is double (or more) the nominal rate.")
-              )
-            )
-          )
+          React.createElement(PaceExplainer, { s, windowLabel, t })
         )
       ),
       // ── Runs Modal ─────────────────────────────────────────────────────
@@ -2220,7 +2339,7 @@
               { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
               (s.total_runs || 0).toLocaleString()
             ),
-            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Job Runs")
+            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, t("summary.job_runs", "Job Runs"))
           ),
           runPct != null && React.createElement(
             "div",
@@ -2228,34 +2347,10 @@
             React.createElement(
               "div",
               { style: { fontSize: "0.82rem", color: runPct > 0 ? "#ef4444" : "#4ade80" } },
-              (runPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(runPct).toFixed(0) + "% vs prior " + (days === 0 ? "period" : days + "d")
+              (runPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(runPct).toFixed(0) + "% " + t("summary.vs_prior", "vs prior") + " " + (days === 0 ? t("summary.period", "period") : days + "d")
             )
           ),
-          React.createElement(
-            "div",
-            { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "What this means"),
-            React.createElement(
-              "p",
-              { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85, marginBottom: "0.75rem" } },
-              "Total number of cron job executions recorded in the selected window. Each run triggers your scheduled task\u2014whether it succeeds, fails, or retries."
-            ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Trend calculation"),
-            React.createElement(
-              "div",
-              { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
-              React.createElement("div", null, "Trend % = ((current runs \u2212 prior runs) / prior runs) \xD7 100"),
-              React.createElement("div", { style: { marginTop: "0.25rem", opacity: 0.6 } }, "Positive = more runs than the prior window. Negative = fewer runs.")
-            ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Window context"),
-            React.createElement(
-              "p",
-              { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85 } },
-              "Showing ",
-              React.createElement("strong", null, windowLabel),
-              ". The prior comparison window is the same duration shifted back in time."
-            )
-          )
+          React.createElement(RunsExplainer, { windowLabel, t })
         )
       ),
       // ── Cost Modal ─────────────────────────────────────────────────────
@@ -2273,12 +2368,12 @@
               { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
               fmtCost(s.tot_estimated_cost)
             ),
-            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Estimated Cost")
+            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, t("summary.estimated", "Estimated") + " " + t("summary.cost", "Cost"))
           ),
           s.tot_actual_cost != null && React.createElement(
             "div",
             { style: { marginBottom: "0.75rem", fontSize: "0.8rem", opacity: 0.85 } },
-            "Actual: ",
+            t("summary.actual", "Actual") + ": ",
             React.createElement("span", { style: { fontWeight: 700 } }, fmtCost(s.tot_actual_cost))
           ),
           costPct != null && React.createElement(
@@ -2287,33 +2382,10 @@
             React.createElement(
               "div",
               { style: { fontSize: "0.82rem", color: costPct > 0 ? "#ef4444" : "#4ade80" } },
-              (costPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(costPct).toFixed(0) + "% vs prior " + (days === 0 ? "period" : days + "d")
+              (costPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(costPct).toFixed(0) + "% " + t("summary.vs_prior", "vs prior") + " " + (days === 0 ? t("summary.period", "period") : days + "d")
             )
           ),
-          React.createElement(
-            "div",
-            { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "What this means"),
-            React.createElement(
-              "p",
-              { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85, marginBottom: "0.75rem" } },
-              "Estimated cost is calculated from token usage and model pricing. Actual cost may differ slightly depending on provider billing granularity."
-            ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Trend calculation"),
-            React.createElement(
-              "div",
-              { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
-              React.createElement("div", null, "Trend % = ((current cost \u2212 prior cost) / prior cost) \xD7 100")
-            ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Window context"),
-            React.createElement(
-              "p",
-              { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85 } },
-              "Showing ",
-              React.createElement("strong", null, windowLabel),
-              ". The prior comparison window is the same duration shifted back in time."
-            )
-          )
+          React.createElement(CostExplainer, { windowLabel, t })
         )
       ),
       // ── Tokens Modal ───────────────────────────────────────────────────
@@ -2331,7 +2403,7 @@
               { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
               fmtCompact(s.total_tokens)
             ),
-            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Tokens")
+            React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, t("summary.tokens", "Tokens"))
           ),
           React.createElement(
             "div",
@@ -2339,7 +2411,7 @@
             React.createElement(
               "div",
               { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-              React.createElement("span", { style: { width: "4rem", fontSize: "0.8rem" } }, "In"),
+              React.createElement("span", { style: { width: "4rem", fontSize: "0.8rem" } }, t("summary.in", "In")),
               React.createElement(
                 "div",
                 { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
@@ -2350,7 +2422,7 @@
             React.createElement(
               "div",
               { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-              React.createElement("span", { style: { width: "4rem", fontSize: "0.8rem" } }, "Out"),
+              React.createElement("span", { style: { width: "4rem", fontSize: "0.8rem" } }, t("summary.out", "Out")),
               React.createElement(
                 "div",
                 { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
@@ -2361,7 +2433,7 @@
             React.createElement(
               "div",
               { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-              React.createElement("span", { style: { width: "4rem", fontSize: "0.8rem" } }, "Cached"),
+              React.createElement("span", { style: { width: "4rem", fontSize: "0.8rem" } }, t("summary.cached", "Cached")),
               React.createElement(
                 "div",
                 { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
@@ -2370,24 +2442,7 @@
               React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem" } }, fmtCompact(s.total_cache_read_tokens))
             )
           ),
-          React.createElement(
-            "div",
-            { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "What this means"),
-            React.createElement(
-              "p",
-              { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85, marginBottom: "0.75rem" } },
-              "Tokens are the currency of LLM usage. Input tokens are your prompts + context. Output tokens are the model's response. Cached tokens come from repeated prompts with identical prefixes (cheaper)."
-            ),
-            React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Breakdown"),
-            React.createElement(
-              "div",
-              { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
-              React.createElement("div", null, "Input:  " + fmtCompact(s.total_input_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_input_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)"),
-              React.createElement("div", null, "Output: " + fmtCompact(s.total_output_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_output_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)"),
-              React.createElement("div", null, "Cached: " + fmtCompact(s.total_cache_read_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_cache_read_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)")
-            )
-          )
+          React.createElement(TokensExplainer, { s, t })
         )
       ),
       // ── Top Runs Modal ─────────────────────────────────────────────────
@@ -2412,22 +2467,9 @@
                   { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
                   j ? (j.runs || 0).toLocaleString() : "\u2014"
                 ),
-                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Job Runs")
+                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, t("summary.job_runs", "Job Runs"))
               ),
-              j && React.createElement(
-                "div",
-                { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-                React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
-                React.createElement(
-                  "div",
-                  { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
-                  React.createElement("div", null, "Schedule: " + (j.schedule && j.schedule.display || "\u2014")),
-                  React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
-                  React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
-                  React.createElement("div", null, "Avg duration: " + (j.avg_duration != null ? fmtDuration(j.avg_duration) : "\u2014")),
-                  React.createElement("div", null, "Tokens: " + (j.total_tokens != null ? fmtCompact(j.total_tokens) : "\u2014"))
-                )
-              )
+              j && React.createElement(JobDetailsBlock, { j, t })
             );
           })()
         )
@@ -2454,22 +2496,9 @@
                   { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
                   j ? fmtCost(j.tot_estimated_cost) : "\u2014"
                 ),
-                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Estimated Cost")
+                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, t("summary.estimated", "Estimated") + " " + t("summary.cost", "Cost"))
               ),
-              j && React.createElement(
-                "div",
-                { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-                React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
-                React.createElement(
-                  "div",
-                  { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
-                  React.createElement("div", null, "Schedule: " + (j.schedule && j.schedule.display || "\u2014")),
-                  React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
-                  React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
-                  React.createElement("div", null, "Avg duration: " + (j.avg_duration != null ? fmtDuration(j.avg_duration) : "\u2014")),
-                  React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \xB7 Avg: " + (j.avg_estimated_cost != null ? fmtCost(j.avg_estimated_cost) : "\u2014"))
-                )
-              )
+              j && React.createElement(JobDetailsBlock, { j, t })
             );
           })()
         )
@@ -2496,21 +2525,9 @@
                   { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
                   j ? fmtCompact(j.total_tokens) : "\u2014"
                 ),
-                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Tokens")
+                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, t("summary.tokens", "Tokens"))
               ),
-              j && React.createElement(
-                "div",
-                { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-                React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
-                React.createElement(
-                  "div",
-                  { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
-                  React.createElement("div", null, "Schedule: " + (j.schedule && j.schedule.display || "\u2014")),
-                  React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
-                  React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
-                  React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString())
-                )
-              )
+              j && React.createElement(JobDetailsBlock, { j, t })
             );
           })()
         )
@@ -2539,62 +2556,46 @@
                 { style: { display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" } },
                 React.createElement(
                   "span",
-                  { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(p) } },
+                  { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: p != null ? paceColor(p) : null } },
                   p != null ? p.toFixed(2) + "\xD7" : "\u2014"
                 ),
-                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Pace")
+                React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, t("summary.pace", "Pace"))
               ),
-              React.createElement(
-                "div",
-                { style: { marginBottom: "1rem" } },
-                React.createElement(
-                  "div",
-                  { style: { display: "flex", flexDirection: "column", gap: "0.2rem" } },
-                  React.createElement(
-                    "div",
-                    { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                    React.createElement("span", { style: { width: "5rem", fontSize: "0.8rem" } }, "Nominal/mo"),
-                    React.createElement(
-                      "div",
-                      { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
-                      React.createElement("div", { style: { width: Math.min(100, (j && j.projections && j.projections.projected_cost_30d || 1) / Math.max(j && j.projections && j.projections.projected_cost_30d || 1, j && j.projections && j.projections.trend_projected_cost_30d || 1, 1) * 100) + "%", background: "#4ade80", height: "100%", opacity: 0.8 } })
-                    ),
-                    React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", color: "#4ade80" } }, fmtCost(j && j.projections ? j.projections.projected_cost_30d : null) + "/mo")
-                  ),
-                  React.createElement(
-                    "div",
-                    { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                    React.createElement("span", { style: { width: "5rem", fontSize: "0.8rem" } }, "Trend/mo"),
-                    React.createElement(
-                      "div",
-                      { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.35rem", overflow: "hidden" } },
-                      React.createElement("div", { style: { width: Math.min(100, (j && j.projections && j.projections.trend_projected_cost_30d || 1) / Math.max(j && j.projections && j.projections.projected_cost_30d || 1, j && j.projections && j.projections.trend_projected_cost_30d || 1, 1) * 100) + "%", background: "#ef4444", height: "100%", opacity: 0.8 } })
-                    ),
-                    React.createElement("span", { style: { width: "5.5rem", textAlign: "right", fontSize: "0.8rem", color: "#ef4444" } }, fmtCost(j && j.projections ? j.projections.trend_projected_cost_30d : null) + "/mo")
-                  )
-                )
-              ),
-              j && React.createElement(
-                "div",
-                { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
-                React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
-                React.createElement(
-                  "div",
-                  { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
-                  React.createElement("div", null, "Schedule: " + (j.schedule && j.schedule.display || "\u2014")),
-                  React.createElement("div", null, "Last run: " + fmtTime(j.last_run)),
-                  React.createElement("div", null, "Model: " + (j.last_model || "\u2014")),
-                  React.createElement("div", null, "Runs: " + (j.runs || 0).toLocaleString() + " \xB7 Avg cost: " + (j.avg_estimated_cost != null ? fmtCost(j.avg_estimated_cost) : "\u2014"))
-                )
-              )
+              j && React.createElement(JobDetailsBlock, { j, t })
             );
           })()
         )
       ),
-      React.createElement(ModelBreakdown, { costByModel: s.cost_by_model }),
-      mode === "all" && s.script_jobs_in_window > 0 && React.createElement("div", {
-        style: { fontSize: "0.65rem", opacity: 0.45, fontFamily: "var(--theme-font-mono, monospace)", marginBottom: "0.5rem", paddingLeft: "0.25rem" }
-      }, s.script_jobs_in_window + " no-agent job" + (s.script_jobs_in_window === 1 ? "" : "s") + " at $0.00 included. Filter to isolate agent costs."),
+      // Charts row
+      jobList.length > 0 && React.createElement(
+        "div",
+        { style: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "1rem", marginBottom: "1.5rem" } },
+        React.createElement(SparkLine, { runs: (() => {
+          const allRuns = [];
+          jobList.forEach((j) => {
+            if (j.runs_detail) allRuns.push(...j.runs_detail);
+          });
+          return allRuns;
+        })() }),
+        React.createElement(ModelBreakdown, { costByModel: s.cost_by_model })
+      ),
+      // Toast
+      syncToast && React.createElement("div", {
+        style: {
+          position: "fixed",
+          bottom: 24,
+          right: 24,
+          zIndex: 2e3,
+          fontSize: "0.72rem",
+          fontFamily: "var(--theme-font-mono, monospace)",
+          padding: "0.5rem 0.75rem",
+          borderRadius: "0.35rem",
+          background: "rgba(34,197,94,0.12)",
+          border: "1px solid rgba(34,197,94,0.3)",
+          color: "#4ade80",
+          animation: "cronalytics-fadein 0.3s ease"
+        }
+      }, syncToast.msg),
       React.createElement(JobBreakdown, {
         jobList,
         sortedJobs,
@@ -2605,31 +2606,512 @@
         days,
         windowLabel,
         onSync,
-        onSort: (h) => setSortConfig((prev) => ({ key: h, direction: prev.key === h && prev.direction === "asc" ? "desc" : "asc" })),
+        onSort: (key) => {
+          if (sortConfig.key === key) {
+            setSortConfig({ key, direction: sortConfig.direction === "asc" ? "desc" : "asc" });
+          } else {
+            setSortConfig({ key, direction: "asc" });
+          }
+        },
         onExpandToggle: (id) => setExpandedId(expandedId === id ? null : id),
         onSelectJob: setSelectedJobId
-      }),
-      // Sync toast
-      syncToast && React.createElement("div", {
-        style: {
-          position: "fixed",
-          bottom: "1.5rem",
-          left: "50%",
-          transform: "translateX(-50%)",
-          background: "var(--background)",
-          color: "var(--foreground-base, var(--foreground))",
-          border: "1px solid var(--foreground-base, var(--foreground))",
-          borderRadius: "0.5rem",
-          padding: "0.6rem 1.25rem",
-          fontSize: "0.85rem",
-          fontFamily: "var(--theme-font-mono, monospace)",
-          zIndex: 1e4,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-          whiteSpace: "nowrap"
-        }
-      }, syncToast.msg)
+      })
     );
   }
+  function PaceExplainer({ s, windowLabel, t }) {
+    return React.createElement(
+      "div",
+      { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
+      React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, t("shared.what_this_means", "What this means")),
+      React.createElement(
+        "p",
+        { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85, marginBottom: "0.75rem", textTransform: "none" } },
+        t("pace.what_this_means", "Pace compares your actual spending trend against the budget you set in your cron job definitions. It answers: \u2018At this rate, am I over or under budget?\u2019")
+      ),
+      React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, t("shared.how_its_calculated", "How it's calculated")),
+      React.createElement(
+        "div",
+        { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6, textTransform: "none" } },
+        React.createElement("div", null, t("pace.nominal_formula", "Nominal = scheduled runs \xD7 average cost per run")),
+        React.createElement("div", null, t("pace.trend_formula", "Trend     = actual runs \xD7 average cost per run")),
+        React.createElement("div", null, t("pace.pace_formula", "Pace      = Trend / Nominal")),
+        React.createElement("div", { style: { marginTop: "0.25rem", opacity: 0.6, textTransform: "none" } }, t("shared.all_scaled_30d", "All scaled to a 30\u2011day month using the selected window."))
+      ),
+      React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, t("shared.color_guide", "Color guide")),
+      React.createElement(
+        "div",
+        { style: { display: "flex", flexDirection: "column", gap: "0.35rem", fontSize: "0.78rem", marginBottom: "0.75rem", textTransform: "none" } },
+        React.createElement(
+          "div",
+          { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+          React.createElement("span", { style: { display: "inline-block", width: "0.6rem", height: "0.6rem", borderRadius: "50%", background: "#4ade80" } }),
+          React.createElement("span", null, t("shared.green_under_budget", "Green (< 1.0\xD7) \u2014 Under budget. Spending less than scheduled."))
+        ),
+        React.createElement(
+          "div",
+          { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+          React.createElement("span", { style: { display: "inline-block", width: "0.6rem", height: "0.6rem", borderRadius: "50%", background: "var(--foreground)" } }),
+          React.createElement("span", null, t("shared.neutral_budget", "Neutral (1.0\u20132.0\xD7) \u2014 On track. Slight variance within normal range."))
+        ),
+        React.createElement(
+          "div",
+          { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+          React.createElement("span", { style: { display: "inline-block", width: "0.6rem", height: "0.6rem", borderRadius: "50%", background: "#ef4444" } }),
+          React.createElement("span", null, t("shared.red_over_budget", "Red (\u2265 2.0\xD7) \u2014 Over budget. Actual spend is double (or more) the nominal rate."))
+        )
+      )
+    );
+  }
+  function RunsExplainer({ windowLabel, t }) {
+    return React.createElement(
+      "div",
+      { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
+      React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, t("shared.what_this_means", "What this means")),
+      React.createElement(
+        "p",
+        { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85, marginBottom: "0.75rem" } },
+        t("runs.what_this_means", "Total number of cron job executions recorded in the selected window. Each run triggers your scheduled task\u2014whether it succeeds, fails, or retries.")
+      ),
+      React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, t("shared.trend_calculation", "Trend calculation")),
+      React.createElement(
+        "div",
+        { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
+        React.createElement("div", null, t("runs.trend_formula", "Trend % = ((current runs \u2212 prior runs) / prior runs) \xD7 100")),
+        React.createElement("div", { style: { marginTop: "0.25rem", opacity: 0.6 } }, t("runs.trend_note", "Positive = more runs than the prior window. Negative = fewer runs."))
+      ),
+      React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, t("shared.window_context", "Window context")),
+      React.createElement(
+        "p",
+        { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85 } },
+        t("shared.showing_window", "Showing "),
+        React.createElement("strong", null, windowLabel),
+        ". " + t("shared.prior_window_note", "The prior comparison window is the same duration shifted back in time.")
+      )
+    );
+  }
+  function CostExplainer({ windowLabel, t }) {
+    return React.createElement(
+      "div",
+      { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
+      React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, t("shared.what_this_means", "What this means")),
+      React.createElement(
+        "p",
+        { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85, marginBottom: "0.75rem" } },
+        t("cost.what_this_means", "Estimated cost is calculated from token usage and model pricing. Actual cost may differ slightly depending on provider billing granularity.")
+      ),
+      React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, t("shared.trend_calculation", "Trend calculation")),
+      React.createElement(
+        "div",
+        { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
+        React.createElement("div", null, t("cost.trend_formula", "Trend % = ((current cost \u2212 prior cost) / prior cost) \xD7 100"))
+      ),
+      React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, t("shared.window_context", "Window context")),
+      React.createElement(
+        "p",
+        { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85 } },
+        t("shared.showing_window", "Showing "),
+        React.createElement("strong", null, windowLabel),
+        ". " + t("shared.prior_window_note", "The prior comparison window is the same duration shifted back in time.")
+      )
+    );
+  }
+  function TokensExplainer({ s, t }) {
+    return React.createElement(
+      "div",
+      { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
+      React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, t("shared.what_this_means", "What this means")),
+      React.createElement(
+        "p",
+        { style: { fontSize: "0.8rem", lineHeight: 1.5, opacity: 0.85, marginBottom: "0.75rem" } },
+        t("tokens.what_this_means", "Tokens are the currency of LLM usage. Input tokens are your prompts + context. Output tokens are the model's response. Cached tokens come from repeated prompts with identical prefixes (cheaper).")
+      ),
+      React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, t("shared.breakdown", "Breakdown")),
+      React.createElement(
+        "div",
+        { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", marginBottom: "0.75rem", lineHeight: 1.6 } },
+        React.createElement("div", null, t("summary.in", "Input") + ":  " + fmtCompact(s.total_input_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_input_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)"),
+        React.createElement("div", null, t("summary.out", "Output") + ": " + fmtCompact(s.total_output_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_output_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)"),
+        React.createElement("div", null, t("summary.cached", "Cached") + ": " + fmtCompact(s.total_cache_read_tokens) + " (" + ((s.total_tokens || 1) > 0 ? ((s.total_cache_read_tokens || 0) / s.total_tokens * 100).toFixed(1) : "0") + "%)")
+      )
+    );
+  }
+  function JobDetailsBlock({ j, t }) {
+    return React.createElement(
+      "div",
+      { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
+      React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, t("shared.job_details", "Job details")),
+      React.createElement(
+        "div",
+        { style: { fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", padding: "0.6rem 0.75rem", borderRadius: "0.35rem", lineHeight: 1.6 } },
+        React.createElement("div", null, t("job_breakdown.schedule", "Schedule") + ": " + (j.schedule && j.schedule.display || "\u2014")),
+        React.createElement("div", null, t("job_breakdown.last_run", "Last run") + ": " + fmtTime(j.last_run)),
+        React.createElement("div", null, t("model_breakdown.model", "Model") + ": " + (j.last_model || "\u2014")),
+        React.createElement("div", null, t("job_breakdown.avg_duration", "Avg duration") + ": " + (j.avg_duration != null ? fmtDuration(j.avg_duration) : "\u2014"))
+      )
+    );
+  }
+
+  // src/i18n/en.js
+  registerCatalog("en", {
+    // HeroBanner — the greeting
+    hero: {
+      title: "CRONALYTICS",
+      tagline: "Observe. Measure. Optimize.",
+      pronunciation: "/\u02C8kr\u0252n.\u0259\u02CCl\u026At.\u026Aks/",
+      noun: "(noun)",
+      definition_1: "1. Cron analytics and observability.",
+      definition_2: "2. The dashboard for agentic automations in Hermes.",
+      expand_tooltip: "Expand hero banner",
+      collapse_tooltip: "Collapse hero banner"
+    },
+    // SummaryBoard — headline stats
+    summary: {
+      job_runs: "Job Runs",
+      cost: "Cost",
+      wasted: "Wasted",
+      tokens: "Tokens",
+      cached: "Cached",
+      pace: "Pace",
+      trend: "Trend",
+      estimated: "Estimated",
+      actual: "Actual",
+      all_time: "All time",
+      last_n_days: "Last {n} days",
+      vs_prior: "vs prior",
+      period: "period",
+      nominal: "Nominal",
+      in: "In",
+      out: "Out",
+      no_schedule: "No schedule"
+    },
+    // LeaderBoard — top performers
+    leaderboard: {
+      title: "Leaderboard",
+      top_est_cost: "Top Est Cost",
+      top_runs: "Top Runs",
+      top_tokens: "Top Tokens",
+      top_duration: "Top Time",
+      most_efficient: "Most Efficient",
+      of_total_est_cost: "% of total est cost",
+      of_total_runs: "% of total runs",
+      of_total_tokens: "% of total tokens"
+    },
+    // JobBreakdown — per-job table
+    job_breakdown: {
+      title: "Jobs Breakdown",
+      job: "Job",
+      runs: "Runs",
+      avg_time: "Avg Time",
+      est_cost: "Est Cost",
+      avg_est_cost: "Avg Est Cost",
+      nominal_mo: "Nominal/mo",
+      trend_mo: "Trend/mo",
+      pace: "Pace",
+      mode_agent: "Agent",
+      mode_no_agent: "No agent",
+      no_schedule: "No schedule",
+      last: "Last",
+      using: "using",
+      next: "Next",
+      see_runs: "See Runs",
+      schedule: "Schedule",
+      last_run: "Last run",
+      no_jobs_window: "No jobs in {window}. Last sync: {time} UTC",
+      no_jobs_sync: "No cron jobs captured. Click Sync Now to backfill from state.db.",
+      sorted_by: "Sorted by {col}, {dir}",
+      sort_by: "Sort by {col}",
+      ascending: "ascending",
+      descending: "descending"
+    },
+    // JobDetailView — individual run history
+    job_detail: {
+      title_runs: "Runs",
+      mode: "Mode",
+      mode_agent: "Agent",
+      duration: "Duration",
+      est_cost: "Est Cost",
+      loading: "Loading runs...",
+      error_prefix: "Error: ",
+      for_full_history: " for full history.",
+      no_runs: "No runs found.",
+      showing: "Showing ",
+      of: " of ",
+      runs_plural: "runs",
+      use_cli: "Use ",
+      run: "run"
+    },
+    // ModelBreakdown — per-model stats
+    model_breakdown: {
+      title: "Per-Model Breakdown",
+      model: "Model",
+      runs: "Runs",
+      est_cost: "Est Cost",
+      and_more: "and {n} more"
+    },
+    // SparkLine — daily trends
+    sparkline: {
+      daily_cost: "Daily Est Cost",
+      daily_runs: "Daily Runs",
+      cost_bar: "\u2014 cost (bar) \xB7 ",
+      tokens_line: "\u2014 tokens",
+      duration_line: "- - duration"
+    },
+    // DaySelector — time window picker
+    day_selector: {
+      label: "Days",
+      apply_custom: "Apply custom days",
+      go: "Go"
+    },
+    // ModeToggle — agent/no_agent/all filter
+    mode_toggle: {
+      label: "Mode",
+      all: "All",
+      agent: "Agent",
+      no_agent: "No Agent"
+    },
+    // OutcomeToggle — success/failure/all filter
+    outcome_toggle: {
+      label: "Outcomes",
+      all: "All",
+      success: "Success",
+      failure: "Failure"
+    },
+    // ErrorBoundary — crash handler
+    error: {
+      title: "Cronalytics Error",
+      message: "Something went wrong. Please refresh or contact support."
+    },
+    // Modal — popup dialog
+    modal: {
+      close: "Close"
+    },
+    // Pace modal explainer
+    pace: {
+      what_this_means: "Pace compares your actual spending trend against the budget you set in your cron job definitions. It answers: \u2018At this rate, am I over or under budget?\u2019",
+      nominal_formula: "Nominal = scheduled runs \xD7 average cost per run",
+      trend_formula: "Trend     = actual runs \xD7 average cost per run",
+      pace_formula: "Pace      = Trend / Nominal"
+    },
+    // Runs modal explainer
+    runs: {
+      what_this_means: "Total number of cron job executions recorded in the selected window. Each run triggers your scheduled task\u2014whether it succeeds, fails, or retries.",
+      trend_formula: "Trend % = ((current runs \u2212 prior runs) / prior runs) \xD7 100",
+      trend_note: "Positive = more runs than the prior window. Negative = fewer runs."
+    },
+    // Cost modal explainer
+    cost: {
+      what_this_means: "Estimated cost is calculated from token usage and model pricing. Actual cost may differ slightly depending on provider billing granularity.",
+      trend_formula: "Trend % = ((current cost \u2212 prior cost) / prior cost) \xD7 100"
+    },
+    // Tokens modal explainer
+    tokens: {
+      what_this_means: "Tokens are the currency of LLM usage. Input tokens are your prompts + context. Output tokens are the model's response. Cached tokens come from repeated prompts with identical prefixes (cheaper)."
+    },
+    // Shared / generic
+    shared: {
+      loading: "Loading\u2026",
+      retry: "Retry",
+      show: "Show",
+      hide: "Hide",
+      refresh: "Refresh",
+      sync_now: "Sync Now",
+      synced_n_runs: "Synced {n} runs",
+      what_this_means: "What this means",
+      how_its_calculated: "How it's calculated",
+      trend_calculation: "Trend calculation",
+      window_context: "Window context",
+      showing_window: "Showing ",
+      prior_window_note: "The prior comparison window is the same duration shifted back in time.",
+      job_details: "Job details",
+      color_guide: "Color guide",
+      neutral_budget: "Neutral (1.0\u20132.0\xD7) \u2014 On track. Slight variance within normal range.",
+      green_under_budget: "Green (< 1.0\xD7) \u2014 Under budget. Spending less than scheduled.",
+      red_over_budget: "Red (> 2.0\xD7) \u2014 Over budget. Spending more than scheduled.",
+      all_scaled_30d: "All scaled to a 30\u2011day month using the selected window.",
+      breakdown: "Breakdown"
+    }
+  });
+
+  // src/i18n/es.js
+  registerCatalog("es", {
+    // HeroBanner — the greeting
+    hero: {
+      title: "CRONALYTICS",
+      tagline: "Observa. Mide. Optimiza.",
+      pronunciation: "/\u02C8kr\u0252n.\u0259\u02CCl\u026At.\u026Aks/",
+      noun: "(sustantivo)",
+      definition_1: "1. An\xE1lisis y observabilidad de cron.",
+      definition_2: "2. El panel para automatizaciones agenticas en Hermes.",
+      expand_tooltip: "Expandir banner principal",
+      collapse_tooltip: "Colapsar banner principal"
+    },
+    // SummaryBoard — headline stats
+    summary: {
+      job_runs: "Ejecuciones",
+      cost: "Costo",
+      wasted: "Desperdiciado",
+      tokens: "Tokens",
+      cached: "En cach\xE9",
+      pace: "Ritmo",
+      trend: "Tendencia",
+      estimated: "Estimado",
+      actual: "Real",
+      all_time: "Todo el tiempo",
+      last_n_days: "\xDAltimos {n} d\xEDas",
+      vs_prior: "vs anterior",
+      period: "periodo",
+      nominal: "Nominal",
+      in: "Entrada",
+      out: "Salida",
+      no_schedule: "Sin horario"
+    },
+    // LeaderBoard — top performers
+    leaderboard: {
+      title: "Tabla de l\xEDderes",
+      top_est_cost: "Mayor Costo Est.",
+      top_runs: "M\xE1s Ejecuciones",
+      top_tokens: "M\xE1s Tokens",
+      top_duration: "M\xE1s Tiempo",
+      most_efficient: "M\xE1s Eficiente",
+      of_total_est_cost: "% del costo est. total",
+      of_total_runs: "% del total de ejec.",
+      of_total_tokens: "% del total de tokens"
+    },
+    // JobBreakdown — per-job table
+    job_breakdown: {
+      title: "Desglose de Trabajos",
+      job: "Trabajo",
+      runs: "Ejec.",
+      avg_time: "Tiempo Prom.",
+      est_cost: "Costo Est.",
+      avg_est_cost: "Costo Est. Prom.",
+      nominal_mo: "Nominal/mes",
+      trend_mo: "Tendencia/mes",
+      pace: "Ritmo",
+      mode_agent: "Agente",
+      mode_no_agent: "Sin agente",
+      no_schedule: "Sin horario",
+      last: "\xDAltimo",
+      using: "usando",
+      next: "Pr\xF3ximo",
+      see_runs: "Ver Ejecuciones",
+      schedule: "Horario",
+      last_run: "\xDAltima ejecuci\xF3n",
+      no_jobs_window: "No hay trabajos en {window}. \xDAltima sinc.: {time} UTC",
+      no_jobs_sync: "No hay trabajos cron capturados. Haz clic en Sincronizar para importar desde state.db.",
+      sorted_by: "Ordenado por {col}, {dir}",
+      sort_by: "Ordenar por {col}",
+      ascending: "ascendente",
+      descending: "descendente"
+    },
+    // JobDetailView — individual run history
+    job_detail: {
+      title_runs: "Ejecuciones",
+      mode: "Modo",
+      mode_agent: "Agente",
+      duration: "Duraci\xF3n",
+      est_cost: "Costo Est.",
+      loading: "Cargando ejecuciones...",
+      error_prefix: "Error: ",
+      for_full_history: " para historial completo.",
+      no_runs: "No se encontraron ejecuciones.",
+      showing: "Mostrando ",
+      of: " de ",
+      runs_plural: "ejecuciones",
+      use_cli: "Usa ",
+      run: "ejecuci\xF3n"
+    },
+    // ModelBreakdown — per-model stats
+    model_breakdown: {
+      title: "Desglose por Modelo",
+      model: "Modelo",
+      runs: "Ejec.",
+      est_cost: "Costo Est.",
+      and_more: "y {n} m\xE1s"
+    },
+    // SparkLine — daily trends
+    sparkline: {
+      daily_cost: "Costo Est. Diario",
+      daily_runs: "Ejecuciones Diarias",
+      cost_bar: "\u2014 costo (barra) \xB7 ",
+      tokens_line: "\u2014 tokens",
+      duration_line: "- - duraci\xF3n"
+    },
+    // DaySelector — time window picker
+    day_selector: {
+      label: "D\xEDas",
+      apply_custom: "Aplicar d\xEDas personalizados",
+      go: "Ir"
+    },
+    // ModeToggle — agent/no_agent/all filter
+    mode_toggle: {
+      label: "Modo",
+      all: "Todos",
+      agent: "Agente",
+      no_agent: "Sin Agente"
+    },
+    // OutcomeToggle — success/failure/all filter
+    outcome_toggle: {
+      label: "Resultados",
+      all: "Todos",
+      success: "\xC9xito",
+      failure: "Fallo"
+    },
+    // ErrorBoundary — crash handler
+    error: {
+      title: "Error de Cronalytics",
+      message: "Algo sali\xF3 mal. Por favor actualiza o contacta soporte."
+    },
+    // Modal — popup dialog
+    modal: {
+      close: "Cerrar"
+    },
+    // Pace modal explainer
+    pace: {
+      what_this_means: "El Ritmo compara tu tendencia de gasto real contra el presupuesto definido en tus trabajos cron. Responde: \u2018A este ritmo, \xBFestoy sobre o bajo presupuesto?\u2019",
+      nominal_formula: "Nominal = ejecuciones programadas \xD7 costo promedio por ejecuci\xF3n",
+      trend_formula: "Tendencia = ejecuciones reales \xD7 costo promedio por ejecuci\xF3n",
+      pace_formula: "Ritmo = Tendencia / Nominal"
+    },
+    // Runs modal explainer
+    runs: {
+      what_this_means: "N\xFAmero total de ejecuciones de trabajos cron registradas en la ventana seleccionada. Cada ejecuci\xF3n activa tu tarea programada\u2014ya sea \xE9xito, fallo o reintento.",
+      trend_formula: "Tendencia % = ((ejec. actuales \u2212 ejec. anteriores) / ejec. anteriores) \xD7 100",
+      trend_note: "Positivo = m\xE1s ejecuciones que la ventana anterior. Negativo = menos ejecuciones."
+    },
+    // Cost modal explainer
+    cost: {
+      what_this_means: "El costo estimado se calcula a partir del uso de tokens y los precios del modelo. El costo real puede diferir ligeramente seg\xFAn la granularidad de facturaci\xF3n del proveedor.",
+      trend_formula: "Tendencia % = ((costo actual \u2212 costo anterior) / costo anterior) \xD7 100"
+    },
+    // Tokens modal explainer
+    tokens: {
+      what_this_means: "Los tokens son la moneda del uso de LLM. Los tokens de entrada son tus indicaciones + contexto. Los tokens de salida son la respuesta del modelo. Los tokens en cach\xE9 provienen de indicaciones repetidas con prefijos id\xE9nticos (m\xE1s baratos)."
+    },
+    // Shared / generic
+    shared: {
+      loading: "Cargando\u2026",
+      retry: "Reintentar",
+      show: "Mostrar",
+      hide: "Ocultar",
+      refresh: "Actualizar",
+      sync_now: "Sincronizar",
+      synced_n_runs: "Sincronizadas {n} ejecuciones",
+      what_this_means: "Qu\xE9 significa esto",
+      how_its_calculated: "C\xF3mo se calcula",
+      trend_calculation: "C\xE1lculo de tendencia",
+      window_context: "Contexto de ventana",
+      showing_window: "Mostrando ",
+      prior_window_note: "La ventana de comparaci\xF3n anterior tiene la misma duraci\xF3n desplazada hacia atr\xE1s en el tiempo.",
+      job_details: "Detalles del trabajo",
+      color_guide: "Gu\xEDa de colores",
+      neutral_budget: "Neutral (1.0\u20132.0\xD7) \u2014 En camino. Ligera variaci\xF3n dentro del rango normal.",
+      green_under_budget: "Verde (< 1.0\xD7) \u2014 Bajo presupuesto. Gastando menos de lo programado.",
+      red_over_budget: "Rojo (> 2.0\xD7) \u2014 Sobre presupuesto. Gastando m\xE1s de lo programado.",
+      all_scaled_30d: "Todo escalado a un mes de 30 d\xEDas usando la ventana seleccionada.",
+      breakdown: "Desglose"
+    }
+  });
 
   // src/index.js
   PLUGINS.register("cronalytics", function CronalyticsWrapped() {

@@ -1,9 +1,11 @@
 import { React, useRef, useState, useEffect } from "../lib/sdk.js";
+import { useCronalyticsI18n } from "../i18n/index.js";
 
 /**
  * Modal overlay with Escape-to-close, backdrop click, and resize tracking.
  */
 export function Modal({ isOpen, onClose, children, maxWidth }) {
+  const t = useCronalyticsI18n();
   const backdropRef = useRef(null);
   const [bounds, setBounds] = useState(null);
 
@@ -73,7 +75,7 @@ export function Modal({ isOpen, onClose, children, maxWidth }) {
         "button",
         {
           type: "button",
-          "aria-label": "Close",
+          "aria-label": t("modal.close", "Close"),
           onClick: onClose,
           style: {
             position: "absolute",

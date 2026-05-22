@@ -1,8 +1,10 @@
 import { React, Card, CardHeader, CardTitle, CardContent } from "../lib/sdk.js";
 import { fmtCost } from "../lib/formatters.js";
 import { CpuIcon } from "../lib/icons.js";
+import { useCronalyticsI18n } from "../i18n/index.js";
 
 export function ModelBreakdown({ costByModel }) {
+  const t = useCronalyticsI18n();
   if (!costByModel || costByModel.length === 0) return null;
   const topModels = costByModel.slice(0, 5);
   const remaining = costByModel.length - 5;
@@ -12,7 +14,7 @@ export function ModelBreakdown({ costByModel }) {
     React.createElement(CardHeader, null,
       React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem" } },
         CpuIcon(16),
-        React.createElement(CardTitle, null, "Per-Model Breakdown")
+        React.createElement(CardTitle, null, t("model_breakdown.title", "Per-Model Breakdown"))
       )
     ),
     React.createElement(CardContent, null,
@@ -42,7 +44,7 @@ export function ModelBreakdown({ costByModel }) {
         )),
         remaining > 0 && React.createElement("div", {
           style: { textAlign: "center", fontSize: "0.65rem", opacity: 0.35, marginTop: "0.3rem", fontFamily: "var(--theme-font-mono, monospace)" }
-        }, "and " + remaining + " more")
+        }, t("model_breakdown.and_more", "and {n} more", { n: remaining }))
       )
     )
   );
