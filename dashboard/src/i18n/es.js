@@ -59,7 +59,7 @@ registerCatalog("es", {
     title: "Desglose de Trabajos",
     job: "Trabajo",
     runs: "Ejec.",
-    avg_time: "Tiempo Prom.",
+    avg_time: "Duración Prom.",
     est_cost: "Costo Est.",
     avg_est_cost: "Costo Est. Prom.",
     nominal_mo: "Nominal/mes",

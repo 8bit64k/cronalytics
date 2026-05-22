@@ -58,7 +58,7 @@ registerCatalog("en", {
     title: "Jobs Breakdown",
     job: "Job",
     runs: "Runs",
-    avg_time: "Avg Time",
+    avg_time: "Avg Duration",
     est_cost: "Est Cost",
     avg_est_cost: "Avg Est Cost",
     nominal_mo: "Nominal/mo",

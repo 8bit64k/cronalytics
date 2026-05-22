@@ -1558,7 +1558,7 @@
         const label = j ? j.name || j.job_id : "\u2014";
         return React.createElement(
           "div",
-          cardProps(onTopCostClick, t("leaderboard.top_est_cost", "Top Est Cost") + " details", { minWidth: 0, overflow: "hidden" }),
+          cardProps(onTopCostClick, t("leaderboard.top_est_cost", "Top Cost") + " details", { minWidth: 0, overflow: "hidden" }),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1569,7 +1569,7 @@
                 "div",
                 { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
                 React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BanknoteIcon(14)),
-                React.createElement(CardTitle, null, t("leaderboard.top_est_cost", "Top Est Cost")),
+                React.createElement(CardTitle, null, t("leaderboard.top_est_cost", "Top Cost")),
                 React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
               )
             ),
@@ -1648,7 +1648,7 @@
         const p = j && j.projections && j.projections.pace != null ? j.projections.pace : null;
         return React.createElement(
           "div",
-          cardProps(onTopPaceClick, t("leaderboard.most_efficient", "Most Efficient") + " details", { minWidth: 0, overflow: "hidden" }),
+          cardProps(onTopPaceClick, t("leaderboard.most_efficient", "Top Pace") + " details", { minWidth: 0, overflow: "hidden" }),
           React.createElement(
             Card,
             { style: { flex: 1 } },
@@ -1659,7 +1659,7 @@
                 "div",
                 { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
                 React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, MetronomeIcon(14)),
-                React.createElement(CardTitle, null, t("leaderboard.most_efficient", "Most Efficient")),
+                React.createElement(CardTitle, null, t("leaderboard.most_efficient", "Top Pace")),
                 React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
               )
             ),
@@ -1767,7 +1767,7 @@
     const HEADERS = [
       t("job_breakdown.job", "Job"),
       t("job_breakdown.runs", "Runs"),
-      t("job_breakdown.avg_time", "Avg Time"),
+      t("job_breakdown.avg_time", "Avg Duration"),
       t("job_breakdown.est_cost", "Est Cost"),
       t("job_breakdown.avg_est_cost", "Avg Est Cost"),
       t("job_breakdown.nominal_mo", "Nominal/mo"),
@@ -2150,7 +2150,7 @@
           return j.name || j.job_id;
         case t("job_breakdown.runs", "Runs"):
           return j.runs || 0;
-        case t("job_breakdown.avg_time", "Avg Time"):
+        case t("job_breakdown.avg_time", "Avg Duration"):
           return j.avg_duration || 0;
         case t("job_breakdown.est_cost", "Est Cost"):
           return j.tot_estimated_cost || 0;
@@ -2255,7 +2255,7 @@
         jobName: (jobList.find((j) => j.job_id === selectedJobId) || {}).name,
         days,
         outcome,
-        sortKey: { [t("job_breakdown.job", "Job")]: "run_time", [t("job_breakdown.runs", "Runs")]: "run_time", [t("job_breakdown.avg_time", "Avg Time")]: "duration_seconds", [t("job_breakdown.est_cost", "Est Cost")]: "estimated_cost", [t("job_breakdown.avg_est_cost", "Avg Est Cost")]: "estimated_cost", [t("job_breakdown.nominal_mo", "Nominal/mo")]: "run_time", [t("job_breakdown.trend_mo", "Trend/mo")]: "run_time", [t("job_breakdown.pace", "Pace")]: "run_time" }[sortConfig.key] || "run_time",
+        sortKey: { [t("job_breakdown.job", "Job")]: "run_time", [t("job_breakdown.runs", "Runs")]: "run_time", [t("job_breakdown.avg_time", "Avg Duration")]: "duration_seconds", [t("job_breakdown.est_cost", "Est Cost")]: "estimated_cost", [t("job_breakdown.avg_est_cost", "Avg Est Cost")]: "estimated_cost", [t("job_breakdown.nominal_mo", "Nominal/mo")]: "run_time", [t("job_breakdown.trend_mo", "Trend/mo")]: "run_time", [t("job_breakdown.pace", "Pace")]: "run_time" }[sortConfig.key] || "run_time",
         sortDir: sortConfig.direction || "desc"
       })),
       React.createElement(SummaryBoard, {
@@ -2787,11 +2787,11 @@
     // LeaderBoard — top performers
     leaderboard: {
       title: "Leaderboard",
-      top_est_cost: "Top Est Cost",
+      top_est_cost: "Top Cost",
       top_runs: "Top Runs",
       top_tokens: "Top Tokens",
       top_duration: "Top Time",
-      most_efficient: "Most Efficient",
+      most_efficient: "Top Pace",
       of_total_est_cost: "% of total est cost",
       of_total_runs: "% of total runs",
       of_total_tokens: "% of total tokens"
@@ -2801,7 +2801,7 @@
       title: "Jobs Breakdown",
       job: "Job",
       runs: "Runs",
-      avg_time: "Avg Time",
+      avg_time: "Avg Duration",
       est_cost: "Est Cost",
       avg_est_cost: "Avg Est Cost",
       nominal_mo: "Nominal/mo",
@@ -2982,7 +2982,7 @@
       title: "Desglose de Trabajos",
       job: "Trabajo",
       runs: "Ejec.",
-      avg_time: "Tiempo Prom.",
+      avg_time: "Duraci\xF3n Prom.",
       est_cost: "Costo Est.",
       avg_est_cost: "Costo Est. Prom.",
       nominal_mo: "Nominal/mes",
