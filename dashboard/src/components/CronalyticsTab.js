@@ -156,12 +156,13 @@ export function CronalyticsTab() {
     switch (key) {
       case t("job_breakdown.job", "Job"): return j.name || j.job_id;
       case t("job_breakdown.runs", "Runs"): return j.runs || 0;
-      case t("job_breakdown.avg_time", "Avg Time"): return j.avg_duration || 0;
+      case t("job_breakdown.avg_time", "Avg Duration"): return j.avg_duration || 0;
       case t("job_breakdown.est_cost", "Est Cost"): return j.tot_estimated_cost || 0;
       case t("job_breakdown.avg_est_cost", "Avg Est Cost"): return j.avg_estimated_cost || 0;
       case t("job_breakdown.nominal_mo", "Nominal/mo"): return j.projections && j.projections.projected_cost_30d != null ? j.projections.projected_cost_30d : -Infinity;
       case t("job_breakdown.trend_mo", "Trend/mo"): return j.projections && j.projections.trend_projected_cost_30d != null ? j.projections.trend_projected_cost_30d : -Infinity;
       case t("job_breakdown.pace", "Pace"): return j.projections && j.projections.pace != null ? j.projections.pace : -Infinity;
+
       default: return 0;
     }
   };
@@ -245,7 +246,8 @@ export function CronalyticsTab() {
       jobName: (jobList.find(j => j.job_id === selectedJobId) || {}).name,
       days: days,
       outcome: outcome,
-      sortKey: ({[t("job_breakdown.job", "Job")]:"run_time",[t("job_breakdown.runs", "Runs")]:"run_time",[t("job_breakdown.avg_time", "Avg Time")]:"duration_seconds",[t("job_breakdown.est_cost", "Est Cost")]:"estimated_cost",[t("job_breakdown.avg_est_cost", "Avg Est Cost")]:"estimated_cost",[t("job_breakdown.nominal_mo", "Nominal/mo")]:"run_time",[t("job_breakdown.trend_mo", "Trend/mo")]:"run_time",[t("job_breakdown.pace", "Pace")]:"run_time"}[sortConfig.key] || "run_time"),
+      sortKey: ({[t("job_breakdown.job", "Job")]:"run_time",[t("job_breakdown.runs", "Runs")]:"run_time",[t("job_breakdown.avg_time", "Avg Duration")]:"duration_seconds",[t("job_breakdown.est_cost", "Est Cost")]:"estimated_cost",[t("job_breakdown.avg_est_cost", "Avg Est Cost")]:"estimated_cost",[t("job_breakdown.nominal_mo", "Nominal/mo")]:"run_time",[t("job_breakdown.trend_mo", "Trend/mo")]:"run_time",[t("job_breakdown.pace", "Pace")]:"run_time"}[sortConfig.key] || "run_time"),
+
       sortDir: sortConfig.direction || "desc",
     })),
 

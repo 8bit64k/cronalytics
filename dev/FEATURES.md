@@ -239,11 +239,11 @@ Proportional bar chart showing the top 5 models by estimated cost. Each row show
 
 #### Jobs Breakdown Table
 
-Eight sortable columns: **Job**, **Runs**, **Avg Time**, **Total Cost**, **Avg Cost**, **Nominal/mo**, **Trend/mo**, **Pace**.
+Eight sortable columns: **Job**, **Runs**, **Avg Duration**, **Total Cost**, **Avg Cost**, **Nominal/mo**, **Trend/mo**, **Pace**.
 
 - **Job** — human-readable name from `jobs.json` (falls back to `job_id`). Shows `[No agent]` badge for script jobs.
 - **Runs** — number of executions in the window.
-- **Avg Time** — average duration per run.
+- **Avg Duration** — average duration per run.
 - **Total Cost** — sum of `estimated_cost_usd`.
 - **Avg Cost** — `tot_estimated_cost / runs`.
 - **Nominal/mo** — `avg_estimated_cost × scheduled_runs_30d` (what it *should* cost if run exactly on schedule).

@@ -12,7 +12,7 @@ export function JobBreakdown({
   const HEADERS = [
     t("job_breakdown.job", "Job"),
     t("job_breakdown.runs", "Runs"),
-    t("job_breakdown.avg_time", "Avg Time"),
+    t("job_breakdown.avg_time", "Avg Duration"),
     t("job_breakdown.est_cost", "Est Cost"),
     t("job_breakdown.avg_est_cost", "Avg Est Cost"),
     t("job_breakdown.nominal_mo", "Nominal/mo"),
@@ -68,6 +68,7 @@ export function JobBreakdown({
             React.createElement("thead", null,
               React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
                 HEADERS.map(h => {
+
                   const isActive = sortConfig.key === h;
                   return React.createElement("th", {
                     key: h,

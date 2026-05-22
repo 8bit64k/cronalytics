@@ -168,7 +168,7 @@ Click any column header to sort ascending. Click again to sort descending. An ar
 |--------|--------------|
 | **Job** | Human-readable name (or job ID). `[No agent]` badge for script jobs. |
 | **Runs** | Execution count in the window. |
-| **Avg Time** | Average duration per run. |
+| **Avg Duration** | Average duration per run. |
 | **Total Cost** | Sum of estimated cost. |
 | **Avg Cost** | Average cost per run. |
 | **Nominal/mo** | Expected monthly cost if run exactly on schedule. |
