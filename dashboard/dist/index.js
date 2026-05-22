@@ -1,5 +1,5 @@
 (() => {
-  // src/lib/sdk.js
+  // dashboard/src/lib/sdk.js
   var SDK = window.__HERMES_PLUGIN_SDK__;
   var PLUGINS = window.__HERMES_PLUGINS__;
   if (!SDK || !PLUGINS) {
@@ -10,7 +10,7 @@
   var fetchJSON = SDK.fetchJSON;
   var { Card, CardHeader, CardTitle, CardContent, Badge, Button } = SDK.components;
 
-  // src/components/ErrorBoundary.js
+  // dashboard/src/components/ErrorBoundary.js
   var PluginErrorBoundary = class extends React.Component {
     constructor(props) {
       super(props);
@@ -47,7 +47,7 @@
     }
   };
 
-  // src/lib/validate.js
+  // dashboard/src/lib/validate.js
   var IS_DEV = (() => {
     try {
       return typeof process !== "undefined" && process.env && false;
@@ -156,7 +156,7 @@
     return void 0;
   }
 
-  // src/hooks/useApi.js
+  // dashboard/src/hooks/useApi.js
   function useApi(path) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -197,7 +197,7 @@
     return { isOpen, open, close };
   }
 
-  // src/components/Modal.js
+  // dashboard/src/components/Modal.js
   function Modal({ isOpen, onClose, children, maxWidth }) {
     const backdropRef = useRef(null);
     const [bounds, setBounds] = useState(null);
@@ -298,7 +298,7 @@
     );
   }
 
-  // src/components/DaySelector.js
+  // dashboard/src/components/DaySelector.js
   var PRESETS = [
     { label: "7D", value: 7 },
     { label: "30D", value: 30 },
@@ -402,7 +402,7 @@
     return elements;
   }
 
-  // src/components/OutcomeToggle.js
+  // dashboard/src/components/OutcomeToggle.js
   var OPTIONS = [
     { label: "All", value: "all" },
     { label: "Success", value: "success" },
@@ -442,7 +442,7 @@
     );
   }
 
-  // src/components/ModeToggle.js
+  // dashboard/src/components/ModeToggle.js
   var OPTIONS2 = [
     { label: "All", value: "all" },
     { label: "Agent", value: "agent" },
@@ -482,7 +482,7 @@
     );
   }
 
-  // src/lib/formatters.js
+  // dashboard/src/lib/formatters.js
   function fmtCost(n) {
     if (n == null) return "\u2014";
     if (n === 0) return "$0.00";
@@ -551,7 +551,7 @@
     return "transparent";
   }
 
-  // src/components/JobDetailView.js
+  // dashboard/src/components/JobDetailView.js
   var COLUMNS = [
     { label: "Time", key: "run_time", align: "left", width: "10rem" },
     { label: "Est Cost", key: "estimated_cost", align: "right", width: "6rem" },
@@ -757,7 +757,7 @@
     );
   }
 
-  // src/components/HeroBanner.js
+  // dashboard/src/components/HeroBanner.js
   function HeroBanner() {
     const [collapsed, setCollapsed] = useState(() => {
       try {
@@ -875,7 +875,7 @@
     );
   }
 
-  // src/lib/icons.js
+  // dashboard/src/lib/icons.js
   function CpuIcon(size) {
     return React.createElement(
       "svg",
@@ -1062,7 +1062,7 @@
     );
   }
 
-  // src/components/SummaryBoard.js
+  // dashboard/src/components/SummaryBoard.js
   function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick, onTokensClick, onPaceClick }) {
     const s = summary || {};
     const runPct = s.previous_period && s.previous_period.runs != null && s.previous_period.runs !== 0 ? (s.total_runs - s.previous_period.runs) / s.previous_period.runs * 100 : null;
@@ -1323,7 +1323,7 @@
     );
   }
 
-  // src/components/LeaderBoard.js
+  // dashboard/src/components/LeaderBoard.js
   function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopTokensClick, onTopPaceClick }) {
     const totalRuns = jobList.reduce((sum, j) => sum + (j.runs || 0), 0);
     const totalCost = jobList.reduce((sum, j) => sum + (j.tot_estimated_cost || 0), 0);
@@ -1531,7 +1531,7 @@
     );
   }
 
-  // src/components/ModelBreakdown.js
+  // dashboard/src/components/ModelBreakdown.js
   function ModelBreakdown({ costByModel }) {
     if (!costByModel || costByModel.length === 0) return null;
     const topModels = costByModel.slice(0, 5);
@@ -1597,7 +1597,7 @@
     );
   }
 
-  // src/components/JobBreakdown.js
+  // dashboard/src/components/JobBreakdown.js
   function JobBreakdown({
     jobList,
     sortedJobs,
@@ -1678,7 +1678,7 @@
               React.createElement(
                 "tr",
                 { style: { borderBottom: "1px solid var(--color-border)" } },
-                ["Job", "Runs", "Avg Time", "Est Cost", "Avg Est Cost", "Nominal/mo", "Trend/mo", "Pace"].map((h) => {
+                ["Job", "Runs", "Avg Duration", "Est Cost", "Avg Est Cost", "Nominal/mo", "Trend/mo", "Pace"].map((h) => {
                   const isActive = sortConfig.key === h;
                   return React.createElement("th", {
                     key: h,
@@ -1848,7 +1848,7 @@
     );
   }
 
-  // src/components/CronalyticsTab.js
+  // dashboard/src/components/CronalyticsTab.js
   function CronalyticsTab() {
     const [days, setDaysRaw] = useState(() => {
       try {
@@ -1987,7 +1987,7 @@
           return j.name || j.job_id;
         case "Runs":
           return j.runs || 0;
-        case "Avg Time":
+        case "Avg Duration":
           return j.avg_duration || 0;
         case "Est Cost":
           return j.tot_estimated_cost || 0;
@@ -2069,19 +2069,11 @@
             onClick: () => {
               summary.refetch();
               jobs.refetch();
-            }
+            },
+            title: "Refresh",
+            style: { minHeight: "28px", display: "flex", alignItems: "center", justifyContent: "center" }
           },
-          summary.loading || jobs.loading ? React.createElement(
-            "span",
-            { style: { display: "flex", alignItems: "center", gap: "0.25rem", minWidth: "4.5rem" } },
-            RefreshCwIcon(14, { style: { animation: "cronalytics-spin 1s linear infinite" } }),
-            "\u2026"
-          ) : React.createElement(
-            "span",
-            { style: { display: "flex", alignItems: "center", gap: "0.25rem", minWidth: "4.5rem" } },
-            RefreshCwIcon(14),
-            "Refresh"
-          )
+          summary.loading || jobs.loading ? RefreshCwIcon(14, { style: { animation: "cronalytics-spin 1s linear infinite" } }) : RefreshCwIcon(14)
         )
       ),
       // Job Detail Modal
@@ -2095,7 +2087,7 @@
         jobName: (jobList.find((j) => j.job_id === selectedJobId) || {}).name,
         days,
         outcome,
-        sortKey: { "Job": "run_time", "Runs": "run_time", "Avg Time": "duration_seconds", "Est Cost": "estimated_cost", "Avg Est Cost": "estimated_cost", "Nominal/mo": "run_time", "Trend/mo": "run_time", "Pace": "run_time" }[sortConfig.key] || "run_time",
+        sortKey: { "Job": "run_time", "Runs": "run_time", "Avg Duration": "duration_seconds", "Est Cost": "estimated_cost", "Avg Est Cost": "estimated_cost", "Nominal/mo": "run_time", "Trend/mo": "run_time", "Pace": "run_time" }[sortConfig.key] || "run_time",
         sortDir: sortConfig.direction || "desc"
       })),
       React.createElement(SummaryBoard, {
@@ -2631,7 +2623,7 @@
     );
   }
 
-  // src/index.js
+  // dashboard/src/index.js
   PLUGINS.register("cronalytics", function CronalyticsWrapped() {
     return React.createElement(
       PluginErrorBoundary,

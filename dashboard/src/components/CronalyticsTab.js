@@ -223,15 +223,11 @@ export function CronalyticsTab() {
         outlined: true,
         disabled: summary.loading || jobs.loading,
         onClick: () => { summary.refetch(); jobs.refetch(); },
+        title: "Refresh",
+        style: { minHeight: "28px", display: "flex", alignItems: "center", justifyContent: "center" },
       }, summary.loading || jobs.loading
-        ? React.createElement("span", { style: { display: "flex", alignItems: "center", gap: "0.25rem", minWidth: "4.5rem" } },
-            RefreshCwIcon(14, { style: { animation: "cronalytics-spin 1s linear infinite" } }),
-            "\u2026"
-          )
-        : React.createElement("span", { style: { display: "flex", alignItems: "center", gap: "0.25rem", minWidth: "4.5rem" } },
-            RefreshCwIcon(14),
-            "Refresh"
-          )
+        ? RefreshCwIcon(14, { style: { animation: "cronalytics-spin 1s linear infinite" } })
+        : RefreshCwIcon(14)
       ),
     ),
 
