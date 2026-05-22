@@ -237,7 +237,7 @@ async def job_runs(
     outcome: str = Query(default="all", pattern="^(all|both|success|failure)$"),
     sort_key: str = Query(
         default="run_time",
-        pattern="^(run_time|estimated_cost|duration_seconds|success|model|input_tokens)$",
+        pattern="^(run_time|estimated_cost|duration_seconds|success|model|input_tokens|job_mode)$",
     ),
     sort_dir: str = Query(default="desc", pattern="^(asc|desc)$"),
     mode: str = Query(default="all", pattern="^(all|agent|no_agent)$"),

@@ -7,8 +7,8 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
   const runPct = s.previous_period && s.previous_period.runs != null && s.previous_period.runs !== 0
     ? ((s.total_runs - s.previous_period.runs) / s.previous_period.runs) * 100
     : null;
-  const costPct = s.previous_period && s.previous_period.cost != null && s.previous_period.cost !== 0
-    ? ((s.tot_estimated_cost - s.previous_period.cost) / s.previous_period.cost) * 100
+  const costPct = s.previous_period && s.previous_period.estimated_cost != null && s.previous_period.estimated_cost !== 0
+    ? ((s.tot_estimated_cost - s.previous_period.estimated_cost) / s.previous_period.estimated_cost) * 100
     : null;
 
   const cardHover = {
@@ -62,15 +62,18 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
         React.createElement(CardHeader, null,
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
             React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, BanknoteIcon(14)),
-            React.createElement(CardTitle, null, outcome === "failure" ? "Est Wasted" : "Est Cost"),
+            React.createElement(CardTitle, null, outcome === "failure" ? "Wasted" : "Cost"),
             React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
           )
         ),
         React.createElement(CardContent, null,
-          React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: outcome === "failure" ? "#ef4444" : "#f5a623" } },
-            fmtCost(s.tot_estimated_cost)
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: outcome === "failure" ? "#ef4444" : "#f5a623" } },
+              fmtCost(s.tot_estimated_cost)
+            ),
+            React.createElement("span", { style: { fontSize: "0.7rem", opacity: 0.95, fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "0.25rem", padding: "0.05rem 0.4rem" } }, "Estimated")
           ),
-          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: costPct != null ? (costPct > 0 ? "#ef4444" : "#4ade80") : null } },
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: costPct != null ? (costPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(costPct).toFixed(0) + "%" : "\u2014" } },
             costPct != null ? (costPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(costPct).toFixed(0) + "%" : "\u2014"
           ),
           React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.1rem" } },

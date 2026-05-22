@@ -143,8 +143,8 @@ export function CronalyticsTab() {
   const jobList = (jobs.data && jobs.data.jobs) ? jobs.data.jobs : [];
   const windowLabel = days === 0 ? "All time" : "Last " + days + " days";
 
-  const costPct = s.previous_period && s.previous_period.cost != null && s.previous_period.cost !== 0
-    ? ((s.tot_estimated_cost - s.previous_period.cost) / s.previous_period.cost) * 100
+  const costPct = s.previous_period && s.previous_period.estimated_cost != null && s.previous_period.estimated_cost !== 0
+    ? ((s.tot_estimated_cost - s.previous_period.estimated_cost) / s.previous_period.estimated_cost) * 100
     : null;
   const runPct = s.previous_period && s.previous_period.runs != null && s.previous_period.runs !== 0
     ? ((s.total_runs - s.previous_period.runs) / s.previous_period.runs) * 100
@@ -451,7 +451,7 @@ export function CronalyticsTab() {
               React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)" } },
                 j ? (j.runs || 0).toLocaleString() : "\u2014"
               ),
-              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "runs")
+              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Job Runs")
             ),
             j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
               React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
@@ -480,7 +480,7 @@ export function CronalyticsTab() {
               React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" } },
                 j ? fmtCost(j.tot_estimated_cost) : "\u2014"
               ),
-              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "total cost")
+              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Estimated Cost")
             ),
             j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
               React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
@@ -509,7 +509,7 @@ export function CronalyticsTab() {
               React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#5b8def" } },
                 j ? fmtCompact(j.total_tokens) : "\u2014"
               ),
-              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "tokens")
+              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Tokens")
             ),
             j && React.createElement("div", { style: { borderTop: "1px solid var(--color-border)", paddingTop: "1rem" } },
               React.createElement("h3", { style: { fontSize: "0.85rem", fontWeight: 800, marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.85 } }, "Job details"),
@@ -544,7 +544,7 @@ export function CronalyticsTab() {
               React.createElement("span", { style: { fontSize: "1.75rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: paceColor(p) } },
                 p != null ? p.toFixed(2) + "\u00d7" : "\u2014"
               ),
-              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "pace")
+              React.createElement("span", { style: { fontSize: "0.9rem", opacity: 0.8, fontWeight: 900 } }, "Pace")
             ),
             React.createElement("div", { style: { marginBottom: "1rem" } },
               React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "0.2rem" } },

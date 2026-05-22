@@ -517,7 +517,7 @@ def query_job_runs(
     where = " WHERE " + " AND ".join(conditions)
 
     # Safe column whitelist — only allow known sortable columns
-    safe_cols = {"run_time", "estimated_cost_usd", "duration_seconds", "success", "model", "input_tokens"}
+    safe_cols = {"run_time", "estimated_cost_usd", "duration_seconds", "success", "model", "input_tokens", "job_mode"}
     sort_col_map = {"estimated_cost": "estimated_cost_usd"}
     order_col = (
         sort_col_map.get(sort_key, sort_key)
