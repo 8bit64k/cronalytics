@@ -44,12 +44,12 @@ registerCatalog("es", {
   // LeaderBoard — top performers
   leaderboard: {
     title: "Tabla de l\u00edderes",
-    top_est_cost: "Mayor Costo Est.",
+    top_est_cost: "Mayor Costo",
     top_runs: "M\u00e1s Ejecuciones",
     top_tokens: "M\u00e1s Tokens",
     top_duration: "M\u00e1s Tiempo",
     most_efficient: "M\u00e1s Eficiente",
-    of_total_est_cost: "% del costo est. total",
+    of_total_est_cost: "% del costo total",
     of_total_runs: "% del total de ejec.",
     of_total_tokens: "% del total de tokens",
   },

@@ -2982,12 +2982,12 @@
     // LeaderBoard — top performers
     leaderboard: {
       title: "Tabla de l\xEDderes",
-      top_est_cost: "Mayor Costo Est.",
+      top_est_cost: "Mayor Costo",
       top_runs: "M\xE1s Ejecuciones",
       top_tokens: "M\xE1s Tokens",
       top_duration: "M\xE1s Tiempo",
       most_efficient: "M\xE1s Eficiente",
-      of_total_est_cost: "% del costo est. total",
+      of_total_est_cost: "% del costo total",
       of_total_runs: "% del total de ejec.",
       of_total_tokens: "% del total de tokens"
     },
