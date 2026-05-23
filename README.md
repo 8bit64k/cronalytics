@@ -1,5 +1,16 @@
 # Cronalytics v1.1.0
 
+ <a href="https://github.com/8bit64k/cronalytics/releases">
+      <img src="https://img.shields.io/github/v/release/8bit64k/cronalytics?label=Release" alt="Latest Release">
+    </a>
+    <a href="https://github.com/8bit64k/cronalytics/blob/main/LICENSE">
+      <img src="https://img.shields.io/github/license/8bit64k/cronalytics" alt="License">
+    </a>
+    <a href="https://github.com/8bit64k/cronalytics/commits/main">
+      <img src="https://img.shields.io/github/last-commit/8bit64k/cronalytics" alt="Last Commit">
+    </a>
+
+---
 
 /ˈkrɒn.əˌlɪt.ɪks/ (noun)
 
@@ -45,7 +56,7 @@ An agent skill that guides agents through structured cron health checks and diag
 
 > "Check my cron jobs for the last two weeks — flag anything that looks off."
 
-The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-references `jobs.json`, and grades every finding by confidence (HIGH / MEDIUM / LOW) with supporting evidence.
+The agent loads the `cronalytics` skill, follows a structured 7-step diagnostic workflow (time window verification → baseline → job-level drill → per-run investigation → failure pattern → model economics → trend validation), cross-references `jobs.json`, and grades every finding by confidence (HIGH / MEDIUM / LOW) with supporting evidence and alternative explanations.
 
 ---
 
@@ -99,7 +110,7 @@ The agent loads the `cronalytics` skill, follows a 3-step CLI workflow, cross-re
   - Job name resolution from `~/.hermes/cron/jobs.json`
 
   **Skill** — agent-guided diagnostics:
-  - Structured 6-step workflow: baseline → jobs → per-run drill-down → failures → models → trends
+  - Structured 7-step workflow: time window verification → baseline → job-level drill → per-run investigation → failure pattern → model economics → trend validation
   - Confidence-graded anomaly detection (HIGH / MEDIUM / LOW)
   - `jobs.json` cross-reference for temporal context and silent failure detection
   - "Known Ways to Fool Yourself" guardrails prevent false positives
@@ -418,7 +429,7 @@ MIT — see [`LICENSE`](LICENSE) for full text.
 ### v1.1.0 (2026-05-19)
 
 - **Terminal CLI** — `cronalytics` (via `pip install -e`) or `python -m cronalytics.cli` with 7 subcommands: `summary`, `jobs`, `runs`, `models`, `trends`, `health`, `all`. Full `--json` output on every data command except `all`. `--days`, `--outcome`, `--mode` filters on every data command. Leader Board spotlight in `summary`. Job name resolution from `jobs.json`.
-- **Agent Diagnostic Skill** — Built-in `cronalytics` skill with structured 3-step workflow (health → summary → jobs → per-run drill-down). Confidence-graded anomaly detection (HIGH / MEDIUM / LOW) with supporting evidence requirements. "Known Ways to Fool Yourself" guardrails (age-gating, script job awareness, variance checks). Cross-references `jobs.json` for scheduling context and silent failure detection.
+- **Agent Diagnostic Skill** — Built-in `cronalytics` skill with structured 7-step diagnostic workflow (time window verification → baseline health → job-level drill → per-run investigation → failure pattern → model economics → trend validation). Confidence-graded anomaly detection (HIGH / MEDIUM / LOW) with supporting evidence requirements. "Known Ways to Fool Yourself" guardrails (age-gating, script job awareness, variance checks). Cross-references `jobs.json` for scheduling context and silent failure detection.
 - **Test suite: 149 tests** — all passing, `ruff` + `mypy` clean.
 
 ### v1.0.1 (2026-05-13)

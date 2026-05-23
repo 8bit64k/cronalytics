@@ -49,7 +49,7 @@ Your selection is saved to `localStorage`.
 
 ### Day Selector
 
-Presets: **7D | 30D | 90D | All**
+Presets: **7D | 30D | 90D**
 
 - Click a preset to instantly filter all metrics to that window.
 - Enter a custom number (0–365) in the input field and press **Enter** or click **Go**.
@@ -371,11 +371,15 @@ Ask your agent in any channel (terminal, Telegram, etc.):
 
 > "Check my cron jobs for the last two weeks — flag anything that looks off."
 
-The agent automatically loads the `cronalytics` skill and follows a structured workflow:
+The agent automatically loads the `cronalytics` skill and follows a structured diagnostic workflow:
 
-1. **Health check** — verifies sync freshness
-2. **Summary + jobs** — pulls aggregate surface and per-job economics
-3. **Per-run drill-down** — investigates top burners with individual run trajectories
+1. **Time window verification** — checks dataset span via `health --json` and defaults to full history for large datasets
+2. **Baseline (`all`)** — verifies sync freshness, scans headline metrics and summary for red flags
+3. **Job-level drill (`jobs --json`)** — ranks jobs by cost/tokens, checks pace and drift
+4. **Per-run investigation (`runs --job`)** — individual run history for top burners, looking for context creep or cost spikes
+5. **Failure pattern analysis** — computes true failure rates and drills into failure-only runs
+6. **Model economics (`models --json`)** — cost-per-run comparison across models, token audit before model-switch suggestions
+7. **Trend validation (`trends --json`)** — daily time series to distinguish one-off spikes from systemic growth
 
 ### What the skill provides
 
@@ -446,6 +450,12 @@ At weekly cadence:
 
 **Rule:** Use the cheapest model that reliably produces the structured output you need. If the assessment misses a signal, upgrade the model, not the prompt.
 
+## Localization (i18n)
+
+Cronalytics automatically detects your system language. If you are using Hermes in **Spanish**, **Simplified Chinese**, or **Traditional Chinese**, the dashboard will update its labels and documentation accordingly.
+
+> **Note to Community:** These locales are AI-validated community contributions. If you spot a discrepancy or regional phrasing error, please open a Pull Request. We follow a strict consensus protocol for all translation changes.
+
 ---
 
 ## Advanced: Multiple Profiles
@@ -459,11 +469,4 @@ If you create jobs under `hermes --profile work cron create ...`, those jobs run
 ---
 
 *Version: 1.1.0*  
-*Last updated: 2026-05-16*
-
-
-## Localization (i18n)
-
-Cronalytics automatically detects your system language. If you are using Hermes in **Spanish**, **Simplified Chinese**, or **Traditional Chinese**, the dashboard will update its labels and documentation accordingly.
-
-> **Note to Community:** These locales are AI-validated community contributions. If you spot a discrepancy or regional phrasing error, please open a Pull Request. We follow a strict consensus protocol for all translation changes.
+*Last updated: 2026-05-23*

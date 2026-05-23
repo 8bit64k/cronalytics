@@ -115,4 +115,4 @@ cd ~/.hermes/plugins/cronalytics && python -m cronalytics.cli --help
 ---
 
 *Version: 1.1.0*  
-*Last updated: 2026-05-17*
+*Last updated: 2026-05-23*

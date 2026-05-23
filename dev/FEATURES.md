@@ -35,7 +35,7 @@ If the gateway restarts, `ingester.start()` replays `pending.jsonl` into the in-
 
 ### 1.4 Session Parsing
 
-Session IDs follow the format `cron_{job_id}_{YYYYMMDD}_{HHMMSS}`. The parser drops the prefix (`cron_`) and the final two segments (date + time) to recover the stable `job_id`. Early versions incorrectly dropped only one segment, causing every run to appear as a distinct job; this was fixed in Phase 2.5.
+Session IDs follow the format `cron_{job_id}_{YYYYMMDD}_{HHMMSS}`. The parser drops the prefix (`cron_`) and the final two segments (date + time) to recover the stable `job_id`.
 
 ### 1.5 Script-Job Capture (No-Agent Mode)
 
@@ -326,7 +326,7 @@ The following metrics are implemented and available in `--json` output for advan
 
 
 
-### 6. i18n Localization Engine
+## 11. i18n Localization Engine
 
 - **Cross-Locale Parity:** All dashboard features are localized for English, Spanish, Simplified Chinese, and Traditional Chinese.
 - **Consensus-Validated:** Phrasing validated via 4 independent AI models.
@@ -406,7 +406,7 @@ Because the math is fixed-window, the aggregate pace is always the exact sum of 
 
 ## 8. Configuration
 
-All values are hardcoded defaults in `config.py`. There is no user-editable configuration file yet (planned for v1.1).
+All values are hardcoded defaults in `config.py`. There is no user-editable configuration file yet.
 
 ```python
 RETRY_DELAYS = [3.0, 8.0, 15.0]   # seconds before each worker attempt
@@ -455,4 +455,4 @@ These are **intentional boundaries or acknowledged gaps**, not bugs.
 ---
 
 *Version: 1.1.0*  
-*Last updated: 2026-05-16*
+*Last updated: 2026-05-23*
