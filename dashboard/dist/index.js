@@ -2231,7 +2231,8 @@
         // Spacer pushes DaySelector + Refresh to the right edge.
         React.createElement("div", { style: { flex: "1 1 0%", minWidth: "0.25rem" } }),
         // DaySelector returns [label, presets, custom] — flattened as direct flex children
-        React.createElement(DaySelector, { selected: days, onChange: setDays, label: t("day_selector.label", "Days") }),
+        // of the toolbar so presets, custom input, and Refresh wrap progressively.
+        React.createElement(DaySelector, { selected: days, onChange: setDays, label: null }),
         // Refresh — its own flex item so it breaks away first at 110%.
         React.createElement(
           Button,
@@ -2243,19 +2244,11 @@
             onClick: () => {
               summary.refetch();
               jobs.refetch();
-            }
+            },
+            title: "Refresh",
+            style: { minHeight: "28px", display: "flex", alignItems: "center", justifyContent: "center" }
           },
-          summary.loading || jobs.loading ? React.createElement(
-            "span",
-            { style: { display: "flex", alignItems: "center", gap: "0.25rem", minWidth: "4.5rem" } },
-            RefreshCwIcon(14, { style: { animation: "cronalytics-spin 1s linear infinite" } }),
-            "\u2026"
-          ) : React.createElement(
-            "span",
-            { style: { display: "flex", alignItems: "center", gap: "0.25rem", minWidth: "4.5rem" } },
-            RefreshCwIcon(14),
-            t("shared.refresh", "Refresh")
-          )
+          summary.loading || jobs.loading ? RefreshCwIcon(14, { style: { animation: "cronalytics-spin 1s linear infinite" } }) : RefreshCwIcon(14)
         )
       ),
       // Job Detail Modal

@@ -213,8 +213,8 @@ Progressive zoom-responsive wrapping: at high zoom levels, Refresh breaks away f
 
 #### Row 1 — Summary Board
 
-- **Job Runs** — total run count in selected window vs. prior period delta (↑/↓ %).
-- **Cost** — total `estimated_cost_usd` in amber `#f5a623`; vs-prior delta + ✓/✗ success/failure breakdown + wasted cost. Actual cost sub-line is suppressed until provider billing coverage is reliable. In Failure mode, headline flips to red and label changes to "Wasted".
+- **Job Runs** — total run count in selected window vs. prior period delta (↑/↓ %). Trend comparison requires the database to contain at least 1.75× the filter window (e.g., 52.5 days of history for a 30-day filter) before showing directional arrows. Shorter history displays "→" (flat) to avoid misleading spikes from partial prior windows.
+- **Cost** — total `estimated_cost_usd` in amber `#f5a623`; vs-prior delta + ✓/✗ success/failure breakdown + wasted cost. Trend comparison requires the database to contain at least 1.75× the filter window (e.g., 52.5 days for a 30-day filter). Shorter history displays "→" (flat). Actual cost sub-line is suppressed until provider billing coverage is reliable. In Failure mode, headline flips to red and label changes to "Wasted".
 - **Tokens** — total tokens in blue `#5b8def`; 3-row micro proportion bars (In, Out, Cached).
 - **Pace** — aggregate `trend_monthly_total / nominal_monthly_total`; font-only color:
   - `< 1.0×` — green `#4ade80` (under nominal)
