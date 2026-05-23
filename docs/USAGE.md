@@ -82,12 +82,17 @@ Four cards showing aggregate metrics. Click any card to open an educational moda
 - **Delta:** ↑ or ↓ percentage comparing to the prior window of the same length.
 - **Context:** "vs prior 30d" (or "period" if All time).
 
+> **Note:** Trend arrows (↗ ↘ →) require the database to contain at least 1.75× the filter window (e.g., 52.5 days for a 30-day filter). Shorter history always shows "→" (flat) to avoid misleading spikes from partial prior windows.
+
 **What to look for:** A sudden spike in runs may indicate a job running more frequently than intended, or a retry loop.
 
 ### Cost
 
 - **Big number:** total estimated cost in amber (`$X.XX`).
 - **Delta:** ↑/↓ percentage vs prior window.
+
+> **Note:** Trend arrows (↗ ↘ →) require the database to contain at least 1.75× the filter window (e.g., 52.5 days for a 30-day filter). Shorter history always shows "→" (flat).
+
 - **Sub-line:** `✓ N · ✗ N` — success vs failure run counts. If failures have cost, shows wasted cost in parentheses.
 
 > **Note:** The "Actual" line is suppressed. Partial `actual_cost_usd` coverage from providers creates misleading comparisons. It will return when coverage is reliable.

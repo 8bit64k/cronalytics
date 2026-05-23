@@ -303,6 +303,13 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "all", mode: str
     """Return aggregate stats for cron runs in the last N days (0 = all time)."""
     conn = get_conn(db_path)
 
+    # DB age check: need at least 1.75 full periods for meaningful trend comparison
+    db_age_days = 0
+    if days > 0:
+        cursor = conn.execute("SELECT COALESCE(MIN(run_time), 0) FROM cron_runs")
+        min_run_time = cursor.fetchone()[0] or 0
+        db_age_days = (time.time() - min_run_time) / 86400
+
     conditions: list[str] = []
     params: list[Any] = []
     if days > 0:
@@ -376,7 +383,8 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "all", mode: str
             "runs": prev_runs or 0,
             "estimated_cost": round(prev_cost, 4) if prev_cost is not None else None,
         }
-        if prev_cost is not None and prev_cost > 0 and total_est_cost is not None:
+        if (prev_cost is not None and prev_cost > 0 and total_est_cost is not None
+                and db_age_days >= days * 1.75):
             delta = (total_est_cost - prev_cost) / prev_cost
             if delta > 0.05:
                 trend = "↑"
@@ -414,8 +422,8 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "all", mode: str
         "success_estimated_cost": round(success_cost, 4) if success_cost is not None else None,
         "failure_estimated_cost": round(failure_cost, 4) if failure_cost is not None else None,
         "cost_by_model": by_model,
-        "previous_period": prev_info if days > 0 else {},
-        "trend": trend if days > 0 else "→",
+        "previous_period": prev_info if (days > 0 and db_age_days >= days * 1.75) else {},
+        "trend": trend if (days > 0 and db_age_days >= days * 1.75) else "→",
     }
 
 
