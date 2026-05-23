@@ -158,7 +158,7 @@ Then read the **summary** block for headline red flags:
 
 ### Step 2: Job-Level Drill (`jobs --json`)
 
-Fetch the jobs surface and rank by cost or token volume:
+Fetch the jobs surface and rank by estimated cost or token volume:
 
 ```bash
 cronalytics jobs --days <days> --json
@@ -231,10 +231,10 @@ cronalytics runs --job <job_id> --days <days> --outcome failure --json
 cronalytics models --days <days> --json
 ```
 
-High-cost models dominating the top are candidates for down-tiering. Compare
+high-estimated-cost models dominating the top are candidates for down-tiering. Compare
 `avg_cost_per_run` across models — a factor of 10× between models for similar
 job types is a clear switch candidate. Don't make 'hard' recommendations
-to the user to switch or down-tier. Just offer the cost savings opportunity 
+to the user to switch or down-tier. Just offer the estimated cost savings opportunity 
 and suggest they evaluate their current job setup.
 
 **Important:** Before recommending (soft recommendation to user to evaluate) a model switch, audit `input_tokens` per run.
@@ -352,7 +352,7 @@ crashing. This does not guarantee useful work was done.
 - **Pace** — ratio of actual cost to scheduled cost, scaled to 30 days. Pace
   > 1.2 = over-triggering or shortened schedule. Pace < 0.5 on an older job
   means backlog, hangs, or schedule mismatch. Pace indicators on no_agent [N]
-  jobs have less cost impact and should be posititioned as such.
+  jobs have less estimated cost impact and should be posititioned as such.
 - **Context creep** — input token growth for the same job. Apr: 38K → May:
   538K is a 14× creep. Root cause: unbounded prompt, history, or attachments.
 - **no_agent** — script-only jobs (`[N]` badge). No LLM loop = zero tokens

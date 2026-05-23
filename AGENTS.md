@@ -16,6 +16,7 @@ All agents working on this repository MUST adhere to the following technical and
 
 ## 3. UI/UX Consistency
 - **Branding:** Tagline is "Observe. Measure. Optimize."
+- **Nomenclature:** The word "cost" MUST be qualified as "Estimated Cost" (or "actual cost" where applicable). Bare "cost" is prohibited in human-visible UI and technical documentation to avoid misleading users regarding provider billing.
 - **Cost Badge:** Use the amber pill badge for Estimated costs. Format as "Est Cost" (with space).
 - **Consensus Phrasing:** Use agreed-upon technical terms (e.g., "Token" remains "Token" in English across all languages).
 
