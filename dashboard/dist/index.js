@@ -199,13 +199,19 @@
   }
   function getLocale() {
     const sdk = getSDK();
+    let code = "en";
     if (sdk.useI18n) {
       try {
-        return sdk.useI18n().locale || "en";
+        code = sdk.useI18n().locale || "en";
       } catch {
       }
+    } else {
+      code = navigator.language || "en";
     }
-    return navigator.language?.split("-")[0] || "en";
+    if (CATALOGS[code]) return code;
+    const base = code.split("-")[0];
+    if (CATALOGS[base]) return base;
+    return "en";
   }
   function resolve(key, catalog) {
     const parts = key.split(".");
@@ -2991,7 +2997,7 @@
   });
 
   // src/i18n/zh-CN.js
-  registerCatalog("zh-CN", {
+  registerCatalog("zh", {
     // cost
     cost: {
       trend_formula: "\u8D8B\u52BF % = ((\u5F53\u524D\u6210\u672C \u2212 \u4E0A\u671F\u6210\u672C) / \u4E0A\u671F\u6210\u672C) \xD7 100",

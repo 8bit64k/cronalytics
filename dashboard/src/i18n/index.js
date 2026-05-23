@@ -29,14 +29,23 @@ function getSDK() {
 
 function getLocale() {
   const sdk = getSDK();
+  let code = "en";
   if (sdk.useI18n) {
     try {
-      return sdk.useI18n().locale || "en";
-    } catch {
-      /* host i18n not ready */
-    }
+      code = sdk.useI18n().locale || "en";
+    } catch {}
+  } else {
+    code = navigator.language || "en";
   }
-  return navigator.language?.split("-")[0] || "en";
+  
+  // Try full match first (e.g. zh-TW, zh-CN)
+  if (CATALOGS[code]) return code;
+  
+  // Fallback to base language (e.g. zh-CN -> zh)
+  const base = code.split("-")[0];
+  if (CATALOGS[base]) return base;
+
+  return "en";
 }
 
 function resolve(key, catalog) {
