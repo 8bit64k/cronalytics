@@ -1,5 +1,5 @@
 (() => {
-  // dashboard/src/lib/sdk.js
+  // src/lib/sdk.js
   var SDK = window.__HERMES_PLUGIN_SDK__;
   var PLUGINS = window.__HERMES_PLUGINS__;
   if (!SDK || !PLUGINS) {
@@ -10,7 +10,7 @@
   var fetchJSON = SDK.fetchJSON;
   var { Card, CardHeader, CardTitle, CardContent, Badge, Button } = SDK.components;
 
-  // dashboard/src/components/ErrorBoundary.js
+  // src/components/ErrorBoundary.js
   var PluginErrorBoundary = class extends React.Component {
     constructor(props) {
       super(props);
@@ -39,7 +39,7 @@
     }
   };
 
-  // dashboard/src/lib/validate.js
+  // src/lib/validate.js
   var IS_DEV = (() => {
     try {
       return typeof process !== "undefined" && process.env && false;
@@ -148,7 +148,7 @@
     return void 0;
   }
 
-  // dashboard/src/hooks/useApi.js
+  // src/hooks/useApi.js
   function useApi(path) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -189,7 +189,7 @@
     return { isOpen, open, close };
   }
 
-  // dashboard/src/i18n/index.js
+  // src/i18n/index.js
   var CATALOGS = {};
   function registerCatalog(lang, messages) {
     CATALOGS[lang] = messages;
@@ -239,7 +239,7 @@
     };
   }
 
-  // dashboard/src/components/Modal.js
+  // src/components/Modal.js
   function Modal({ isOpen, onClose, children, maxWidth }) {
     const t = useCronalyticsI18n();
     const backdropRef = useRef(null);
@@ -341,7 +341,7 @@
     );
   }
 
-  // dashboard/src/components/DaySelector.js
+  // src/components/DaySelector.js
   var PRESETS = [
     { label: "7D", value: 7 },
     { label: "30D", value: 30 },
@@ -446,7 +446,7 @@
     return elements;
   }
 
-  // dashboard/src/components/OutcomeToggle.js
+  // src/components/OutcomeToggle.js
   function OutcomeToggle({ selected, onChange, label }) {
     const t = useCronalyticsI18n();
     const OPTIONS = [
@@ -487,7 +487,7 @@
     );
   }
 
-  // dashboard/src/components/ModeToggle.js
+  // src/components/ModeToggle.js
   function ModeToggle({ selected, onChange, label }) {
     const t = useCronalyticsI18n();
     const OPTIONS = [
@@ -528,7 +528,7 @@
     );
   }
 
-  // dashboard/src/lib/formatters.js
+  // src/lib/formatters.js
   function fmtCost(n) {
     if (n == null) return "\u2014";
     if (n === 0) return "$0.00";
@@ -597,7 +597,7 @@
     return "transparent";
   }
 
-  // dashboard/src/components/JobDetailView.js
+  // src/components/JobDetailView.js
   function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir }) {
     const t = useCronalyticsI18n();
     const [sKey, setSKey] = useState(sortKey);
@@ -799,7 +799,7 @@
     );
   }
 
-  // dashboard/src/components/HeroBanner.js
+  // src/components/HeroBanner.js
   function HeroBanner() {
     const t = useCronalyticsI18n();
     const [collapsed, setCollapsed] = useState(() => {
@@ -918,7 +918,7 @@
     );
   }
 
-  // dashboard/src/lib/icons.js
+  // src/lib/icons.js
   function CpuIcon(size) {
     return React.createElement(
       "svg",
@@ -1105,7 +1105,7 @@
     );
   }
 
-  // dashboard/src/components/SummaryBoard.js
+  // src/components/SummaryBoard.js
   function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick, onTokensClick, onPaceClick }) {
     const t = useCronalyticsI18n();
     const s = summary || {};
@@ -1367,7 +1367,7 @@
     );
   }
 
-  // dashboard/src/components/LeaderBoard.js
+  // src/components/LeaderBoard.js
   function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopTokensClick, onTopPaceClick }) {
     const t = useCronalyticsI18n();
     const totalRuns = jobList.reduce((sum, j) => sum + (j.runs || 0), 0);
@@ -1576,7 +1576,7 @@
     );
   }
 
-  // dashboard/src/components/ModelBreakdown.js
+  // src/components/ModelBreakdown.js
   function ModelBreakdown({ costByModel }) {
     const t = useCronalyticsI18n();
     if (!costByModel || costByModel.length === 0) return null;
@@ -1643,7 +1643,7 @@
     );
   }
 
-  // dashboard/src/components/JobBreakdown.js
+  // src/components/JobBreakdown.js
   function JobBreakdown({
     jobList,
     sortedJobs,
@@ -1905,7 +1905,7 @@
     );
   }
 
-  // dashboard/src/components/CronalyticsTab.js
+  // src/components/CronalyticsTab.js
   function CronalyticsTab() {
     const t = useCronalyticsI18n();
     const [days, setDaysRaw] = useState(() => {
@@ -2628,7 +2628,7 @@
     );
   }
 
-  // dashboard/src/i18n/en.js
+  // src/i18n/en.js
   registerCatalog("en", {
     // HeroBanner — the greeting
     hero: {
@@ -2809,369 +2809,550 @@
     }
   });
 
-  // dashboard/src/i18n/es.js
+  // src/i18n/es.js
   registerCatalog("es", {
-    // HeroBanner — the greeting
+    // cost
+    cost: {
+      trend_formula: "Tendencia % = ((costo actual \u2212 costo anterior) / costo anterior) \xD7 100",
+      what_this_means: "El costo estimado se calcula a partir del uso de tokens y el precio del modelo. El costo real puede diferir ligeramente seg\xFAn la granularidad de facturaci\xF3n del proveedor."
+    },
+    // day_selector
+    day_selector: {
+      apply_custom: "Aplicar d\xEDas personalizados",
+      go: "Ir",
+      label: "D\xEDas"
+    },
+    // error
+    error: {
+      message: "Algo sali\xF3 mal. Por favor recarga o contacta soporte.",
+      title: "Error de Cronalytics"
+    },
+    // hero
     hero: {
-      title: "CRONALYTICS",
-      tagline: "Observa. Mide. Optimiza.",
-      pronunciation: "/\u02C8kr\u0252n.\u0259\u02CCl\u026At.\u026Aks/",
-      noun: "(sustantivo)",
-      definition_1: "1. An\xE1lisis y observabilidad de cron.",
-      definition_2: "2. El panel para automatizaciones agenticas en Hermes.",
+      collapse_tooltip: "Contraer banner principal",
+      definition_1: "1. An\xE1lisis y observabilidad de cron jobs.",
+      definition_2: "2. El panel de control para automatizaciones agentivas en Hermes.",
       expand_tooltip: "Expandir banner principal",
-      collapse_tooltip: "Colapsar banner principal"
+      noun: "(sustantivo)",
+      pronunciation: "/\u02C8kr\u0252n.\u0259\u02CCl\u026At.\u026Aks/",
+      tagline: "Observar. Medir. Optimizar.",
+      title: "CRONALYTICS"
     },
-    // SummaryBoard — headline stats
-    summary: {
-      job_runs: "Ejecuciones",
-      cost: "Costo",
-      wasted: "Desperdiciado",
-      tokens: "Tokens",
-      cached: "En cach\xE9",
-      pace: "Ritmo",
-      trend: "Tendencia",
-      estimated: "Estimado",
-      actual: "Real",
-      all_time: "Todo el tiempo",
-      last_n_days: "\xDAltimos {n} d\xEDas",
-      vs_prior: "vs anterior",
-      period: "periodo",
-      nominal: "Nominal",
-      in: "Entrada",
-      out: "Salida",
-      no_schedule: "Sin horario"
-    },
-    // LeaderBoard — top performers
-    leaderboard: {
-      title: "Tabla de l\xEDderes",
-      top_est_cost: "Mayor Costo",
-      top_runs: "M\xE1s Ejecuciones",
-      top_tokens: "M\xE1s Tokens",
-      top_duration: "M\xE1s Tiempo",
-      most_efficient: "M\xE1s Eficiente",
-      of_total_est_cost: "% del costo total",
-      of_total_runs: "% del total de ejec.",
-      of_total_tokens: "% del total de tokens"
-    },
-    // JobBreakdown — per-job table
+    // job_breakdown
     job_breakdown: {
-      title: "Desglose de Trabajos",
-      job: "Trabajo",
-      runs: "Ejec.",
-      avg_time: "Duraci\xF3n Prom.",
+      ascending: "ascendente",
+      avg_est_cost: "Costo est. prom.",
+      avg_time: "Dur. promedio",
+      descending: "descendente",
       est_cost: "Costo Est.",
-      avg_est_cost: "Costo Est. Prom.",
-      nominal_mo: "Nominal/mes",
-      trend_mo: "Tendencia/mes",
-      pace: "Ritmo",
+      job: "Trabajo",
+      last: "\xDAltimo",
+      last_run: "\xDAltima ejecuci\xF3n",
       mode_agent: "Agente",
       mode_no_agent: "Sin agente",
-      no_schedule: "Sin horario",
-      last: "\xDAltimo",
-      using: "usando",
-      next: "Pr\xF3ximo",
-      see_runs: "Ver Ejecuciones",
-      schedule: "Horario",
-      last_run: "\xDAltima ejecuci\xF3n",
-      no_jobs_window: "No hay trabajos en {window}. \xDAltima sinc.: {time} UTC",
-      no_jobs_sync: "No hay trabajos cron capturados. Haz clic en Sincronizar para importar desde state.db.",
-      sorted_by: "Ordenado por {col}, {dir}",
+      next: "Siguiente",
+      no_jobs_sync: "No se capturaron cron jobs. Haz clic en Sincronizar ahora para rellenar desde state.db.",
+      no_jobs_window: "Sin trabajos en {window}. \xDAltima sincronizaci\xF3n: {time} UTC",
+      no_schedule: "Sin prog.",
+      nominal_mo: "Nominal/mes",
+      pace: "Ritmo",
+      runs: "Ejec.",
+      schedule: "Programaci\xF3n",
+      see_runs: "Ver ejecuciones",
       sort_by: "Ordenar por {col}",
-      ascending: "ascendente",
-      descending: "descendente"
+      sorted_by: "Ordenado por {col}, {dir}",
+      title: "Desglose de trabajos",
+      trend_mo: "Tendencia/mes",
+      using: "usando"
     },
-    // JobDetailView — individual run history
+    // job_detail
     job_detail: {
-      title_runs: "Ejecuciones",
+      duration: "Duraci\xF3n",
+      error_prefix: "Error: ",
+      est_cost: "Costo Est.",
+      for_full_history: " para historial completo.",
+      loading: "Cargando ejecuciones...",
       mode: "Modo",
       mode_agent: "Agente",
-      duration: "Duraci\xF3n",
-      est_cost: "Costo Est.",
-      loading: "Cargando ejecuciones...",
-      error_prefix: "Error: ",
-      for_full_history: " para historial completo.",
       no_runs: "No se encontraron ejecuciones.",
-      showing: "Mostrando ",
       of: " de ",
+      run: "ejecuci\xF3n",
       runs_plural: "ejecuciones",
-      use_cli: "Usa ",
-      run: "ejecuci\xF3n"
+      showing: "Mostrando ",
+      title_runs: "Ejecuciones",
+      use_cli: "Usar "
     },
-    // ModelBreakdown — per-model stats
-    model_breakdown: {
-      title: "Desglose por Modelo",
-      model: "Modelo",
-      runs: "Ejec.",
-      est_cost: "Costo Est.",
-      and_more: "y {n} m\xE1s"
+    // leaderboard
+    leaderboard: {
+      most_efficient: "Mejor ritmo",
+      of_total_est_cost: "% del costo total est.",
+      of_total_runs: "% del total de ejec.",
+      of_total_tokens: "% del total de tokens",
+      title: "Tabla de l\xEDderes",
+      top_duration: "Mayor duraci\xF3n",
+      top_est_cost: "Mayor Costo",
+      top_runs: "M\xE1s ejecuciones",
+      top_tokens: "M\xE1s tokens"
     },
-    // SparkLine — daily trends
-    sparkline: {
-      daily_cost: "Costo Est. Diario",
-      daily_runs: "Ejecuciones Diarias",
-      cost_bar: "\u2014 costo (barra) \xB7 ",
-      tokens_line: "\u2014 tokens",
-      duration_line: "- - duraci\xF3n"
-    },
-    // DaySelector — time window picker
-    day_selector: {
-      label: "D\xEDas",
-      apply_custom: "Aplicar d\xEDas personalizados",
-      go: "Ir"
-    },
-    // ModeToggle — agent/no_agent/all filter
-    mode_toggle: {
-      label: "Modo",
-      all: "Todos",
-      agent: "Agente",
-      no_agent: "Sin Agente"
-    },
-    // OutcomeToggle — success/failure/all filter
-    outcome_toggle: {
-      label: "Resultados",
-      all: "Todos",
-      success: "\xC9xito",
-      failure: "Fallo"
-    },
-    // ErrorBoundary — crash handler
-    error: {
-      title: "Error de Cronalytics",
-      message: "Algo sali\xF3 mal. Por favor actualiza o contacta soporte."
-    },
-    // Modal — popup dialog
+    // modal
     modal: {
       close: "Cerrar"
     },
-    // Pace modal explainer
+    // mode_toggle
+    mode_toggle: {
+      agent: "Agente",
+      all: "Todos",
+      label: "Modo",
+      no_agent: "Sin agente"
+    },
+    // model_breakdown
+    model_breakdown: {
+      and_more: "y {n} m\xE1s",
+      est_cost: "Costo Est.",
+      model: "Modelo",
+      runs: "Ejec.",
+      title: "Desglose por modelo"
+    },
+    // outcome_toggle
+    outcome_toggle: {
+      all: "Todos",
+      failure: "Fallo",
+      label: "Resultados",
+      success: "\xC9xito"
+    },
+    // pace
     pace: {
-      what_this_means: "El Ritmo compara tu tendencia de gasto real contra el presupuesto definido en tus trabajos cron. Responde: \u2018A este ritmo, \xBFestoy sobre o bajo presupuesto?\u2019",
       nominal_formula: "Nominal = ejecuciones programadas \xD7 costo promedio por ejecuci\xF3n",
+      pace_formula: "Ritmo = Tendencia / Nominal",
       trend_formula: "Tendencia = ejecuciones reales \xD7 costo promedio por ejecuci\xF3n",
-      pace_formula: "Ritmo = Tendencia / Nominal"
+      what_this_means: "El ritmo compara tu tendencia de gasto real contra el presupuesto que configuraste en tus cron jobs. Responde: \u2018A este ritmo, \xBFestoy por encima o por debajo del presupuesto?\u2019"
     },
-    // Runs modal explainer
+    // runs
     runs: {
-      what_this_means: "N\xFAmero total de ejecuciones de trabajos cron registradas en la ventana seleccionada. Cada ejecuci\xF3n activa tu tarea programada\u2014ya sea \xE9xito, fallo o reintento.",
       trend_formula: "Tendencia % = ((ejec. actuales \u2212 ejec. anteriores) / ejec. anteriores) \xD7 100",
-      trend_note: "Positivo = m\xE1s ejecuciones que la ventana anterior. Negativo = menos ejecuciones."
+      trend_note: "Positivo = m\xE1s ejecuciones que la ventana anterior. Negativo = menos ejecuciones.",
+      what_this_means: "N\xFAmero total de ejecuciones de cron jobs registradas en la ventana seleccionada. Cada ejecuci\xF3n activa tu tarea programada, ya sea exitosa, fallida o reintentada."
     },
-    // Cost modal explainer
-    cost: {
-      what_this_means: "El costo estimado se calcula a partir del uso de tokens y los precios del modelo. El costo real puede diferir ligeramente seg\xFAn la granularidad de facturaci\xF3n del proveedor.",
-      trend_formula: "Tendencia % = ((costo actual \u2212 costo anterior) / costo anterior) \xD7 100"
-    },
-    // Tokens modal explainer
-    tokens: {
-      what_this_means: "Los tokens son la moneda del uso de LLM. Los tokens de entrada son tus indicaciones + contexto. Los tokens de salida son la respuesta del modelo. Los tokens en cach\xE9 provienen de indicaciones repetidas con prefijos id\xE9nticos (m\xE1s baratos)."
-    },
-    // Shared / generic
+    // shared
     shared: {
+      all_scaled_30d: "Todo escalado a un mes de 30 d\xEDas usando la ventana seleccionada.",
+      breakdown: "Desglose",
+      color_guide: "Gu\xEDa de colores",
+      green_under_budget: "Verde (< 1.0\xD7) \u2014 Por debajo del presupuesto. Gasto menor al programado.",
+      hide: "Ocultar",
+      how_its_calculated: "C\xF3mo se calcula",
+      job_details: "Detalles del trabajo",
       loading: "Cargando\u2026",
+      neutral_budget: "Neutral (1.0\u20132.0\xD7) \u2014 En camino. Variaci\xF3n leve dentro del rango normal.",
+      prior_window_note: "La ventana de comparaci\xF3n anterior tiene la misma duraci\xF3n desplazada en el tiempo.",
+      red_over_budget: "Rojo (> 2.0\xD7) \u2014 Sobre presupuesto. Gasto mayor al programado.",
+      refresh: "Actualizar",
       retry: "Reintentar",
       show: "Mostrar",
-      hide: "Ocultar",
-      refresh: "Actualizar",
-      sync_now: "Sincronizar",
-      synced_n_runs: "Sincronizadas {n} ejecuciones",
-      what_this_means: "Qu\xE9 significa esto",
-      how_its_calculated: "C\xF3mo se calcula",
-      trend_calculation: "C\xE1lculo de tendencia",
-      window_context: "Contexto de ventana",
       showing_window: "Mostrando ",
-      prior_window_note: "La ventana de comparaci\xF3n anterior tiene la misma duraci\xF3n desplazada hacia atr\xE1s en el tiempo.",
-      job_details: "Detalles del trabajo",
-      color_guide: "Gu\xEDa de colores",
-      neutral_budget: "Neutral (1.0\u20132.0\xD7) \u2014 En camino. Ligera variaci\xF3n dentro del rango normal.",
-      green_under_budget: "Verde (< 1.0\xD7) \u2014 Bajo presupuesto. Gastando menos de lo programado.",
-      red_over_budget: "Rojo (> 2.0\xD7) \u2014 Sobre presupuesto. Gastando m\xE1s de lo programado.",
-      all_scaled_30d: "Todo escalado a un mes de 30 d\xEDas usando la ventana seleccionada.",
-      breakdown: "Desglose"
+      sync_now: "Sincronizar ahora",
+      synced_n_runs: "Sincronizadas {n} ejecuciones",
+      trend_calculation: "C\xE1lculo de tendencia",
+      what_this_means: "Qu\xE9 significa esto",
+      window_context: "Contexto de ventana"
+    },
+    // sparkline
+    sparkline: {
+      cost_bar: "\u2014 costo (barra) \xB7 ",
+      daily_cost: "Costo Est. Diario",
+      daily_runs: "Ejecuciones diarias",
+      duration_line: "- - duraci\xF3n",
+      tokens_line: "\u2014 tokens"
+    },
+    // summary
+    summary: {
+      actual: "Real",
+      all_time: "Todo el tiempo",
+      cached: "En cach\xE9",
+      cost: "Costo",
+      estimated: "Estimado",
+      in: "Entrada",
+      job_runs: "Ejecuciones",
+      last_n_days: "\xDAltimos {n} d\xEDas",
+      no_schedule: "Sin programaci\xF3n",
+      nominal: "Nominal",
+      out: "Salida",
+      pace: "Ritmo",
+      period: "per\xEDodo",
+      tokens: "Tokens",
+      trend: "Tendencia",
+      vs_prior: "vs anterior",
+      wasted: "Desperdiciado"
+    },
+    // tokens
+    tokens: {
+      what_this_means: "Los tokens son la unidad de uso de los LLMs. Los tokens de entrada son tus prompts + contexto. Los tokens de salida son la respuesta del modelo. Los tokens en cach\xE9 provienen de prompts repetidos con prefijos id\xE9nticos (m\xE1s econ\xF3micos)."
     }
   });
 
-  // dashboard/src/i18n/zh.js
-  registerCatalog("zh", {
-    // HeroBanner
+  // src/i18n/zh-CN.js
+  registerCatalog("zh-CN", {
+    // cost
+    cost: {
+      trend_formula: "\u8D8B\u52BF % = ((\u5F53\u524D\u6210\u672C \u2212 \u4E0A\u671F\u6210\u672C) / \u4E0A\u671F\u6210\u672C) \xD7 100",
+      what_this_means: "\u9884\u4F30\u6210\u672C\u6839\u636E\u4EE4\u724C\u4F7F\u7528\u91CF\u548C\u6A21\u578B\u5B9A\u4EF7\u8BA1\u7B97\u3002\u5B9E\u9645\u6210\u672C\u53EF\u80FD\u56E0\u670D\u52A1\u5546\u8BA1\u8D39\u7C92\u5EA6\u800C\u7565\u6709\u5DEE\u5F02\u3002"
+    },
+    // day_selector
+    day_selector: {
+      apply_custom: "\u5E94\u7528\u81EA\u5B9A\u4E49\u5929\u6570",
+      go: "\u786E\u5B9A",
+      label: "\u5929\u6570"
+    },
+    // error
+    error: {
+      message: "\u51FA\u73B0\u95EE\u9898\uFF0C\u8BF7\u5237\u65B0\u9875\u9762\u6216\u8054\u7CFB\u652F\u6301\u3002",
+      title: "Cronalytics \u9519\u8BEF"
+    },
+    // hero
     hero: {
-      title: "CRONALYTICS",
-      tagline: "\u89C2\u5BDF\u3002\u8861\u91CF\u3002\u4F18\u5316\u3002",
-      pronunciation: "/\u02C8kr\u0252n.\u0259\u02CCl\u026At.\u026Aks/",
-      noun: "(\u540D\u8BCD)",
+      collapse_tooltip: "\u6536\u8D77\u6A2A\u5E45",
       definition_1: "1. Cron \u5206\u6790\u4E0E\u53EF\u89C2\u6D4B\u6027\u3002",
-      definition_2: "2. Hermes \u4E2D\u667A\u80FD\u81EA\u52A8\u5316\u7684\u4EEA\u8868\u677F\u3002",
-      expand_tooltip: "\u5C55\u5F00\u6B22\u8FCE\u6A2A\u5E45",
-      collapse_tooltip: "\u6536\u8D77\u6B22\u8FCE\u6A2A\u5E45"
+      definition_2: "2. Hermes \u4E2D\u667A\u80FD\u4EE3\u7406\u81EA\u52A8\u5316\u7684\u4EEA\u8868\u677F\u3002",
+      expand_tooltip: "\u5C55\u5F00\u6A2A\u5E45",
+      noun: "(\u540D\u8BCD)",
+      pronunciation: "/\u02C8kr\u0252n.\u0259\u02CCl\u026At.\u026Aks/",
+      tagline: "\u89C2\u5BDF\u3002\u8861\u91CF\u3002\u4F18\u5316\u3002",
+      title: "CRONALYTICS"
     },
-    // SummaryBoard
-    summary: {
-      job_runs: "\u4EFB\u52A1\u8FD0\u884C",
-      cost: "\u6210\u672C",
-      wasted: "\u6D6A\u8D39",
-      tokens: "\u4EE4\u724C",
-      cached: "\u7F13\u5B58",
-      pace: "\u8282\u594F",
-      trend: "\u8D8B\u52BF",
-      estimated: "\u9884\u4F30",
-      actual: "\u5B9E\u9645",
-      all_time: "\u5168\u90E8\u65F6\u95F4",
-      last_n_days: "\u6700\u8FD1 {n} \u5929",
-      vs_prior: "\u5BF9\u6BD4\u4E0A\u671F",
-      period: "\u5468\u671F",
-      nominal: "\u6807\u79F0",
-      in: "\u8F93\u5165",
-      out: "\u8F93\u51FA",
-      no_schedule: "\u65E0\u8BA1\u5212"
-    },
-    // LeaderBoard
-    leaderboard: {
-      title: "\u6392\u884C\u699C",
-      top_est_cost: "\u6700\u9AD8\u6210\u672C",
-      top_runs: "\u6700\u591A\u8FD0\u884C",
-      top_tokens: "\u6700\u591A\u4EE4\u724C",
-      top_duration: "\u6700\u957F\u65F6\u95F4",
-      most_efficient: "\u6700\u9AD8\u8282\u594F",
-      of_total_est_cost: "\u5360\u603B\u9884\u4F30\u6210\u672C %",
-      of_total_runs: "\u5360\u603B\u8FD0\u884C\u6570 %",
-      of_total_tokens: "\u5360\u603B\u4EE4\u724C\u6570 %"
-    },
-    // JobBreakdown
+    // job_breakdown
     job_breakdown: {
-      title: "\u4EFB\u52A1\u660E\u7EC6",
-      job: "\u4EFB\u52A1",
-      runs: "\u8FD0\u884C",
-      avg_time: "\u5E73\u5747\u65F6\u957F",
-      est_cost: "\u9884\u4F30\u6210\u672C",
+      ascending: "\u5347\u5E8F",
       avg_est_cost: "\u5E73\u5747\u9884\u4F30\u6210\u672C",
-      nominal_mo: "\u6807\u79F0/\u6708",
-      trend_mo: "\u8D8B\u52BF/\u6708",
-      pace: "\u8282\u594F",
+      avg_time: "\u5E73\u5747\u8017\u65F6",
+      descending: "\u964D\u5E8F",
+      est_cost: "\u9884\u4F30\u6210\u672C",
+      job: "\u4EFB\u52A1",
+      last: "\u4E0A\u6B21",
+      last_run: "\u4E0A\u6B21\u8FD0\u884C",
       mode_agent: "\u667A\u80FD\u4F53",
       mode_no_agent: "\u65E0\u667A\u80FD\u4F53",
-      no_schedule: "\u65E0\u8BA1\u5212",
-      last: "\u4E0A\u6B21",
-      using: "\u4F7F\u7528",
       next: "\u4E0B\u6B21",
-      see_runs: "\u67E5\u770B\u8FD0\u884C",
-      schedule: "\u8BA1\u5212",
-      last_run: "\u4E0A\u6B21\u8FD0\u884C",
+      no_jobs_sync: "\u672A\u6355\u83B7\u5230\u5B9A\u65F6\u4EFB\u52A1\u3002\u70B9\u51FB\u7ACB\u5373\u540C\u6B65\u4ECE state.db \u56DE\u586B\u3002",
       no_jobs_window: "{window} \u5185\u65E0\u4EFB\u52A1\u3002\u4E0A\u6B21\u540C\u6B65\uFF1A{time} UTC",
-      no_jobs_sync: "\u672A\u6355\u83B7\u5230\u5B9A\u65F6\u4EFB\u52A1\u3002\u70B9\u51FB\u7ACB\u5373\u540C\u6B65\u4EE5\u4ECE state.db \u56DE\u586B\u3002",
-      sorted_by: "\u6309 {col} {dir} \u6392\u5E8F",
+      no_schedule: "\u65E0\u8BA1\u5212",
+      nominal_mo: "\u6807\u79F0/\u6708",
+      pace: "\u8282\u594F",
+      runs: "\u8FD0\u884C",
+      schedule: "\u8BA1\u5212",
+      see_runs: "\u67E5\u770B\u8FD0\u884C",
       sort_by: "\u6309 {col} \u6392\u5E8F",
-      ascending: "\u5347\u5E8F",
-      descending: "\u964D\u5E8F"
+      sorted_by: "\u6309 {col} {dir} \u6392\u5E8F",
+      title: "\u4EFB\u52A1\u660E\u7EC6",
+      trend_mo: "\u8D8B\u52BF/\u6708",
+      using: "\u4F7F\u7528"
     },
-    // JobDetailView
+    // job_detail
     job_detail: {
-      title_runs: "\u8FD0\u884C",
+      duration: "\u8017\u65F6",
+      error_prefix: "\u9519\u8BEF\uFF1A",
+      est_cost: "\u9884\u4F30\u6210\u672C",
+      for_full_history: " \u67E5\u770B\u5B8C\u6574\u5386\u53F2\u3002",
+      loading: "\u52A0\u8F7D\u8FD0\u884C\u8BB0\u5F55...",
       mode: "\u6A21\u5F0F",
       mode_agent: "\u667A\u80FD\u4F53",
-      duration: "\u65F6\u957F",
-      est_cost: "\u9884\u4F30\u6210\u672C",
-      loading: "\u52A0\u8F7D\u8FD0\u884C\u8BB0\u5F55...",
-      error_prefix: "\u9519\u8BEF\uFF1A",
-      for_full_history: " \u67E5\u770B\u5B8C\u6574\u5386\u53F2\u3002",
       no_runs: "\u672A\u627E\u5230\u8FD0\u884C\u8BB0\u5F55\u3002",
-      showing: "\u663E\u793A ",
       of: " / ",
-      runs_plural: "\u8FD0\u884C",
-      use_cli: "\u4F7F\u7528 ",
-      run: "\u8FD0\u884C"
+      run: "\u6B21\u8FD0\u884C",
+      runs_plural: "\u6B21\u8FD0\u884C",
+      showing: "\u663E\u793A ",
+      title_runs: "\u8FD0\u884C\u8BB0\u5F55",
+      use_cli: "\u4F7F\u7528 "
     },
-    // ModelBreakdown
-    model_breakdown: {
-      title: "\u6A21\u578B\u5206\u5E03",
-      model: "\u6A21\u578B",
-      runs: "\u8FD0\u884C",
-      est_cost: "\u9884\u4F30\u6210\u672C",
-      and_more: "\u8FD8\u6709 {n} \u4E2A"
+    // leaderboard
+    leaderboard: {
+      most_efficient: "\u6700\u4F73\u8282\u594F",
+      of_total_est_cost: "\u5360\u9884\u4F30\u603B\u6210\u672C %",
+      of_total_runs: "\u5360\u603B\u8FD0\u884C\u6570 %",
+      of_total_tokens: "\u5360\u603B\u4EE4\u724C\u6570 %",
+      title: "\u6392\u884C\u699C",
+      top_duration: "\u6700\u957F\u65F6\u957F",
+      top_est_cost: "\u6700\u9AD8\u6210\u672C",
+      top_runs: "\u6700\u591A\u8FD0\u884C",
+      top_tokens: "Token \u6700\u591A"
     },
-    // SparkLine
-    sparkline: {
-      daily_cost: "\u6BCF\u65E5\u9884\u4F30\u6210\u672C",
-      daily_runs: "\u6BCF\u65E5\u8FD0\u884C",
-      cost_bar: "\u2014 \u6210\u672C\uFF08\u67F1\u72B6\uFF09\xB7 ",
-      tokens_line: "\u2014 \u4EE4\u724C",
-      duration_line: "- - \u65F6\u957F"
-    },
-    // DaySelector
-    day_selector: {
-      label: "\u5929\u6570",
-      apply_custom: "\u5E94\u7528\u81EA\u5B9A\u4E49\u5929\u6570",
-      go: "\u6267\u884C"
-    },
-    // ModeToggle
-    mode_toggle: {
-      label: "\u6A21\u5F0F",
-      all: "\u5168\u90E8",
-      agent: "\u667A\u80FD\u4F53",
-      no_agent: "\u65E0\u667A\u80FD\u4F53"
-    },
-    // OutcomeToggle
-    outcome_toggle: {
-      label: "\u7ED3\u679C",
-      all: "\u5168\u90E8",
-      success: "\u6210\u529F",
-      failure: "\u5931\u8D25"
-    },
-    // ErrorBoundary
-    error: {
-      title: "Cronalytics \u9519\u8BEF",
-      message: "\u51FA\u4E86\u70B9\u95EE\u9898\u3002\u8BF7\u5237\u65B0\u9875\u9762\u6216\u8054\u7CFB\u652F\u6301\u3002"
-    },
-    // Modal
+    // modal
     modal: {
       close: "\u5173\u95ED"
     },
-    // Pace modal explainer
+    // mode_toggle
+    mode_toggle: {
+      agent: "\u667A\u80FD\u4F53",
+      all: "\u5168\u90E8",
+      label: "\u6A21\u5F0F",
+      no_agent: "\u65E0\u667A\u80FD\u4F53"
+    },
+    // model_breakdown
+    model_breakdown: {
+      and_more: "\u8FD8\u6709 {n} \u4E2A",
+      est_cost: "\u9884\u4F30\u6210\u672C",
+      model: "\u6A21\u578B",
+      runs: "\u8FD0\u884C",
+      title: "\u6A21\u578B\u5206\u5E03"
+    },
+    // outcome_toggle
+    outcome_toggle: {
+      all: "\u5168\u90E8",
+      failure: "\u5931\u8D25",
+      label: "\u7ED3\u679C",
+      success: "\u6210\u529F"
+    },
+    // pace
     pace: {
-      what_this_means: "\u8282\u594F\u5C06\u4F60\u5B9E\u9645\u652F\u51FA\u7684\u8D8B\u52BF\u4E0E\u4F60\u5728\u5B9A\u65F6\u4EFB\u52A1\u5B9A\u4E49\u4E2D\u8BBE\u5B9A\u7684\u9884\u7B97\u8FDB\u884C\u6BD4\u8F83\u3002\u5B83\u56DE\u7B54\u4E86\uFF1A\u2018\u6309\u7167\u8FD9\u4E2A\u901F\u5EA6\uFF0C\u6211\u662F\u8D85\u652F\u8FD8\u662F\u8282\u7EA6\uFF1F\u2019",
       nominal_formula: "\u6807\u79F0 = \u8BA1\u5212\u8FD0\u884C\u6B21\u6570 \xD7 \u6BCF\u6B21\u5E73\u5747\u6210\u672C",
-      trend_formula: "\u8D8B\u52BF     = \u5B9E\u9645\u8FD0\u884C\u6B21\u6570 \xD7 \u6BCF\u6B21\u5E73\u5747\u6210\u672C",
-      pace_formula: "\u8282\u594F      = \u8D8B\u52BF / \u6807\u79F0"
+      pace_formula: "\u8282\u594F      = \u8D8B\u52BF / \u6807\u79F0",
+      trend_formula: "\u8D8B\u52BF = \u5B9E\u9645\u8FD0\u884C\u6B21\u6570 \xD7 \u6BCF\u6B21\u5E73\u5747\u6210\u672C",
+      what_this_means: "\u8282\u594F\u5C06\u4F60\u7684\u5B9E\u9645\u652F\u51FA\u8D8B\u52BF\u4E0E\u4F60\u5728\u5B9A\u65F6\u4EFB\u52A1\u5B9A\u4E49\u4E2D\u8BBE\u5B9A\u7684\u9884\u7B97\u8FDB\u884C\u6BD4\u8F83\u3002\u5B83\u56DE\u7B54\uFF1A\u2018\u6309\u7167\u8FD9\u4E2A\u901F\u5EA6\uFF0C\u6211\u662F\u8D85\u652F\u8FD8\u662F\u8282\u7EA6\uFF1F\u2019"
     },
-    // Runs modal explainer
+    // runs
     runs: {
-      what_this_means: "\u5728\u6240\u9009\u7A97\u53E3\u4E2D\u8BB0\u5F55\u7684\u5B9A\u65F6\u4EFB\u52A1\u6267\u884C\u603B\u6B21\u6570\u3002\u6BCF\u6B21\u8FD0\u884C\u90FD\u4F1A\u89E6\u53D1\u4F60\u7684\u8BA1\u5212\u4EFB\u52A1\u2014\u2014\u65E0\u8BBA\u6210\u529F\u3001\u5931\u8D25\u8FD8\u662F\u91CD\u8BD5\u3002",
       trend_formula: "\u8D8B\u52BF % = ((\u5F53\u524D\u8FD0\u884C\u6570 \u2212 \u4E0A\u671F\u8FD0\u884C\u6570) / \u4E0A\u671F\u8FD0\u884C\u6570) \xD7 100",
-      trend_note: "\u6B63\u503C = \u6BD4\u4E0A\u671F\u8FD0\u884C\u66F4\u591A\u3002\u8D1F\u503C = \u6BD4\u4E0A\u671F\u8FD0\u884C\u66F4\u5C11\u3002"
+      trend_note: "\u6B63\u503C = \u6BD4\u4E0A\u671F\u8FD0\u884C\u66F4\u591A\u3002\u8D1F\u503C = \u6BD4\u4E0A\u671F\u8FD0\u884C\u66F4\u5C11\u3002",
+      what_this_means: "\u6240\u9009\u7A97\u53E3\u5185\u8BB0\u5F55\u7684\u5B9A\u65F6\u4EFB\u52A1\u6267\u884C\u603B\u6B21\u6570\u3002\u6BCF\u6B21\u8FD0\u884C\u90FD\u4F1A\u89E6\u53D1\u4F60\u7684\u8BA1\u5212\u4EFB\u52A1\u2014\u2014\u65E0\u8BBA\u6210\u529F\u3001\u5931\u8D25\u8FD8\u662F\u91CD\u8BD5\u3002"
     },
-    // Cost modal explainer
-    cost: {
-      what_this_means: "\u9884\u4F30\u6210\u672C\u6839\u636E\u4EE4\u724C\u4F7F\u7528\u91CF\u548C\u6A21\u578B\u5B9A\u4EF7\u8BA1\u7B97\u5F97\u51FA\u3002\u5B9E\u9645\u6210\u672C\u53EF\u80FD\u56E0\u63D0\u4F9B\u5546\u8BA1\u8D39\u7C92\u5EA6\u4E0D\u540C\u800C\u7565\u6709\u5DEE\u5F02\u3002",
-      trend_formula: "\u8D8B\u52BF % = ((\u5F53\u524D\u6210\u672C \u2212 \u4E0A\u671F\u6210\u672C) / \u4E0A\u671F\u6210\u672C) \xD7 100"
-    },
-    // Tokens modal explainer
-    tokens: {
-      what_this_means: "\u4EE4\u724C\u662F LLM \u4F7F\u7528\u7684\u8BA1\u91CF\u5355\u4F4D\u3002\u8F93\u5165\u4EE4\u724C\u662F\u4F60\u7684\u63D0\u793A\u8BCD + \u4E0A\u4E0B\u6587\u3002\u8F93\u51FA\u4EE4\u724C\u662F\u6A21\u578B\u7684\u54CD\u5E94\u3002\u7F13\u5B58\u4EE4\u724C\u6765\u81EA\u5177\u6709\u76F8\u540C\u524D\u7F00\u7684\u91CD\u590D\u63D0\u793A\u8BCD\uFF08\u66F4\u4FBF\u5B9C\uFF09\u3002"
-    },
-    // Shared / generic
+    // shared
     shared: {
+      all_scaled_30d: "\u4F7F\u7528\u6240\u9009\u7A97\u53E3\u6298\u7B97\u4E3A 30 \u5929\u3002",
+      breakdown: "\u660E\u7EC6",
+      color_guide: "\u989C\u8272\u8BF4\u660E",
+      green_under_budget: "\u7EFF\u8272 (< 1.0\xD7) \u2014 \u4F4E\u4E8E\u9884\u7B97\uFF0C\u652F\u51FA\u5C11\u4E8E\u8BA1\u5212\u3002",
+      hide: "\u9690\u85CF",
+      how_its_calculated: "\u5982\u4F55\u8BA1\u7B97",
+      job_details: "\u4EFB\u52A1\u8BE6\u60C5",
       loading: "\u52A0\u8F7D\u4E2D\u2026",
+      neutral_budget: "\u4E2D\u6027 (1.0\u20132.0\xD7) \u2014 \u6B63\u5E38\u8303\u56F4\u5185\uFF0C\u8F7B\u5FAE\u6CE2\u52A8\u3002",
+      prior_window_note: "\u4E0A\u671F\u5BF9\u6BD4\u7A97\u53E3\u662F\u5C06\u76F8\u540C\u65F6\u957F\u5411\u540E\u5E73\u79FB\u6240\u5F97\u3002",
+      red_over_budget: "\u7EA2\u8272 (> 2.0\xD7) \u2014 \u8D85\u51FA\u9884\u7B97\uFF0C\u652F\u51FA\u591A\u4E8E\u8BA1\u5212\u3002",
+      refresh: "\u5237\u65B0",
       retry: "\u91CD\u8BD5",
       show: "\u663E\u793A",
-      hide: "\u9690\u85CF",
-      refresh: "\u5237\u65B0",
+      showing_window: "\u663E\u793A ",
       sync_now: "\u7ACB\u5373\u540C\u6B65",
       synced_n_runs: "\u5DF2\u540C\u6B65 {n} \u6B21\u8FD0\u884C",
-      what_this_means: "\u8FD9\u662F\u4EC0\u4E48\u610F\u601D",
-      how_its_calculated: "\u5982\u4F55\u8BA1\u7B97",
       trend_calculation: "\u8D8B\u52BF\u8BA1\u7B97",
-      window_context: "\u7A97\u53E3\u4E0A\u4E0B\u6587",
-      showing_window: "\u663E\u793A ",
-      prior_window_note: "\u4E0A\u671F\u5BF9\u6BD4\u7A97\u53E3\u662F\u5C06\u76F8\u540C\u65F6\u957F\u5411\u540E\u5E73\u79FB\u3002",
-      job_details: "\u4EFB\u52A1\u8BE6\u60C5",
-      color_guide: "\u989C\u8272\u6307\u5357",
-      neutral_budget: "\u4E2D\u6027 (1.0\u20132.0\xD7) \u2014 \u6B63\u5E38\u8303\u56F4\u5185\u3002",
-      green_under_budget: "\u7EFF\u8272 (< 1.0\xD7) \u2014 \u4F4E\u4E8E\u9884\u7B97\u3002\u652F\u51FA\u4F4E\u4E8E\u8BA1\u5212\u3002",
-      red_over_budget: "\u7EA2\u8272 (> 2.0\xD7) \u2014 \u8D85\u51FA\u9884\u7B97\u3002\u652F\u51FA\u8D85\u8FC7\u8BA1\u5212\u3002",
-      all_scaled_30d: "\u5168\u90E8\u6309\u6240\u9009\u7A97\u53E3\u6298\u7B97\u4E3A 30 \u5929\u3002",
-      breakdown: "\u660E\u7EC6"
+      what_this_means: "\u8FD9\u662F\u4EC0\u4E48\u610F\u601D",
+      window_context: "\u7A97\u53E3\u4E0A\u4E0B\u6587"
+    },
+    // sparkline
+    sparkline: {
+      cost_bar: "\u2014 \u6210\u672C\uFF08\u67F1\u72B6\uFF09\xB7 ",
+      daily_cost: "\u6BCF\u65E5\u9884\u4F30\u6210\u672C",
+      daily_runs: "\u6BCF\u65E5\u8FD0\u884C",
+      duration_line: "- - \u65F6\u957F",
+      tokens_line: "\u2014 Token"
+    },
+    // summary
+    summary: {
+      actual: "\u5B9E\u9645",
+      all_time: "\u5168\u90E8\u65F6\u95F4",
+      cached: "\u7F13\u5B58",
+      cost: "\u6210\u672C",
+      estimated: "\u9884\u4F30",
+      in: "\u8F93\u5165",
+      job_runs: "\u4EFB\u52A1\u8FD0\u884C",
+      last_n_days: "\u6700\u8FD1 {n} \u5929",
+      no_schedule: "\u65E0\u8BA1\u5212",
+      nominal: "\u6807\u79F0",
+      out: "\u8F93\u51FA",
+      pace: "\u8282\u594F",
+      period: "\u5468\u671F",
+      tokens: "Token",
+      trend: "\u8D8B\u52BF",
+      vs_prior: "\u5BF9\u6BD4\u4E0A\u671F",
+      wasted: "\u6D6A\u8D39"
+    },
+    // tokens
+    tokens: {
+      what_this_means: "\u4EE4\u724C\u662F LLM \u4F7F\u7528\u7684\u8BA1\u91CF\u5355\u4F4D\u3002\u8F93\u5165\u4EE4\u724C\u662F\u4F60\u7684\u63D0\u793A\u8BCD + \u4E0A\u4E0B\u6587\u3002\u8F93\u51FA\u4EE4\u724C\u662F\u6A21\u578B\u7684\u54CD\u5E94\u3002\u7F13\u5B58\u4EE4\u724C\u6765\u81EA\u5177\u6709\u76F8\u540C\u524D\u7F00\u7684\u91CD\u590D\u63D0\u793A\u8BCD\uFF08\u66F4\u4FBF\u5B9C\uFF09\u3002"
     }
   });
 
-  // dashboard/src/index.js
+  // src/i18n/zh-TW.js
+  registerCatalog("zh-TW", {
+    // cost
+    cost: {
+      trend_formula: "\u8DA8\u52E2 % = ((\u76EE\u524D\u6210\u672C \u2212 \u4E0A\u671F\u6210\u672C) / \u4E0A\u671F\u6210\u672C) \xD7 100",
+      what_this_means: "\u9810\u4F30\u6210\u672C\u6839\u64DA\u4EE4\u724C\u4F7F\u7528\u91CF\u548C\u6A21\u578B\u5B9A\u50F9\u8A08\u7B97\u3002\u5BE6\u969B\u6210\u672C\u53EF\u80FD\u56E0\u670D\u52D9\u5546\u8A08\u8CBB\u7C92\u5EA6\u800C\u7565\u6709\u5DEE\u7570\u3002"
+    },
+    // day_selector
+    day_selector: {
+      apply_custom: "\u5957\u7528\u81EA\u8A02\u5929\u6578",
+      go: "\u78BA\u5B9A",
+      label: "\u5929\u6578"
+    },
+    // error
+    error: {
+      message: "\u767C\u751F\u554F\u984C\uFF0C\u8ACB\u91CD\u65B0\u6574\u7406\u9801\u9762\u6216\u806F\u7D61\u652F\u63F4\u3002",
+      title: "Cronalytics \u932F\u8AA4"
+    },
+    // hero
+    hero: {
+      collapse_tooltip: "\u6536\u5408\u6A6B\u5E45",
+      definition_1: "1. Cron \u5206\u6790\u8207\u53EF\u89C0\u6E2C\u6027\u3002",
+      definition_2: "2. Hermes \u4E2D\u667A\u80FD\u4EE3\u7406\u81EA\u52D5\u5316\u7684\u5100\u8868\u677F\u3002",
+      expand_tooltip: "\u5C55\u958B\u6A6B\u5E45",
+      noun: "(\u540D\u8A5E)",
+      pronunciation: "/\u02C8kr\u0252n.\u0259\u02CCl\u026At.\u026Aks/",
+      tagline: "\u89C0\u5BDF\u3002\u8861\u91CF\u3002\u6700\u4F73\u5316\u3002",
+      title: "CRONALYTICS"
+    },
+    // job_breakdown
+    job_breakdown: {
+      ascending: "\u905E\u589E",
+      avg_est_cost: "\u5E73\u5747\u9810\u4F30\u6210\u672C",
+      avg_time: "\u5E73\u5747\u8017\u6642",
+      descending: "\u905E\u6E1B",
+      est_cost: "\u9810\u4F30\u6210\u672C",
+      job: "\u4EFB\u52D9",
+      last: "\u4E0A\u6B21",
+      last_run: "\u4E0A\u6B21\u57F7\u884C",
+      mode_agent: "\u667A\u6167\u9AD4",
+      mode_no_agent: "\u7121\u667A\u80FD\u4EE3\u7406",
+      next: "\u4E0B\u6B21",
+      no_jobs_sync: "\u672A\u64F7\u53D6\u5230\u5B9A\u6642\u4EFB\u52D9\u3002\u9EDE\u64CA\u7ACB\u5373\u540C\u6B65\u5F9E state.db \u56DE\u586B\u3002",
+      no_jobs_window: "{window} \u5167\u7121\u4EFB\u52D9\u3002\u4E0A\u6B21\u540C\u6B65\uFF1A{time} UTC",
+      no_schedule: "\u7121\u6392\u7A0B",
+      nominal_mo: "\u6A19\u7A31/\u6708",
+      pace: "\u7BC0\u594F",
+      runs: "\u57F7\u884C",
+      schedule: "\u6392\u7A0B",
+      see_runs: "\u67E5\u770B\u57F7\u884C",
+      sort_by: "\u6309 {col} \u6392\u5E8F",
+      sorted_by: "\u6309 {col} {dir} \u6392\u5E8F",
+      title: "\u4EFB\u52D9\u660E\u7D30",
+      trend_mo: "\u8DA8\u52E2/\u6708",
+      using: "\u4F7F\u7528"
+    },
+    // job_detail
+    job_detail: {
+      duration: "\u8017\u6642",
+      error_prefix: "\u932F\u8AA4\uFF1A",
+      est_cost: "\u9810\u4F30\u6210\u672C",
+      for_full_history: " \u67E5\u770B\u5B8C\u6574\u6B77\u7A0B\u3002",
+      loading: "\u8F09\u5165\u57F7\u884C\u8A18\u9304...",
+      mode: "\u6A21\u5F0F",
+      mode_agent: "\u667A\u6167\u9AD4",
+      no_runs: "\u672A\u627E\u5230\u57F7\u884C\u8A18\u9304\u3002",
+      of: " / ",
+      run: "\u6B21\u57F7\u884C",
+      runs_plural: "\u6B21\u57F7\u884C",
+      showing: "\u986F\u793A ",
+      title_runs: "\u57F7\u884C\u8A18\u9304",
+      use_cli: "\u4F7F\u7528 "
+    },
+    // leaderboard
+    leaderboard: {
+      most_efficient: "\u6700\u4F73\u7BC0\u594F",
+      of_total_est_cost: "\u4F54\u9810\u4F30\u7E3D\u6210\u672C %",
+      of_total_runs: "\u4F54\u7E3D\u57F7\u884C\u6578 %",
+      of_total_tokens: "\u4F54\u7E3D\u4EE4\u724C\u6578 %",
+      title: "\u6392\u884C\u699C",
+      top_duration: "\u6700\u9577\u6642\u9577",
+      top_est_cost: "\u6700\u9AD8\u6210\u672C",
+      top_runs: "\u6700\u591A\u57F7\u884C",
+      top_tokens: "Token \u6700\u591A"
+    },
+    // modal
+    modal: {
+      close: "\u95DC\u9589"
+    },
+    // mode_toggle
+    mode_toggle: {
+      agent: "\u667A\u80FD\u4EE3\u7406",
+      all: "\u5168\u90E8",
+      label: "\u6A21\u5F0F",
+      no_agent: "\u7121\u667A\u80FD\u4EE3\u7406"
+    },
+    // model_breakdown
+    model_breakdown: {
+      and_more: "\u9084\u6709 {n} \u500B",
+      est_cost: "\u9810\u4F30\u6210\u672C",
+      model: "\u6A21\u578B",
+      runs: "\u57F7\u884C",
+      title: "\u6A21\u578B\u5206\u5E03"
+    },
+    // outcome_toggle
+    outcome_toggle: {
+      all: "\u5168\u90E8",
+      failure: "\u5931\u6557",
+      label: "\u7D50\u679C",
+      success: "\u6210\u529F"
+    },
+    // pace
+    pace: {
+      nominal_formula: "\u6A19\u7A31 = \u8A08\u756B\u57F7\u884C\u6B21\u6578 \xD7 \u6BCF\u6B21\u5E73\u5747\u6210\u672C",
+      pace_formula: "\u7BC0\u594F      = \u8DA8\u52E2 / \u6A19\u7A31",
+      trend_formula: "\u8DA8\u52E2 = \u5BE6\u969B\u57F7\u884C\u6B21\u6578 \xD7 \u6BCF\u6B21\u5E73\u5747\u6210\u672C",
+      what_this_means: "\u7BC0\u594F\u5C07\u4F60\u7684\u5BE6\u969B\u652F\u51FA\u8DA8\u52E2\u8207\u4F60\u5728\u5B9A\u6642\u4EFB\u52D9\u5B9A\u7FA9\u4E2D\u8A2D\u5B9A\u7684\u9810\u7B97\u9032\u884C\u6BD4\u8F03\u3002\u5B83\u56DE\u7B54\uFF1A\u2018\u6309\u7167\u9019\u500B\u901F\u5EA6\uFF0C\u6211\u662F\u8D85\u652F\u9084\u662F\u7BC0\u7D04\uFF1F\u2019"
+    },
+    // runs
+    runs: {
+      trend_formula: "\u8DA8\u52E2 % = ((\u76EE\u524D\u57F7\u884C\u6578 \u2212 \u4E0A\u671F\u57F7\u884C\u6578) / \u4E0A\u671F\u57F7\u884C\u6578) \xD7 100",
+      trend_note: "\u6B63\u503C = \u6BD4\u4E0A\u671F\u57F7\u884C\u66F4\u591A\u3002\u8CA0\u503C = \u6BD4\u4E0A\u671F\u57F7\u884C\u66F4\u5C11\u3002",
+      what_this_means: "\u6240\u9078\u8996\u7A97\u5167\u8A18\u9304\u7684\u5B9A\u6642\u4EFB\u52D9\u57F7\u884C\u7E3D\u6B21\u6578\u3002\u6BCF\u6B21\u57F7\u884C\u90FD\u6703\u89F8\u767C\u4F60\u7684\u8A08\u756B\u4EFB\u52D9\u2014\u2014\u7121\u8AD6\u6210\u529F\u3001\u5931\u6557\u9084\u662F\u91CD\u8A66\u3002"
+    },
+    // shared
+    shared: {
+      all_scaled_30d: "\u4F7F\u7528\u6240\u9078\u8996\u7A97\u6298\u7B97\u70BA 30 \u5929\u3002",
+      breakdown: "\u660E\u7D30",
+      color_guide: "\u984F\u8272\u8AAA\u660E",
+      green_under_budget: "\u7DA0\u8272 (< 1.0\xD7) \u2014 \u4F4E\u65BC\u9810\u7B97\uFF0C\u652F\u51FA\u5C11\u65BC\u8A08\u756B\u3002",
+      hide: "\u96B1\u85CF",
+      how_its_calculated: "\u5982\u4F55\u8A08\u7B97",
+      job_details: "\u4EFB\u52D9\u8A73\u60C5",
+      loading: "\u8F09\u5165\u4E2D\u2026",
+      neutral_budget: "\u4E2D\u6027 (1.0\u20132.0\xD7) \u2014 \u6B63\u5E38\u7BC4\u570D\u5167\uFF0C\u8F15\u5FAE\u6CE2\u52D5\u3002",
+      prior_window_note: "\u4E0A\u671F\u5C0D\u6BD4\u8996\u7A97\u662F\u5C07\u76F8\u540C\u6642\u9577\u5411\u5F8C\u5E73\u79FB\u6240\u5F97\u3002",
+      red_over_budget: "\u7D05\u8272 (> 2.0\xD7) \u2014 \u8D85\u51FA\u9810\u7B97\uFF0C\u652F\u51FA\u591A\u65BC\u8A08\u756B\u3002",
+      refresh: "\u91CD\u65B0\u6574\u7406",
+      retry: "\u91CD\u8A66",
+      show: "\u986F\u793A",
+      showing_window: "\u986F\u793A ",
+      sync_now: "\u7ACB\u5373\u540C\u6B65",
+      synced_n_runs: "\u5DF2\u540C\u6B65 {n} \u6B21\u57F7\u884C",
+      trend_calculation: "\u8DA8\u52E2\u8A08\u7B97",
+      what_this_means: "\u9019\u662F\u4EC0\u9EBC\u610F\u601D",
+      window_context: "\u8996\u7A97\u4E0A\u4E0B\u6587"
+    },
+    // sparkline
+    sparkline: {
+      cost_bar: "\u2014 \u6210\u672C\uFF08\u67F1\u72C0\uFF09\xB7 ",
+      daily_cost: "\u6BCF\u65E5\u9810\u4F30\u6210\u672C",
+      daily_runs: "\u6BCF\u65E5\u57F7\u884C",
+      duration_line: "- - \u6642\u9577",
+      tokens_line: "\u2014 Token"
+    },
+    // summary
+    summary: {
+      actual: "\u5BE6\u969B",
+      all_time: "\u5168\u90E8\u6642\u9593",
+      cached: "\u5FEB\u53D6",
+      cost: "\u6210\u672C",
+      estimated: "\u9810\u4F30",
+      in: "\u8F38\u5165",
+      job_runs: "\u4EFB\u52D9\u57F7\u884C",
+      last_n_days: "\u6700\u8FD1 {n} \u5929",
+      no_schedule: "\u7121\u6392\u7A0B",
+      nominal: "\u6A19\u7A31",
+      out: "\u8F38\u51FA",
+      pace: "\u7BC0\u594F",
+      period: "\u9031\u671F",
+      tokens: "Token",
+      trend: "\u8DA8\u52E2",
+      vs_prior: "\u5C0D\u6BD4\u4E0A\u671F",
+      wasted: "\u6D6A\u8CBB"
+    },
+    // tokens
+    tokens: {
+      what_this_means: "\u4EE4\u724C\u662F LLM \u4F7F\u7528\u7684\u8A08\u91CF\u55AE\u4F4D\u3002\u8F38\u5165\u4EE4\u724C\u662F\u4F60\u7684\u63D0\u793A\u8A5E + \u4E0A\u4E0B\u6587\u3002\u8F38\u51FA\u4EE4\u724C\u662F\u6A21\u578B\u7684\u56DE\u61C9\u3002\u5FEB\u53D6\u4EE4\u724C\u4F86\u81EA\u5177\u6709\u76F8\u540C\u524D\u7DB4\u7684\u91CD\u8907\u63D0\u793A\u8A5E\uFF08\u66F4\u4FBF\u5B9C\uFF09\u3002"
+    }
+  });
+
+  // src/index.js
   PLUGINS.register("cronalytics", function CronalyticsWrapped() {
     return React.createElement(
       PluginErrorBoundary,
