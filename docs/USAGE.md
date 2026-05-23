@@ -460,3 +460,10 @@ If you create jobs under `hermes --profile work cron create ...`, those jobs run
 
 *Version: 1.1.0*  
 *Last updated: 2026-05-16*
+
+
+## Localization (i18n)
+
+Cronalytics automatically detects your system language. If you are using Hermes in **Spanish**, **Simplified Chinese**, or **Traditional Chinese**, the dashboard will update its labels and documentation accordingly.
+
+> **Note to Community:** These locales are AI-validated community contributions. If you spot a discrepancy or regional phrasing error, please open a Pull Request. We follow a strict consensus protocol for all translation changes.

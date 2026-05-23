@@ -1,3 +1,19 @@
+# Release Notes — v1.1.0 (2026-05-22)
+
+## Major Launch: Native i18n & Multi-Model Consensus
+
+This release introduces a hardened localization architecture for the Cronalytics dashboard.
+
+### New Features
+1. **Multilingual Dashboard:** 100% coverage for es, zh-CN, zh-TW.
+2. **"2/4 Consensus" Gateway:** Multi-model validation protocol ensures technical accuracy. 
+3. **Agent Standards (AGENTS.md):** Formal repo rules prohibiting hardcoded UI strings.
+4. **Audit Trail:** New `docs/I18N_PROTOCOL.md` and `TRANSLATION.md` reference.
+
+### Fixes & Improvements
+- **Trend Spikes:** Gated arrows behind 1.75x history window to prevent false alarms.
+- **UI Uniformity:** Consistent naming ("Avg Duration") and modernized icon-only refresh.
+
 # Release Notes — Cronalytics v1.1.0
 
 **Release date:** 2026-05-19  

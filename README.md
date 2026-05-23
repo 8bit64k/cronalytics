@@ -139,6 +139,16 @@ Click any card to open a detail modal with job metadata.
 
 Proportional bar chart showing the top 5 models by cost, with run counts. Remaining models collapsed with "and N more."
 
+### Multi-Locale Support
+
+Cronalytics is the first Hermes plugin with production-grade internationalization support. All UI elements, educational explainers, and metrics are fully localized for:
+- 🇺🇸 **English** (Source of Truth)
+- 🇪🇸 **Spanish** (Professional/Technical)
+- 🇨🇳 **Chinese Simplified** (zh-CN)
+- 🇹🇼 **Chinese Traditional** (zh-TW)
+
+Translations undergo a multi-model "2/4 Consensus" validation process to ensure high technical accuracy.
+
 ### Jobs Breakdown Table
 
 Eight sortable columns: **Job**, **Runs**, **Avg Duration**, **Total Cost**, **Avg Cost**, **Nominal/mo**, **Trend/mo**, **Pace**.

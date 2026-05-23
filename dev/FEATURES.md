@@ -324,6 +324,14 @@ The following metrics are implemented and available in `--json` output for advan
 
 ---
 
+
+
+### 6. i18n Localization Engine
+
+- **Cross-Locale Parity:** All dashboard features are localized for English, Spanish, Simplified Chinese, and Traditional Chinese.
+- **Consensus-Validated:** Phrasing validated via 4 independent AI models.
+- **Agent Enforcement:** Repository architecture enforces zero-hardcoded-string compliance (see `AGENTS.md`).
+
 ## 7. Formulas & Data Sources
 
 ### 7.1 Fixed-Window Projection Math
