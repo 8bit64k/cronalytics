@@ -5,9 +5,8 @@ All agents working on this repository MUST adhere to the following technical and
 ## 1. Mandatory I18N / Localization
 - **Zero Hardcoded Strings:** NO user-facing text is permitted in JSX components or JavaScript files.
 - **Implementation:** Every string must be wrapped in the `t()` function provided by the `useCronalyticsI18n()` hook.
-- **Pattern:** `t("key.path", "English Default String")`
-- **Fallback Policy:** The second argument (English default) is mandatory and must match the current `en.js` catalog state exactly.
-- **Protocol:** Refer to `docs/I18N_PROTOCOL.md` for the multi-model consensus process (2/4 gate) required when adding new locales. **NO SHORTCUTS.** Every new UI element read by a human must have locale support built-in from day one.
+- **The Glossary Rule:** Agents must refer to `docs/GLOSSARY.md` before adding new keys. Naming and phrasing must remain consistent with established product concepts (e.g., "Pace" is "Execution Rate," not "Music Rhythm").
+- **Protocol:** Refer to `docs/I18N_PROTOCOL.md` for the multi-model consensus process (2/4 gate) required when adding new locales. **NO SHORTCUTS.**
 
 ## 2. Technical Quality Gates
 - **Accuracy Over Speed:** Do not prioritize fast responses over complete, correct implementation. Nick: "not going to give you an award for being fast."

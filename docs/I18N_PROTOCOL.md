@@ -8,13 +8,11 @@ This document defines the mandatory process for implementing, translating, and v
 - **Fallback Policy:** Every `t()` call must include an English fallback: `t("key.path", "English Default")`.
 - **Placeholder Integrity:** Variable placeholders (e.g., `{n}`, `{col}`) must be preserved in all translations to prevent runtime crashes.
 
-## 2. Extraction & Map Generation
-- The English catalog (`en.js`) serves as the **Source of Truth**.
-- A flat mapping of dot-notated keys to strings is extracted using the internal parser.
-- A side-by-side mapping doc (`TRANSLATION.md`) is auto-generated for human spot-checks.
+## 2. Phase 0: The Product Glossary
+Before any translation run, the mandatory **Cronalytics Glossary** (`docs/GLOSSARY.md`) must be consulted. This ensures that "Pace" is translated as "Execution Rate" (Technical) rather than "Rhythm" (Musical). 
 
-## 3. The Multi-Model Consensus Protocol
-To ensure professional, technically accurate localization without relying on a single AI's hallucinations or regional biases, all new strings must undergo the **2/4 Consensus Gate**:
+## 3. Multi-Model Consensus (2/4 Gate)
+To ensure professional, technically accurate localization, all new strings must undergo the **2/4 Consensus Gate**:
 
 ### The Participants
 1. **Model #1 (Kimi K2.6):** Balanced, strong in technical Simplified Chinese.
