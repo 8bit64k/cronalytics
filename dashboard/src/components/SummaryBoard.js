@@ -53,7 +53,7 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
             runPct != null ? (runPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(runPct).toFixed(0) + "%" : "\u2014"
           ),
           React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.1rem" } },
-            "vs prior ", days === 0 ? "period" : days + "d"
+            t("summary.vs_prior", "vs prior") + " ", days === 0 ? t("summary.period", "period") : days + "d"
           )
         )
       )
@@ -79,7 +79,7 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
             costPct != null ? (costPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(costPct).toFixed(0) + "%" : "\u2014"
           ),
           React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.1rem" } },
-            "vs prior ", days === 0 ? "period" : days + "d"
+            t("summary.vs_prior", "vs prior") + " ", days === 0 ? t("summary.period", "period") : days + "d"
           ),
           React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.3rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.25rem" } },
             t("summary.actual", "Actual") + ": ", s.tot_actual_cost != null ? fmtCost(s.tot_actual_cost) : "\u2014"
@@ -153,14 +153,14 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
             }, s.pace != null ? s.pace.toFixed(2) + "\u00d7" : "\u2014"),
             React.createElement("div", { style: { marginTop: "0.4rem", display: "flex", flexDirection: "column", gap: "0.2rem" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "3.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Nominal"),
+                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, t("summary.nominal", "Nominal")),
                 React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
                   React.createElement("div", { style: { width: (Math.min(100, (nominalPace / maxPace) * 100)) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
                 ),
                 React.createElement("span", { style: { width: "4.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCost(nominalPace))
               ),
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "3.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Trend"),
+                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, t("summary.trend", "Trend")),
                 React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
                   React.createElement("div", { style: { width: (Math.min(100, (trendPace / maxPace) * 100)) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
                 ),

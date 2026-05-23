@@ -597,125 +597,6 @@
     return "transparent";
   }
 
-  // dashboard/src/components/SparkLine.js
-  var SPARK_BAR_W = 4;
-  var SPARK_BAR_GAP = 1;
-  var SPARK_H = 60;
-  function _modelColor(m) {
-    if (!m) return "var(--foreground-base, #888)";
-    if (m.includes("kimi")) return "#22c55e";
-    if (m.includes("gemini")) return "#f59e0b";
-    if (m.includes("gpt")) return "#3b82f6";
-    if (m.includes("claude")) return "#d946ef";
-    return "var(--foreground-base, #888)";
-  }
-  function _shortModel(m) {
-    if (!m) return "\u2014";
-    return m.split("/").pop();
-  }
-  function _tokTotal(r) {
-    return (r.input_tokens || 0) + (r.output_tokens || 0) + (r.cache_read_tokens || 0) + (r.cache_write_tokens || 0);
-  }
-  function SparkLine({ runs }) {
-    const t = useCronalyticsI18n();
-    const [hoverIdx, setHoverIdx] = useState(-1);
-    if (!runs || runs.length === 0) return null;
-    const chrono = [...runs].sort((a, b) => a.run_time - b.run_time);
-    const maxCost = Math.max(...chrono.map((r) => r.estimated_cost || 0), 1e-4);
-    const maxTok = Math.max(...chrono.map(_tokTotal), 1);
-    const maxDur = Math.max(...chrono.map((r) => r.duration_seconds || 0), 0.1);
-    const h = SPARK_H;
-    const w = SPARK_BAR_W;
-    const gap = SPARK_BAR_GAP;
-    const totalW = chrono.length * (w + gap);
-    const cx = (i) => i * (w + gap) + w / 2;
-    const cy = (v, max) => h - v / max * h;
-    const tokPts = chrono.map((r, i) => `${cx(i)},${cy(_tokTotal(r), maxTok)}`).join(" ");
-    const durPts = chrono.map((r, i) => `${cx(i)},${cy(r.duration_seconds || 0, maxDur)}`).join(" ");
-    const hoverRun = hoverIdx >= 0 ? chrono[hoverIdx] : null;
-    return React.createElement(
-      "div",
-      { style: { marginBottom: "0.5rem", position: "relative" } },
-      React.createElement(
-        "svg",
-        {
-          viewBox: `0 0 ${totalW} ${h}`,
-          style: { width: "100%", height: h + "px", display: "block" }
-        },
-        // Token line
-        React.createElement("polyline", {
-          points: tokPts,
-          fill: "none",
-          stroke: "#60a5fa",
-          strokeWidth: "1.5",
-          opacity: 0.85
-        }),
-        // Duration line (dashed)
-        React.createElement("polyline", {
-          points: durPts,
-          fill: "none",
-          stroke: "#fcd34d",
-          strokeWidth: "1.5",
-          strokeDasharray: "3,2",
-          opacity: 0.85
-        }),
-        // Cost bars (top layer — model color)
-        chrono.map((r, i) => {
-          const barH = (r.estimated_cost || 0) / maxCost * h;
-          return React.createElement("rect", {
-            key: r.session_id,
-            x: i * (w + gap),
-            y: h - barH,
-            width: w,
-            height: Math.max(barH, 1),
-            fill: _modelColor(r.model),
-            opacity: hoverIdx >= 0 && hoverIdx !== i ? 0.35 : 0.92,
-            style: { transition: "opacity 0.15s", cursor: "pointer" },
-            onMouseEnter: () => setHoverIdx(i),
-            onMouseLeave: () => setHoverIdx(-1)
-          });
-        })
-      ),
-      // Legend
-      React.createElement(
-        "div",
-        {
-          style: {
-            fontSize: "0.6rem",
-            fontFamily: "var(--theme-font-mono, monospace)",
-            opacity: 0.4,
-            display: "flex",
-            gap: "0.6rem",
-            marginTop: "0.15rem",
-            marginBottom: "0.25rem"
-          }
-        },
-        React.createElement(
-          "span",
-          null,
-          t("sparkline.cost_bar", "\u2014 cost (bar) \xB7 "),
-          React.createElement("span", { style: { color: "#60a5fa" } }, t("sparkline.tokens_line", "\u2014 tokens")),
-          " \xB7 ",
-          React.createElement("span", { style: { color: "#fcd34d" } }, t("sparkline.duration_line", "- - duration"))
-        )
-      ),
-      hoverRun && React.createElement(
-        "div",
-        {
-          style: {
-            fontSize: "0.68rem",
-            fontFamily: "var(--theme-font-mono, monospace)",
-            opacity: 0.65,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis"
-          }
-        },
-        fmtTime(hoverRun.run_time) + " \xB7 " + fmtCost(hoverRun.estimated_cost) + " \xB7 " + fmtCompact(_tokTotal(hoverRun)) + " " + t("summary.tokens", "toks") + " \xB7 " + fmtDuration(hoverRun.duration_seconds) + " \xB7 " + _shortModel(hoverRun.model)
-      )
-    );
-  }
-
   // dashboard/src/components/JobDetailView.js
   function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir }) {
     const t = useCronalyticsI18n();
@@ -1294,8 +1175,8 @@
             React.createElement(
               "div",
               { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.1rem" } },
-              "vs prior ",
-              days === 0 ? "period" : days + "d"
+              t("summary.vs_prior", "vs prior") + " ",
+              days === 0 ? t("summary.period", "period") : days + "d"
             )
           )
         )
@@ -1339,8 +1220,8 @@
             React.createElement(
               "div",
               { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.1rem" } },
-              "vs prior ",
-              days === 0 ? "period" : days + "d"
+              t("summary.vs_prior", "vs prior") + " ",
+              days === 0 ? t("summary.period", "period") : days + "d"
             ),
             React.createElement(
               "div",
@@ -1459,7 +1340,7 @@
                 React.createElement(
                   "div",
                   { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                  React.createElement("span", { style: { width: "3.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Nominal"),
+                  React.createElement("span", { style: { width: "4.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, t("summary.nominal", "Nominal")),
                   React.createElement(
                     "div",
                     { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
@@ -1470,7 +1351,7 @@
                 React.createElement(
                   "div",
                   { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                  React.createElement("span", { style: { width: "3.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Trend"),
+                  React.createElement("span", { style: { width: "4.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, t("summary.trend", "Trend")),
                   React.createElement(
                     "div",
                     { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
@@ -2573,19 +2454,8 @@
           })()
         )
       ),
-      // Charts row
-      jobList.length > 0 && React.createElement(
-        "div",
-        { style: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "1rem", marginBottom: "1.5rem" } },
-        React.createElement(SparkLine, { runs: (() => {
-          const allRuns = [];
-          jobList.forEach((j) => {
-            if (j.runs_detail) allRuns.push(...j.runs_detail);
-          });
-          return allRuns;
-        })() }),
-        React.createElement(ModelBreakdown, { costByModel: s.cost_by_model })
-      ),
+      // ModelBreakdown — full width
+      React.createElement(ModelBreakdown, { costByModel: s.cost_by_model }),
       // Toast
       syncToast && React.createElement("div", {
         style: {
@@ -3117,6 +2987,187 @@
       red_over_budget: "Rojo (> 2.0\xD7) \u2014 Sobre presupuesto. Gastando m\xE1s de lo programado.",
       all_scaled_30d: "Todo escalado a un mes de 30 d\xEDas usando la ventana seleccionada.",
       breakdown: "Desglose"
+    }
+  });
+
+  // dashboard/src/i18n/zh.js
+  registerCatalog("zh", {
+    // HeroBanner
+    hero: {
+      title: "CRONALYTICS",
+      tagline: "\u89C2\u5BDF\u3002\u8861\u91CF\u3002\u4F18\u5316\u3002",
+      pronunciation: "/\u02C8kr\u0252n.\u0259\u02CCl\u026At.\u026Aks/",
+      noun: "(\u540D\u8BCD)",
+      definition_1: "1. Cron \u5206\u6790\u4E0E\u53EF\u89C2\u6D4B\u6027\u3002",
+      definition_2: "2. Hermes \u4E2D\u667A\u80FD\u81EA\u52A8\u5316\u7684\u4EEA\u8868\u677F\u3002",
+      expand_tooltip: "\u5C55\u5F00\u6B22\u8FCE\u6A2A\u5E45",
+      collapse_tooltip: "\u6536\u8D77\u6B22\u8FCE\u6A2A\u5E45"
+    },
+    // SummaryBoard
+    summary: {
+      job_runs: "\u4EFB\u52A1\u8FD0\u884C",
+      cost: "\u6210\u672C",
+      wasted: "\u6D6A\u8D39",
+      tokens: "\u4EE4\u724C",
+      cached: "\u7F13\u5B58",
+      pace: "\u8282\u594F",
+      trend: "\u8D8B\u52BF",
+      estimated: "\u9884\u4F30",
+      actual: "\u5B9E\u9645",
+      all_time: "\u5168\u90E8\u65F6\u95F4",
+      last_n_days: "\u6700\u8FD1 {n} \u5929",
+      vs_prior: "\u5BF9\u6BD4\u4E0A\u671F",
+      period: "\u5468\u671F",
+      nominal: "\u6807\u79F0",
+      in: "\u8F93\u5165",
+      out: "\u8F93\u51FA",
+      no_schedule: "\u65E0\u8BA1\u5212"
+    },
+    // LeaderBoard
+    leaderboard: {
+      title: "\u6392\u884C\u699C",
+      top_est_cost: "\u6700\u9AD8\u6210\u672C",
+      top_runs: "\u6700\u591A\u8FD0\u884C",
+      top_tokens: "\u6700\u591A\u4EE4\u724C",
+      top_duration: "\u6700\u957F\u65F6\u95F4",
+      most_efficient: "\u6700\u9AD8\u8282\u594F",
+      of_total_est_cost: "\u5360\u603B\u9884\u4F30\u6210\u672C %",
+      of_total_runs: "\u5360\u603B\u8FD0\u884C\u6570 %",
+      of_total_tokens: "\u5360\u603B\u4EE4\u724C\u6570 %"
+    },
+    // JobBreakdown
+    job_breakdown: {
+      title: "\u4EFB\u52A1\u660E\u7EC6",
+      job: "\u4EFB\u52A1",
+      runs: "\u8FD0\u884C",
+      avg_time: "\u5E73\u5747\u65F6\u957F",
+      est_cost: "\u9884\u4F30\u6210\u672C",
+      avg_est_cost: "\u5E73\u5747\u9884\u4F30\u6210\u672C",
+      nominal_mo: "\u6807\u79F0/\u6708",
+      trend_mo: "\u8D8B\u52BF/\u6708",
+      pace: "\u8282\u594F",
+      mode_agent: "\u667A\u80FD\u4F53",
+      mode_no_agent: "\u65E0\u667A\u80FD\u4F53",
+      no_schedule: "\u65E0\u8BA1\u5212",
+      last: "\u4E0A\u6B21",
+      using: "\u4F7F\u7528",
+      next: "\u4E0B\u6B21",
+      see_runs: "\u67E5\u770B\u8FD0\u884C",
+      schedule: "\u8BA1\u5212",
+      last_run: "\u4E0A\u6B21\u8FD0\u884C",
+      no_jobs_window: "{window} \u5185\u65E0\u4EFB\u52A1\u3002\u4E0A\u6B21\u540C\u6B65\uFF1A{time} UTC",
+      no_jobs_sync: "\u672A\u6355\u83B7\u5230\u5B9A\u65F6\u4EFB\u52A1\u3002\u70B9\u51FB\u7ACB\u5373\u540C\u6B65\u4EE5\u4ECE state.db \u56DE\u586B\u3002",
+      sorted_by: "\u6309 {col} {dir} \u6392\u5E8F",
+      sort_by: "\u6309 {col} \u6392\u5E8F",
+      ascending: "\u5347\u5E8F",
+      descending: "\u964D\u5E8F"
+    },
+    // JobDetailView
+    job_detail: {
+      title_runs: "\u8FD0\u884C",
+      mode: "\u6A21\u5F0F",
+      mode_agent: "\u667A\u80FD\u4F53",
+      duration: "\u65F6\u957F",
+      est_cost: "\u9884\u4F30\u6210\u672C",
+      loading: "\u52A0\u8F7D\u8FD0\u884C\u8BB0\u5F55...",
+      error_prefix: "\u9519\u8BEF\uFF1A",
+      for_full_history: " \u67E5\u770B\u5B8C\u6574\u5386\u53F2\u3002",
+      no_runs: "\u672A\u627E\u5230\u8FD0\u884C\u8BB0\u5F55\u3002",
+      showing: "\u663E\u793A ",
+      of: " / ",
+      runs_plural: "\u8FD0\u884C",
+      use_cli: "\u4F7F\u7528 ",
+      run: "\u8FD0\u884C"
+    },
+    // ModelBreakdown
+    model_breakdown: {
+      title: "\u6A21\u578B\u5206\u5E03",
+      model: "\u6A21\u578B",
+      runs: "\u8FD0\u884C",
+      est_cost: "\u9884\u4F30\u6210\u672C",
+      and_more: "\u8FD8\u6709 {n} \u4E2A"
+    },
+    // SparkLine
+    sparkline: {
+      daily_cost: "\u6BCF\u65E5\u9884\u4F30\u6210\u672C",
+      daily_runs: "\u6BCF\u65E5\u8FD0\u884C",
+      cost_bar: "\u2014 \u6210\u672C\uFF08\u67F1\u72B6\uFF09\xB7 ",
+      tokens_line: "\u2014 \u4EE4\u724C",
+      duration_line: "- - \u65F6\u957F"
+    },
+    // DaySelector
+    day_selector: {
+      label: "\u5929\u6570",
+      apply_custom: "\u5E94\u7528\u81EA\u5B9A\u4E49\u5929\u6570",
+      go: "\u6267\u884C"
+    },
+    // ModeToggle
+    mode_toggle: {
+      label: "\u6A21\u5F0F",
+      all: "\u5168\u90E8",
+      agent: "\u667A\u80FD\u4F53",
+      no_agent: "\u65E0\u667A\u80FD\u4F53"
+    },
+    // OutcomeToggle
+    outcome_toggle: {
+      label: "\u7ED3\u679C",
+      all: "\u5168\u90E8",
+      success: "\u6210\u529F",
+      failure: "\u5931\u8D25"
+    },
+    // ErrorBoundary
+    error: {
+      title: "Cronalytics \u9519\u8BEF",
+      message: "\u51FA\u4E86\u70B9\u95EE\u9898\u3002\u8BF7\u5237\u65B0\u9875\u9762\u6216\u8054\u7CFB\u652F\u6301\u3002"
+    },
+    // Modal
+    modal: {
+      close: "\u5173\u95ED"
+    },
+    // Pace modal explainer
+    pace: {
+      what_this_means: "\u8282\u594F\u5C06\u4F60\u5B9E\u9645\u652F\u51FA\u7684\u8D8B\u52BF\u4E0E\u4F60\u5728\u5B9A\u65F6\u4EFB\u52A1\u5B9A\u4E49\u4E2D\u8BBE\u5B9A\u7684\u9884\u7B97\u8FDB\u884C\u6BD4\u8F83\u3002\u5B83\u56DE\u7B54\u4E86\uFF1A\u2018\u6309\u7167\u8FD9\u4E2A\u901F\u5EA6\uFF0C\u6211\u662F\u8D85\u652F\u8FD8\u662F\u8282\u7EA6\uFF1F\u2019",
+      nominal_formula: "\u6807\u79F0 = \u8BA1\u5212\u8FD0\u884C\u6B21\u6570 \xD7 \u6BCF\u6B21\u5E73\u5747\u6210\u672C",
+      trend_formula: "\u8D8B\u52BF     = \u5B9E\u9645\u8FD0\u884C\u6B21\u6570 \xD7 \u6BCF\u6B21\u5E73\u5747\u6210\u672C",
+      pace_formula: "\u8282\u594F      = \u8D8B\u52BF / \u6807\u79F0"
+    },
+    // Runs modal explainer
+    runs: {
+      what_this_means: "\u5728\u6240\u9009\u7A97\u53E3\u4E2D\u8BB0\u5F55\u7684\u5B9A\u65F6\u4EFB\u52A1\u6267\u884C\u603B\u6B21\u6570\u3002\u6BCF\u6B21\u8FD0\u884C\u90FD\u4F1A\u89E6\u53D1\u4F60\u7684\u8BA1\u5212\u4EFB\u52A1\u2014\u2014\u65E0\u8BBA\u6210\u529F\u3001\u5931\u8D25\u8FD8\u662F\u91CD\u8BD5\u3002",
+      trend_formula: "\u8D8B\u52BF % = ((\u5F53\u524D\u8FD0\u884C\u6570 \u2212 \u4E0A\u671F\u8FD0\u884C\u6570) / \u4E0A\u671F\u8FD0\u884C\u6570) \xD7 100",
+      trend_note: "\u6B63\u503C = \u6BD4\u4E0A\u671F\u8FD0\u884C\u66F4\u591A\u3002\u8D1F\u503C = \u6BD4\u4E0A\u671F\u8FD0\u884C\u66F4\u5C11\u3002"
+    },
+    // Cost modal explainer
+    cost: {
+      what_this_means: "\u9884\u4F30\u6210\u672C\u6839\u636E\u4EE4\u724C\u4F7F\u7528\u91CF\u548C\u6A21\u578B\u5B9A\u4EF7\u8BA1\u7B97\u5F97\u51FA\u3002\u5B9E\u9645\u6210\u672C\u53EF\u80FD\u56E0\u63D0\u4F9B\u5546\u8BA1\u8D39\u7C92\u5EA6\u4E0D\u540C\u800C\u7565\u6709\u5DEE\u5F02\u3002",
+      trend_formula: "\u8D8B\u52BF % = ((\u5F53\u524D\u6210\u672C \u2212 \u4E0A\u671F\u6210\u672C) / \u4E0A\u671F\u6210\u672C) \xD7 100"
+    },
+    // Tokens modal explainer
+    tokens: {
+      what_this_means: "\u4EE4\u724C\u662F LLM \u4F7F\u7528\u7684\u8BA1\u91CF\u5355\u4F4D\u3002\u8F93\u5165\u4EE4\u724C\u662F\u4F60\u7684\u63D0\u793A\u8BCD + \u4E0A\u4E0B\u6587\u3002\u8F93\u51FA\u4EE4\u724C\u662F\u6A21\u578B\u7684\u54CD\u5E94\u3002\u7F13\u5B58\u4EE4\u724C\u6765\u81EA\u5177\u6709\u76F8\u540C\u524D\u7F00\u7684\u91CD\u590D\u63D0\u793A\u8BCD\uFF08\u66F4\u4FBF\u5B9C\uFF09\u3002"
+    },
+    // Shared / generic
+    shared: {
+      loading: "\u52A0\u8F7D\u4E2D\u2026",
+      retry: "\u91CD\u8BD5",
+      show: "\u663E\u793A",
+      hide: "\u9690\u85CF",
+      refresh: "\u5237\u65B0",
+      sync_now: "\u7ACB\u5373\u540C\u6B65",
+      synced_n_runs: "\u5DF2\u540C\u6B65 {n} \u6B21\u8FD0\u884C",
+      what_this_means: "\u8FD9\u662F\u4EC0\u4E48\u610F\u601D",
+      how_its_calculated: "\u5982\u4F55\u8BA1\u7B97",
+      trend_calculation: "\u8D8B\u52BF\u8BA1\u7B97",
+      window_context: "\u7A97\u53E3\u4E0A\u4E0B\u6587",
+      showing_window: "\u663E\u793A ",
+      prior_window_note: "\u4E0A\u671F\u5BF9\u6BD4\u7A97\u53E3\u662F\u5C06\u76F8\u540C\u65F6\u957F\u5411\u540E\u5E73\u79FB\u3002",
+      job_details: "\u4EFB\u52A1\u8BE6\u60C5",
+      color_guide: "\u989C\u8272\u6307\u5357",
+      neutral_budget: "\u4E2D\u6027 (1.0\u20132.0\xD7) \u2014 \u6B63\u5E38\u8303\u56F4\u5185\u3002",
+      green_under_budget: "\u7EFF\u8272 (< 1.0\xD7) \u2014 \u4F4E\u4E8E\u9884\u7B97\u3002\u652F\u51FA\u4F4E\u4E8E\u8BA1\u5212\u3002",
+      red_over_budget: "\u7EA2\u8272 (> 2.0\xD7) \u2014 \u8D85\u51FA\u9884\u7B97\u3002\u652F\u51FA\u8D85\u8FC7\u8BA1\u5212\u3002",
+      all_scaled_30d: "\u5168\u90E8\u6309\u6240\u9009\u7A97\u53E3\u6298\u7B97\u4E3A 30 \u5929\u3002",
+      breakdown: "\u660E\u7EC6"
     }
   });
 

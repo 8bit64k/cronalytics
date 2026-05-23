@@ -11,6 +11,7 @@ import { CronalyticsTab } from "./components/CronalyticsTab.js";
 import "./i18n/index.js";
 import "./i18n/en.js";
 import "./i18n/es.js";
+import "./i18n/zh.js";
 
 PLUGINS.register("cronalytics", function CronalyticsWrapped() {
   return React.createElement(

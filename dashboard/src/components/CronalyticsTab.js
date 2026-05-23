@@ -4,7 +4,6 @@ import { Modal } from "../components/Modal.js";
 import { DaySelector } from "../components/DaySelector.js";
 import { OutcomeToggle } from "../components/OutcomeToggle.js";
 import { ModeToggle } from "../components/ModeToggle.js";
-import { SparkLine } from "../components/SparkLine.js";
 import { JobDetailView } from "../components/JobDetailView.js";
 import { HeroBanner } from "../components/HeroBanner.js";
 import { SummaryBoard } from "../components/SummaryBoard.js";
@@ -457,17 +456,8 @@ export function CronalyticsTab() {
       )
     ),
 
-    // Charts row
-    jobList.length > 0 && React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "1rem", marginBottom: "1.5rem" } },
-      React.createElement(SparkLine, { runs: (() => {
-        const allRuns = [];
-        jobList.forEach(j => {
-          if (j.runs_detail) allRuns.push(...j.runs_detail);
-        });
-        return allRuns;
-      })() }),
-      React.createElement(ModelBreakdown, { costByModel: s.cost_by_model })
-    ),
+    // ModelBreakdown — full width
+    React.createElement(ModelBreakdown, { costByModel: s.cost_by_model }),
 
     // Toast
     syncToast && React.createElement("div", {
