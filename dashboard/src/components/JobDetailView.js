@@ -212,7 +212,12 @@ export function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir 
                     lineHeight: 1.5,
                   },
                 },
-                t("job_detail.showing", "Showing ") + runs.data.runs.length + t("job_detail.of", " of ") + runs.data.total_runs.toLocaleString() + " " + t("job_detail.runs", "runs") + ". " + t("job_detail.use_cli", "Use ") +
+                t("job_detail.showing", "Showing "), 
+                runs.data.runs.length, 
+                t("job_detail.of", " of "), 
+                runs.data.total_runs.toLocaleString(), 
+                " ", t("job_detail.runs_plural", "runs"), ". ", 
+                t("job_detail.use_cli", "Use "),
                 React.createElement("code", { style: { fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.9 } },
                   "cronalytics runs --job " + jobId + " --days " + (days === 0 ? "0" : days)
                 ),
