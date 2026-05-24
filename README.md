@@ -264,66 +264,25 @@ If the dashboard shows "No cron jobs captured," click **Sync Now**.
 
 ## Architecture at a Glance
 
-```
-Cron Job Due
-    │
-    ▼
-run_job() ──▶ agent.run_conversation()
-    │
-    ▼
-Hook: on_session_end(platform="cron")
-    │
-    ▼
-Enqueue session_id ──▶ Deferred worker retries
-    │                         (waits for DB flush)
-    ▼
-Query state.db ──▶ Insert into facts.db
-    │
-    ├──────▶ Dashboard queries facts.db via plugin API
-    │
-    ├──────▶ CLI queries facts.db directly
-    │
-    └──────▶ Skill guides agent to query via CLI
-```
+Cronalytics hooks into Hermes's `on_session_end`, enqueues session IDs, queries `state.db`, and stores derived analytics in a plugin-owned `facts.db`. Three interfaces read from that database: Dashboard (HTTP API), CLI (direct SQLite queries), and Agent Skill (CLI-piped heuristics).
 
-> **Three-layer diagnostic model:** The CLI is a dumb data pipe (aggregates, never interprets). The skill is the interpretation layer (heuristics, guardrails, confidence grading). The agent is the fuzzy reasoner (applies the skill, improvises within guidelines). The human is the final authority. Together they produce better decisions than any single layer alone.
+For the full architecture diagram, data flow, and technical decisions, see **[DESIGN.md](dev/DESIGN.md#3-architecture)**.
 
 ---
 
 ## API Endpoints
 
-All endpoints are mounted at `/api/plugins/cronalytics/`.
+All endpoints are mounted at `/api/plugins/cronalytics/`. Core endpoints: `GET /health`, `GET /summary`, `GET /jobs`, `GET /jobs/{job_id}/runs`, `GET /models`, `GET /trends`, `POST /sync`.
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | `GET` | Plugin health + sync metadata |
-| `/summary?days=N&outcome=all&mode=all` | `GET` | Aggregated totals with projections |
-| `/jobs?days=N&outcome=all&mode=all` | `GET` | Per-job rolled-up stats with projections |
-| `/jobs/{job_id}/runs` | `GET` | Individual runs for a specific job |
-| `/models?days=N&outcome=all&mode=all` | `GET` | Cost breakdown by model |
-| `/trends?days=N&outcome=all&mode=all` | `GET` | Daily cost + runs time series |
-| `/sync` | `POST` | Run reconciliation scanner manually |
+For the full endpoint table with parameters and response shapes, see **[DESIGN.md §4.11 API Validation Layer](dev/DESIGN.md#411-api-validation-layer)**.
 
 ---
 
 ## Data Model
 
-The fact database (`facts.db`) is append-only. Rows are inserted once and never updated or deleted.
+The fact database (`facts.db`) is append-only — rows are inserted once and never updated or deleted. Core fields include `session_id`, `job_id`, `estimated_cost_usd`, `actual_cost_usd`, `model`, token breakdowns, `duration_seconds`, `end_reason`, and `success`.
 
-Key fields captured per run:
-
-- `session_id` — unique run key
-- `job_id` — stable job definition ID
-- `run_time` / `ended_at` / `duration_seconds`
-- `model`
-- `input_tokens` / `output_tokens` / `reasoning_tokens` / `cache_read_tokens` / `cache_write_tokens`
-- `estimated_cost_usd` — primary cost metric
-- `actual_cost_usd` — ground-truth when available
-- `cost_status`, `cost_source`, `billing_provider`
-- `api_call_count`, `message_count`, `tool_call_count`
-- `end_reason`, `success`
-- `job_mode` — `agent` or `no_agent`
-- `ingested_at`
+For the full schema with field descriptions, see **[DESIGN.md §4.3 Fact DB](dev/DESIGN.md#43-fact-db-plugin-owned-append-only-sqlite)**.
 
 ---
 
@@ -427,37 +386,7 @@ MIT — see [`LICENSE`](LICENSE) for full text.
 
 ## Changelog
 
-### v1.1.0 (2026-05-26)
-
-- **Terminal CLI** — `cronalytics` (via `pip install -e`) or `python -m cronalytics.cli` with 7 subcommands: `summary`, `jobs`, `runs`, `models`, `trends`, `health`, `all`. Full `--json` output on every data command except `all`. `--days`, `--outcome`, `--mode` filters on every data command. Leader Board spotlight in `summary`. Job name resolution from `jobs.json`.
-- **Agent Diagnostic Skill** — Built-in `cronalytics` skill with structured 7-step diagnostic workflow (time window verification → baseline health → job-level drill → per-run investigation → failure pattern → model economics → trend validation). Confidence-graded anomaly detection (HIGH / MEDIUM / LOW) with supporting evidence requirements. "Known Ways to Fool Yourself" guardrails (age-gating, script job awareness, variance checks). Cross-references `jobs.json` for scheduling context and silent failure detection.
-- **Test suite: 149 tests** — all passing, `ruff` + `mypy` clean (note: `mypy` excludes `ingester.py`, `scanner.py`, `__init__.py`, and `dashboard/`; `disallow_untyped_defs = false`).
-
-### v1.0.1 (2026-05-13)
-
-- **Leader Board '% of total'** — spotlight cards show the leader's share of the window total (e.g. "42% of total cost")
-- **Cost card: suppressed Actual** — partial `actual_cost_usd` coverage creates misleading comparisons. The line now reads `Actual: —` until provider billing data coverage is reliable.
-- **Backend fix** — synthetic script-only rows now insert `NULL` for `actual_cost_usd` (was 0.0), eliminating phantom `$0.00` aggregates.
-
-### v1.0.0 (2026-05-12)
-
-- Dashboard: Summary Board, Leader Board, Per-Model Breakdown, Jobs Breakdown table
-- Sortable 8-column jobs table with expandable detail rows
-- Job Detail Modal with full run history, sticky headers, inherited sorting
-- Outcome toggle (All/Success/Failure) with conditional Cost card colors
-- Mode toggle (All/Agent/No agent) with script job visibility
-- Pace, Nominal, and Trend projections with educational modals
-- Reconciliation scanner with watermark-based backfill
-- Bootstrap scanner on plugin load (catches post-restart gaps)
-- 83 pytest tests covering facts, parser, scanner, schedule, ingester, plugin API
-- Lint/type check: `ruff` + `mypy` clean
-- Keyboard-accessible cards and table headers (a11y)
-- Large-font theme resilience
-- API validation layer (JSDoc typedefs + runtime guards)
-
-### v0.1.0
-
-- Initial release: real-time ingestion, fact DB, reconciliation scanner, dashboard API, React frontend with summary cards, jobs table, cost-by-model, sync button.
+See **[CHANGELOG.md](CHANGELOG.md)** for the full version history.
 
 ---
 
