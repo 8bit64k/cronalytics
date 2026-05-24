@@ -39,16 +39,35 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
 Visual exploration with cards, tables, charts, and modals. Best for human pattern recognition.
 
 ### 2. CLI (for agents and tooling)
-```bash
-# Full report (bare command or 'all' subcommand)
-cronalytics --days 14
 
-# Per-job economics with pace and projections
-cronalytics jobs --days 7 --json | jq '.data[] | select(.pace > 1.2)'
-
-# Drill into a specific job
-cronalytics runs --job f1561526d8 --days 30 --json
 ```
+usage: cronalytics [-h] [--db DB] [--days DAYS] [--outcome {all,success,failure}]
+                   [--mode {all,agent,no_agent}] [--json]
+                   {summary,jobs,models,trends,health,runs,all,sync} ...
+
+Cronalytics CLI — dump cron run insights to the terminal
+
+positional arguments:
+  {summary,jobs,models,trends,health,runs,all,sync}
+    summary             Aggregate headline summary
+    jobs                Per-job breakdown with pace
+    models              Per-model estimated cost breakdown
+    trends              Daily run-count / estimated cost sparkline
+    health              Fact DB health check
+    runs                Individual runs for a job
+    all                 Run health + summary + jobs + models + trends
+    sync                Backfill cron sessions from state.db into fact DB
+
+options:
+  -h, --help            show this help message and exit
+  --db DB               Path to fact DB (default: auto-detected from plugin directory)
+  --days DAYS           Number of days to look back (default: 30, 0 = all time)
+  --outcome {all,success,failure}
+                        Filter by outcome (default: all)
+  --mode {all,agent,no_agent}
+                        Filter by job mode (default: all)
+  --json                Output raw JSON instead of formatted tables
+  ```
 
 ### 3. Agent Skill (for reasoning and superpowers)
 An agent skill that guides agents through structured cron health checks and diagnostics. Ask your agent:
@@ -68,6 +87,7 @@ The agent loads the `cronalytics` skill, follows a structured 7-step diagnostic 
 | **Exploring Features** | [Usage & Workflows](docs/USAGE.md) or [Feature Catalog](dev/FEATURES.md) |
 
 ---
+# A Closer Look into Cronalytics
 
 ## Mini-Tour
 ![Short Tour](docs/screenshots/cronalytics-tour.gif)
@@ -76,123 +96,65 @@ The agent loads the `cronalytics` skill, follows a structured 7-step diagnostic 
 
 ---
 
-## A Closer Look into Cronalytics
-
-### What Cronalytics Does
+## What Cronalytics Does
 
 - **Captures** every cron job run as it completes via the `on_session_end` hook
 - **Persists** cost, token counts, model, duration, and success state to a local fact database
 - **Backfills** historical data automatically on plugin load and on demand via reconciliation scanner
 - **Surfaces** data through three interfaces:
 
-  **Dashboard** — visual exploration:
-  - Summary cards (total runs, estimated cost, tokens, pace)
-  - Leader board (top runs, top cost, top tokens, top pace)
-  - Cost-by-model breakdown with proportional bars
-  - Per-job table with runs, cost, duration, projections, and sortable columns
-  - Expandable detail rows showing token breakdown, schedule, and success/failure split
-  - Job detail modal with full run history (sortable, 200-run limit)
-  - Outcome filter (All / Success / Failure) with conditional card colors
-  - Mode filter (All / Agent / No agent) for script-only job visibility
-  - **Sync Now** button to trigger backfill on demand
-  - Educational modals explaining Pace, Nominal, Trend, and cost math
-
-  **CLI** — terminal access:
-  - `summary` — headline aggregates + leader board + cost-by-model table
-  - `jobs` — per-job table with ID, runs, cost, tokens, pace, avg duration
-  - `runs --job <id>` — individual run history (time, duration, cost, tokens, model)
-  - `models` — per-model aggregate table
-  - `trends` — daily bar chart (ASCII) of cost + runs
-  - `health` — fact DB metadata, job count, last sync
-  - `all` — chains health → summary → jobs → models → trends
-  - All commands support `--days N`, `--outcome`, `--mode`, and `--json`
-  - Job name resolution from `~/.hermes/cron/jobs.json`
-
-  **Skill** — agent-guided diagnostics:
-  - Structured 7-step workflow: time window verification → baseline → job-level drill → per-run investigation → failure pattern → model economics → trend validation
-  - Confidence-graded anomaly detection (HIGH / MEDIUM / LOW)
-  - `jobs.json` cross-reference for temporal context and silent failure detection
-  - "Known Ways to Fool Yourself" guardrails prevent false positives
-  - Works in any terminal session or messaging channel
-
----
-
-## What the Dashboard Shows
-
-### Summary Board (Row 1)
-
-Four cards showing aggregate metrics for the selected window:
-
-- **Job Runs** — total executions with vs-prior-period delta (↑/↓ %)
-- **Cost** — total estimated cost in amber; vs-prior delta + ✓/✗ breakdown
-  (Actual cost placeholder suppressed — partial coverage creates misleading comparisons)
-- **Tokens** — total tokens in blue; In/Out/Cached proportion micro-bars
-- **Pace** — aggregate `trend_monthly / nominal_monthly` as a multiplier:
-  - `< 1.0×` green — under scheduled budget
-  - `1.0–2.0×` neutral — on track
-  - `≥ 2.0×` red — over budget
-
-Click any card to open an educational modal explaining the metric.
-
-### Leader Board (Row 2)
-
-Four spotlight cards surfacing the highest-value job in each dimension, with the leader's share of the window total:
-
-- **Top Runs** — highest execution count; `% of total runs` sub-line
-- **Top Cost** — highest cumulative spend; `% of total cost` sub-line
-- **Top Tokens** — highest token consumption; `% of total tokens` sub-line
-- **Top Pace** — highest pace multiplier (most at risk of exceeding budget)
-
-Click any card to open a detail modal with job metadata.
-
-### Per-Model Breakdown
-
-Proportional bar chart showing the top 5 models by cost, with run counts. Remaining models collapsed with "and N more."
-
-### Multi-Locale Support
-
+### Dashboard — visual exploration:
+- Summary cards (total runs, estimated cost, tokens, pace)
+- Leader board (top runs, top cost, top tokens, top pace)
+- Cost-by-model breakdown with proportional bars
+- Per-job table with runs, cost, duration, projections, and sortable columns
+- Expandable detail rows showing token breakdown, schedule, and success/failure split
+- Job detail modal with full run history (sortable, 200-run limit)
+- Educational modals explaining Pace, Nominal, Trend, and cost math
+- Outcome filter (All / Success / Failure) with conditional card colors
+- Mode filter (All / Agent / No agent) for script-only job visibility
+- Day selector  `7D | 30D | 90D` presets + custom input (0–365 days, Enter/Go)
+- Refresh — re-fetches summary and jobs
+- Sync Now button to trigger backfill on demand
+  
+**Multi-Locale Support**
 Cronalytics implements a self-hosted internationalization layer for independent Hermes plugins. All UI elements, educational explainers, and metrics are fully localized for:
 - 🇺🇸 **English** (Source of Truth)
 - 🇪🇸 **Spanish** (Professional/Technical)
 - 🇨🇳 **Chinese Simplified** (zh-CN)
 - 🇹🇼 **Chinese Traditional** (zh-TW)
 
-Translations undergo a multi-model "2/4 Consensus" validation process to ensure high technical accuracy across regional variants.
+### CLI — terminal access:
+- `summary` — headline aggregates + leader board + cost-by-model table
+- `jobs` — per-job table with ID, runs, cost, tokens, pace, avg duration
+- `runs --job <id>` — individual run history (time, duration, cost, tokens, model)
+- `models` — per-model aggregate table
+- `trends` — daily bar chart (ASCII) of cost + runs
+- `health` — fact DB metadata, job count, last sync
+- `all` — chains health → summary → jobs → models → trends
+- All commands support `--days N`, `--outcome`, `--mode`, and `--json`
+- Job name resolution from `~/.hermes/cron/jobs.json`
 
-> **Note:** Bundled Hermes plugins (Kanban, Achievements) rely on `SDK.useI18n()` with strings baked into Hermes core catalogs — a pattern unavailable to independently installed plugins. Cronalytics chose a self-hosted catalog approach to maintain full control over terminology and support languages beyond Hermes core's built-in set.
+### Agent Skill — agent-guided diagnostics:
+- Structured 7-step workflow: time window verification → baseline → job-level drill → per-run investigation → failure pattern → model economics → trend validation
+- Confidence-graded anomaly detection (HIGH / MEDIUM / LOW)
+- `jobs.json` cross-reference for temporal context and silent failure detection
+- "Known Ways to Fool Yourself" guardrails prevent false positives
+- Works in any terminal session or messaging channel
 
-### Jobs Breakdown Table
-
-Eight sortable columns: **Job**, **Runs**, **Avg Duration**, **Total Cost**, **Avg Cost**, **Nominal/mo**, **Trend/mo**, **Pace**.
-
-- Click a column header to sort ascending/descending
-- Click any row to expand a detail panel showing:
-  - Token breakdown (total, in, out, cached)
-  - Success/failure split with cost attribution
-  - Schedule display, last run, model, next run
-  - **See Runs** button opening a full modal
-
-### Job Detail Modal
-
-Full run history for the selected job:
-- 95% width modal with sticky headers
-- Sortable by run time, cost, duration, success, model
-- 200-run default limit (backend ceiling: 500)
-- Mode column showing Agent vs No agent
-
-### Toolbar Controls
-
-- **Outcome toggle** — `All | Success | Failure` (persists in localStorage)
-- **Mode toggle** — `All | Agent | No agent` (persists in localStorage)
-- **Day selector** — `7D | 30D | 90D` presets + custom input (0–365 days, Enter/Go)
-- **Refresh** — re-fetches summary and jobs
-- **Sync Now** — triggers reconciliation scan with spinner + completion toast
+For full details about usage and common workflows see **[USAGE.md](docs/USAGE.md)** and to explore the complete feature catalog see **[FEATURES.md](dev/FEATURES.md)**.
 
 ---
 
+## ⚠️ Important Notes
+
+### **Cost data is estimated, not exact.** 
+
+Cronalytics reports the estimated cost that Hermes computed and stored in `state.db`. Your actual invoice may differ due to rate changes, credits, or rounding. Use this for directional awareness, not accounting.
+
 ### Understanding Success
 
-Cronalytics tracks two different notions of "success":
+**Cronalytics tracks two different notions of "success"**:
 
 | Signal | What It Means | Source |
 |--------|--------------|--------|
@@ -207,13 +169,9 @@ Cronalytics tracks two different notions of "success":
 
 > The Success/Failure toggle is a **reliability** signal, not a **correctness** signal.
 
----
+### **Single-profile cron by default.** 
 
-## ⚠️ Important Notes
-
-**Cost data is estimated, not exact.** Cronalytics reports the estimated cost that Hermes computed and stored in `state.db`. Your actual invoice may differ due to rate changes, credits, or rounding. Use this for directional awareness, not accounting.
-
-**Single-profile cron by default.** Cronalytics monitors the Hermes profile where it is installed. Most users — even those with multiple profiles configured — run cron jobs in the **default** profile. For them, Cronalytics works fully.
+Cronalytics monitors the Hermes profile where it is installed. Most users — even those with multiple profiles configured — run cron jobs in the **default** profile. For them, Cronalytics works fully.
 
 The edge case: if you explicitly create a cron job under a non-default profile (`hermes --profile <name> cron create ...`), that job runs in an isolated gateway with its own `state.db`. Cronalytics, installed in the default profile, cannot see it. To monitor those jobs, install Cronalytics in that profile's `plugins/` directory as well.
 
@@ -221,9 +179,9 @@ Multi-profile cron support is on our roadmap.
 
 ---
 
-### Documentation Index
+## Documentation Index
 
-#### User Documentation (`docs/`)
+### User Documentation (`docs/`)
 
 - **docs/INSTALL.md** — Installation guide (dashboard plugin + pip CLI + skill setup)
 - **docs/UPGRADE.md** — Transition guide for v1.0.x users (Namespace restructure)
@@ -232,14 +190,14 @@ Multi-profile cron support is on our roadmap.
 - **docs/TROUBLESHOOTING.md** — Common issues and fixes
 - **docs/RELEASE_NOTES.md** — Per-release upgrade notes and highlights
 
-#### Developer Documentation (`dev/`)
+### Developer Documentation (`dev/`)
 
 - **dev/BRIEF.md** — Product opportunity brief & positioning
 - **dev/DESIGN.md** — Architecture, data flow, and technical decisions
 - **dev/FEATURES.md** — Complete feature catalog with formulas
 - **dev/DEV_SETUP.md** — Development environment setup
 
-#### Project Meta
+### Project Meta
 
 - **CHANGELOG.md** — Full version history
 
@@ -250,15 +208,9 @@ Multi-profile cron support is on our roadmap.
 After install, the plugin needs data:
 
 1. **Wait for a cron job to run** — the `on_session_end` hook captures it automatically.
-2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard, or run:
-
-```bash
-curl -H "X-Hermes-Session-Token: <token>" -X POST http://localhost:9119/api/plugins/cronalytics/sync
-```
+2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard.
 
 If the dashboard shows "No cron jobs captured," click **Sync Now**.
-
-> **Note:** The sync endpoint requires the dashboard's ephemeral session token for security (injected into the SPA at startup). Most users should use the dashboard **Sync Now** button instead of curl.
 
 ---
 
@@ -366,7 +318,7 @@ This is an independent project built by a solo developer with help from an AI ag
 **Found a bug?** Open a [GitHub issue](https://github.com/8bit64k/cronalytics/issues) with reproduction steps.  
 **Have a feature idea?** Open a [discussion](https://github.com/8bit64k/cronalytics/discussions) or fork it.
 
-Caveat: The cost estimates are approximate and as recorded by the Hermes Agent framework. The success/failure signal is wrapper-level only (see [Understanding Success](#understanding-success)). Verify anything mission-critical independently.
+**Caveat**: The cost estimates are approximate and as recorded by the Hermes Agent framework. The success/failure signal is wrapper-level only (see [Understanding Success](#understanding-success)). Verify anything mission-critical independently.
 
 ---
 

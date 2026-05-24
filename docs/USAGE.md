@@ -3,8 +3,9 @@
 > How to read the dashboard, interpret the metrics, and use the controls.
 
 ---
+⚠️ **Before you being make sure you have read and understand these [Important Notes](#important-notes)**.
 
-## The Cronalytics Tab
+> ## The Cronalytics Tab
 
 Open the **Cronalytics** tab from the Hermes dashboard sidebar. The tab is organized top-to-bottom as:
 
@@ -17,7 +18,7 @@ Open the **Cronalytics** tab from the Hermes dashboard sidebar. The tab is organ
 
 ---
 
-## Toolbar Controls
+> ## Toolbar Controls
 
 The sticky toolbar stays at the top of the viewport as you scroll.
 
@@ -72,7 +73,7 @@ Triggers a reconciliation scan against `state.db` and the cron output directory.
 
 ---
 
-## Summary Board
+> ## Summary Board
 
 Four cards showing aggregate metrics. Click any card to open an educational modal.
 
@@ -118,7 +119,7 @@ Click the Pace card to open a modal explaining the math in detail.
 
 ---
 
-## Leader Board
+> ## Leader Board
 
 Four spotlight cards showing the single highest-value job in each dimension. Click any card to see job details.
 
@@ -136,7 +137,7 @@ The job most at risk of exceeding its budget. This is your early-warning signal 
 
 ---
 
-## Understanding the Cost Column
+> ## Understanding the Cost Column
 
 The cost shown for each run is the **estimated cost** that Hermes calculated and recorded in `state.db` during the session.
 
@@ -149,7 +150,7 @@ It is **not** your exact invoice. Provider billing systems apply rounding, credi
 
 ---
 
-## Per-Model Breakdown
+> ## Per-Model Breakdown
 
 A proportional bar chart of the top 5 models by estimated cost.
 
@@ -161,7 +162,7 @@ A proportional bar chart of the top 5 models by estimated cost.
 
 ---
 
-## Jobs Breakdown Table
+> ## Jobs Breakdown Table
 
 The main data surface. Eight columns, all sortable.
 
@@ -198,7 +199,7 @@ Click any row to expand a detail panel showing:
 
 ---
 
-## Job Detail Modal
+> ## Job Detail Modal
 
 Click **See Runs** in an expanded row to open the full run history.
 
@@ -217,7 +218,7 @@ Close the modal by:
 
 ---
 
-## Educational Modals
+> ## Educational Modals
 
 Click any Summary Board or Leader Board card to open an explanatory modal.
 
@@ -235,7 +236,7 @@ Explains input/output/cached tokens, shows proportion bars, and includes percent
 
 ---
 
-## Keyboard Navigation
+> ## Keyboard Navigation
 
 All interactive elements are keyboard-accessible:
 
@@ -245,7 +246,7 @@ All interactive elements are keyboard-accessible:
 
 ---
 
-## Resetting the UI
+> ## Resetting the UI
 
 The dashboard saves your filter preferences to `localStorage`. If the UI behaves unexpectedly or you wish to clear your settings, you can clear these keys in your browser's Developer Tools (Console):
 
@@ -255,7 +256,7 @@ The dashboard saves your filter preferences to `localStorage`. If the UI behaves
 
 ---
 
-## Common Workflows
+> ## Common Workflows
 
 ### "Why did my cost spike this week?"
 1. Set Day Selector to **7D**.
@@ -283,18 +284,9 @@ The dashboard saves your filter preferences to `localStorage`. If the UI behaves
 
 ---
 
-## CLI Usage
+> ## CLI Usage
 
-Cronalytics includes a terminal data tool with the same data as the dashboard, plus `--json` output for scripts and agents.
-
-### Installation
-
-If you installed via the dashboard plugin tab, the CLI code is already present. Install it via `pip` to get the `cronalytics` command on your `$PATH`:
-
-```bash
-pip install -e ~/.hermes/plugins/cronalytics
-```
-*(Arch Linux users (btw) may need to add `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
+Cronalytics includes a terminal data tool with the same data as the dashboard, plus `--json` output for scripts and agents, but it must be registered separately via `pip` to get the `cronalytics` command on your `$PATH`. See [INSTALL.md](INSTALL.md) for details.
 
 Then use it from any directory:
 
@@ -350,6 +342,20 @@ cronalytics jobs --days 30 --json | jq -r '.data[] | [.job_id, .runs, .tot_estim
 ```bash
 cronalytics all
 ```
+**"Full report (bare command or 'all' subcommand)"**
+```bash
+cronalytics --days 14
+```
+
+**"Per-job economics with pace and projections"**
+```bash
+cronalytics jobs --days 7 --json | jq '.data[] | select(.pace > 1.2)'
+```
+
+**"Drill into a specific job"**
+```bash
+cronalytics runs --job f1561526d8 --days 30 --json
+```
 
 ### Formatting Conventions
 
@@ -361,7 +367,7 @@ cronalytics all
 
 ---
 
-## Agent Skill
+> ## Agent Skill
 
 Cronalytics ships with a built-in diagnostic skill that teaches Hermes agents how to analyze your cron jobs.
 
@@ -450,7 +456,7 @@ At weekly cadence:
 
 **Rule:** Use the cheapest model that reliably produces the structured output you need. If the assessment misses a signal, upgrade the model, not the prompt.
 
-## Localization (i18n)
+> ## Localization (i18n)
 
 Cronalytics automatically detects your system language. If you are using Hermes in **Spanish**, **Simplified Chinese**, or **Traditional Chinese**, the dashboard will update its labels and documentation accordingly.
 
@@ -458,7 +464,7 @@ Cronalytics automatically detects your system language. If you are using Hermes 
 
 ---
 
-## Advanced: Multiple Profiles
+> ## Advanced: Multiple Profiles
 
 Hermes supports multiple profiles via `hermes --profile <name>`. Each profile has its own `state.db`, cron jobs, and plugin directory.
 
@@ -468,5 +474,39 @@ If you create jobs under `hermes --profile work cron create ...`, those jobs run
 
 ---
 
+ ## Important Notes ⚠️
+>
+> ### Cost data is estimated, not exact. 
+>
+> Cronalytics reports the estimated cost that Hermes computed and stored in `state.db`. Your actual invoice may differ due to rate changes, credits, or rounding. Use this for directional awareness, not accounting.
+
+> ### Understanding Success
+> 
+> **Cronalytics tracks two different notions of "success"**:
+> 
+> | Signal | What It Means | Source |
+|--------|--------------|--------|
+| **Wrapper Success** (`success` toggle in dashboard) | The cron wrapper finished without error — the job ran, the agent responded, and the wrapper exited cleanly. | `end_reason` field |
+| **Payload Success** | The agent's actual output was correct, useful, or achieved the intended  goal. | **Not tracked** |
+> 
+> ### How to interpret the dashboard
+> 
+> - **Success = high, Failure = low** → Your cron jobs are mechanically reliable.
+> - **Success = high, but output quality is poor** → The infrastructure is fine; the issue is in the > prompt, model choice, or task definition.
+> - **Failure = high** → Investigate timeouts, API errors, or wrapper crashes.
+> 
+> The Success/Failure toggle is a **reliability** signal, not a **correctness** signal.
+
+> ### Single-profile cron by default. 
+> 
+> Cronalytics monitors the Hermes profile where it is installed. Most users — even those with multiple profiles configured — run cron jobs in the **default** profile. For them, Cronalytics works fully.
+> 
+> The edge case: if you explicitly create a cron job under a non-default profile (`hermes --profile <name> cron create ...`), that job runs in an isolated gateway with its own `state.db`. Cronalytics, installed in the default profile, cannot see it. To monitor those jobs, install Cronalytics in that profile's `plugins/` directory as well.
+> 
+> Multi-profile cron support is on our roadmap.
+>
+---
+
 *Version: 1.1.0*  
-*Last updated: 2026-05-26*
+*Last updated: 2026-05-26
+
