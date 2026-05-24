@@ -183,23 +183,23 @@ Multi-profile cron support is on our roadmap.
 
 ### User Documentation (`docs/`)
 
-- **docs/INSTALL.md** — Installation guide (dashboard plugin + pip CLI + skill setup)
-- **docs/UPGRADE.md** — Transition guide for v1.0.x users (Namespace restructure)
-- **docs/UNINSTALL.md** — Clean removal instructions
-- **docs/USAGE.md** — Dashboard and CLI usage guide
-- **docs/TROUBLESHOOTING.md** — Common issues and fixes
-- **docs/RELEASE_NOTES.md** — Per-release upgrade notes and highlights
+- **[INSTALL.md](docs/INSTALL.md)** — Installation guide (dashboard plugin + pip CLI + skill setup)
+- **[UPGRADE.md](docs/UPGRADE.md)** — Transition guide for v1.0.x users (Namespace restructure)
+- **[UNINSTALL.md](docs/UNINSTALL.md)** — Clean removal instructions
+- **[USAGE.md](docs/USAGE.md)** — Dashboard and CLI usage guide
+- **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** — Common issues and fixes
+- **[RELEASE_NOTES.md](docs/RELEASE_NOTES.md)** — Per-release upgrade notes and highlights
 
 ### Developer Documentation (`dev/`)
 
-- **dev/BRIEF.md** — Product opportunity brief & positioning
-- **dev/DESIGN.md** — Architecture, data flow, and technical decisions
-- **dev/FEATURES.md** — Complete feature catalog with formulas
-- **dev/DEV_SETUP.md** — Development environment setup
+- **[BRIEF.md](dev/BRIEF.md)** — Product opportunity brief & positioning
+- **[DESIGN.md](dev/DESIGN.md)** — Architecture, data flow, and technical decisions
+- **[FEATURES.md](dev/FEATURES.md)** — Complete feature catalog with formulas
+- **[DEV_SETUP.md](dev/DEV_SETUP.md)** — Development environment setup
 
 ### Project Meta
 
-- **CHANGELOG.md** — Full version history
+- **[CHANGELOG.md](CHANGELOG.md)** — Full version history
 
 ---
 
