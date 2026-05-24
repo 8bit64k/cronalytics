@@ -189,6 +189,7 @@ Multi-profile cron support is on our roadmap.
 - **[USAGE.md](docs/USAGE.md)** — Dashboard and CLI usage guide
 - **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** — Common issues and fixes
 - **[RELEASE_NOTES.md](docs/RELEASE_NOTES.md)** — Per-release upgrade notes and highlights
+- **[FAQ.md](docs/FAQ.md)** — Common questions and quick answers
 
 ### Developer Documentation (`dev/`)
 
