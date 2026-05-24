@@ -1,23 +1,16 @@
-# Release Notes — v1.1.0 (2026-05-22)
+# Release Notes — Cronalytics v1.1.0 (2026-05-26)
+**"The CLI Tool + Skill" Release**
 
-## Major Launch: Native i18n & Multi-Model Consensus
-
-This release introduces a hardened localization architecture for the Cronalytics dashboard.
+## New and Improved Features
 
 ### New Features
-1. **Multilingual Dashboard:** 100% coverage for es, zh-CN, zh-TW.
-2. **"2/4 Consensus" Gateway:** Multi-model validation protocol ensures technical accuracy. 
-3. **Agent Standards (AGENTS.md):** Formal repo rules prohibiting hardcoded UI strings.
-4. **Audit Trail:** New `docs/I18N_PROTOCOL.md` and `TRANSLATION.md` reference.
+1. Terminal CLI Tool
+2. Agent Diagnostic Skill
+3. **Multilingual/Localization Support (i18n)**: coverage for [en, es, zh-CN, zh-TW].
 
-### Fixes & Improvements
+### Improvements
 - **Trend Spikes:** Gated arrows behind 1.75x history window to prevent false alarms.
 - **UI Uniformity:** Consistent naming ("Avg Duration") and modernized icon-only refresh.
-
-# Release Notes — Cronalytics v1.1.0
-
-**Release date:** 2026-05-19  
-**Codename:** "The CLI Tool + Skill"
 
 ---
 
@@ -38,8 +31,6 @@ cronalytics jobs --days 7 --json | jq '.data[] | select(.pace > 1.2)'
 cronalytics runs --job 67541bf6e230 --days 30 --json
 ```
 
-**Install:** `pip install -e ~/.hermes/plugins/cronalytics` (requires plugin already installed via dashboard). Arch Linux users append `--break-system-packages`.
-
 **Important:** The CLI is not a standalone product. It requires the plugin's `facts.db` to function. If you uninstall the plugin, the CLI stops working.
 
 ### Agent Diagnostic Skill
@@ -50,28 +41,9 @@ Ask your agent:
 
 > "Check my cron jobs for the last two weeks — flag anything that looks off."
 
-The skill guides the agent through a 6-step workflow: baseline → jobs → per-run drill-down → failures → models → trends. Every finding is confidence-graded (HIGH / MEDIUM / LOW) with required evidence and alternative explanations.
-
-**Install:** `hermes skills install https://raw.githubusercontent.com/8bit64k/cronalytics/main/skills/devops/cronalytics/SKILL.md --category devops --name cronalytics --yes`
+The skill guides the agent through a structured 7-step diagnostic workflow (time window verification → baseline health → job-level drill → per-run investigation → failure pattern → model economics → trend validation). Every finding is confidence-graded (HIGH / MEDIUM / LOW) with required evidence and alternative explanations.
 
 ---
-
-## Upgrade Notes
-
-### From v1.0.x
-
-1. **Dashboard plugin:** Use the dashboard **Plugins** tab → **Update**, or run `hermes plugins update cronalytics`. Then **stop and start the dashboard** with a 2-second delay to ensure the port is released (`hermes dashboard --stop && sleep 2 && hermes dashboard`) for changes to take effect.
-2. **CLI (new):** If you want the terminal command, run:
-   ```bash
-   pip install -e ~/.hermes/plugins/cronalytics
-   ```
-   *(Arch Linux users (btw) may need to add `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
-   ```bash
-   hermes skills install \
-     https://raw.githubusercontent.com/8bit64k/cronalytics/main/skills/devops/cronalytics/SKILL.md \
-     --category devops --name cronalytics --yes
-   ```
-4. Hard-refresh the dashboard (`Ctrl+Shift+R` or `Cmd+Shift+R`).
 
 ### File Layout Change
 

@@ -184,7 +184,7 @@ The original design specified three slots (`cron:top`, `cron:bottom`) injected i
 2. Vertical slice delivery: a full page is faster to build and test than coordinating multiple slot injections.
 3. Navigation clarity: users expect "Cronalytics" as a distinct view, not a patch on top of the scheduler CRUD.
 
-The manifest no longer claims any sidebar slots. The `/cronalytics` tab is the sole UI surface.
+The `/cronalytics` tab is the primary UI surface.
 
 ### 4.6 Fixed-Window Projection Math
 
@@ -434,7 +434,7 @@ cronalytics/
 
 ---
 
-## 9. Positioning
+## 10. Positioning
 
 > Turn hidden automation into visible spend.
 
@@ -443,4 +443,4 @@ See what your cron jobs are costing before background automation becomes backgro
 ---
 
 *Version: 1.1.0*  
-*Last updated: 2026-05-23*
+*Last updated: 2026-05-26*

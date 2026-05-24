@@ -27,7 +27,6 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
 3. **Agent Skill** — A built-in diagnostic skill that teaches Hermes agents how to analyze your cron jobs with confidence-graded anomaly detection
 
 > Turn hidden automation into visible spend.
->
 > Built for **[Hermes Agent](https://github.com/nousresearch/hermes-agent)**, the autonomous agent framework by **[Nous Research](https://nousresearch.com)**.
 
 ---
@@ -316,7 +315,7 @@ Key fields captured per run:
 - `run_time` / `ended_at` / `duration_seconds`
 - `model`
 - `input_tokens` / `output_tokens` / `reasoning_tokens` / `cache_read_tokens` / `cache_write_tokens`
-- `estimated_cost` — primary cost metric
+- `estimated_cost_usd` — primary cost metric
 - `actual_cost_usd` — ground-truth when available
 - `cost_status`, `cost_source`, `billing_provider`
 - `api_call_count`, `message_count`, `tool_call_count`
@@ -401,7 +400,7 @@ Paths are resolved automatically:
 
 ## Support
 
-This is an independent project built by a solo developer with help from an AI agent, and I'm grateful you are willing to try Cronayltics. I hope it helps optimize your cron activity. I use it daily and will fix bugs as I find them, but support and bug fixes will be on my **best effort** time schedule.
+This is an independent project built by a solo developer with help from an AI agent, and I'm grateful you are willing to try Cronalytics. I hope it helps optimize your cron activity. I use it daily and will fix bugs as I find them, but support and bug fixes will be on my **best effort** time schedule.
 
 **Found a bug?** Open a [GitHub issue](https://github.com/8bit64k/cronalytics/issues) with reproduction steps.  
 **Have a feature idea?** Open a [discussion](https://github.com/8bit64k/cronalytics/discussions) or fork it.
@@ -426,11 +425,11 @@ MIT — see [`LICENSE`](LICENSE) for full text.
 
 ## Changelog
 
-### v1.1.0 (2026-05-19)
+### v1.1.0 (2026-05-26)
 
 - **Terminal CLI** — `cronalytics` (via `pip install -e`) or `python -m cronalytics.cli` with 7 subcommands: `summary`, `jobs`, `runs`, `models`, `trends`, `health`, `all`. Full `--json` output on every data command except `all`. `--days`, `--outcome`, `--mode` filters on every data command. Leader Board spotlight in `summary`. Job name resolution from `jobs.json`.
 - **Agent Diagnostic Skill** — Built-in `cronalytics` skill with structured 7-step diagnostic workflow (time window verification → baseline health → job-level drill → per-run investigation → failure pattern → model economics → trend validation). Confidence-graded anomaly detection (HIGH / MEDIUM / LOW) with supporting evidence requirements. "Known Ways to Fool Yourself" guardrails (age-gating, script job awareness, variance checks). Cross-references `jobs.json` for scheduling context and silent failure detection.
-- **Test suite: 149 tests** — all passing, `ruff` + `mypy` clean.
+- **Test suite: 149 tests** — all passing, `ruff` + `mypy` clean (note: `mypy` excludes `ingester.py`, `scanner.py`, `__init__.py`, and `dashboard/`; `disallow_untyped_defs = false`).
 
 ### v1.0.1 (2026-05-13)
 

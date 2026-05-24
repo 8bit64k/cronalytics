@@ -8,7 +8,7 @@ This guide covers the transition to **Cronalytics v1.1.0**, which introduces a s
 
 ### Primary: Dashboard UI (Git Pull method) (Recommended)
 
-Open the Hermes dashboard and navigate to the **Plugins** tab. Find the Cronalytics plugin listed in the ***Installed Plugins*** section. Click on 'Git Pull' to pull the latest code.
+Open the Hermes dashboard and navigate to the **Plugins** tab. Find the Cronalytics plugin listed in the **Installed Plugins** section. Click on 'Git Pull' to pull the latest code.
 
 ![Screenshot of Plugin Listing](screenshots/gitpull.png)
 
@@ -89,7 +89,7 @@ cp -r skills/cronalytics/* ~/.hermes/skills/devops/cronalytics/
 ### 422 Error: string_pattern_mismatch
 **Symptoms:** Dashboard fails to load; browser console shows 422 error on `outcome` or `mode`.
 **Cause:** Old v1.0 code is still running in the Gateway/Dashboard memory.
-**Fix:** Run the robust restart sequence (`hermes dashboard --stop && sleep 2 && hermes dashboard`) and perform a hard refresh in your browser ($Ctrl+Shift+R$).
+**Fix:** Run the robust restart sequence (`hermes dashboard --stop && sleep 2 && hermes dashboard`) and perform a hard refresh in your browser (`Ctrl+Shift+R`).
 
 ### Missing Command: `cronalytics`
 **Cause:** The CLI is an optional entry point that must be registered via pip.

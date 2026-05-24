@@ -416,7 +416,7 @@ Anomalies (confidence-graded):
 
 ### Tailoring Assessments to Your Environment
 
-The same assessment prompt produces different depth depending on your fleet size and how you frame the request. Our testing (see `references/prompt-engineering-suite.md`) found six distinct prompt angles, each surfacing different signals:
+The same assessment prompt produces different depth depending on your fleet size and how you frame the request. Six distinct prompt angles each surface different signals:
 
 | Angle | Surfaces Best | Good For |
 |-------|---------------|----------|
@@ -445,7 +445,7 @@ You do **not** need a frontier model to run a cronalytics assessment. Pattern de
 | claude-sonnet / gpt-5.5 | $2.00–5.00+ | **Overkill — avoid for routine assessments** |
 
 At weekly cadence:
-- gemini-flash: ~$0.04–0.20/month to monitor a fleet
+- gemini-3-flash: ~$0.04–0.20/month to monitor a fleet
 - gpt-5.5: ~$8–20/month — a 100× waste for the same signal
 
 **Rule:** Use the cheapest model that reliably produces the structured output you need. If the assessment misses a signal, upgrade the model, not the prompt.
@@ -469,4 +469,4 @@ If you create jobs under `hermes --profile work cron create ...`, those jobs run
 ---
 
 *Version: 1.1.0*  
-*Last updated: 2026-05-23*
+*Last updated: 2026-05-26*

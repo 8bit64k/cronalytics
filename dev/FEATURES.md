@@ -289,8 +289,10 @@ If no data exists at all:
 
 A terminal interface that mirrors the dashboard data without requiring a browser.
 
-```
+```bash
 cronalytics <command> [--days N]
+```
+
 ### 6.1 Full Report Chain (Default)
 
 Executing `cronalytics` (bare) or `cronalytics all` triggers an orchestrated **Full Report Chain**. It sequentially executes and renders five sub-commands into a unified terminal view:
@@ -324,17 +326,15 @@ The following metrics are implemented and available in `--json` output for advan
 
 ---
 
-
-
-## 11. i18n Localization Engine
+## 7. i18n Localization Engine
 
 - **Cross-Locale Parity:** All dashboard features are localized for English, Spanish, Simplified Chinese, and Traditional Chinese.
 - **Consensus-Validated:** Phrasing validated via 4 independent AI models.
 - **Agent Enforcement:** Repository architecture enforces zero-hardcoded-string compliance (see `AGENTS.md`).
 
-## 7. Formulas & Data Sources
+## 8. Formulas & Data Sources
 
-### 7.1 Fixed-Window Projection Math
+### 8.1 Fixed-Window Projection Math
 
 All trend calculations use the **user-selected filter window** as the denominator, not the actual data span.
 
@@ -350,7 +350,7 @@ trend_1yr  = daily_cost * 365
 - Prevents stale averages from jobs with sparse runs.
 - Makes jobs comparable: same denominator, same time horizon.
 
-### 7.2 Nominal (Schedule-Based) Projection
+### 8.2 Nominal (Schedule-Based) Projection
 
 ```
 scheduled_runs_30d = count_occurrences(schedule_expr, now, now + 30 days)
@@ -359,7 +359,7 @@ nominal_30d        = avg_estimated_cost * scheduled_runs_30d
 
 Uses `croniter` for cron expressions and simple `timedelta` math for interval schedules (`every N minutes`).
 
-### 7.3 Pace
+### 8.3 Pace
 
 ```
 pace = trend_30d / nominal_30d
@@ -369,7 +369,7 @@ pace = trend_30d / nominal_30d
 - `pace == 1.0` — actual spend matches scheduled expectation.
 - `pace > 1.0` — actual spend exceeds scheduled expectation (over-running or drifting).
 
-### 7.4 Drift Ratio
+### 8.4 Drift Ratio
 
 ```
 scheduled_in_window = count_occurrences(schedule_expr, now - observed_window, now)
@@ -381,7 +381,7 @@ Drift answers: *"How many times did this job actually run, compared to how many 
 - `drift > 1.0` — running more often than scheduled (retries, external triggers, interval overlap).
 - `drift < 1.0` — running less often than scheduled (missed ticks, job disabled).
 
-### 7.5 Aggregate Pace
+### 8.5 Aggregate Pace
 
 ```
 nominal_monthly_total = Σ(nominal_30d across all jobs)
@@ -391,7 +391,7 @@ aggregate_pace        = trend_monthly_total / nominal_monthly_total
 
 Because the math is fixed-window, the aggregate pace is always the exact sum of its parts.
 
-### 7.6 Data Sources
+### 8.6 Data Sources
 
 | Data | Source File | Description |
 |------|-------------|-------------|
@@ -404,7 +404,7 @@ Because the math is fixed-window, the aggregate pace is always the exact sum of 
 
 ---
 
-## 8. Configuration
+## 9. Configuration
 
 All values are hardcoded defaults in `config.py`. There is no user-editable configuration file yet.
 
@@ -423,7 +423,7 @@ Paths:
 
 ---
 
-## 9. Test Coverage
+## 10. Test Coverage
 
 149 pytest tests covering:
 - `facts.py` — schema creation, ingestion, aggregation queries, job_id parsing
@@ -439,7 +439,7 @@ Lint/type: `uv run ruff check . && uv run mypy .`
 
 ---
 
-## 10. Known Limitations
+## 11. Known Limitations
 
 These are **intentional boundaries or acknowledged gaps**, not bugs.
 
@@ -455,4 +455,4 @@ These are **intentional boundaries or acknowledged gaps**, not bugs.
 ---
 
 *Version: 1.1.0*  
-*Last updated: 2026-05-23*
+*Last updated: 2026-05-26*

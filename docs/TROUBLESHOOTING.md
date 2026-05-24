@@ -58,7 +58,7 @@ Cronalytics only captures jobs from the `on_session_end` hook going forward. His
 
 ---
 
-### Problem: CLI reports "No runs found" but the Dashboard shows data.
+## Problem: CLI reports "No runs found" but the Dashboard shows data.
 
 **Check Path Resolution:**
 Cronalytics resolves `$HERMES_HOME` with the following priority:
@@ -71,7 +71,7 @@ If your CLI is environment-isolated (e.g. running in a raw shell without your us
 
 ---
 
-### Problem: Dashboard is not updating after a cron run.
+## Problem: Dashboard is not updating after a cron run.
 
 **Check the Ingestion Queue:**
 Cronalytics uses a durable queue file: `~/.hermes/plugins/cronalytics/pending.jsonl`.
@@ -92,6 +92,8 @@ Cronalytics uses a durable queue file: `~/.hermes/plugins/cronalytics/pending.js
 ```bash
 hermes dashboard --stop && sleep 2 && hermes dashboard
 ```
+
+See also [UPGRADE.md](UPGRADE.md) for version-specific upgrade issues.
 
 ---
 
@@ -115,4 +117,4 @@ cd ~/.hermes/plugins/cronalytics && python -m cronalytics.cli --help
 ---
 
 *Version: 1.1.0*  
-*Last updated: 2026-05-23*
+*Last updated: 2026-05-26*
