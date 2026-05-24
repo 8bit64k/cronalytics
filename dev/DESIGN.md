@@ -340,13 +340,18 @@ run_job() ──▶ run_conversation() ──▶ on_session_end(platform="cron")
 **Status:** Production-ready Multi-locale support (`en`, `es`, `zh-CN`, `zh-TW`). 
 
 **Architecture:** 
-Cronalytics implements a custom i18n layer that bridges with the Hermes Core `locale` state. Detects locale from `navigator.language` and syncs via `locale-changed` events.
+Cronalytics implements a **self-hosted i18n layer** that bridges with the Hermes Core `locale` state. While other bundled plugins (Kanban, Achievements) consume translations directly via `SDK.useI18n()` and rely on Hermes' built-in catalogs, Cronalytics maintains its own catalog registry (`registerCatalog`) to support languages and technical terminology beyond what Hermes core provides.
 
-**The "2/4 Consensus" Protocol:**
-Validated through 4 independent models (Sonnet, Kimi, DeepSeek, Gemini). Requires 2/4 matching identity. Outliers rejected. Final technical alignment enforced (e.g., "Token" as English).
+**Why self-hosted:**
+1. **Independent locale control:** Hermes core supports 16 locales, but Cronalytics may need languages or regional variants (e.g., `zh-TW`) that are not in the core bundle.
+2. **Product Glossary enforcement:** Technical terms like "Pace" require precise, domain-specific translation that generic Hermes catalogs cannot guarantee.
+3. **The "2/4 Consensus" Protocol:** Our multi-model validation pipeline requires owning the entire translation catalog to enforce statistical agreement and outlier rejection.
+
+**How other plugins do it:**
+Kanban and Achievements call `const { t } = SDK.useI18n()` directly. Hermes exposes a namespaced translation object (e.g., `t.kanban.title`). This is simpler but limits plugins to whatever languages Hermes ships.
 
 **Developer Requirement:**
-Zero hardcoded strings in JSX. Every label must use `t()` hook with technical key + English fallback. See `docs/I18N_PROTOCOL.md` and `AGENTS.md`.
+Zero hardcoded strings in JSX. Every label must use the `useCronalyticsI18n()` hook with a technical key + English fallback. See `docs/I18N_PROTOCOL.md` and `AGENTS.md`.
 
 ---
 ## 8. Terminal CLI

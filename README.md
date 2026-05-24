@@ -151,13 +151,15 @@ Proportional bar chart showing the top 5 models by cost, with run counts. Remain
 
 ### Multi-Locale Support
 
-Cronalytics is the first Hermes plugin with production-grade internationalization support. All UI elements, educational explainers, and metrics are fully localized for:
+Cronalytics implements a self-hosted internationalization layer for independent Hermes plugins. All UI elements, educational explainers, and metrics are fully localized for:
 - 🇺🇸 **English** (Source of Truth)
 - 🇪🇸 **Spanish** (Professional/Technical)
 - 🇨🇳 **Chinese Simplified** (zh-CN)
 - 🇹🇼 **Chinese Traditional** (zh-TW)
 
-Translations undergo a multi-model "2/4 Consensus" validation process to ensure high technical accuracy.
+Translations undergo a multi-model "2/4 Consensus" validation process to ensure high technical accuracy across regional variants.
+
+> **Note:** Bundled Hermes plugins (Kanban, Achievements) rely on `SDK.useI18n()` with strings baked into Hermes core catalogs — a pattern unavailable to independently installed plugins. Cronalytics chose a self-hosted catalog approach to maintain full control over terminology and support languages beyond Hermes core's built-in set.
 
 ### Jobs Breakdown Table
 
