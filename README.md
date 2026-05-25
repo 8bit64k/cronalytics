@@ -132,7 +132,7 @@ Cronalytics implements a self-hosted internationalization layer for independent 
 - `trends` — daily bar chart (ASCII) of cost + runs
 - `health` — fact DB metadata, job count, last sync
 - `all` — chains health → summary → jobs → models → trends
-- All commands support `--days N`, `--outcome`, `--mode`, and `--json`
+- All commands support `--days N`, `--outcome`, and `--mode`; every data command except `all` supports `--json`
 - Job name resolution from `~/.hermes/cron/jobs.json`
 
 ### Agent Skill — agent-guided diagnostics:
