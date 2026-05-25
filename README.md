@@ -324,10 +324,9 @@ See **[FAQ](docs/FAQ.md)** for more: the 250-run limit, agent vs no-agent, model
 
 ## Support
 
-This is an independent project built by a solo developer with help from an AI agent, and I'm grateful you are willing to try Cronalytics. I hope it helps optimize your cron activity. I use it daily and will fix bugs as I find them, but support and bug fixes will be on my **best effort** time schedule.
+Found a bug? Open a [GitHub Issue](https://github.com/8bit64k/cronalytics/issues) with reproduction steps. Have a feature idea? Open a [Discussion](https://github.com/8bit64k/cronalytics/discussions) or fork it.
 
-**Found a bug?** Open a [GitHub issue](https://github.com/8bit64k/cronalytics/issues) with reproduction steps.  
-**Have a feature idea?** Open a [discussion](https://github.com/8bit64k/cronalytics/discussions) or fork it.
+See **[SUPPORT.md](SUPPORT.md)** for the full help guide, FAQ, and response expectations.
 
 **Caveat**: The cost estimates are approximate and as recorded by the Hermes Agent framework. The success/failure signal is wrapper-level only (see [Understanding Success](#understanding-success)). Verify anything mission-critical independently.
 
