@@ -26,11 +26,11 @@
 Observe. Measure. Optimize.
 
 
-Cronalytics is a Hermes Agent plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them through **three interfaces**:
+Cronalytics is a Hermes Agent plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them through **three interfaces** — each aligned with the tagline:
 
-1. **Dashboard** — A dedicated `/cronalytics` tab inside `hermes dashboard` for visual exploration
-2. **CLI** — A terminal tool for programmatic access, `--json` output, and agent consumption. Requires the plugin's `facts.db` to function — not a standalone product.
-3. **Agent Skill** — A built-in diagnostic skill that teaches Hermes agents how to analyze your cron jobs with confidence-graded anomaly detection
+1. **Dashboard — *Observe*** — A dedicated `/cronalytics` tab inside `hermes dashboard` for visual exploration. Charts, cards, and filters let you see cost, pace, and failure patterns at a glance.
+2. **CLI — *Measure*** — A terminal tool for programmatic access, `--json` output, and agent consumption. Precise queries, exact numbers, and scriptable data exports. Requires the plugin's `facts.db` to function — not a standalone product.
+3. **Agent Skill — *Optimize*** — A built-in diagnostic skill that teaches Hermes agents how to analyze your cron jobs with confidence-graded anomaly detection and ranked recommendations.
 
 > Turn hidden automation into visible spend.
 > Built for **[Hermes Agent](https://github.com/nousresearch/hermes-agent)**, the autonomous agent framework by **[Nous Research](https://nousresearch.com)**.
