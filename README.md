@@ -12,6 +12,9 @@
     <a href="#">
       <img src="https://img.shields.io/badge/Hermes_Agent-supported-blueviolet.svg" alt="Hermes Agent">
     </a>
+    <a href="https://github.com/8bit64k/cronalytics-uat/actions/workflows/ci.yml">
+      <img src="https://github.com/8bit64k/cronalytics-uat/actions/workflows/ci.yml/badge.svg" alt="CI">
+    </a>
 
 ---
 
