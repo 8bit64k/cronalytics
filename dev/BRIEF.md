@@ -48,7 +48,7 @@ Potential names for the initiative or feature include:
 
 - **Unattended AI Cost Insights**.hermes-agent.nousresearch+1
 
-- **Cron-Insights**<---- *chosen (current) product name*
+- **Cronalytics** — the dashboard for agentic automations in Hermes
 
 ## Short Executive Pitch
 
