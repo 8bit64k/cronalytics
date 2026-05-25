@@ -111,7 +111,29 @@ For full details about usage and common workflows see **[USAGE.md](docs/USAGE.md
 ## Features
 
 ### Mini-Tour
-![Short Tour](docs/screenshots/cronalytics-tour.gif)
+
+<table>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/S01_dashboard-english.png" width="100%" alt="English Dashboard"/></td>
+    <td width="33%"><img src="docs/screenshots/S02_dashboard-chinese.png" width="100%" alt="Chinese Dashboard"/></td>
+    <td width="33%"><img src="docs/screenshots/S03_dashboard-spanish.png" width="100%" alt="Spanish Dashboard"/></td>
+  </tr>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/S04_summary-success.png" width="100%" alt="Summary: Success mode"/></td>
+    <td width="33%"><img src="docs/screenshots/S05_summary-failures.png" width="100%" alt="Summary: Failure mode"/></td>
+    <td width="33%"><img src="docs/screenshots/S06_pace-modal.png" width="100%" alt="Pace explainer modal"/></td>
+  </tr>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/S07_model-breakdown.png" width="100%" alt="Per-model breakdown"/></td>
+    <td width="33%"><img src="docs/screenshots/S08_jobs-breakdown.png" width="100%" alt="Jobs breakdown table"/></td>
+    <td width="33%"><img src="docs/screenshots/S09_job-runs.png" width="100%" alt="Job run history modal"/></td>
+  </tr>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/S10_cli-summary.png" width="100%" alt="CLI summary output"/></td>
+    <td width="33%"><img src="docs/screenshots/S11_cli-14-day-lead-to-assessment.png" width="100%" alt="CLI full report"/></td>
+    <td width="33%"><img src="docs/screenshots/S12_agent-report-w-viz.png" width="100%" alt="Agent diagnostic report"/></td>
+  </tr>
+</table>
 
 [YouTube](https://youtu.be/nbeViSt9hCk?si=EH2u7Ys2vDTVDqka): short video showing basic install and usage.
 
