@@ -66,6 +66,7 @@ registerCatalog("zh-TW", {
     mode_agent: "智慧體",
     no_runs: "未找到執行記錄。",
     of: " / ",
+    result: "結果",
     run: "次執行",
     runs_plural: "次執行",
     showing: "顯示 ",

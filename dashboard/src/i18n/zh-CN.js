@@ -66,6 +66,7 @@ registerCatalog("zh", {
     mode_agent: "智能体",
     no_runs: "未找到运行记录。",
     of: " / ",
+    result: "结果",
     run: "次运行",
     runs_plural: "次运行",
     showing: "显示 ",

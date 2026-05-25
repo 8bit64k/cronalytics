@@ -66,6 +66,7 @@ registerCatalog("es", {
     mode_agent: "Agente",
     no_runs: "No se encontraron ejecuciones.",
     of: " de ",
+    result: "Resultado",
     run: "ejecución",
     runs_plural: "ejecuciones",
     showing: "Mostrando ",
