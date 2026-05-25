@@ -9,6 +9,9 @@
     <a href="https://github.com/8bit64k/cronalytics/commits/main">
       <img src="https://img.shields.io/github/last-commit/8bit64k/cronalytics" alt="Last Commit">
     </a>
+    <a href="#">
+      <img src="https://img.shields.io/badge/Hermes_Agent-supported-blueviolet.svg" alt="Hermes Agent">
+    </a>
 
 ---
 
