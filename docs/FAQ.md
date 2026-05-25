@@ -8,9 +8,9 @@
 
 ### Why is my cost showing $0.00?
 
-Cronalytics reads the cost that Hermes computed during each cron session. If Hermes doesn't have a cost estimate for a run (provider didn't return one, model doesn't report costs, or the session predates cost tracking), the field is `$0.00`. This is most common with `no_agent` script jobs and very old historical runs.
+Cronalytics reads the estimated cost that Hermes computed during each cron session. If Hermes doesn't have a cost estimate for a run (provider didn't return one, model doesn't report costs, or the session predates cost tracking), the field is `$0.00`. This is most common with `no_agent` script jobs and very old historical runs.
 
-**Fix:** Click **Sync Now** to backfill recent runs. If zero-cost rows persist, check whether the provider/model you're using reports costs to Hermes.
+**Fix:** Click **Sync Now** to backfill recent runs. If zero-cost rows persist, check whether the provider/model you're using reports estimated costs (or actual) to Hermes.
 
 ### How is estimated cost different from what my provider charges?
 
@@ -31,8 +31,8 @@ Hermes populates `actual_cost_usd` only when provider billing data is available 
 
 They're measuring different things:
 
-- **Hermes Analytics tab** — all gateway activity (chat, cron, API calls) across all profiles. Broad, aggregate.
-- **Hermes Insights** — per-session cost snapshots, unfiltered by source.
+- **Hermes Analytics tab** — gateway activity (chat, cron, API calls). Broader scope than Cronalytics, not filtered to cron-only.
+- **Hermes Insights** — per-session cost snapshots. Can be filtered with `--source`, but most users see the aggregate view.
 - **Your provider invoice** — what you're actually billed, including rate changes, credits, and auxiliary charges.
 - **Cronalytics** — cron-only runs within one profile, using Hermes's session-time cost estimates.
 
