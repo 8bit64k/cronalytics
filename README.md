@@ -135,8 +135,6 @@ For full details about usage and common workflows see **[USAGE.md](docs/USAGE.md
   </tr>
 </table>
 
-[YouTube](https://youtu.be/nbeViSt9hCk?si=EH2u7Ys2vDTVDqka): short video showing basic install and usage.
-
 ---
 
 ### What Cronalytics Does
