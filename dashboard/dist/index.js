@@ -2894,6 +2894,7 @@
       run: "ejecuci\xF3n",
       runs_plural: "ejecuciones",
       showing: "Mostrando ",
+      time: "Fecha",
       title_runs: "Ejecuciones",
       use_cli: "Usar "
     },
@@ -3076,6 +3077,7 @@
       run: "\u6B21\u8FD0\u884C",
       runs_plural: "\u6B21\u8FD0\u884C",
       showing: "\u663E\u793A ",
+      time: "\u65F6\u95F4",
       title_runs: "\u8FD0\u884C\u8BB0\u5F55",
       use_cli: "\u4F7F\u7528 "
     },
@@ -3258,6 +3260,7 @@
       run: "\u6B21\u57F7\u884C",
       runs_plural: "\u6B21\u57F7\u884C",
       showing: "\u986F\u793A ",
+      time: "\u6642\u9593",
       title_runs: "\u57F7\u884C\u8A18\u9304",
       use_cli: "\u4F7F\u7528 "
     },

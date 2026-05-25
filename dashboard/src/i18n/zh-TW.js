@@ -70,6 +70,7 @@ registerCatalog("zh-TW", {
     run: "次執行",
     runs_plural: "次執行",
     showing: "顯示 ",
+    time: "時間",
     title_runs: "執行記錄",
     use_cli: "使用 ",
   },

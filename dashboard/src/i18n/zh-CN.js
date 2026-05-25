@@ -70,6 +70,7 @@ registerCatalog("zh", {
     run: "次运行",
     runs_plural: "次运行",
     showing: "显示 ",
+    time: "时间",
     title_runs: "运行记录",
     use_cli: "使用 ",
   },

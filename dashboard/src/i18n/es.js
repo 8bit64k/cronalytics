@@ -70,6 +70,7 @@ registerCatalog("es", {
     run: "ejecución",
     runs_plural: "ejecuciones",
     showing: "Mostrando ",
+    time: "Fecha",
     title_runs: "Ejecuciones",
     use_cli: "Usar ",
   },
