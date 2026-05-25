@@ -2637,7 +2637,7 @@
         React.createElement("div", null, t("job_breakdown.schedule", "Schedule") + ": " + (j.schedule && j.schedule.display || "\u2014")),
         React.createElement("div", null, t("job_breakdown.last_run", "Last run") + ": " + fmtTime(j.last_run)),
         React.createElement("div", null, t("model_breakdown.model", "Model") + ": " + (j.last_model || "\u2014")),
-        React.createElement("div", null, t("job_breakdown.avg_duration", "Avg duration") + ": " + (j.avg_duration != null ? fmtDuration(j.avg_duration) : "\u2014"))
+        React.createElement("div", null, t("job_breakdown.avg_time", "Avg Duration") + ": " + (j.avg_duration != null ? fmtDuration(j.avg_duration) : "\u2014"))
       )
     );
   }
@@ -2827,7 +2827,7 @@
   registerCatalog("es", {
     // cost
     cost: {
-      trend_formula: "Tendencia % = ((costo actual \u2212 costo anterior) / costo anterior) \xD7 100",
+      trend_formula: "Tendencia % = ((costo presente \u2212 costo anterior) / costo anterior) \xD7 100",
       what_this_means: "El costo estimado se calcula a partir del uso de tokens y el precio del modelo. El costo real puede diferir ligeramente seg\xFAn la granularidad de facturaci\xF3n del proveedor."
     },
     // day_selector

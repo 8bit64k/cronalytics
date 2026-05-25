@@ -590,7 +590,7 @@ function JobDetailsBlock({ j, t }) {
       React.createElement("div", null, t("job_breakdown.schedule", "Schedule") + ": " + ((j.schedule && j.schedule.display) || "\u2014")),
       React.createElement("div", null, t("job_breakdown.last_run", "Last run") + ": " + fmtTime(j.last_run)),
       React.createElement("div", null, t("model_breakdown.model", "Model") + ": " + (j.last_model || "\u2014")),
-      React.createElement("div", null, t("job_breakdown.avg_duration", "Avg duration") + ": " + (j.avg_duration != null ? fmtDuration(j.avg_duration) : "\u2014"))
+      React.createElement("div", null, t("job_breakdown.avg_time", "Avg Duration") + ": " + (j.avg_duration != null ? fmtDuration(j.avg_duration) : "\u2014"))
     )
   );
 }

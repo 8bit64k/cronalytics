@@ -3,7 +3,7 @@ import { registerCatalog } from "./index.js";
 registerCatalog("es", {
   // cost
   cost: {
-    trend_formula: "Tendencia % = ((costo actual − costo anterior) / costo anterior) × 100",
+    trend_formula: "Tendencia % = ((costo presente − costo anterior) / costo anterior) × 100",
     what_this_means: "El costo estimado se calcula a partir del uso de tokens y el precio del modelo. El costo real puede diferir ligeramente según la granularidad de facturación del proveedor.",
   },
   // day_selector
