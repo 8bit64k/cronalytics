@@ -335,10 +335,12 @@ class TestProcessOne:
 
     def test_retry_when_row_not_found(self, temp_pending):
         """When state.db row is absent, should re-enqueue for retry."""
-        with patch.object(ingester, "_query_state_db", return_value=None):
-            with patch.object(ingester, "_delay_for_attempt", return_value=0.01):
-                item = {"session_id": "missing", "model": "gpt-4o", "retries": 0}
-                resolved = ingester._process_one(item)
+        with (
+            patch.object(ingester, "_query_state_db", return_value=None),
+            patch.object(ingester, "_delay_for_attempt", return_value=0.01),
+        ):
+            item = {"session_id": "missing", "model": "gpt-4o", "retries": 0}
+            resolved = ingester._process_one(item)
 
         assert resolved is False
         assert item["retries"] == 1
@@ -346,10 +348,12 @@ class TestProcessOne:
 
     def test_drop_after_max_retries(self, temp_pending):
         """After exhausting retries, should drop and remove from pending."""
-        with patch.object(ingester, "_query_state_db", return_value=None):
-            with patch.object(ingester, "_delay_for_attempt", return_value=0.01):
-                item = {"session_id": "missing", "model": "gpt-4o", "retries": len(ingester.RETRY_DELAYS)}
-                resolved = ingester._process_one(item)
+        with (
+            patch.object(ingester, "_query_state_db", return_value=None),
+            patch.object(ingester, "_delay_for_attempt", return_value=0.01),
+        ):
+            item = {"session_id": "missing", "model": "gpt-4o", "retries": len(ingester.RETRY_DELAYS)}
+            resolved = ingester._process_one(item)
 
         assert resolved is True  # marked as resolved (dropped)
 

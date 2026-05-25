@@ -879,7 +879,7 @@ def _cmd_health(args: argparse.Namespace, db_path: Path) -> int:
 
 def _cmd_sync(args: argparse.Namespace, db_path: Path) -> int:
     """Backfill historical cron sessions from state.db into facts.db."""
-    from cronalytics import scanner, config
+    from cronalytics import config, scanner
 
     result = scanner.run_sync(
         config.STATE_DB,

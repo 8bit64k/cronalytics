@@ -304,10 +304,10 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "all", mode: str
     conn = get_conn(db_path)
 
     # DB age check: need at least 1.75 full periods for meaningful trend comparison
-    db_age_days = 0
+    db_age_days = 0.0
     if days > 0:
         cursor = conn.execute("SELECT COALESCE(MIN(run_time), 0) FROM cron_runs")
-        min_run_time = cursor.fetchone()[0] or 0
+        min_run_time = cursor.fetchone()[0] or 0.0
         db_age_days = (time.time() - min_run_time) / 86400
 
     conditions: list[str] = []

@@ -56,7 +56,7 @@ def _read_watermark(path: Path) -> Watermark:
         return {"last_ended_at": 0.0, "last_sync": None, "rows_synced": 0}
     try:
         with open(path, encoding="utf-8") as fh:
-            return json.load(fh)
+            return json.load(fh)  # type: ignore[no-any-return]
     except (OSError, json.JSONDecodeError):
         logger.error("[scanner] Corrupt watermark, resetting", exc_info=True)
         return {"last_ended_at": 0.0, "last_sync": None, "rows_synced": 0}
