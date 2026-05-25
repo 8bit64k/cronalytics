@@ -122,9 +122,9 @@ This is a **reliability** signal, not a **correctness** signal. A "successful" r
 Cron jobs run in two modes:
 
 - **Agent** — Hermes spawns a full LLM agent session. The agent gets tools, thinking, and conversation turns. These are your "smart" jobs (summaries, research, analysis). They consume tokens and incur cost.
-- **No agent** — Hermes runs a script directly (`/bin/bash` or Python) with no LLM involved. These are your "dumb" jobs (health checks, file cleanup, notifications). They cost nothing in tokens but still show up in Cronalytics with `$0.00` cost.
+- **No agent** — Hermes runs a script directly (`/bin/bash` or Python) with no LLM involved. These are your "dumb" jobs (health checks, file cleanup, notifications). They cost nothing in tokens but still show up in Cronalytics with `$0.00` estimated cost.
 
-Use the **Mode toggle** (All / Agent / No agent) in the dashboard toolbar to filter between them. No-agent jobs that show `$0.00` cost and zero tokens are working correctly — they're not broken.
+Use the **Mode toggle** (All / Agent / No agent) in the dashboard toolbar to filter between them. No-agent jobs that show `$0.00` estimated cost and zero tokens are working correctly — they're not broken.
 
 ---
 
@@ -158,10 +158,6 @@ cd ~/.hermes/plugins/cronalytics && python -m cronalytics.cli --help
 ```
 
 If you've already `pip install`ed and it still isn't found, check that your `pip` user bin directory is in your `$PATH`. Pip will warn you on install if it isn't.
-
-### What's the difference between Cronalytics and Hermes's built-in analytics tab?
-
-Hermes's built-in analytics tab shows **aggregate gateway statistics** across all activity types (chat, cron, API). Cronalytics isolates **cron-only runs**, tracks per-job economics, and adds scheduling context (pace, nominal, trend projections). They're complementary — analytics for "what's happening," Cronalytics for "what's it costing and is it on plan."
 
 ### Can I use Cronalytics without the Hermes dashboard?
 
