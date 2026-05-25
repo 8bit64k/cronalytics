@@ -45,7 +45,7 @@ registerCatalog("zh-TW", {
     no_jobs_window: "{window} 內無任務。上次同步：{time} UTC",
     no_schedule: "無排程",
     nominal_mo: "標稱/月",
-    pace: "節奏",
+    pace: "執行率",
     runs: "執行",
     schedule: "排程",
     see_runs: "查看執行",
@@ -74,7 +74,7 @@ registerCatalog("zh-TW", {
   },
   // leaderboard
   leaderboard: {
-    most_efficient: "最佳節奏",
+    most_efficient: "最佳執行率",
     of_total_est_cost: "佔預估總成本 %",
     of_total_runs: "佔總執行數 %",
     of_total_tokens: "佔總令牌數 %",
@@ -113,9 +113,9 @@ registerCatalog("zh-TW", {
   // pace
   pace: {
     nominal_formula: "標稱 = 計畫執行次數 × 每次平均成本",
-    pace_formula: "節奏      = 趨勢 / 標稱",
+    pace_formula: "執行率     = 趨勢 / 標稱",
     trend_formula: "趨勢 = 實際執行次數 × 每次平均成本",
-    what_this_means: "節奏將你的實際支出趨勢與你在定時任務定義中設定的預算進行比較。它回答：‘按照這個速度，我是超支還是節約？’",
+    what_this_means: "執行率將你的實際支出趨勢與你在定時任務定義中設定的預算進行比較。它回答：‘按照這個速度，我是超支還是節約？’",
   },
   // runs
   runs: {
@@ -167,7 +167,7 @@ registerCatalog("zh-TW", {
     no_schedule: "無排程",
     nominal: "標稱",
     out: "輸出",
-    pace: "節奏",
+    pace: "執行率",
     period: "週期",
     tokens: "Token",
     trend: "趨勢",

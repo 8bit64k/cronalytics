@@ -45,7 +45,7 @@ registerCatalog("zh", {
     no_jobs_window: "{window} 内无任务。上次同步：{time} UTC",
     no_schedule: "无计划",
     nominal_mo: "标称/月",
-    pace: "节奏",
+    pace: "执行率",
     runs: "运行",
     schedule: "计划",
     see_runs: "查看运行",
@@ -74,7 +74,7 @@ registerCatalog("zh", {
   },
   // leaderboard
   leaderboard: {
-    most_efficient: "最佳节奏",
+    most_efficient: "最佳执行率",
     of_total_est_cost: "占预估总成本 %",
     of_total_runs: "占总运行数 %",
     of_total_tokens: "占总令牌数 %",
@@ -113,9 +113,9 @@ registerCatalog("zh", {
   // pace
   pace: {
     nominal_formula: "标称 = 计划运行次数 × 每次平均成本",
-    pace_formula: "节奏      = 趋势 / 标称",
+    pace_formula: "执行率     = 趋势 / 标称",
     trend_formula: "趋势 = 实际运行次数 × 每次平均成本",
-    what_this_means: "节奏将你的实际支出趋势与你在定时任务定义中设定的预算进行比较。它回答：‘按照这个速度，我是超支还是节约？’",
+    what_this_means: "执行率将你的实际支出趋势与你在定时任务定义中设定的预算进行比较。它回答：‘按照这个速度，我是超支还是节约？’",
   },
   // runs
   runs: {
@@ -167,7 +167,7 @@ registerCatalog("zh", {
     no_schedule: "无计划",
     nominal: "标称",
     out: "输出",
-    pace: "节奏",
+    pace: "执行率",
     period: "周期",
     tokens: "Token",
     trend: "趋势",

@@ -1,5 +1,5 @@
 (() => {
-  // src/lib/sdk.js
+  // dashboard/src/lib/sdk.js
   var SDK = window.__HERMES_PLUGIN_SDK__;
   var PLUGINS = window.__HERMES_PLUGINS__;
   if (!SDK || !PLUGINS) {
@@ -10,7 +10,7 @@
   var fetchJSON = SDK.fetchJSON;
   var { Card, CardHeader, CardTitle, CardContent, Badge, Button } = SDK.components;
 
-  // src/components/ErrorBoundary.js
+  // dashboard/src/components/ErrorBoundary.js
   var PluginErrorBoundary = class extends React.Component {
     constructor(props) {
       super(props);
@@ -39,7 +39,7 @@
     }
   };
 
-  // src/lib/validate.js
+  // dashboard/src/lib/validate.js
   var IS_DEV = (() => {
     try {
       return typeof process !== "undefined" && process.env && false;
@@ -148,7 +148,7 @@
     return void 0;
   }
 
-  // src/hooks/useApi.js
+  // dashboard/src/hooks/useApi.js
   function useApi(path) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -189,7 +189,7 @@
     return { isOpen, open, close };
   }
 
-  // src/i18n/index.js
+  // dashboard/src/i18n/index.js
   var CATALOGS = {};
   function registerCatalog(lang, messages) {
     CATALOGS[lang] = messages;
@@ -245,7 +245,7 @@
     };
   }
 
-  // src/components/Modal.js
+  // dashboard/src/components/Modal.js
   function Modal({ isOpen, onClose, children, maxWidth }) {
     const t = useCronalyticsI18n();
     const backdropRef = useRef(null);
@@ -347,7 +347,7 @@
     );
   }
 
-  // src/components/DaySelector.js
+  // dashboard/src/components/DaySelector.js
   var PRESETS = [
     { label: "7D", value: 7 },
     { label: "30D", value: 30 },
@@ -452,7 +452,7 @@
     return elements;
   }
 
-  // src/components/OutcomeToggle.js
+  // dashboard/src/components/OutcomeToggle.js
   function OutcomeToggle({ selected, onChange, label }) {
     const t = useCronalyticsI18n();
     const OPTIONS = [
@@ -493,7 +493,7 @@
     );
   }
 
-  // src/components/ModeToggle.js
+  // dashboard/src/components/ModeToggle.js
   function ModeToggle({ selected, onChange, label }) {
     const t = useCronalyticsI18n();
     const OPTIONS = [
@@ -534,7 +534,7 @@
     );
   }
 
-  // src/lib/formatters.js
+  // dashboard/src/lib/formatters.js
   function fmtCost(n) {
     if (n == null) return "\u2014";
     if (n === 0) return "$0.00";
@@ -603,7 +603,7 @@
     return "transparent";
   }
 
-  // src/components/JobDetailView.js
+  // dashboard/src/components/JobDetailView.js
   function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir }) {
     const t = useCronalyticsI18n();
     const [sKey, setSKey] = useState(sortKey);
@@ -813,7 +813,7 @@
     );
   }
 
-  // src/components/HeroBanner.js
+  // dashboard/src/components/HeroBanner.js
   function HeroBanner() {
     const t = useCronalyticsI18n();
     const [collapsed, setCollapsed] = useState(() => {
@@ -932,7 +932,7 @@
     );
   }
 
-  // src/lib/icons.js
+  // dashboard/src/lib/icons.js
   function CpuIcon(size) {
     return React.createElement(
       "svg",
@@ -1119,7 +1119,7 @@
     );
   }
 
-  // src/components/SummaryBoard.js
+  // dashboard/src/components/SummaryBoard.js
   function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick, onTokensClick, onPaceClick }) {
     const t = useCronalyticsI18n();
     const s = summary || {};
@@ -1381,7 +1381,7 @@
     );
   }
 
-  // src/components/LeaderBoard.js
+  // dashboard/src/components/LeaderBoard.js
   function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopTokensClick, onTopPaceClick }) {
     const t = useCronalyticsI18n();
     const totalRuns = jobList.reduce((sum, j) => sum + (j.runs || 0), 0);
@@ -1590,7 +1590,7 @@
     );
   }
 
-  // src/components/ModelBreakdown.js
+  // dashboard/src/components/ModelBreakdown.js
   function ModelBreakdown({ costByModel }) {
     const t = useCronalyticsI18n();
     if (!costByModel || costByModel.length === 0) return null;
@@ -1657,7 +1657,7 @@
     );
   }
 
-  // src/components/JobBreakdown.js
+  // dashboard/src/components/JobBreakdown.js
   function JobBreakdown({
     jobList,
     sortedJobs,
@@ -1919,7 +1919,7 @@
     );
   }
 
-  // src/components/CronalyticsTab.js
+  // dashboard/src/components/CronalyticsTab.js
   function CronalyticsTab() {
     const t = useCronalyticsI18n();
     const [days, setDaysRaw] = useState(() => {
@@ -2642,7 +2642,7 @@
     );
   }
 
-  // src/i18n/en.js
+  // dashboard/src/i18n/en.js
   registerCatalog("en", {
     // HeroBanner — the greeting
     hero: {
@@ -2823,7 +2823,7 @@
     }
   });
 
-  // src/i18n/es.js
+  // dashboard/src/i18n/es.js
   registerCatalog("es", {
     // cost
     cost: {
@@ -3004,7 +3004,7 @@
     }
   });
 
-  // src/i18n/zh-CN.js
+  // dashboard/src/i18n/zh-CN.js
   registerCatalog("zh", {
     // cost
     cost: {
@@ -3050,7 +3050,7 @@
       no_jobs_window: "{window} \u5185\u65E0\u4EFB\u52A1\u3002\u4E0A\u6B21\u540C\u6B65\uFF1A{time} UTC",
       no_schedule: "\u65E0\u8BA1\u5212",
       nominal_mo: "\u6807\u79F0/\u6708",
-      pace: "\u8282\u594F",
+      pace: "\u6267\u884C\u7387",
       runs: "\u8FD0\u884C",
       schedule: "\u8BA1\u5212",
       see_runs: "\u67E5\u770B\u8FD0\u884C",
@@ -3079,7 +3079,7 @@
     },
     // leaderboard
     leaderboard: {
-      most_efficient: "\u6700\u4F73\u8282\u594F",
+      most_efficient: "\u6700\u4F73\u6267\u884C\u7387",
       of_total_est_cost: "\u5360\u9884\u4F30\u603B\u6210\u672C %",
       of_total_runs: "\u5360\u603B\u8FD0\u884C\u6570 %",
       of_total_tokens: "\u5360\u603B\u4EE4\u724C\u6570 %",
@@ -3118,9 +3118,9 @@
     // pace
     pace: {
       nominal_formula: "\u6807\u79F0 = \u8BA1\u5212\u8FD0\u884C\u6B21\u6570 \xD7 \u6BCF\u6B21\u5E73\u5747\u6210\u672C",
-      pace_formula: "\u8282\u594F      = \u8D8B\u52BF / \u6807\u79F0",
+      pace_formula: "\u6267\u884C\u7387     = \u8D8B\u52BF / \u6807\u79F0",
       trend_formula: "\u8D8B\u52BF = \u5B9E\u9645\u8FD0\u884C\u6B21\u6570 \xD7 \u6BCF\u6B21\u5E73\u5747\u6210\u672C",
-      what_this_means: "\u8282\u594F\u5C06\u4F60\u7684\u5B9E\u9645\u652F\u51FA\u8D8B\u52BF\u4E0E\u4F60\u5728\u5B9A\u65F6\u4EFB\u52A1\u5B9A\u4E49\u4E2D\u8BBE\u5B9A\u7684\u9884\u7B97\u8FDB\u884C\u6BD4\u8F83\u3002\u5B83\u56DE\u7B54\uFF1A\u2018\u6309\u7167\u8FD9\u4E2A\u901F\u5EA6\uFF0C\u6211\u662F\u8D85\u652F\u8FD8\u662F\u8282\u7EA6\uFF1F\u2019"
+      what_this_means: "\u6267\u884C\u7387\u5C06\u4F60\u7684\u5B9E\u9645\u652F\u51FA\u8D8B\u52BF\u4E0E\u4F60\u5728\u5B9A\u65F6\u4EFB\u52A1\u5B9A\u4E49\u4E2D\u8BBE\u5B9A\u7684\u9884\u7B97\u8FDB\u884C\u6BD4\u8F83\u3002\u5B83\u56DE\u7B54\uFF1A\u2018\u6309\u7167\u8FD9\u4E2A\u901F\u5EA6\uFF0C\u6211\u662F\u8D85\u652F\u8FD8\u662F\u8282\u7EA6\uFF1F\u2019"
     },
     // runs
     runs: {
@@ -3172,7 +3172,7 @@
       no_schedule: "\u65E0\u8BA1\u5212",
       nominal: "\u6807\u79F0",
       out: "\u8F93\u51FA",
-      pace: "\u8282\u594F",
+      pace: "\u6267\u884C\u7387",
       period: "\u5468\u671F",
       tokens: "Token",
       trend: "\u8D8B\u52BF",
@@ -3185,7 +3185,7 @@
     }
   });
 
-  // src/i18n/zh-TW.js
+  // dashboard/src/i18n/zh-TW.js
   registerCatalog("zh-TW", {
     // cost
     cost: {
@@ -3231,7 +3231,7 @@
       no_jobs_window: "{window} \u5167\u7121\u4EFB\u52D9\u3002\u4E0A\u6B21\u540C\u6B65\uFF1A{time} UTC",
       no_schedule: "\u7121\u6392\u7A0B",
       nominal_mo: "\u6A19\u7A31/\u6708",
-      pace: "\u7BC0\u594F",
+      pace: "\u57F7\u884C\u7387",
       runs: "\u57F7\u884C",
       schedule: "\u6392\u7A0B",
       see_runs: "\u67E5\u770B\u57F7\u884C",
@@ -3260,7 +3260,7 @@
     },
     // leaderboard
     leaderboard: {
-      most_efficient: "\u6700\u4F73\u7BC0\u594F",
+      most_efficient: "\u6700\u4F73\u57F7\u884C\u7387",
       of_total_est_cost: "\u4F54\u9810\u4F30\u7E3D\u6210\u672C %",
       of_total_runs: "\u4F54\u7E3D\u57F7\u884C\u6578 %",
       of_total_tokens: "\u4F54\u7E3D\u4EE4\u724C\u6578 %",
@@ -3299,9 +3299,9 @@
     // pace
     pace: {
       nominal_formula: "\u6A19\u7A31 = \u8A08\u756B\u57F7\u884C\u6B21\u6578 \xD7 \u6BCF\u6B21\u5E73\u5747\u6210\u672C",
-      pace_formula: "\u7BC0\u594F      = \u8DA8\u52E2 / \u6A19\u7A31",
+      pace_formula: "\u57F7\u884C\u7387     = \u8DA8\u52E2 / \u6A19\u7A31",
       trend_formula: "\u8DA8\u52E2 = \u5BE6\u969B\u57F7\u884C\u6B21\u6578 \xD7 \u6BCF\u6B21\u5E73\u5747\u6210\u672C",
-      what_this_means: "\u7BC0\u594F\u5C07\u4F60\u7684\u5BE6\u969B\u652F\u51FA\u8DA8\u52E2\u8207\u4F60\u5728\u5B9A\u6642\u4EFB\u52D9\u5B9A\u7FA9\u4E2D\u8A2D\u5B9A\u7684\u9810\u7B97\u9032\u884C\u6BD4\u8F03\u3002\u5B83\u56DE\u7B54\uFF1A\u2018\u6309\u7167\u9019\u500B\u901F\u5EA6\uFF0C\u6211\u662F\u8D85\u652F\u9084\u662F\u7BC0\u7D04\uFF1F\u2019"
+      what_this_means: "\u57F7\u884C\u7387\u5C07\u4F60\u7684\u5BE6\u969B\u652F\u51FA\u8DA8\u52E2\u8207\u4F60\u5728\u5B9A\u6642\u4EFB\u52D9\u5B9A\u7FA9\u4E2D\u8A2D\u5B9A\u7684\u9810\u7B97\u9032\u884C\u6BD4\u8F03\u3002\u5B83\u56DE\u7B54\uFF1A\u2018\u6309\u7167\u9019\u500B\u901F\u5EA6\uFF0C\u6211\u662F\u8D85\u652F\u9084\u662F\u7BC0\u7D04\uFF1F\u2019"
     },
     // runs
     runs: {
@@ -3353,7 +3353,7 @@
       no_schedule: "\u7121\u6392\u7A0B",
       nominal: "\u6A19\u7A31",
       out: "\u8F38\u51FA",
-      pace: "\u7BC0\u594F",
+      pace: "\u57F7\u884C\u7387",
       period: "\u9031\u671F",
       tokens: "Token",
       trend: "\u8DA8\u52E2",
@@ -3366,7 +3366,7 @@
     }
   });
 
-  // src/index.js
+  // dashboard/src/index.js
   PLUGINS.register("cronalytics", function CronalyticsWrapped() {
     return React.createElement(
       PluginErrorBoundary,
