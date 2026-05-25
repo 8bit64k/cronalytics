@@ -76,11 +76,11 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
             )
           ),
           React.createElement(CardContent, null,
-            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", minWidth: 0 } },
               React.createElement("div", {
-                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#f5a623", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
+                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#f5a623", overflow: "hidden", whiteSpace: "nowrap" }
               }, j ? fmtCost(j.tot_estimated_cost) : "\u2014"),
-              j && React.createElement("span", { style: { fontSize: "0.7rem", opacity: 0.95, fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "0.25rem", padding: "0.05rem 0.4rem" } }, t("summary.estimated", "Estimated"))
+              j && React.createElement("span", { style: { flexShrink: 0, fontSize: "0.7rem", opacity: 0.95, fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "0.25rem", padding: "0.05rem 0.4rem" } }, t("summary.estimated", "Estimated"))
             ),
             React.createElement("div", {
               style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
