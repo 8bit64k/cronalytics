@@ -27,13 +27,32 @@ Use Cronalytics for **directional awareness** ("spend is trending up"), not acco
 
 Hermes populates `actual_cost_usd` only when provider billing data is available — which is rare in most setups. Until reliable provider billing integration arrives, the Actual field is intentionally suppressed to avoid showing `$0.00` as if it were ground truth.
 
+### Why does the cost and token reporting look different from the Hermes Analytics tab, Insights, or my provider invoice?
+
+They're measuring different things:
+
+- **Hermes Analytics tab** — all gateway activity (chat, cron, API calls) across all profiles. Broad, aggregate.
+- **Hermes Insights** — per-session cost snapshots, unfiltered by source.
+- **Your provider invoice** — what you're actually billed, including rate changes, credits, and auxiliary charges.
+- **Cronalytics** — cron-only runs within one profile, using Hermes's session-time cost estimates.
+
+Cronalytics is intentionally narrow: it isolates scheduled jobs so you can track per-job economics. If you're trying to square Cronalytics with your invoice, some drift is expected — see "How is estimated cost different from what my provider charges?" above.
+
+### I see more models in the Analytics tab than in Cronalytics. Why?
+
+Cronalytics only tracks models used by **cron jobs**. Chat sessions, ad-hoc CLI runs, and API calls use different models but don't appear here. The Models Breakdown card shows "models your cron jobs are costing you," not "every model you've ever used."
+
 ---
 
 ## Visibility & Data
 
-### Why don't I see ALL my cron jobs?
+### Where are my jobs? I created jobs but don't see them.
 
-Cronalytics hooks into `on_session_end` on the profile where it's installed. By default, that's your **default** Hermes profile. If you've created cron jobs under a different profile (`hermes --profile staging cron create ...`), those jobs run in an isolated gateway with their own `state.db` — Cronalytics can't see them.
+Check three things:
+
+1. **Did the cron job actually run?** Cronalytics only captures completed runs. If the job is scheduled but hasn't fired yet, it won't appear.
+2. **Are you on the right profile?** Cronalytics hooks into `on_session_end` on the profile where it's installed — by default, your **default** Hermes profile. Jobs created under a different profile run in an isolated gateway with their own `state.db` and won't appear.
+3. **Did you click Sync Now?** Historical runs before installation need backfill. Click **Sync Now** in the dashboard toolbar.
 
 **To monitor multiple profiles:** install Cronalytics in each profile's `plugins/` directory.
 
@@ -43,9 +62,33 @@ Cronalytics captures data when a cron session **ends** (the `on_session_end` hoo
 
 Historical data is backfilled by the reconciliation scanner — triggered manually (**Sync Now** button) or on plugin load.
 
-### How far back can I look?
+### How far back can I look? How do I see my entire history?
 
-The dashboard supports custom day ranges from **0 to 365 days**. The CLI supports `--days 0` for "all time." Data retention depends on how long you've had Cronalytics installed and how many sessions `state.db` retains.
+The dashboard supports custom day ranges from **0 to 365 days**. The CLI supports `--days 0` for "all time" — no cap:
+
+```bash
+cronalytics summary --days 0 --json
+cronalytics jobs --days 0 --json
+```
+
+Data goes back to the oldest session in `state.db` that the reconciliation scanner has processed.
+
+### The job detail modal only shows 250 runs — why? How do I get all of them?
+
+The modal caps at **250 runs** to keep the UI responsive. The backend ceiling is 500, but above ~250 the browser can struggle with row rendering.
+
+**To see every run for a job:**
+
+```bash
+cronalytics runs --job <job_id> --days 0 --json
+```
+
+This returns every run in the fact database for that job, with no limit. Pipe to `jq` for filtering:
+
+```bash
+cronalytics runs --job <job_id> --days 0 --json | jq '.data | length'  # total count
+cronalytics runs --job <job_id> --days 0 --json | jq '.data[] | select(.success == 0)'  # failures only
+```
 
 ---
 
@@ -74,6 +117,15 @@ The Cost card uses an **amber pill badge** to signal that all costs are estimate
 
 This is a **reliability** signal, not a **correctness** signal. A "successful" run might still have produced bad output if the prompt or model was wrong.
 
+### What's the difference between agent and no-agent jobs?
+
+Cron jobs run in two modes:
+
+- **Agent** — Hermes spawns a full LLM agent session. The agent gets tools, thinking, and conversation turns. These are your "smart" jobs (summaries, research, analysis). They consume tokens and incur cost.
+- **No agent** — Hermes runs a script directly (`/bin/bash` or Python) with no LLM involved. These are your "dumb" jobs (health checks, file cleanup, notifications). They cost nothing in tokens but still show up in Cronalytics with `$0.00` cost.
+
+Use the **Mode toggle** (All / Agent / No agent) in the dashboard toolbar to filter between them. No-agent jobs that show `$0.00` cost and zero tokens are working correctly — they're not broken.
+
 ---
 
 ## Setup & Configuration
@@ -85,8 +137,27 @@ No — the dashboard works standalone. The CLI is an optional add-on for:
 - Scripting and automation (pipe `--json` output to `jq`)
 - Agent consumption (Hermes agents read CLI output in diagnostic flows)
 - Environments where you don't have a browser
+- Getting a full run dump without the 250-run modal limit
 
 Install it with: `pip install -e ~/.hermes/plugins/cronalytics`
+
+### `cronalytics` isn't in my PATH — why, and how do I fix it?
+
+The CLI isn't registered automatically — it's an optional add-on that requires a `pip install`:
+
+```bash
+pip install -e ~/.hermes/plugins/cronalytics
+```
+
+*(Arch Linux users may need `--break-system-packages` due to PEP 668.)*
+
+Until installed, you can run it through Python:
+
+```bash
+cd ~/.hermes/plugins/cronalytics && python -m cronalytics.cli --help
+```
+
+If you've already `pip install`ed and it still isn't found, check that your `pip` user bin directory is in your `$PATH`. Pip will warn you on install if it isn't.
 
 ### What's the difference between Cronalytics and Hermes's built-in analytics tab?
 
@@ -110,17 +181,22 @@ No. All data stays **local**:
 
 Nothing is uploaded, phoned home, or sent to Nous Research or any third party.
 
-### Can I see the raw data?
+### Can I see the raw data? How do I get a snapshot of my entire facts.db?
 
-Yes — the CLI outputs JSON for every data command:
+Yes — three ways, from quickest to most thorough:
 
 ```bash
-cronalytics summary --days 7 --json
-cronalytics jobs --days 30 --json
-cronalytics runs --job <id> --json
+# Quick: all CLI commands support --json
+cronalytics all --days 0 --json
+
+# Full job dump with per-run detail
+cronalytics jobs --days 0 --json | jq '.data'
+
+# Complete snapshot: everything in the database
+sqlite3 ~/.hermes/plugins/cronalytics/facts.db '.mode json' 'SELECT * FROM cron_runs;'
 ```
 
-The fact database is also a standard SQLite file (`~/.hermes/plugins/cronalytics/facts.db`). You can query it directly with any SQLite client.
+The fact database is a standard SQLite file (`~/.hermes/plugins/cronalytics/facts.db`). You can query it directly with any SQLite client.
 
 ### How do I reset everything and start over?
 
