@@ -1,6 +1,11 @@
-![banner](docs/screenshots/github-banner.png)
 # Cronalytics
+/ˈkrɒn.əˌlɪt.ɪks/ (noun)
 
+1. Cron analytics and observability.
+2. The dashboard for agentic automations in Hermes.
+
+Observe. Measure. Optimize.
+<br/><br/>
  <a href="https://github.com/8bit64k/cronalytics/releases">
    <img src="https://img.shields.io/github/v/release/8bit64k/cronalytics?label=Release" alt="Latest Release">
  </a>
@@ -16,32 +21,19 @@
  <a href="https://github.com/8bit64k/cronalytics/actions/workflows/ci.yml">
    <img src="https://github.com/8bit64k/cronalytics/actions/workflows/ci.yml/badge.svg" alt="CI">
  </a>
+ <a href="https://x.com/intent/tweet?text=Check%20out%20this%20project%20on%20GitHub:%20https://github.com/8bit64k/cronalytics%20%23HermesAgent%20%23NousResearch">
+  <img src="https://img.shields.io/badge/share-000000?logo=x&logoColor=white">
+ </a>
+ <a href="https://www.reddit.com/submit?title=Check%20out%20this%20project%20on%20GitHub:%20https://github.com/8bit64k/cronalytics">
+  <img src="https://img.shields.io/badge/share-FF4500?logo=reddit&logoColor=white">
+ </a>
+ <a href="https://t.me/share/url?url=https://github.com/8bit64k/cronalytics&text=Check%20out%20this%20project%20on%20GitHub">
+   <img src="https://img.shields.io/badge/share-0088CC?logo=telegram&logoColor=white">
+ </a>
 
-[![Share](https://img.shields.io/badge/share-000000?logo=x&logoColor=white)](https://x.com/intent/tweet?text=Check%20out%20this%20project%20on%20GitHub:%20https://github.com/8bit64k/cronalytics%20%23HermesAgent%20%23NousResearch)
-[![Share](https://img.shields.io/badge/share-FF4500?logo=reddit&logoColor=white)](https://www.reddit.com/submit?title=Check%20out%20this%20project%20on%20GitHub:%20https://github.com/8bit64k/cronalytics)
-[![Share](https://img.shields.io/badge/share-0088CC?logo=telegram&logoColor=white)](https://t.me/share/url?url=https://github.com/8bit64k/cronalytics&text=Check%20out%20this%20project%20on%20GitHub)
+Cronalytics is a Hermes Agent plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them through **three** complementary interfaces: a hermes dashboard tab, a CLI tool for programmatic access, and an agent skill for cron health/diagnostics and comprehensive assessments. The current version is v1.1.0.
 
----
-
-/ˈkrɒn.əˌlɪt.ɪks/ (noun)
-
-1. Cron analytics and observability.
-2. The dashboard for agentic automations in Hermes.
-
-Observe. Measure. Optimize.
-
-Cronalytics is a Hermes Agent plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them through **three interfaces**:
-
-#### **Dashboard — *Observe***
-A dedicated `/cronalytics` tab inside `hermes dashboard` for visual exploration. Charts, cards, and filters let you see cost, pace, and failure patterns at a glance.
-#### **CLI — *Measure***
-A terminal tool for programmatic access, `--json` output, and agent consumption. Precise queries, exact numbers, and scriptable data exports. Requires the plugin's `facts.db` to function — not a standalone product.
-#### **Agent Skill — *Optimize***
-A built-in diagnostic skill that teaches Hermes agents how to analyze your cron jobs with confidence-graded anomaly detection and ranked recommendations.
-
-> Turn hidden automation into visible spend.
 > Built for **[Hermes Agent](https://github.com/nousresearch/hermes-agent)**, the autonomous agent framework by **[Nous Research](https://nousresearch.com)**.
-
 
 ---
 
@@ -53,18 +45,17 @@ A built-in diagnostic skill that teaches Hermes agents how to analyze your cron 
 | **An Existing v1.0.x User** | [Upgrade Guide (v1.1 Migration)](docs/UPGRADE.md) |
 | **Exploring Features** | [Usage & Workflows](docs/USAGE.md) or [Feature Catalog](dev/FEATURES.md) |
 
-
 ---
 
-## Quick Start
+## Quick Start and Usage
 
->The dashboard is insightful, but the CLI + Skill are the real superpower.
+> The dashboard is insightful, but the CLI + Skill are the real superpower.
 
-#### **Dashboard**
-Open the **Cronalytics** tab from the Hermes dashboard sidebar for visual exploration with cards, tables, charts, filters and modals. Best for human pattern recognition.
+#### **Dashboard — *Observe***
+Use the dedicated `/cronalytics` tab inside `hermes dashboard` for visual exploration. Charts, cards, and filters let you see cost, pace, and failure patterns at a glance.
 
-#### **CLI**
-Cronalytics includes a terminal data tool with the same data as the dashboard and includes eight commands, three global filters, and `--json` output for scripts and agents.
+#### **CLI — *Measure***
+Use the terminal tool for programmatic access, `--json` output, and agent consumption. Precise queries, exact numbers, and scriptable data exports. Features eight commands, three global filters, and json output.
 
 ```
 usage: cronalytics [-h] [--db DB] [--days DAYS] [--outcome {all,success,failure}]
@@ -95,17 +86,29 @@ options:
   --json                Output raw JSON instead of formatted tables
   ```
 
-#### **Agent Skill**
-An agent skill that guides agents through structured cron health checks and diagnostics. Ask your agent:
+#### **Agent Skill — *Optimize***
+A built-in diagnostic skill that teaches Hermes agents how to analyze your cron jobs with confidence-graded anomaly detection and ranked recommendations. Ask your agent:
 
 > "Check my cron jobs for the last two weeks — flag anything that looks off."
 
 The agent loads the `cronalytics` skill, follows a structured 7-step diagnostic workflow (time window verification → baseline → job-level drill → per-run investigation → failure pattern → model economics → trend validation), cross-references `jobs.json`, and grades every finding by confidence (HIGH / MEDIUM / LOW) with supporting evidence and alternative explanations.
 
+### First-Time Setup
+
+After install, the plugin needs data:
+
+1. **Wait for a cron job to run** — the `on_session_end` hook captures it automatically.
+2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard.
+
+If the dashboard shows "No cron jobs captured," click **Sync Now**.
+
+See **[FAQ: Visibility & Data](docs/FAQ.md)** for more help — how data updates, how far back you can look, and the 250-run modal limit.
+
+For full details about usage and common workflows see **[USAGE.md](docs/USAGE.md)**.
 
 ---
 
-## Usage and Features
+## Features
 
 ### Mini-Tour
 ![Short Tour](docs/screenshots/cronalytics-tour.gif)
@@ -113,7 +116,6 @@ The agent loads the `cronalytics` skill, follows a structured 7-step diagnostic 
 [YouTube](https://youtu.be/nbeViSt9hCk?si=EH2u7Ys2vDTVDqka): short video showing basic install and usage.
 
 ---
-
 
 ### What Cronalytics Does
 
@@ -161,8 +163,7 @@ Cronalytics implements a self-hosted internationalization layer for independent 
 - "Known Ways to Fool Yourself" guardrails prevent false positives
 - Works in any terminal session or messaging channel
 
-For full details about usage and common workflows see **[USAGE.md](docs/USAGE.md)** and to explore the complete feature catalog see **[FEATURES.md](dev/FEATURES.md)**.
-
+To explore the complete feature catalog see **[FEATURES.md](dev/FEATURES.md)**.
 
 ---
 
@@ -227,19 +228,6 @@ See **[FAQ: Where are my jobs?](docs/FAQ.md)** for a checklist of common reasons
 ### Project Meta
 
 - **[CHANGELOG.md](CHANGELOG.md)** — Full version history
-
----
-
-## First-Time Setup
-
-After install, the plugin needs data:
-
-1. **Wait for a cron job to run** — the `on_session_end` hook captures it automatically.
-2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard.
-
-If the dashboard shows "No cron jobs captured," click **Sync Now**.
-
-See **[FAQ: Visibility & Data](docs/FAQ.md)** for more help — how data updates, how far back you can look, and the 250-run modal limit.
 
 ---
 
