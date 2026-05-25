@@ -3,7 +3,7 @@
 > How to read the dashboard, interpret the metrics, and use the controls.
 
 ---
-⚠️ **Before you being make sure you have read and understand these [Important Notes](#important-notes)**.
+⚠️ **Before you begin, make sure you have read and understand these [Important Notes](#important-notes-)**.
 
 > ## The Cronalytics Tab
 
