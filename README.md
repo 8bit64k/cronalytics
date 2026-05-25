@@ -374,6 +374,12 @@ MIT — see [`LICENSE`](LICENSE) for full text.
 
 ---
 
+## Acknowledgments
+
+Thanks to my wife **Gaby** for the Spanish translation review — and to everyone who starred, opened issues, and helped shape v1.1.
+
+---
+
 ## Changelog
 
 See **[CHANGELOG.md](CHANGELOG.md)** for the full version history.
