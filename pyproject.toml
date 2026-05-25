@@ -55,6 +55,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["ARG002"]
+"__init__.py" = ["N999"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
