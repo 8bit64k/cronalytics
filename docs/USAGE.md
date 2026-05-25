@@ -48,6 +48,8 @@ Filters between LLM agent jobs and script-only (`no_agent`) jobs.
 
 Your selection is saved to `localStorage`.
 
+> See **[FAQ: What's the difference between agent and no-agent jobs?](FAQ.md)** for a plain-English explanation.
+
 ### Day Selector
 
 Presets: **7D | 30D | 90D**
@@ -148,6 +150,8 @@ It is useful for:
 
 It is **not** your exact invoice. Provider billing systems apply rounding, credits, and rate changes that neither Hermes nor Cronalytics see. For precise charges, check your provider dashboard.
 
+> See **[FAQ: Cost & Billing](FAQ.md)** — $0.00 costs, estimated vs actual, and why numbers differ from the Analytics tab or provider invoice.
+
 ---
 
 > ## Per-Model Breakdown
@@ -207,6 +211,8 @@ Click **See Runs** in an expanded row to open the full run history.
 - **Headers:** sticky (remain visible while scrolling)
 - **Sort:** click any column header to sort
 - **Limit:** 200 runs by default (backend ceiling: 500)
+
+See **[FAQ: 250-run modal limit](FAQ.md)** — why the cap exists and how to dump every run via the CLI.
 - **Columns:** Run Time, Cost, Duration, Success, Model, Mode
 
 The modal inherits the sort preference from the parent Jobs Breakdown table. If you sorted by Cost in the main table, the modal opens sorted by Cost.
@@ -508,5 +514,7 @@ If you create jobs under `hermes --profile work cron create ...`, those jobs run
 ---
 
 *Version: 1.1.0*  
-*Last updated: 2026-05-26
+*Last updated: 2026-05-26*
+
+> **Got questions?** See the **[FAQ](FAQ.md)** for quick answers: cost estimates, missing jobs, Pace, agent vs no-agent, 250-run limit, CLI setup, and more.
 

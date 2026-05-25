@@ -152,6 +152,8 @@ For full details about usage and common workflows see **[USAGE.md](docs/USAGE.md
 
 Cronalytics reports the estimated cost that Hermes computed and stored in `state.db`. Your actual invoice may differ due to rate changes, credits, or rounding. Use this for directional awareness, not accounting.
 
+> See **[FAQ: Cost & Billing](docs/FAQ.md)** — $0.00 costs, estimated vs actual, and why Cronalytics differs from your provider invoice.
+
 ### Understanding Success
 
 **Cronalytics tracks two different notions of "success"**:
@@ -169,6 +171,8 @@ Cronalytics reports the estimated cost that Hermes computed and stored in `state
 
 > The Success/Failure toggle is a **reliability** signal, not a **correctness** signal.
 
+See **[FAQ: Metrics & Interpretation](docs/FAQ.md)** for Success vs Failure, agent vs no-agent jobs, and what Pace really means.
+
 ### **Single-profile cron by default.** 
 
 Cronalytics monitors the Hermes profile where it is installed. Most users — even those with multiple profiles configured — run cron jobs in the **default** profile. For them, Cronalytics works fully.
@@ -176,6 +180,8 @@ Cronalytics monitors the Hermes profile where it is installed. Most users — ev
 The edge case: if you explicitly create a cron job under a non-default profile (`hermes --profile <name> cron create ...`), that job runs in an isolated gateway with its own `state.db`. Cronalytics, installed in the default profile, cannot see it. To monitor those jobs, install Cronalytics in that profile's `plugins/` directory as well.
 
 Multi-profile cron support is on our roadmap.
+
+See **[FAQ: Where are my jobs?](docs/FAQ.md)** for a checklist of common reasons jobs don't appear.
 
 ---
 
@@ -212,6 +218,8 @@ After install, the plugin needs data:
 2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard.
 
 If the dashboard shows "No cron jobs captured," click **Sync Now**.
+
+See **[FAQ: Visibility & Data](docs/FAQ.md)** for more help — how data updates, how far back you can look, and the 250-run modal limit.
 
 ---
 
@@ -309,6 +317,8 @@ Paths are resolved automatically:
 5. **Dashboard server caches plugins per-process.** Changes to `manifest.json` or `plugin_api.py` require a full dashboard restart.
 6. **Mobile layout tested but not optimized.** The table may require horizontal scroll on narrow viewports.
 7. **Job detail modal capped at 200 runs.** High-frequency jobs show full count in the table but the drill-down is limited.
+
+See **[FAQ](docs/FAQ.md)** for more: the 250-run limit, agent vs no-agent, models breakdown, snapshotting your facts.db, and getting `cronalytics` on your PATH.
 
 ---
 
