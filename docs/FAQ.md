@@ -54,7 +54,7 @@ Check three things:
 2. **Are you on the right profile?** Cronalytics hooks into `on_session_end` on the profile where it's installed — by default, your **default** Hermes profile. Jobs created under a different profile run in an isolated gateway with their own `state.db` and won't appear.
 3. **Did you click Sync Now?** Historical runs before installation need backfill. Click **Sync Now** in the dashboard toolbar.
 
-**To monitor multiple profiles:** install Cronalytics in each profile's `plugins/` directory.
+**Cronalytics currently only supports the default profile.** Multi-profile cron support is on our roadmap.
 
 ### How often does data update?
 
