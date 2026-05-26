@@ -56,7 +56,7 @@ def _read_watermark(path: Path) -> Watermark:
         return {"last_ended_at": 0.0, "last_sync": None, "rows_synced": 0}
     try:
         with open(path, encoding="utf-8") as fh:
-            return json.load(fh)
+            return json.load(fh)  # type: ignore[no-any-return]
     except (OSError, json.JSONDecodeError):
         logger.error("[scanner] Corrupt watermark, resetting", exc_info=True)
         return {"last_ended_at": 0.0, "last_sync": None, "rows_synced": 0}
@@ -218,10 +218,10 @@ def run_sync(
     Returns a summary dict with counts and timestamps.
     """
     wm = _read_watermark(watermark_path)
-    since = float(wm.get("last_ended_at", 0.0))
+    since = float(wm.get("last_ended_at") or 0.0)
 
     logger.info("[scanner] Starting sync since ended_at=%s", since)
-    started = time.time()
+    started = time.perf_counter()
 
     # --- Track A: Agent jobs from state.db ---
     rows = _fetch_new_sessions(state_db, since)
@@ -257,7 +257,7 @@ def run_sync(
     except Exception:
         logger.error("[scanner] Script sync failed", exc_info=True)
 
-    elapsed = time.time() - started
+    elapsed = time.perf_counter() - started
     logger.info(
         "[scanner] Sync complete: agent=%d/%d, script=%d/%d, %.2fs",
         agent_inserted, agent_skipped,

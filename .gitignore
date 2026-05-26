@@ -1,5 +1,10 @@
 # Python artifacts
 __pycache__/
+*.venv/
+venv/
+ENV/
+.mypy_cache/
+.ruff_cache/
 *.py[cod]
 *$py.class
 *.egg-info/
@@ -25,6 +30,13 @@ scratchpad/
 # Auto-checkpoint state (generated at runtime)
 cronalytics-checkpoint.json
 CHECKPOINT.md
+
+# Internal planning docs — not for public repo
+PLAN.md
+AGENTS.md
+dev/AGENTS.md
+dev/LAUNCH_PLAN.md
+dev/LAUNCH_POSTS.md
 # Test artifacts
 .pytest_cache/
 .coverage
@@ -38,8 +50,6 @@ htmlcov/
 
 # Node artifacts (dashboard build)
 node_modules/
+**/node_modules/
 *.backup*
 *.bak
-facts.db-shm
-facts.db-wal
-CHECKPOINT.md

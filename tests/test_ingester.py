@@ -5,18 +5,13 @@ Uses importlib with fake package context so relative imports resolve.
 
 from __future__ import annotations
 
-import contextlib
 import importlib.util
 import json
 import sys
-import tempfile
-import threading
-import time
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
-
 
 # ---------------------------------------------------------------------------
 # Load ingester with fake package context (relative imports)
@@ -28,7 +23,7 @@ _PKG_NAME = "cronalytics_test_pkg"
 
 def _load_module(name: str):
     """Load a sibling module from the plugin root into the fake package."""
-    mod_path = _PLUGIN_ROOT / f"{name}.py"
+    mod_path = _PLUGIN_ROOT / "cronalytics" / f"{name}.py"
     full_name = f"{_PKG_NAME}.{name}"
     spec = importlib.util.spec_from_file_location(full_name, mod_path)
     mod = importlib.util.module_from_spec(spec)
@@ -49,7 +44,7 @@ for _dep in ("facts", "config", "logger"):
 
 # Load ingester itself
 _ingester_spec = importlib.util.spec_from_file_location(
-    f"{_PKG_NAME}.ingester", _PLUGIN_ROOT / "ingester.py"
+    f"{_PKG_NAME}.ingester", _PLUGIN_ROOT / "cronalytics" / "ingester.py"
 )
 ingester = importlib.util.module_from_spec(_ingester_spec)
 ingester.__package__ = _PKG_NAME
@@ -90,7 +85,7 @@ def temp_pending(tmp_path: Path):
 def mock_fact_db(tmp_path: Path):
     """Create a temp fact DB and patch FACT_DB."""
     db_path = tmp_path / "facts.db"
-    import facts  # noqa: E402 — conftest has this on sys.path
+    from cronalytics import facts  # noqa: E402 — conftest has this on sys.path
     facts.ensure_schema(db_path)
     orig = ingester.FACT_DB
     ingester.FACT_DB = db_path
@@ -340,10 +335,12 @@ class TestProcessOne:
 
     def test_retry_when_row_not_found(self, temp_pending):
         """When state.db row is absent, should re-enqueue for retry."""
-        with patch.object(ingester, "_query_state_db", return_value=None):
-            with patch.object(ingester, "_delay_for_attempt", return_value=0.01):
-                item = {"session_id": "missing", "model": "gpt-4o", "retries": 0}
-                resolved = ingester._process_one(item)
+        with (
+            patch.object(ingester, "_query_state_db", return_value=None),
+            patch.object(ingester, "_delay_for_attempt", return_value=0.01),
+        ):
+            item = {"session_id": "missing", "model": "gpt-4o", "retries": 0}
+            resolved = ingester._process_one(item)
 
         assert resolved is False
         assert item["retries"] == 1
@@ -351,10 +348,12 @@ class TestProcessOne:
 
     def test_drop_after_max_retries(self, temp_pending):
         """After exhausting retries, should drop and remove from pending."""
-        with patch.object(ingester, "_query_state_db", return_value=None):
-            with patch.object(ingester, "_delay_for_attempt", return_value=0.01):
-                item = {"session_id": "missing", "model": "gpt-4o", "retries": len(ingester.RETRY_DELAYS)}
-                resolved = ingester._process_one(item)
+        with (
+            patch.object(ingester, "_query_state_db", return_value=None),
+            patch.object(ingester, "_delay_for_attempt", return_value=0.01),
+        ):
+            item = {"session_id": "missing", "model": "gpt-4o", "retries": len(ingester.RETRY_DELAYS)}
+            resolved = ingester._process_one(item)
 
         assert resolved is True  # marked as resolved (dropped)
 

@@ -1,0 +1,9 @@
+prune .git
+prune tests
+prune dev
+prune skills
+prune dashboard
+prune docs
+exclude .gitignore
+exclude CHECKPOINT.md
+exclude PLAN.md

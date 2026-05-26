@@ -71,8 +71,8 @@ def _count_occurrences(
 
 def get_job_projections(
     job_id: str,
-    avg_cost: float | None,
-    total_cost: float | None,
+    avg_estimated_cost: float | None,
+    tot_estimated_cost: float | None,
     runs: int,
     first_run: float | None,
     last_run: float | None,
@@ -84,8 +84,8 @@ def get_job_projections(
 
     Args:
         job_id: Stable job ID (matches jobs.json `id`).
-        avg_cost: Average cost per run from fact DB.
-        total_cost: Total cost for the window (for trend pacing).
+        avg_estimated_cost: Average estimated cost per run from fact DB.
+        tot_estimated_cost: Total estimated cost for the window (for trend pacing).
         runs: Number of runs in the observation window.
         first_run: Earliest run_time (unix epoch).
         last_run: Latest run_time (unix epoch).
@@ -108,7 +108,7 @@ def get_job_projections(
     minutes: int | None = None
 
     if job_def:
-        sched = job_def.get("schedule", {})
+        sched = job_def.get("schedule") or {}
         kind = sched.get("kind")
         expr = sched.get("expr")
         minutes = sched.get("minutes")
@@ -124,7 +124,7 @@ def get_job_projections(
         for d in horizon_days:
             sr = _count_occurrences(kind, expr, minutes, now, now + timedelta(days=d))
             scheduled_runs[f"{d}d"] = sr
-            ac = avg_cost if avg_cost is not None else 0.0
+            ac = avg_estimated_cost if avg_estimated_cost is not None else 0.0
             nominal_proj[f"{d}d"] = round(ac * sr, 4) if sr is not None else None
     else:
         for d in horizon_days:
@@ -141,8 +141,8 @@ def get_job_projections(
         observed_window = 0.0
 
     trend_proj: dict[str, float | None] = {}
-    if observed_window > 0 and runs > 0 and total_cost is not None:
-        daily_cost = total_cost / observed_window
+    if observed_window > 0 and runs > 0 and tot_estimated_cost is not None:
+        daily_cost = tot_estimated_cost / observed_window
         for d in horizon_days:
             trend_proj[f"{d}d"] = round(daily_cost * d, 4)
     else:

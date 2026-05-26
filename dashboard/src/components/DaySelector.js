@@ -1,5 +1,6 @@
 import { React, useState } from "../lib/sdk.js";
 import { Button } from "../lib/sdk.js";
+import { useCronalyticsI18n } from "../i18n/index.js";
 
 const PRESETS = [
   { label: "7D", value: 7 },
@@ -10,6 +11,7 @@ const PRESETS = [
 const MAX_DAYS = 365;
 
 export function DaySelector({ selected, onChange, label = null }) {
+  const t = useCronalyticsI18n();
   const [custom, setCustom] = useState("");
 
   const applyCustom = () => {
@@ -79,9 +81,9 @@ export function DaySelector({ selected, onChange, label = null }) {
           size: "sm",
           outlined: true,
           onClick: applyCustom,
-          title: "Apply custom days",
+          title: t("day_selector.apply_custom", "Apply custom days"),
         },
-        "Go"
+        t("day_selector.go", "Go")
       )
     ),
   ];

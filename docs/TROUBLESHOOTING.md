@@ -1,0 +1,120 @@
+# Troubleshooting
+
+> Common issues and fixes for Cronalytics.
+
+---
+
+## Reverse Proxy Returns HTML for API Routes
+
+If you run the Hermes dashboard behind a reverse proxy (e.g., **Caddy**, **Nginx**) and see JSON parse errors (`Unexpected token '<'`), the proxy may be routing API requests incorrectly. The Hermes dashboard serves the SPA fallback (`index.html`) for any unmatched route, so any proxy misconfiguration sends HTML instead of JSON to `/api/plugins/cronalytics/*`.
+
+**Common cause:** Caddy `try_files` or Nginx `rewrite` rules intercepting `/api/*` paths before they reach the dashboard server.
+
+**Fix:** Ensure your reverse proxy forwards `/api/plugins/cronalytics/*` directly to the Hermes dashboard backend without rewriting or serving static files.
+
+**Minimal Caddy example:**
+
+```caddy
+# Forward all /api/* routes to the Hermes dashboard backend
+reverse_proxy /api/* localhost:9119
+
+# Serve the SPA for everything else
+reverse_proxy localhost:9119
+```
+
+After updating the proxy config, hard-refresh the browser (`Ctrl+Shift+R` or `Cmd+Shift+R`).
+
+---
+
+## "Unexpected token '<'" Error in the Dashboard
+
+If the Cronalytics tab shows a JSON parse error mentioning `<!doctype`, the dashboard's cached JavaScript bundle is requesting an old or unmounted API route. The Hermes dashboard server serves the SPA fallback (HTML) for any unmatched path, and the browser tries to parse that HTML as JSON.
+
+**Fix:** Perform a **hard refresh** (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear the browser cache and load the latest frontend bundle. If you're behind a reverse proxy, also verify the [reverse proxy configuration](#reverse-proxy-returns-html-for-api-routes) above.
+
+---
+
+## API Routes Are Mounted but Requests Return HTML
+
+If you see plugin API routes mounted in the dashboard server logs (e.g., `/api/plugins/cronalytics/`) but requests still return HTML, the dashboard server may have been restarted after the plugin loaded.
+
+**Fix:** Restart the Hermes dashboard server and hard-refresh the browser.
+
+---
+
+## `curl` Returns `{"detail":"unauthorized"}`
+
+The Cronalytics API (and all Hermes plugin APIs) requires the dashboard's ephemeral session token. This token is generated when the dashboard starts and is injected into the SPA's `index.html`.
+
+**Fix:** Use the dashboard **Sync Now** button instead. If you must use `curl` from a script, extract `window.__HERMES_SESSION_TOKEN__` from the dashboard page source and pass it in the `X-Hermes-Session-Token` header.
+
+---
+
+## "No cron jobs captured" After Install
+
+Cronalytics only captures jobs from the `on_session_end` hook going forward. Historical runs are backfilled via the reconciliation scanner.
+
+**Fix:** Click **Sync Now** in the dashboard toolbar. The scanner reads `state.db` and inserts any cron sessions newer than the last watermark.
+
+---
+
+## Problem: CLI reports "No runs found" but the Dashboard shows data.
+
+**Check Path Resolution:**
+Cronalytics resolves `$HERMES_HOME` with the following priority:
+1. `hermes_constants.get_hermes_home()` (if running inside Hermes)
+2. `os.environ["HERMES_HOME"]`
+3. Default to `~/.hermes`
+
+If your CLI is environment-isolated (e.g. running in a raw shell without your usual exports), it may be looking at a different profile. Explicitly export your path:
+`export HERMES_HOME=/home/nick/.hermes`
+
+---
+
+## Problem: Dashboard is not updating after a cron run.
+
+**Check the Ingestion Queue:**
+Cronalytics uses a durable queue file: `~/.hermes/plugins/cronalytics/pending.jsonl`.
+- If this file exists and is growing, the gateway is capturing sessions but the background worker is failing to ingest them into the fact DB.
+- Check the gateway logs: `hermes logs --gateway`. Look for `[cronalytics]` warnings about `state.db` timeouts or retries.
+- The worker waits up to 17 seconds for Hermes to flush the session to disk; if your system is under heavy load, it may require manual sync.
+
+---
+
+## Dashboard Errors
+
+### 422: Unprocessable Entity (string_pattern_mismatch)
+**Symptoms:** The dashboard fails to load data and the browser console shows a 422 error mentioning `outcome` or `mode` pattern mismatch.
+
+**Cause:** This happens immediately after upgrading to v1.1.0 if the old plugin code is still resident in memory. The browser is sending the new default value (`all`) but the old backend only recognizes `both`.
+
+**Fix:** Stop and start the Hermes Dashboard with a small delay to force a reload of the plugin code:
+```bash
+hermes dashboard --stop && sleep 2 && hermes dashboard
+```
+
+See also [UPGRADE.md](UPGRADE.md) for version-specific upgrade issues.
+
+---
+
+## CLI Errors
+
+### command not found: `cronalytics`
+**Cause:** The CLI hasn't been registered yet. It is an optional add-on that requires a `pip` install.
+
+**Fix:** Run the following command in the plugin directory:
+```bash
+pip install -e ~/.hermes/plugins/cronalytics
+```
+*(Arch Linux users (btw) may need to add `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
+
+Alternatively, run through the plugin directory without pip:
+
+```bash
+cd ~/.hermes/plugins/cronalytics && python -m cronalytics.cli --help
+```
+
+---
+
+*Version: 1.1.0*  
+*Last updated: 2026-05-26*

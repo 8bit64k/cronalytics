@@ -40,15 +40,15 @@ A concise positioning line for the product is: **Turn hidden automation into vis
 
 Potential names for the initiative or feature include:
 
-- **Cron Cost Analytics**.hermes-agent.nousresearch+1
+- ~~**Cron Cost Analytics**~~
 
-- **Cron Spend Visibility**.hermes-agent.nousresearch+1
+- ~~**Cron Spend Visibility**~~
 
-- **Background Automation Cost Tracking**.hermes-agent.nousresearch+1
+- ~~**Background Automation Cost Tracking**~~
 
-- **Unattended AI Cost Insights**.hermes-agent.nousresearch+1
+- ~~**Unattended AI Cost Insights**~~
 
-- **Cron-Insights**<---- *chosen (current) product name*
+- **Cronalytics** — the dashboard for agentic automations in Hermes
 
 ## Short Executive Pitch
 

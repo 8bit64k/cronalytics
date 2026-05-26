@@ -3,8 +3,9 @@
 > How to read the dashboard, interpret the metrics, and use the controls.
 
 ---
+⚠️ **Before you begin, make sure you have read and understand these [Important Notes](#important-notes-%EF%B8%8F)**.
 
-## The Cronalytics Tab
+> ## The Cronalytics Tab
 
 Open the **Cronalytics** tab from the Hermes dashboard sidebar. The tab is organized top-to-bottom as:
 
@@ -17,13 +18,13 @@ Open the **Cronalytics** tab from the Hermes dashboard sidebar. The tab is organ
 
 ---
 
-## Toolbar Controls
+> ## Toolbar Controls
 
 The sticky toolbar stays at the top of the viewport as you scroll.
 
 ### Outcome Toggle: `All | Success | Failure`
 
-Filters every metric and table row to show only successful runs, only failed runs, or both.
+Filters every metric and table row to show only successful runs, only failed runs, or all.
 
 - **All** (default) — shows everything.
 - **Success** — Cost card shows only successful-run cost; Jobs table shows only jobs with successful runs; Leader Board spotlights top successful jobs.
@@ -39,13 +40,19 @@ Filters between LLM agent jobs and script-only (`no_agent`) jobs.
 - **Agent** — shows only jobs that invoke an LLM (have cost, tokens, model).
 - **No agent** — shows only script-only jobs (zero cost, zero tokens). These are invisible in most Hermes views; this toggle makes them visible.
 
-Script jobs display a `[No agent]` badge in the Jobs table and Job Detail Modal.
+**Note on Badges:** Script jobs are marked with shorthand badges. These are synonymous:
+- **`[No agent]`** — The full badge shown in the Dashboard Jobs table.
+- **`[N]`** — The compact suffix used in CLI tables and the Dashboard Job Detail Modal.
+
+**Technical Difference:** An **Agent** job executes within a Hermes agent session, generating a `state.db` entry and incurring token costs. A **No agent** job (script-only) executes a raw shell command or script; it generates no session record in `state.db` and its presence is detected by Cronalytics via its output artifacts in `~/.hermes/cron/output/`.
 
 Your selection is saved to `localStorage`.
 
+> See **[FAQ: What's the difference between agent and no-agent jobs?](FAQ.md)** for a plain-English explanation.
+
 ### Day Selector
 
-Presets: **7D | 30D | 90D | All**
+Presets: **7D | 30D | 90D**
 
 - Click a preset to instantly filter all metrics to that window.
 - Enter a custom number (0–365) in the input field and press **Enter** or click **Go**.
@@ -68,7 +75,7 @@ Triggers a reconciliation scan against `state.db` and the cron output directory.
 
 ---
 
-## Summary Board
+> ## Summary Board
 
 Four cards showing aggregate metrics. Click any card to open an educational modal.
 
@@ -78,12 +85,17 @@ Four cards showing aggregate metrics. Click any card to open an educational moda
 - **Delta:** ↑ or ↓ percentage comparing to the prior window of the same length.
 - **Context:** "vs prior 30d" (or "period" if All time).
 
+> **Note:** Trend arrows (↗ ↘ →) require the database to contain at least 1.75× the filter window (e.g., 52.5 days for a 30-day filter). Shorter history always shows "→" (flat) to avoid misleading spikes from partial prior windows.
+
 **What to look for:** A sudden spike in runs may indicate a job running more frequently than intended, or a retry loop.
 
 ### Cost
 
 - **Big number:** total estimated cost in amber (`$X.XX`).
 - **Delta:** ↑/↓ percentage vs prior window.
+
+> **Note:** Trend arrows (↗ ↘ →) require the database to contain at least 1.75× the filter window (e.g., 52.5 days for a 30-day filter). Shorter history always shows "→" (flat).
+
 - **Sub-line:** `✓ N · ✗ N` — success vs failure run counts. If failures have cost, shows wasted cost in parentheses.
 
 > **Note:** The "Actual" line is suppressed. Partial `actual_cost_usd` coverage from providers creates misleading comparisons. It will return when coverage is reliable.
@@ -109,7 +121,7 @@ Click the Pace card to open a modal explaining the math in detail.
 
 ---
 
-## Leader Board
+> ## Leader Board
 
 Four spotlight cards showing the single highest-value job in each dimension. Click any card to see job details.
 
@@ -127,7 +139,7 @@ The job most at risk of exceeding its budget. This is your early-warning signal 
 
 ---
 
-## Understanding the Cost Column
+> ## Understanding the Cost Column
 
 The cost shown for each run is the **estimated cost** that Hermes calculated and recorded in `state.db` during the session.
 
@@ -138,9 +150,11 @@ It is useful for:
 
 It is **not** your exact invoice. Provider billing systems apply rounding, credits, and rate changes that neither Hermes nor Cronalytics see. For precise charges, check your provider dashboard.
 
+> See **[FAQ: Cost & Billing](FAQ.md)** — $0.00 costs, estimated vs actual, and why numbers differ from the Analytics tab or provider invoice.
+
 ---
 
-## Per-Model Breakdown
+> ## Per-Model Breakdown
 
 A proportional bar chart of the top 5 models by estimated cost.
 
@@ -152,7 +166,7 @@ A proportional bar chart of the top 5 models by estimated cost.
 
 ---
 
-## Jobs Breakdown Table
+> ## Jobs Breakdown Table
 
 The main data surface. Eight columns, all sortable.
 
@@ -164,7 +178,7 @@ Click any column header to sort ascending. Click again to sort descending. An ar
 |--------|--------------|
 | **Job** | Human-readable name (or job ID). `[No agent]` badge for script jobs. |
 | **Runs** | Execution count in the window. |
-| **Avg Time** | Average duration per run. |
+| **Avg Duration** | Average duration per run. |
 | **Total Cost** | Sum of estimated cost. |
 | **Avg Cost** | Average cost per run. |
 | **Nominal/mo** | Expected monthly cost if run exactly on schedule. |
@@ -189,7 +203,7 @@ Click any row to expand a detail panel showing:
 
 ---
 
-## Job Detail Modal
+> ## Job Detail Modal
 
 Click **See Runs** in an expanded row to open the full run history.
 
@@ -197,6 +211,8 @@ Click **See Runs** in an expanded row to open the full run history.
 - **Headers:** sticky (remain visible while scrolling)
 - **Sort:** click any column header to sort
 - **Limit:** 200 runs by default (backend ceiling: 500)
+
+See **[FAQ: 250-run modal limit](FAQ.md)** — why the cap exists and how to dump every run via the CLI.
 - **Columns:** Run Time, Cost, Duration, Success, Model, Mode
 
 The modal inherits the sort preference from the parent Jobs Breakdown table. If you sorted by Cost in the main table, the modal opens sorted by Cost.
@@ -208,7 +224,7 @@ Close the modal by:
 
 ---
 
-## Educational Modals
+> ## Educational Modals
 
 Click any Summary Board or Leader Board card to open an explanatory modal.
 
@@ -226,7 +242,7 @@ Explains input/output/cached tokens, shows proportion bars, and includes percent
 
 ---
 
-## Keyboard Navigation
+> ## Keyboard Navigation
 
 All interactive elements are keyboard-accessible:
 
@@ -236,7 +252,17 @@ All interactive elements are keyboard-accessible:
 
 ---
 
-## Common Workflows
+> ## Resetting the UI
+
+The dashboard saves your filter preferences to `localStorage`. If the UI behaves unexpectedly or you wish to clear your settings, you can clear these keys in your browser's Developer Tools (Console):
+
+- `cron_outcome_filter` — Stores `all`, `success`, or `failure`.
+- `cron_mode_filter` — Stores `all`, `agent`, or `no_agent`.
+- `cron_day_filter` — Stores the selected day window (e.g., `30`).
+
+---
+
+> ## Common Workflows
 
 ### "Why did my cost spike this week?"
 1. Set Day Selector to **7D**.
@@ -264,7 +290,187 @@ All interactive elements are keyboard-accessible:
 
 ---
 
-## Advanced: Multiple Profiles
+> ## CLI Usage
+
+Cronalytics includes a terminal data tool with the same data as the dashboard, plus `--json` output for scripts and agents, but it must be registered separately via `pip` to get the `cronalytics` command on your `$PATH`. See [INSTALL.md](INSTALL.md) for details.
+
+Then use it from any directory:
+
+```bash
+cronalytics summary --days 14
+```
+
+Or, without `pip`, run the module directly from the plugin directory:
+
+```bash
+cd ~/.hermes/plugins/cronalytics && python -m cronalytics.cli summary --days 14
+```
+
+### Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `summary` | Headline aggregates + Leader Board + cost-by-model table | `cronalytics summary --days 14` |
+| `jobs` | Per-job table with ID, runs, cost, tokens, pace, avg duration | `cronalytics jobs --days 7 --json` |
+| `runs --job <id>` | Individual run history for a specific job | `cronalytics runs --job _demo_f1561526d8 --days 30` |
+| `models` | Per-model aggregate table | `cronalytics models --days 14` |
+| `trends` | Daily bar chart (ASCII) of cost + runs | `cronalytics trends --days 90` |
+| `health` | Fact DB metadata: total runs, unique jobs, last sync | `cronalytics health --json` |
+| `all` | Chains health → summary → jobs → models → trends | `cronalytics all --days 7` |
+
+### Shared Flags
+
+Every data command accepts:
+
+- `--days N` — Look-back window (default: 30, `0` = all time)
+- `--outcome all|success|failure` — Filter by run outcome
+- `--mode all|agent|no_agent` — Filter by job mode
+- `--json` — Emit JSON instead of rendered tables (pipe to `jq`, Python, etc.)
+
+### Common CLI Workflows
+
+**"Find jobs with pace above 1.2×"**
+```bash
+cronalytics jobs --days 7 --json | jq '.data[] | select(.pace > 1.2) | {id: .job_id, name: .job_name, pace}'
+```
+
+**"Get total cost for the last week"**
+```bash
+cronalytics summary --days 7 --json | jq '.data.tot_estimated_cost'
+```
+
+**"Export job list as CSV"**
+```bash
+cronalytics jobs --days 30 --json | jq -r '.data[] | [.job_id, .runs, .tot_estimated_cost, .total_tokens] | @csv'
+```
+
+**"Full report in one command"**
+```bash
+cronalytics all
+```
+**"Full report (bare command or 'all' subcommand)"**
+```bash
+cronalytics --days 14
+```
+
+**"Per-job economics with pace and projections"**
+```bash
+cronalytics jobs --days 7 --json | jq '.data[] | select(.pace > 1.2)'
+```
+
+**"Drill into a specific job"**
+```bash
+cronalytics runs --job f1561526d8 --days 30 --json
+```
+
+### Formatting Conventions
+
+- **Cost:** `$X.XX` (e.g., `$14.37`)
+- **Tokens:** Compact K/M suffixes (e.g., `12.2M`, `538K`)
+- **Duration:** Seconds with `s` suffix (e.g., `7032s`)
+- **Tables:** Monospace-aligned ASCII boxes matching `hermes insights` style
+- **Date ranges:** Shown under every time-bounded banner (e.g., `May 03 — May 16, 2026`)
+
+---
+
+> ## Agent Skill
+
+Cronalytics ships with a built-in diagnostic skill that teaches Hermes agents how to analyze your cron jobs.
+
+### How to use it
+
+Ask your agent in any channel (terminal, Telegram, etc.):
+
+> "Check my cron jobs for the last two weeks — flag anything that looks off."
+
+The agent automatically loads the `cronalytics` skill and follows a structured diagnostic workflow:
+
+1. **Time window verification** — checks dataset span via `health --json` and defaults to full history for large datasets
+2. **Baseline (`all`)** — verifies sync freshness, scans headline metrics and summary for red flags
+3. **Job-level drill (`jobs --json`)** — ranks jobs by cost/tokens, checks pace and drift
+4. **Per-run investigation (`runs --job`)** — individual run history for top burners, looking for context creep or cost spikes
+5. **Failure pattern analysis** — computes true failure rates and drills into failure-only runs
+6. **Model economics (`models --json`)** — cost-per-run comparison across models, token audit before model-switch suggestions
+7. **Trend validation (`trends --json`)** — daily time series to distinguish one-off spikes from systemic growth
+
+### What the skill provides
+
+- **Confidence grading** — Every anomaly rated HIGH / MEDIUM / LOW with supporting evidence
+- **Alternative explanations** — The agent must consider why a finding might be normal
+- **Guardrails** — "Known Ways to Fool Yourself" prevents common false positives:
+  - Pace < 1.0 on new jobs (age-gating via `jobs.json` `created_at`)
+  - Script jobs (`[N]` in name) running differently than agent jobs
+  - Single spikes without temporal cross-check
+  - Outlier costs in job groups
+  - Deliberately growing jobs
+- **`jobs.json` cross-reference** — Human-readable names, schedules, creation dates, delivery errors, and `last_status` for silent failure detection
+
+### Example output
+
+The agent produces structured findings like:
+
+```
+Anomalies (confidence-graded):
+1. [HIGH] Watchdog script jobs failing — 4 jobs with "Script not found" since May 10
+   Evidence: jobs.json last_status for all 4 instances
+   Remediation: Check ~/.hermes/scripts/ for missing files
+
+2. [HIGH] phosphor-daily context creep — input_tokens 38K → 816K over 3 weeks
+   Evidence: per-run trajectory showing 28× variance
+   Remediation: Cap input size or split large sources
+
+3. [LOW] Gateway Check pace 0.48 — expected; job created May 1, window is 30 days
+   Evidence: jobs.json created_at confirms age < window
+   Alternative: Not a drift signal; focus on cost/tokens instead
+```
+
+> **"Dashboard for people, CLI for agents, skill for reasoning."**
+
+### Tailoring Assessments to Your Environment
+
+The same assessment prompt produces different depth depending on your fleet size and how you frame the request. Six distinct prompt angles each surface different signals:
+
+| Angle | Surfaces Best | Good For |
+|-------|---------------|----------|
+| Cost forensics | Ranked burners, model economics, annualized projections | "My bill is high" |
+| Failure hunting | Silent failures, broken `no_agent` jobs, error patterns | "Something is broken" |
+| Growth / acceleration | Context creep, cost acceleration, session archaeology | "Is anything getting worse?" |
+| Temporal patterns | Schedule clustering, UTC drift, off-peak gaps | "When are my jobs actually running?" |
+| Value / frustration | Blunt bottom-line, "what to fix first" priority list | "Am I wasting money?" |
+| Weekly status check | Concise top-5 digest, borderline cases | "Quick check — what's up?" |
+
+**Composite prompt** (catches all angles in one shot):
+
+> "I think my cron jobs are wasting money and some might be broken without me knowing. Show me which jobs are burning the most money, which are failing silently, and whether anything is accelerating out of control. Include day-of-week and hour-of-day patterns, rank by cost, and give me a blunt bottom line of what's broken and what to fix first."
+
+**Time window matters.** The CLI defaults to 30 days, but long-term creep and cost acceleration are invisible inside a month. If you do not specify a window, the skill defaults to the **full dataset span** (`--days 0`). Specify only when you want a narrow slice (e.g., "this week" → `--days 7`).
+
+### Model Choice for Assessments
+
+You do **not** need a frontier model to run a cronalytics assessment. Pattern detection on structured data is what cheap models excel at.
+
+| Model | Est. Cost per Assessment | Best For |
+|-------|-------------------------|----------|
+| gemini-3-flash | ~$0.01–0.05 | Weekly recurring assessments |
+| gpt-5.4-mini | ~$0.02–0.08 | Weekly with deeper reasoning |
+| kimi-k2.6 | ~$0.10–0.50 | Monthly deep-dives, full composite prompt |
+| claude-sonnet / gpt-5.5 | $2.00–5.00+ | **Overkill — avoid for routine assessments** |
+
+At weekly cadence:
+- gemini-3-flash: ~$0.04–0.20/month to monitor a fleet
+- gpt-5.5: ~$8–20/month — a 100× waste for the same signal
+
+**Rule:** Use the cheapest model that reliably produces the structured output you need. If the assessment misses a signal, upgrade the model, not the prompt.
+
+> ## Localization (i18n)
+
+Cronalytics automatically detects your system language. If you are using Hermes in **Spanish**, **Simplified Chinese**, or **Traditional Chinese**, the dashboard will update its labels and documentation accordingly.
+
+> **Note to Community:** These locales are AI-validated community contributions. If you spot a discrepancy or regional phrasing error, please open a Pull Request. We follow a strict consensus protocol for all translation changes.
+
+---
+
+> ## Advanced: Multiple Profiles
 
 Hermes supports multiple profiles via `hermes --profile <name>`. Each profile has its own `state.db`, cron jobs, and plugin directory.
 
@@ -274,5 +480,41 @@ If you create jobs under `hermes --profile work cron create ...`, those jobs run
 
 ---
 
-*Version: 1.0.0*  
-*Last updated: 2026-05-11*
+ ## Important Notes ⚠️
+>
+> ### Cost data is estimated, not exact. 
+>
+> Cronalytics reports the estimated cost that Hermes computed and stored in `state.db`. Your actual invoice may differ due to rate changes, credits, or rounding. Use this for directional awareness, not accounting.
+
+> ### Understanding Success
+> 
+> **Cronalytics tracks two different notions of "success"**:
+> 
+> | Signal | What It Means | Source |
+|--------|--------------|--------|
+| **Wrapper Success** (`success` toggle in dashboard) | The cron wrapper finished without error — the job ran, the agent responded, and the wrapper exited cleanly. | `end_reason` field |
+| **Payload Success** | The agent's actual output was correct, useful, or achieved the intended  goal. | **Not tracked** |
+> 
+> ### How to interpret the dashboard
+> 
+> - **Success = high, Failure = low** → Your cron jobs are mechanically reliable.
+> - **Success = high, but output quality is poor** → The infrastructure is fine; the issue is in the > prompt, model choice, or task definition.
+> - **Failure = high** → Investigate timeouts, API errors, or wrapper crashes.
+> 
+> The Success/Failure toggle is a **reliability** signal, not a **correctness** signal.
+
+> ### Single-profile cron by default. 
+> 
+> Cronalytics monitors the Hermes profile where it is installed. Most users — even those with multiple profiles configured — run cron jobs in the **default** profile. For them, Cronalytics works fully.
+> 
+> The edge case: if you explicitly create a cron job under a non-default profile (`hermes --profile <name> cron create ...`), that job runs in an isolated gateway with its own `state.db`. Cronalytics, installed in the default profile, cannot see it. To monitor those jobs, install Cronalytics in that profile's `plugins/` directory as well.
+> 
+> Multi-profile cron support is on our roadmap.
+>
+---
+
+*Version: 1.1.0*  
+*Last updated: 2026-05-26*
+
+> **Got questions?** See the **[FAQ](FAQ.md)** for quick answers: cost estimates, missing jobs, Pace, agent vs no-agent, 250-run limit, CLI setup, and more.
+

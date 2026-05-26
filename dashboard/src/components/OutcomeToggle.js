@@ -1,13 +1,15 @@
 import { React } from "../lib/sdk.js";
 import { Button } from "../lib/sdk.js";
-
-const OPTIONS = [
-  { label: "All", value: "both" },
-  { label: "Success", value: "success" },
-  { label: "Failure", value: "failure" },
-];
+import { useCronalyticsI18n } from "../i18n/index.js";
 
 export function OutcomeToggle({ selected, onChange, label }) {
+  const t = useCronalyticsI18n();
+  const OPTIONS = [
+    { label: t("outcome_toggle.all", "All"), value: "all" },
+    { label: t("outcome_toggle.success", "Success"), value: "success" },
+    { label: t("outcome_toggle.failure", "Failure"), value: "failure" },
+  ];
+
   return React.createElement(
     "div",
     { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },

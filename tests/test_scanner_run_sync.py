@@ -6,8 +6,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
-import facts
-import scanner
+from cronalytics import facts, scanner
 
 
 class TestRunSync:
@@ -178,6 +177,24 @@ class TestRunSync:
         assert wm["last_ended_at"] == 900.0
         # rows_synced tracks only the agent batch (behaviour of current implementation)
         assert wm["rows_synced"] == 2
+
+    def test_null_watermark_regression(self, fact_db, tmp_path: Path):
+        """A watermark JSON with last_ended_at=null must not crash run_sync."""
+        wm_path = tmp_path / "watermark.json"
+        wm_path.write_text(json.dumps({"last_ended_at": None, "last_sync": None, "rows_synced": 0}))
+        state_db = tmp_path / "state.db"
+
+        with patch.object(scanner, "_fetch_new_sessions", return_value=[]), patch.object(
+            scanner, "_scan_output_dirs", return_value=(0, 0)
+        ):
+            result = scanner.run_sync(state_db, fact_db, wm_path)
+
+        assert result["inserted"] == 0
+        assert result["skipped"] == 0
+        assert result["new_watermark"] == 0.0
+
+        wm = scanner._read_watermark(wm_path)
+        assert wm["last_ended_at"] == 0.0
 
 
 class TestGetStatus:

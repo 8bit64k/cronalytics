@@ -14,6 +14,7 @@ import importlib.util
 import json
 import sqlite3
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -28,9 +29,9 @@ _plugin_dir = _plugin_api_dir.parent
 
 
 def _load_module(name: str):
-    """Load a .py file from the plugin root as a namespaced module."""
+    """Load a .py file from the plugin package as a namespaced module."""
     mod_name = f"cronalytics_auto_{name}"
-    path = _plugin_dir / f"{name}.py"
+    path = _plugin_dir / "cronalytics" / f"{name}.py"
     spec = importlib.util.spec_from_file_location(mod_name, path)
     if spec is None or spec.loader is None:
         raise ImportError(f"Cannot load {path}")
@@ -127,7 +128,7 @@ async def health() -> dict[str, Any]:
             "status": "ok",
             "fact_db": db_health,
             "sync": sync_status,
-            "version": "1.0.0",
+            "version": "1.1.0",
         }
     )
 
@@ -147,7 +148,7 @@ async def sync() -> dict[str, Any]:
 @router.get("/summary")
 async def summary(
     days: int = Query(default=30, ge=0),
-    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
+    outcome: str = Query(default="all", pattern="^(all|both|success|failure)$"),
     mode: str = Query(default="all", pattern="^(all|agent|no_agent)$"),
 ) -> dict[str, Any]:
     """Aggregated stats for cron runs over the last N days (0 = all time).
@@ -163,8 +164,8 @@ async def summary(
     for j in raw_jobs:
         proj = _schedule_mod.get_job_projections(
             job_id=j["job_id"],
-            avg_cost=j.get("avg_cost"),
-            total_cost=j.get("total_cost"),
+            avg_estimated_cost=j.get("avg_estimated_cost"),
+            tot_estimated_cost=j.get("tot_estimated_cost"),
             runs=j.get("runs", 0),
             first_run=j.get("first_run", 0),
             last_run=j.get("last_run", 0),
@@ -199,7 +200,7 @@ async def summary(
 async def jobs(
     days: int = Query(default=30, ge=0),
     skip_projections: bool = Query(default=False, description="Set true to omit schedule-aware projections (faster)"),
-    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
+    outcome: str = Query(default="all", pattern="^(all|both|success|failure)$"),
     mode: str = Query(default="all", pattern="^(all|agent|no_agent)$"),
 ) -> dict[str, Any]:
     """Per-job aggregates: runs, total cost, avg cost, projections (0 = all time)."""
@@ -210,8 +211,8 @@ async def jobs(
         for j in enriched:
             proj = _schedule_mod.get_job_projections(
                 job_id=j["job_id"],
-                avg_cost=j.get("avg_cost"),
-                total_cost=j.get("total_cost"),
+                avg_estimated_cost=j.get("avg_estimated_cost"),
+                tot_estimated_cost=j.get("tot_estimated_cost"),
                 runs=j.get("runs", 0),
                 first_run=j.get("first_run", 0),
                 last_run=j.get("last_run", 0),
@@ -231,19 +232,19 @@ async def jobs(
 @router.get("/jobs/{job_id}/runs")
 async def job_runs(
     job_id: str,
-    limit: int = Query(default=50, ge=1, le=500),
+    limit: int = Query(default=250, ge=0, le=500),
     days: int = Query(default=0, ge=0),
-    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
+    outcome: str = Query(default="all", pattern="^(all|both|success|failure)$"),
     sort_key: str = Query(
         default="run_time",
-        pattern="^(run_time|estimated_cost_usd|duration_seconds|success|model|input_tokens)$",
+        pattern="^(run_time|estimated_cost|duration_seconds|success|model|input_tokens|job_mode)$",
     ),
     sort_dir: str = Query(default="desc", pattern="^(asc|desc)$"),
     mode: str = Query(default="all", pattern="^(all|agent|no_agent)$"),
 ) -> dict[str, Any]:
     """Individual run history for a specific job (0 = all time).
 
-    Inherits the global outcome filter and allows sorting by cost, duration, model, success,
+    Inherits the global outcome filter and allows sorting by estimated_cost, duration, model, success,
     or time. Defaults to the parent table's sort preference if passed through sort_key.
     """
     rows = _facts_mod.query_job_runs(
@@ -252,10 +253,31 @@ async def job_runs(
     )
     if not rows:
         raise HTTPException(status_code=404, detail=f"No runs found for job {job_id}")
+    # Also fetch total count for "more available" indicator
+    total_conn = sqlite3.connect(FACT_DB)
+    total_conditions = ["job_id = ?"]
+    total_params: list[Any] = [job_id]
+    if days > 0:
+        total_conditions.append("run_time >= ?")
+        total_params.append(time.time() - (days * 86400))
+    if outcome in ("success", "failure"):
+        total_conditions.append("success = ?")
+        total_params.append(1 if outcome == "success" else 0)
+    if mode in ("agent", "no_agent"):
+        total_conditions.append("job_mode = ?")
+        total_params.append(mode)
+    total_where = " WHERE " + " AND ".join(total_conditions)
+    total_cursor = total_conn.execute(
+        f"SELECT COUNT(*) FROM cron_runs{total_where}", total_params
+    )
+    total_runs = total_cursor.fetchone()[0]
+
     return _api_wrap(
         {
             "job_id": job_id,
             "limit": limit,
+            "total_runs": total_runs,
+            "more_available": total_runs > len(rows),
             "days": days,
             "outcome": outcome,
             "sort_key": sort_key,
@@ -268,7 +290,7 @@ async def job_runs(
 @router.get("/models")
 async def models(
     days: int = Query(default=30, ge=0),
-    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
+    outcome: str = Query(default="all", pattern="^(all|both|success|failure)$"),
     mode: str = Query(default="all", pattern="^(all|agent|no_agent)$"),
 ) -> dict[str, Any]:
     """Per-model usage aggregates (0 = all time)."""
@@ -284,7 +306,7 @@ async def models(
 @router.get("/trends")
 async def trends(
     days: int = Query(default=30, ge=0),
-    outcome: str = Query(default="both", pattern="^(both|success|failure)$"),
+    outcome: str = Query(default="all", pattern="^(all|both|success|failure)$"),
     mode: str = Query(default="all", pattern="^(all|agent|no_agent)$"),
 ) -> dict[str, Any]:
     """Daily cost trend (0 = all time)."""

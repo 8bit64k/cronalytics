@@ -7,6 +7,13 @@ import { React, PLUGINS } from "./lib/sdk.js";
 import { PluginErrorBoundary } from "./components/ErrorBoundary.js";
 import { CronalyticsTab } from "./components/CronalyticsTab.js";
 
+// Register i18n catalogs (en + es) before component renders
+import "./i18n/index.js";
+import "./i18n/en.js";
+import "./i18n/es.js";
+import "./i18n/zh-CN.js";
+import "./i18n/zh-TW.js";
+
 PLUGINS.register("cronalytics", function CronalyticsWrapped() {
   return React.createElement(
     PluginErrorBoundary,

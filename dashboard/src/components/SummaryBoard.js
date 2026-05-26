@@ -1,14 +1,16 @@
 import { React, Card, CardHeader, CardTitle, CardContent } from "../lib/sdk.js";
 import { fmtCost, fmtCompact, paceColor } from "../lib/formatters.js";
 import { ZapIcon, BanknoteIcon, BlocksIcon, MetronomeIcon, HelpCircleIcon } from "../lib/icons.js";
+import { useCronalyticsI18n } from "../i18n/index.js";
 
 export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick, onTokensClick, onPaceClick }) {
+  const t = useCronalyticsI18n();
   const s = summary || {};
   const runPct = s.previous_period && s.previous_period.runs != null && s.previous_period.runs !== 0
     ? ((s.total_runs - s.previous_period.runs) / s.previous_period.runs) * 100
     : null;
-  const costPct = s.previous_period && s.previous_period.cost != null && s.previous_period.cost !== 0
-    ? ((s.total_estimated_cost - s.previous_period.cost) / s.previous_period.cost) * 100
+  const costPct = s.previous_period && s.previous_period.estimated_cost != null && s.previous_period.estimated_cost !== 0
+    ? ((s.tot_estimated_cost - s.previous_period.estimated_cost) / s.previous_period.estimated_cost) * 100
     : null;
 
   const cardHover = {
@@ -36,12 +38,12 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
     }
   },
     // Job Runs
-    React.createElement("div", cardProps(onRunsClick, "Job Runs details", { minWidth: 0, overflow: "hidden" }),
+    React.createElement("div", cardProps(onRunsClick, t("summary.job_runs", "Job Runs") + " details", { minWidth: 0, overflow: "hidden" }),
       React.createElement(Card, { style: { flex: 1 } },
         React.createElement(CardHeader, null,
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
             React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, ZapIcon(14)),
-            React.createElement(CardTitle, null, "Job Runs"),
+            React.createElement(CardTitle, null, t("summary.job_runs", "Job Runs")),
             React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
           )
         ),
@@ -51,50 +53,53 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
             runPct != null ? (runPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(runPct).toFixed(0) + "%" : "\u2014"
           ),
           React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.1rem" } },
-            "vs prior ", days === 0 ? "period" : days + "d"
+            t("summary.vs_prior", "vs prior") + " ", days === 0 ? t("summary.period", "period") : days + "d"
           )
         )
       )
     ),
     // Cost
-    React.createElement("div", cardProps(onCostClick, outcome === "failure" ? "Wasted cost details" : "Cost details", { minWidth: 0, overflow: "hidden" }),
+    React.createElement("div", cardProps(onCostClick, outcome === "failure" ? t("summary.estimated", "Est") + " " + t("summary.wasted", "Wasted") + " cost details" : t("summary.estimated", "Est") + " cost details", { minWidth: 0, overflow: "hidden" }),
       React.createElement(Card, { style: { flex: 1 } },
         React.createElement(CardHeader, null,
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
             React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, BanknoteIcon(14)),
-            React.createElement(CardTitle, null, outcome === "failure" ? "Wasted" : "Cost"),
+            React.createElement(CardTitle, null, outcome === "failure" ? t("summary.wasted", "Wasted") : t("summary.cost", "Cost")),
             React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
           )
         ),
         React.createElement(CardContent, null,
-          React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: outcome === "failure" ? "#ef4444" : "#f5a623" } },
-            fmtCost(s.total_estimated_cost)
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+            React.createElement("div", { style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: outcome === "failure" ? "#ef4444" : "#f5a623" } },
+              fmtCost(s.tot_estimated_cost)
+            ),
+            React.createElement("span", { style: { fontSize: "0.7rem", opacity: 0.95, fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "0.25rem", padding: "0.05rem 0.4rem" } }, t("summary.estimated", "Estimated"))
           ),
-          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: costPct != null ? (costPct > 0 ? "#ef4444" : "#4ade80") : null } },
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.2rem", fontSize: "1.05rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: costPct != null ? (costPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(costPct).toFixed(0) + "%" : "\u2014" } },
             costPct != null ? (costPct > 0 ? "\u2191 " : "\u2193 ") + Math.abs(costPct).toFixed(0) + "%" : "\u2014"
           ),
           React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.1rem" } },
-            "vs prior ", days === 0 ? "period" : days + "d"
+            t("summary.vs_prior", "vs prior") + " ", days === 0 ? t("summary.period", "period") : days + "d"
           ),
           React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.3rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.25rem" } },
-            "Actual: ", s.total_actual_cost != null ? fmtCost(s.total_actual_cost) : "\u2014"
+            t("summary.actual", "Actual") + ": ", s.tot_actual_cost != null ? fmtCost(s.tot_actual_cost) : "\u2014"
           ),
           React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem" } },
             React.createElement("span", { style: { color: "#4ade80" } }, "\u2713 ", s.success_runs || 0),
             " \u00b7 ",
             React.createElement("span", { style: { color: (s.failure_runs || 0) > 0 ? "#ef4444" : null } }, "\u2717 ", s.failure_runs || 0),
-            (s.failure_cost != null && s.failure_cost > 0) ? " (" + fmtCost(s.failure_cost) + " wasted)" : ""
+            (s.failure_estimated_cost != null && s.failure_estimated_cost > 0) ? " (" + fmtCost(s.failure_estimated_cost) + " " + t("summary.wasted", "wasted") + ")" : ""
           )
         )
       )
     ),
     // Tokens
-    React.createElement("div", cardProps(onTokensClick, "Tokens details", { minWidth: 0, overflow: "hidden" }),
+    React.createElement("div", cardProps(onTokensClick, t("summary.tokens", "Tokens") + " details", { minWidth: 0, overflow: "hidden" }),
       React.createElement(Card, { style: { flex: 1 } },
         React.createElement(CardHeader, null,
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
             React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, BlocksIcon(14)),
-            React.createElement(CardTitle, null, "Tokens"),
+            React.createElement(CardTitle, null, t("summary.tokens", "Tokens")),
             React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
           )
         ),
@@ -118,7 +123,7 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
               React.createElement("span", { style: { width: "3.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCompact(s.total_output_tokens))
             ),
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-              React.createElement("span", { style: { width: "2.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Cached"),
+              React.createElement("span", { style: { width: "2.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, t("summary.cached", "Cached")),
               React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
                 React.createElement("div", { style: { width: Math.min(100, ((s.total_cache_read_tokens || 0) / (s.total_tokens || 1)) * 100) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
               ),
@@ -133,12 +138,12 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
       const nominalPace = s.nominal_monthly_total || 0;
       const trendPace = s.trend_monthly_total || 0;
       const maxPace = Math.max(nominalPace, trendPace, 1);
-      return React.createElement("div", cardProps(onPaceClick, "Pace details", { minWidth: 0, overflow: "hidden" }),
+      return React.createElement("div", cardProps(onPaceClick, t("summary.pace", "Pace") + " details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
               React.createElement("span", { style: { lineHeight: 0, filter: "drop-shadow(0 0 4px rgba(255,87,34,0.55))" } }, MetronomeIcon(14)),
-              React.createElement(CardTitle, null, "Pace"),
+              React.createElement(CardTitle, null, t("summary.pace", "Pace")),
               React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, HelpCircleIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
             )
           ),
@@ -148,14 +153,14 @@ export function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick,
             }, s.pace != null ? s.pace.toFixed(2) + "\u00d7" : "\u2014"),
             React.createElement("div", { style: { marginTop: "0.4rem", display: "flex", flexDirection: "column", gap: "0.2rem" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "3.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Nominal"),
+                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, t("summary.nominal", "Nominal")),
                 React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
                   React.createElement("div", { style: { width: (Math.min(100, (nominalPace / maxPace) * 100)) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
                 ),
                 React.createElement("span", { style: { width: "4.5rem", textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtCost(nominalPace))
               ),
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.35rem" } },
-                React.createElement("span", { style: { width: "3.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, "Trend"),
+                React.createElement("span", { style: { width: "4.5rem", fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)" } }, t("summary.trend", "Trend")),
                 React.createElement("div", { style: { flex: 1, background: "rgba(255,255,255,0.04)", borderRadius: "0.15rem", height: "0.3rem", overflow: "hidden" } },
                   React.createElement("div", { style: { width: (Math.min(100, (trendPace / maxPace) * 100)) + "%", background: 'var(--foreground-base, var(--foreground))', height: "100%", opacity: 0.6 } })
                 ),

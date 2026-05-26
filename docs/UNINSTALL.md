@@ -2,7 +2,13 @@
 
 ## Method 1: Dashboard Plugins Tab (Recommended)
 
-Navigate to the **Plugins** tab in the Hermes dashboard. Find Cronalytics in the list and click **Delete**. This removes the plugin directory and disables it in config automatically.
+Navigate to the **Plugins** tab in the Hermes dashboard. Find Cronalytics in the list and click **Delete**. This removes the plugin code, fact database, watermark, and pending queue.
+
+> **Important:** If you installed the CLI via `pip`, it must be uninstalled separately:
+> ```bash
+> pip uninstall cronalytics
+> ```
+> *(Arch Linux users (btw) may need to add `--break-system-packages` due to PEP 668. Other distros omit that flag.)*
 
 ## Method 2: Manual Removal
 
@@ -10,11 +16,7 @@ Navigate to the **Plugins** tab in the Hermes dashboard. Find Cronalytics in the
 rm -rf ~/.hermes/plugins/cronalytics
 ```
 
-This removes:
-- The plugin code
-- The fact database (`facts.db`)
-- The sync watermark (`watermark.json`)
-- The pending queue (`pending.jsonl`)
+This removes the plugin code, fact database (`facts.db`), sync watermark (`watermark.json`), and pending queue (`pending.jsonl`).
 
 If you added `cronalytics` to `plugins.enabled` in `~/.hermes/config.yaml`, remove it:
 
@@ -25,7 +27,7 @@ plugins:
     # - cronalytics   <-- remove this line
 ```
 
-Then restart the gateway:
+If the dashboard still shows the Cronalytics tab after manual removal, restart the dashboard server.
 
 ```bash
 hermes gateway restart
@@ -47,4 +49,5 @@ cp ~/cronalytics-backup-YYYYMMDD.db ~/.hermes/plugins/cronalytics/facts.db
 
 ---
 
-*Version: 1.0.0*
+*Version: 1.1.0*  
+*Last updated: 2026-05-26*

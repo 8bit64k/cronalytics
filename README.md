@@ -1,45 +1,228 @@
 # Cronalytics
-
-
 /ˈkrɒn.əˌlɪt.ɪks/ (noun)
 
 1. Cron analytics and observability.
 2. The dashboard for agentic automations in Hermes.
 
 Observe. Measure. Optimize.
+<br/><br/>
+ <a href="https://github.com/8bit64k/cronalytics/releases">
+   <img src="https://img.shields.io/github/v/release/8bit64k/cronalytics?label=Release" alt="Latest Release">
+ </a>
+ <a href="https://github.com/8bit64k/cronalytics/blob/main/LICENSE">
+   <img src="https://img.shields.io/github/license/8bit64k/cronalytics" alt="License">
+ </a>
+ <a href="https://github.com/8bit64k/cronalytics/commits/main">
+   <img src="https://img.shields.io/github/last-commit/8bit64k/cronalytics" alt="Last Commit">
+ </a>
+ <a href="#">
+   <img src="https://img.shields.io/badge/Hermes_Agent-supported-blueviolet.svg" alt="Hermes Agent">
+ </a>
+ <a href="https://github.com/8bit64k/cronalytics/actions/workflows/ci.yml">
+   <img src="https://github.com/8bit64k/cronalytics/actions/workflows/ci.yml/badge.svg" alt="CI">
+ </a>
+ <a href="https://x.com/intent/tweet?text=Check%20out%20this%20project%20on%20GitHub:%20https://github.com/8bit64k/cronalytics%20%23HermesAgent%20%23NousResearch">
+  <img src="https://img.shields.io/badge/share-000000?logo=x&logoColor=white">
+ </a>
+ <a href="https://www.reddit.com/submit?title=Check%20out%20this%20project%20on%20GitHub:%20https://github.com/8bit64k/cronalytics">
+  <img src="https://img.shields.io/badge/share-FF4500?logo=reddit&logoColor=white">
+ </a>
+ <a href="https://t.me/share/url?url=https://github.com/8bit64k/cronalytics&text=Check%20out%20this%20project%20on%20GitHub">
+   <img src="https://img.shields.io/badge/share-0088CC?logo=telegram&logoColor=white">
+ </a>
 
+Cronalytics is a Hermes Agent plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them through **three** complementary interfaces: a hermes dashboard tab, a CLI tool for programmatic access, and an agent skill for cron health/diagnostics and comprehensive assessments. The current version is v1.1.0.
 
-Cronalytics is a Hermes Agent plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them in the Hermes dashboard via a dedicated `/cronalytics` tab.
-
-> Turn hidden automation into visible spend.
->
 > Built for **[Hermes Agent](https://github.com/nousresearch/hermes-agent)**, the autonomous agent framework by **[Nous Research](https://nousresearch.com)**.
 
 ---
 
-## Mini-Tour
-![Short Tour](docs/screenshots/cronalytics-tour.gif)
+## Getting Started
 
-[YouTube](https://youtu.be/nbeViSt9hCk?si=EH2u7Ys2vDTVDqka): short video showing basic install and usage.
+| I am... | Path |
+| :--- | :--- |
+| **A New User** | [Install Guide (Fresh Start)](docs/INSTALL.md) |
+| **An Existing v1.0.x User** | [Upgrade Guide (v1.1 Migration)](docs/UPGRADE.md) |
+| **Exploring Features** | [Usage & Workflows](docs/USAGE.md) or [Feature Catalog](dev/FEATURES.md) |
 
 ---
 
-## What It Does
+## Quick Start and Usage
+
+> The dashboard is insightful, but the CLI + Skill are the real superpower.
+
+#### **Dashboard — *Observe***
+Use the dedicated `/cronalytics` tab inside `hermes dashboard` for visual exploration. Charts, cards, and filters let you see cost, pace, and failure patterns at a glance.
+
+#### **CLI — *Measure***
+Use the terminal tool for programmatic access, `--json` output, and agent consumption. Precise queries, exact numbers, and scriptable data exports. Features eight commands, three global filters, and json output.
+
+```
+usage: cronalytics [-h] [--db DB] [--days DAYS] [--outcome {all,success,failure}]
+                   [--mode {all,agent,no_agent}] [--json]
+                   {summary,jobs,models,trends,health,runs,all,sync} ...
+
+Cronalytics CLI — dump cron run insights to the terminal
+
+positional arguments:
+  {summary,jobs,models,trends,health,runs,all,sync}
+    summary             Aggregate headline summary
+    jobs                Per-job breakdown with pace
+    models              Per-model estimated cost breakdown
+    trends              Daily run-count / estimated cost sparkline
+    health              Fact DB health check
+    runs                Individual runs for a job
+    all                 Run health + summary + jobs + models + trends
+    sync                Backfill cron sessions from state.db into fact DB
+
+options:
+  -h, --help            show this help message and exit
+  --db DB               Path to fact DB (default: auto-detected from plugin directory)
+  --days DAYS           Number of days to look back (default: 30, 0 = all time)
+  --outcome {all,success,failure}
+                        Filter by outcome (default: all)
+  --mode {all,agent,no_agent}
+                        Filter by job mode (default: all)
+  --json                Output raw JSON instead of formatted tables
+  ```
+
+#### **Agent Skill — *Optimize***
+A built-in diagnostic skill that teaches Hermes agents how to analyze your cron jobs with confidence-graded anomaly detection and ranked recommendations. Ask your agent:
+
+> "Check my cron jobs for the last two weeks — flag anything that looks off."
+
+The agent loads the `cronalytics` skill, follows a structured 7-step diagnostic workflow (time window verification → baseline → job-level drill → per-run investigation → failure pattern → model economics → trend validation), cross-references `jobs.json`, and grades every finding by confidence (HIGH / MEDIUM / LOW) with supporting evidence and alternative explanations.
+
+### First-Time Setup
+
+After install, the plugin needs data:
+
+1. **Wait for a cron job to run** — the `on_session_end` hook captures it automatically.
+2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard.
+
+If the dashboard shows "No cron jobs captured," click **Sync Now**.
+
+See **[FAQ: Visibility & Data](docs/FAQ.md)** for more help — how data updates, how far back you can look, and the 250-run modal limit.
+
+For full details about usage and common workflows see **[USAGE.md](docs/USAGE.md)**.
+
+---
+
+## Features
+
+### Mini-Tour
+
+<table>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/S01_dashboard-english.png" width="100%" alt="English Dashboard"/></td>
+    <td width="33%"><img src="docs/screenshots/S02_dashboard-chinese.png" width="100%" alt="Chinese Dashboard"/></td>
+    <td width="33%"><img src="docs/screenshots/S03_dashboard-spanish.png" width="100%" alt="Spanish Dashboard"/></td>
+  </tr>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/S04_summary-success.png" width="100%" alt="Summary: Success mode"/></td>
+    <td width="33%"><img src="docs/screenshots/S05_summary-failures.png" width="100%" alt="Summary: Failure mode"/></td>
+    <td width="33%"><img src="docs/screenshots/S06_pace-modal.png" width="100%" alt="Pace explainer modal"/></td>
+  </tr>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/S07_model-breakdown.png" width="100%" alt="Per-model breakdown"/></td>
+    <td width="33%"><img src="docs/screenshots/S08_jobs-breakdown.png" width="100%" alt="Jobs breakdown table"/></td>
+    <td width="33%"><img src="docs/screenshots/S09_job-runs.png" width="100%" alt="Job run history modal"/></td>
+  </tr>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/S10_cli-summary.png" width="100%" alt="CLI summary output"/></td>
+    <td width="33%"><img src="docs/screenshots/S11_cli-14-day-lead-to-assessment.png" width="100%" alt="CLI full report"/></td>
+    <td width="33%"><img src="docs/screenshots/S12_agent-report-w-viz.png" width="100%" alt="Agent diagnostic report"/></td>
+  </tr>
+</table>
+
+---
+
+### What Cronalytics Does
 
 - **Captures** every cron job run as it completes via the `on_session_end` hook
 - **Persists** cost, token counts, model, duration, and success state to a local fact database
 - **Backfills** historical data automatically on plugin load and on demand via reconciliation scanner
-- **Surfaces** a dashboard with:
-  - Summary cards (total runs, estimated cost, tokens, pace)
-  - Leader board (top runs, top cost, top tokens, top pace)
-  - Cost-by-model breakdown with proportional bars
-  - Per-job table with runs, cost, duration, projections, and sortable columns
-  - Expandable detail rows showing token breakdown, schedule, and success/failure split
-  - Job detail modal with full run history (sortable, 200-run limit)
-  - Outcome filter (All / Success / Failure) with conditional card colors
-  - Mode filter (All / Agent / No agent) for script-only job visibility
-  - **Sync Now** button to trigger backfill on demand
-  - Educational modals explaining Pace, Nominal, Trend, and cost math
+- **Surfaces** data through three interfaces:
+
+### Dashboard — visual exploration:
+- Summary cards (total runs, estimated cost, tokens, pace)
+- Leader board (top runs, top cost, top tokens, top pace)
+- Cost-by-model breakdown with proportional bars
+- Per-job table with runs, cost, duration, projections, and sortable columns
+- Expandable detail rows showing token breakdown, schedule, and success/failure split
+- Job detail modal with full run history (sortable, 200-run limit)
+- Educational modals explaining Pace, Nominal, Trend, and cost math
+- Outcome filter (All / Success / Failure) with conditional card colors
+- Mode filter (All / Agent / No agent) for script-only job visibility
+- Day selector  `7D | 30D | 90D` presets + custom input (0–365 days, Enter/Go)
+- Refresh — re-fetches summary and jobs
+- Sync Now button to trigger backfill on demand
+  
+**Multi-Locale Support**
+Cronalytics implements a self-hosted internationalization layer for independent Hermes plugins. All UI elements, educational explainers, and metrics are fully localized for:
+- 🇺🇸 **English** (Source of Truth)
+- 🇪🇸 **Spanish** (Professional/Technical)
+- 🇨🇳 **Chinese Simplified** (zh-CN)
+- 🇹🇼 **Chinese Traditional** (zh-TW)
+
+### CLI — terminal access:
+- `summary` — headline aggregates + leader board + cost-by-model table
+- `jobs` — per-job table with ID, runs, cost, tokens, pace, avg duration
+- `runs --job <id>` — individual run history (time, duration, cost, tokens, model)
+- `models` — per-model aggregate table
+- `trends` — daily bar chart (ASCII) of cost + runs
+- `health` — fact DB metadata, job count, last sync
+- `all` — chains health → summary → jobs → models → trends
+- All commands support `--days N`, `--outcome`, and `--mode`; every data command except `all` supports `--json`
+- Job name resolution from `~/.hermes/cron/jobs.json`
+
+### Agent Skill — agent-guided diagnostics:
+- Structured 7-step workflow: time window verification → baseline → job-level drill → per-run investigation → failure pattern → model economics → trend validation
+- Confidence-graded anomaly detection (HIGH / MEDIUM / LOW)
+- `jobs.json` cross-reference for temporal context and silent failure detection
+- "Known Ways to Fool Yourself" guardrails prevent false positives
+- Works in any terminal session or messaging channel
+
+To explore the complete feature catalog see **[FEATURES.md](dev/FEATURES.md)**.
+
+---
+
+## ⚠️ Important Notes
+
+### **Cost data is estimated, not exact.** 
+
+Cronalytics reports the estimated cost that Hermes computed and stored in `state.db`. Your actual invoice may differ due to rate changes, credits, or rounding. Use this for directional awareness, not accounting.
+
+> See **[FAQ: Cost & Billing](docs/FAQ.md)** — $0.00 costs, estimated vs actual, and why Cronalytics differs from your provider invoice.
+
+### Understanding Success
+
+**Cronalytics tracks two different notions of "success"**:
+
+| Signal | What It Means | Source |
+|--------|--------------|--------|
+| **Wrapper Success** (`success` toggle in dashboard) | The cron wrapper finished without error — the job ran, the agent responded, and the wrapper exited cleanly. | `end_reason` field |
+| **Payload Success** | The agent's actual output was correct, useful, or achieved the intended goal. | **Not tracked** |
+
+### How to interpret the dashboard
+
+- **Success = high, Failure = low** → Your cron jobs are mechanically reliable.
+- **Success = high, but output quality is poor** → The infrastructure is fine; the issue is in the prompt, model choice, or task definition.
+- **Failure = high** → Investigate timeouts, API errors, or wrapper crashes.
+
+> The Success/Failure toggle is a **reliability** signal, not a **correctness** signal.
+
+See **[FAQ: Metrics & Interpretation](docs/FAQ.md)** for Success vs Failure, agent vs no-agent jobs, and what Pace really means.
+
+### **Single-profile cron by default.** 
+
+Cronalytics monitors the Hermes profile where it is installed. Most users — even those with multiple profiles configured — run cron jobs in the **default** profile. For them, Cronalytics works fully.
+
+The edge case: if you explicitly create a cron job under a non-default profile (`hermes --profile <name> cron create ...`), that job runs in an isolated gateway with its own `state.db`. Cronalytics, installed in the default profile, cannot see it.
+
+Multi-profile cron support is on our roadmap.
+
+See **[FAQ: Where are my jobs?](docs/FAQ.md)** for a checklist of common reasons jobs don't appear.
 
 ---
 
@@ -47,71 +230,79 @@ Cronalytics is a Hermes Agent plugin that attributes session-level usage and est
 
 ### User Documentation (`docs/`)
 
-- **docs/INSTALL.md** — Detailed installation guide
-- **docs/UNINSTALL.md** — Clean removal instructions
-- **docs/USAGE.md** — Dashboard usage guide
+- **[INSTALL.md](docs/INSTALL.md)** — Installation guide (dashboard plugin + pip CLI + skill setup)
+- **[UPGRADE.md](docs/UPGRADE.md)** — Transition guide for v1.0.x users (Namespace restructure)
+- **[UNINSTALL.md](docs/UNINSTALL.md)** — Clean removal instructions
+- **[USAGE.md](docs/USAGE.md)** — Dashboard and CLI usage guide
+- **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** — Common issues and fixes
+- **[RELEASE_NOTES.md](docs/RELEASE_NOTES.md)** — Per-release upgrade notes and highlights
+- **[FAQ.md](docs/FAQ.md)** — Common questions and quick answers
 
 ### Developer Documentation (`dev/`)
 
-- **dev/BRIEF.md** — Product opportunity brief & positioning
-- **dev/DESIGN.md** — Architecture, data flow, and technical decisions
-- **dev/FEATURES.md** — Complete feature catalog with formulas
-- **dev/LAUNCH_PLAN.md** — V1.0 launch timeline
-- **dev/AGENTS.md** — Contributor conventions & release gates
-- **dev/DEV_SETUP.md** — Development environment setup
-- **PLAN.md** — Phased build plan and backlog (root)
+- **[BRIEF.md](dev/BRIEF.md)** — Product opportunity brief & positioning
+- **[DESIGN.md](dev/DESIGN.md)** — Architecture, data flow, and technical decisions
+- **[FEATURES.md](dev/FEATURES.md)** — Complete feature catalog with formulas
+- **[DEV_SETUP.md](dev/DEV_SETUP.md)** — Development environment setup
+
+### Project Meta
+
+- **[CHANGELOG.md](CHANGELOG.md)** — Full version history
 
 ---
 
-## ⚠️ Important Notes
+## Architecture at a Glance
 
-**Cost data is estimated, not exact.** Cronalytics reports the estimated cost that Hermes computed and stored in `state.db`. Your actual invoice may differ due to rate changes, credits, or rounding. Use this for directional awareness, not accounting.
+Cronalytics hooks into Hermes's `on_session_end`, enqueues session IDs, queries `state.db`, and stores derived analytics in a plugin-owned `facts.db`. Three interfaces read from that database: Dashboard (HTTP API), CLI (direct SQLite queries), and Agent Skill (CLI-piped heuristics).
 
-**Single-profile cron by default.** Cronalytics monitors the Hermes profile where it is installed. Most users — even those with multiple profiles configured — run cron jobs in the **default** profile. For them, Cronalytics works fully.
-
-The edge case: if you explicitly create a cron job under a non-default profile (`hermes --profile <name> cron create ...`), that job runs in an isolated gateway with its own `state.db`. Cronalytics, installed in the default profile, cannot see it. To monitor those jobs, install Cronalytics in that profile's `plugins/` directory as well.
-
-Multi-profile cron support is on our roadmap.
+For the full architecture diagram, data flow, and technical decisions, see **[DESIGN.md](dev/DESIGN.md#3-architecture)**.
 
 ---
 
-## Installation
+## API Endpoints
 
-### Dashboard Plugins Tab (Recommended)
+All endpoints are mounted at `/api/plugins/cronalytics/`. Core endpoints: `GET /health`, `GET /summary`, `GET /jobs`, `GET /jobs/{job_id}/runs`, `GET /models`, `GET /trends`, `POST /sync`.
 
-Open the Hermes dashboard, navigate to the **Plugins** tab, and use the **Install from GitHub / Git URL** field. Enter:
-
-- `owner/repo` shorthand (e.g. `8bit64k/cronalytics`)
-- Or a full `https://` or `git@` clone URL
-
-Check **Enable after install**, then click **Install**.
-
-### After Install
-
-Hard-refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached JS.
-
-Open the **Cronalytics** tab in the dashboard sidebar.
-
-> **Reverse proxy users:** If you run the Hermes dashboard behind Caddy or Nginx, ensure `/api/*` routes are forwarded directly to the dashboard backend. A misconfigured proxy will return HTML instead of JSON for plugin API calls. See [`docs/INSTALL.md`](docs/INSTALL.md#reverse-proxy-setup) for a minimal Caddy example.
->
-> For development setup, see [`dev/DEV_SETUP.md`](dev/DEV_SETUP.md).
+For the full endpoint table with parameters and response shapes, see **[DESIGN.md §4.11 API Validation Layer](dev/DESIGN.md#411-api-validation-layer)**.
 
 ---
 
-## First-Time Setup
+## Data Model
 
-After install, the plugin needs data:
+The fact database (`facts.db`) is append-only — rows are inserted once and never updated or deleted. Core fields include `session_id`, `job_id`, `estimated_cost_usd`, `actual_cost_usd`, `model`, token breakdowns, `duration_seconds`, `end_reason`, and `success`.
 
-1. **Wait for a cron job to run** — the `on_session_end` hook captures it automatically.
-2. **Or trigger a manual backfill** — click **Sync Now** in the dashboard, or run:
+For the full schema with field descriptions, see **[DESIGN.md §4.3 Fact DB](dev/DESIGN.md#43-fact-db-plugin-owned-append-only-sqlite)**.
 
-```bash
-curl -H "X-Hermes-Session-Token: <token>" -X POST http://localhost:9119/api/plugins/cronalytics/sync
+---
+
+## File Layout
+
 ```
-
-If the dashboard shows "No cron jobs captured," click **Sync Now**.
-
-> **Note:** The sync endpoint requires the dashboard's ephemeral session token for security (injected into the SPA at startup). Most users should use the dashboard **Sync Now** button instead of curl.
+cronalytics/
+├─── plugin.yaml              # Plugin manifest (hooks, version)
+├─── __init__.py              # Register hook + bootstrap scanner
+├─── cronalytics/             # Core package
+│   ├── cli.py                # Terminal interface (entry point)
+│   ├── config.py             # Paths + defaults
+│   ├── facts.py              # SQLite fact DB: schema, insert, queries
+│   ├── ingester.py           # Deferred ingestion worker + crash recovery
+│   ├── scanner.py            # Reconciliation scanner + watermark I/O
+│   ├── schedule.py           # Cron parsing + projection math
+│   ├── logger.py             # Shared logger
+│   └── checkpoint.py         # Session state persistence
+├─── skills/
+│   └─── devops/
+│       └─── cronalytics/
+│           └─── SKILL.md     # Built-in diagnostic skill for agents
+├─── dashboard/
+│   ├─── manifest.json        # Slot registration + routes
+│   ├─── plugin_api.py        # REST API mounted at /api/plugins/cronalytics/
+│   ├─── build.js             # esbuild bundler script
+│   ├─── src/                 # Modular frontend source
+│   └─── dist/
+│       └─── index.js         # Bundled React frontend
+└─── tests/                   # Unit tests (run with pytest)
+```
 
 ---
 
@@ -121,7 +312,7 @@ If the dashboard shows "No cron jobs captured," click **Sync Now**.
 
 ```yaml
 name: cronalytics
-version: 1.0.0
+version: 1.1.0
 description: Cost and operational observability for Hermes cron jobs
 provides_hooks:
   - on_session_end
@@ -129,7 +320,7 @@ provides_hooks:
 
 ### `config.py` (static defaults)
 
-All current settings are hardcoded defaults. There is no user-editable config file yet (planned for v1.1).
+All current settings are hardcoded defaults. There is no user-editable config file yet (planned for a future release).
 
 | Setting | Default | Meaning |
 |---------|---------|---------|
@@ -145,200 +336,27 @@ Paths are resolved automatically:
 
 ---
 
-## What the Dashboard Shows
-
-### Summary Board (Row 1)
-
-Four cards showing aggregate metrics for the selected window:
-
-- **Job Runs** — total executions with vs-prior-period delta (↑/↓ %)
-- **Cost** — total estimated cost in amber; vs-prior delta + ✓/✗ breakdown
-  (Actual cost placeholder suppressed — partial coverage creates misleading comparisons)
-- **Tokens** — total tokens in blue; In/Out/Cached proportion micro-bars
-- **Pace** — aggregate `trend_monthly / nominal_monthly` as a multiplier:
-  - `< 1.0×` green — under scheduled budget
-  - `1.0–2.0×` neutral — on track
-  - `≥ 2.0×` red — over budget
-
-Click any card to open an educational modal explaining the metric.
-
-### Leader Board (Row 2)
-
-Four spotlight cards surfacing the highest-value job in each dimension, with the leader's share of the window total:
-
-- **Top Runs** — highest execution count; `% of total runs` sub-line
-- **Top Cost** — highest cumulative spend; `% of total cost` sub-line
-- **Top Tokens** — highest token consumption; `% of total tokens` sub-line
-- **Top Pace** — highest pace multiplier (most at risk of exceeding budget)
-
-Click any card to open a detail modal with job metadata.
-
-### Per-Model Breakdown
-
-Proportional bar chart showing the top 5 models by cost, with run counts. Remaining models collapsed with "and N more."
-
-### Jobs Breakdown Table
-
-Eight sortable columns: **Job**, **Runs**, **Avg Time**, **Total Cost**, **Avg Cost**, **Nominal/mo**, **Trend/mo**, **Pace**.
-
-- Click a column header to sort ascending/descending
-- Click any row to expand a detail panel showing:
-  - Token breakdown (total, in, out, cached)
-  - Success/failure split with cost attribution
-  - Schedule display, last run, model, next run
-  - **See Runs** button opening a full modal
-
-### Job Detail Modal
-
-Full run history for the selected job:
-- 95% width modal with sticky headers
-- Sortable by run time, cost, duration, success, model
-- 200-run default limit (backend ceiling: 500)
-- Mode column showing Agent vs No agent
-
-### Toolbar Controls
-
-- **Outcome toggle** — `All | Success | Failure` (persists in localStorage)
-- **Mode toggle** — `All | Agent | No agent` (persists in localStorage)
-- **Day selector** — `7D | 30D | 90D` presets + custom input (0–365 days, Enter/Go)
-- **Refresh** — re-fetches summary and jobs
-- **Sync Now** — triggers reconciliation scan with spinner + completion toast
-
----
-
-## Understanding Success
-
-Cronalytics tracks two different notions of "success":
-
-| Signal | What It Means | Source |
-|--------|--------------|--------|
-| **Wrapper Success** (`success` toggle in dashboard) | The cron wrapper finished without error — the job ran, the agent responded, and the wrapper exited cleanly. | `end_reason` field |
-| **Payload Success** | The agent's actual output was correct, useful, or achieved the intended goal. | **Not tracked** |
-
-### How to interpret the dashboard
-
-- **Success = high, Failure = low** → Your cron jobs are mechanically reliable.
-- **Success = high, but output quality is poor** → The infrastructure is fine; the issue is in the prompt, model choice, or task definition.
-- **Failure = high** → Investigate timeouts, API errors, or wrapper crashes.
-
-> The Success/Failure toggle is a **reliability** signal, not a **correctness** signal.
-
----
-
-## Architecture at a Glance
-
-```
-Cron Job Due
-    │
-    ▼
-run_job() ──▶ agent.run_conversation()
-    │
-    ▼
-Hook: on_session_end(platform="cron")
-    │
-    ▼
-Enqueue session_id ──▶ Deferred worker retries
-    │                         (waits for DB flush)
-    ▼
-Query state.db ──▶ Insert into facts.db
-    │
-    ▼
-Dashboard queries facts.db via plugin API
-```
-
----
-
-## API Endpoints
-
-All endpoints are mounted at `/api/plugins/cronalytics/`.
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | `GET` | Plugin health + sync metadata |
-| `/summary?days=N&outcome=both&mode=all` | `GET` | Aggregated totals with projections |
-| `/jobs?days=N&outcome=both&mode=all` | `GET` | Per-job rolled-up stats with projections |
-| `/jobs/{job_id}/runs` | `GET` | Individual runs for a specific job |
-| `/models?days=N&outcome=both&mode=all` | `GET` | Cost breakdown by model |
-| `/trends?days=N&outcome=both&mode=all` | `GET` | Daily cost + runs time series |
-| `/sync` | `POST` | Run reconciliation scanner manually |
-
----
-
-## Data Model
-
-The fact database (`facts.db`) is append-only. Rows are inserted once and never updated or deleted.
-
-Key fields captured per run:
-
-- `session_id` — unique run key
-- `job_id` — stable job definition ID
-- `run_time` / `ended_at` / `duration_seconds`
-- `model`
-- `input_tokens` / `output_tokens` / `reasoning_tokens` / `cache_read_tokens` / `cache_write_tokens`
-- `estimated_cost_usd` — primary cost metric
-- `actual_cost_usd` — ground-truth when available
-- `cost_status`, `cost_source`, `billing_provider`
-- `api_call_count`, `message_count`, `tool_call_count`
-- `end_reason`, `success`
-- `job_mode` — `agent` or `no_agent`
-- `ingested_at`
-
----
-
-## File Layout
-
-```
-cronalytics/
-├── plugin.yaml              # Plugin manifest (hooks, version)
-├── __init__.py              # Register hook + bootstrap scanner
-├── config.py                # Paths + defaults
-├── facts.py                 # SQLite fact DB: schema, insert, queries
-├── ingester.py              # Deferred ingestion worker + crash recovery
-├── scanner.py               # Reconciliation scanner + watermark I/O
-├── schedule.py              # Cron parsing + projection math
-├── cli.py                   # Standalone terminal interface
-├── logger.py                # Shared logger
-├── checkpoint.py            # Session state persistence
-├── dashboard/
-│   ├── manifest.json        # Dashboard plugin manifest
-│   ├── plugin_api.py        # FastAPI router
-│   ├── build.js             # esbuild bundler script
-│   ├── src/                 # Modular frontend source
-│   │   ├── index.js         # Entry point
-│   │   ├── lib/             # SDK, formatters, icons, validators
-│   │   ├── hooks/           # useApi, useModal
-│   │   └── components/      # 13 React components
-│   └── dist/
-│       └── index.js         # Bundled IIFE frontend
-└── tests/                   # 83 pytest tests
-```
-
----
-
 ## Known Limitations
 
 1. **Wrapper-level success only.** The `success` boolean reflects whether the session wrapper completed, not whether the agent task succeeded.
 2. **Abandoned sessions are invisible.** Sessions where the gateway crashed or the job got stuck are never ingested (they never reach `ended_at`).
 3. **No user-editable config file yet.** All tuning values are hardcoded in `config.py`.
 4. **Actual cost is often null.** Most runs only populate `estimated_cost_usd`; `actual_cost_usd` depends on provider billing data.
-5. **Plugin directory is a static copy.** Changes in the build directory are not reflected in `~/.hermes/plugins/cronalytics/` unless manually copied or symlinked.
-6. **Dashboard server caches plugins per-process.** Changes to `manifest.json` or `plugin_api.py` require a full dashboard restart.
-7. **Mobile layout tested but not optimized.** The table may require horizontal scroll on narrow viewports.
-8. **Job detail modal capped at 200 runs.** High-frequency jobs show full count in the table but the drill-down is limited.
+5. **Dashboard server caches plugins per-process.** Changes to `manifest.json` or `plugin_api.py` require a full dashboard restart.
+6. **Mobile layout tested but not optimized.** The table may require horizontal scroll on narrow viewports.
+7. **Job detail modal capped at 200 runs.** High-frequency jobs show full count in the table but the drill-down is limited.
 
----
-
+See **[FAQ](docs/FAQ.md)** for more: the 250-run limit, agent vs no-agent, models breakdown, snapshotting your facts.db, and getting `cronalytics` on your PATH.
 
 ---
 
 ## Support
 
-This is an independent project built by a solo developer with help from an AI agent, and I'm grateful you are willing to try Cronayltics. I hope it helps optimize your cron activity. I use it daily and will fix bugs as I find them, but support and bug fixes will be on my **best effort** time schedule.
+Found a bug? Open a [GitHub Issue](https://github.com/8bit64k/cronalytics/issues) with reproduction steps. Have a feature idea? Open a [Discussion](https://github.com/8bit64k/cronalytics/discussions) or fork it.
 
-**Found a bug?** Open a [GitHub issue](https://github.com/8bit64k/cronalytics/issues) with reproduction steps.  
-**Have a feature idea?** Open a [discussion](https://github.com/8bit64k/cronalytics/discussions) or fork it.
+See **[SUPPORT.md](SUPPORT.md)** for the full help guide, FAQ, and response expectations.
 
-Caveat: The cost estimates are approximate and as recorded by the Hermes Agent framework. The success/failure signal is wrapper-level only (see [Understanding Success](#understanding-success)). Verify anything mission-critical independently.
+**Caveat**: The cost estimates are approximate and as recorded by the Hermes Agent framework. The success/failure signal is wrapper-level only (see [Understanding Success](#understanding-success)). Verify anything mission-critical independently.
 
 ---
 
@@ -356,33 +374,15 @@ MIT — see [`LICENSE`](LICENSE) for full text.
 
 ---
 
+## Acknowledgments
+
+Thanks to my wife **Gaby** for the Spanish translation review — and to everyone who starred, opened issues, and helped shape v1.1.
+
+---
+
 ## Changelog
 
-### v1.0.1 (2026-05-13)
-
-- **Leader Board '% of total'** — spotlight cards show the leader's share of the window total (e.g. "42% of total cost")
-- **Cost card: suppressed Actual** — partial `actual_cost_usd` coverage creates misleading comparisons. The line now reads `Actual: —` until provider billing data coverage is reliable.
-- **Backend fix** — synthetic script-only rows now insert `NULL` for `actual_cost_usd` (was 0.0), eliminating phantom `$0.00` aggregates.
-
-### v1.0.0 (2026-05-12)
-
-- Dashboard: Summary Board, Leader Board, Per-Model Breakdown, Jobs Breakdown table
-- Sortable 8-column jobs table with expandable detail rows
-- Job Detail Modal with full run history, sticky headers, inherited sorting
-- Outcome toggle (All/Success/Failure) with conditional Cost card colors
-- Mode toggle (All/Agent/No agent) with script job visibility
-- Pace, Nominal, and Trend projections with educational modals
-- Reconciliation scanner with watermark-based backfill
-- Bootstrap scanner on plugin load (catches post-restart gaps)
-- 83 pytest tests covering facts, parser, scanner, schedule, ingester, plugin API
-- Lint/type check: `ruff` + `mypy` clean
-- Keyboard-accessible cards and table headers (a11y)
-- Large-font theme resilience
-- API validation layer (JSDoc typedefs + runtime guards)
-
-### v0.1.0
-
-- Initial release: real-time ingestion, fact DB, reconciliation scanner, dashboard API, React frontend with summary cards, jobs table, cost-by-model, sync button.
+See **[CHANGELOG.md](CHANGELOG.md)** for the full version history.
 
 ---
 

@@ -101,7 +101,9 @@ def api_module(tmp_path: Path):
     dashboard_dir.mkdir()
 
     # Mock config.py — sets all paths inside tmp_path
-    (plugin_dir / "config.py").write_text(
+    cronalytics_pkg = plugin_dir / "cronalytics"
+    cronalytics_pkg.mkdir(exist_ok=True)
+    (cronalytics_pkg / "config.py").write_text(
         f"""
 from pathlib import Path
 RETRY_DELAYS = [3.0, 8.0, 15.0]
@@ -118,7 +120,7 @@ PLUGIN_DIR = Path("{plugin_dir}")
     )
 
     # Mock logger.py
-    (plugin_dir / "logger.py").write_text(
+    (cronalytics_pkg / "logger.py").write_text(
         """
 import logging
 logger = logging.getLogger("cronalytics")
@@ -126,8 +128,9 @@ logger = logging.getLogger("cronalytics")
     )
 
     # Copy real modules (stdlib-only imports, safe in temp dir)
-    for fname in ("facts.py", "scanner.py", "schedule.py"):
-        shutil.copy(_PLUGIN_ROOT / fname, plugin_dir / fname)
+    for fname in ("__init__.py", "facts.py", "scanner.py", "schedule.py"):
+        if (_PLUGIN_ROOT / "cronalytics" / fname).exists():
+            shutil.copy(_PLUGIN_ROOT / "cronalytics" / fname, cronalytics_pkg / fname)
 
     # Copy plugin_api.py
     shutil.copy(
@@ -136,9 +139,8 @@ logger = logging.getLogger("cronalytics")
     )
 
     # Seed a real fact DB via the temp copy of facts.py
-    import importlib.util
     spec = importlib.util.spec_from_file_location(
-        "_test_facts", plugin_dir / "facts.py"
+        "_test_facts", cronalytics_pkg / "facts.py"
     )
     facts_mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(facts_mod)
@@ -185,7 +187,7 @@ logger = logging.getLogger("cronalytics")
     mod._JOBS_PATH = tmp_path / "jobs.json"
 
     # Mock scanner.run_sync to avoid needing a real Hermes state.db
-    mod._scanner_mod.run_sync = lambda *a, **k: {
+    mod._scanner_mod.run_sync = lambda *_a, **_k: {
         "inserted": 0,
         "skipped": 0,
         "agent_rows": 0,
@@ -215,7 +217,7 @@ class TestHealth:
         data = response.json()
         assert data["plugin"] == "cronalytics"
         assert data["status"] == "ok"
-        assert data["version"] == "1.0.0"
+        assert data["version"] == "1.1.0"
         assert "fact_db" in data
         assert "sync" in data
 
@@ -228,7 +230,7 @@ class TestSummary:
         data = response.json()
         assert data["plugin"] == "cronalytics"
         assert data["total_runs"] == 3
-        assert data["total_estimated_cost"] > 0
+        assert data["tot_estimated_cost"] > 0
         assert "nominal_monthly_total" in data
         assert "trend_monthly_total" in data
         assert "pace" in data

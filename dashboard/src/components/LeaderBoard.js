@@ -1,11 +1,13 @@
 import { React, Card, CardHeader, CardTitle, CardContent } from "../lib/sdk.js";
 import { fmtCost, fmtCompact, paceColor } from "../lib/formatters.js";
 import { ZapIcon, BanknoteIcon, BlocksIcon, MetronomeIcon, InfoIcon } from "../lib/icons.js";
+import { useCronalyticsI18n } from "../i18n/index.js";
 
 export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopTokensClick, onTopPaceClick }) {
+  const t = useCronalyticsI18n();
   // Precompute totals for "% of total" context on leader cards
   const totalRuns = jobList.reduce((sum, j) => sum + (j.runs || 0), 0);
-  const totalCost = jobList.reduce((sum, j) => sum + (j.total_cost || 0), 0);
+  const totalCost = jobList.reduce((sum, j) => sum + (j.tot_estimated_cost || 0), 0);
   const totalTokens = jobList.reduce((sum, j) => sum + (j.total_tokens || 0), 0);
 
   const cardHover = {
@@ -36,12 +38,12 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
     (() => {
       const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.runs || 0) > (a.runs || 0) ? b : a, jobList[0]) : null;
       const label = j ? (j.name || j.job_id) : "\u2014";
-      return React.createElement("div", cardProps(onTopRunsClick, "Top Runs details", { minWidth: 0, overflow: "hidden" }),
+      return React.createElement("div", cardProps(onTopRunsClick, t("leaderboard.top_runs", "Top Runs") + " details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
               React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, ZapIcon(14)),
-              React.createElement(CardTitle, null, "Top Runs"),
+              React.createElement(CardTitle, null, t("leaderboard.top_runs", "Top Runs")),
               React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
             )
           ),
@@ -54,7 +56,7 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
               title: label
             }, label),
             React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.6, marginTop: "0.15rem" } },
-              totalRuns > 0 ? (Math.round(((j.runs || 0) / totalRuns) * 100)) + "% of total runs" : ""
+              totalRuns > 0 ? (Math.round(((j.runs || 0) / totalRuns) * 100)) + "% " + t("leaderboard.of_total_runs", "% of total runs") : ""
             )
           )
         )
@@ -62,27 +64,30 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
     })(),
     // Top Cost
     (() => {
-      const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.total_cost || 0) > (a.total_cost || 0) ? b : a, jobList[0]) : null;
+      const j = jobList.length > 0 ? jobList.reduce((a, b) => (b.tot_estimated_cost || 0) > (a.tot_estimated_cost || 0) ? b : a, jobList[0]) : null;
       const label = j ? (j.name || j.job_id) : "\u2014";
-      return React.createElement("div", cardProps(onTopCostClick, "Top Cost details", { minWidth: 0, overflow: "hidden" }),
+      return React.createElement("div", cardProps(onTopCostClick, t("leaderboard.top_est_cost", "Top Cost") + " details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
               React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BanknoteIcon(14)),
-              React.createElement(CardTitle, null, "Top Cost"),
+              React.createElement(CardTitle, null, t("leaderboard.top_est_cost", "Top Cost")),
               React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
             )
           ),
           React.createElement(CardContent, null,
-            React.createElement("div", {
-              style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", lineHeight: 1.15, color: "#f5a623", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
-            }, j ? fmtCost(j.total_cost) : "\u2014"),
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem" } },
+              React.createElement("div", {
+                style: { fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--theme-font-mono, monospace)", color: "#f5a623" }
+              }, j ? fmtCost(j.tot_estimated_cost) : "\u2014"),
+              j && React.createElement("span", { style: { fontSize: "0.7rem", opacity: 0.95, fontFamily: "var(--theme-font-mono, monospace)", background: "rgba(245,166,35,0.12)", border: "1px solid rgba(245,166,35,0.25)", borderRadius: "0.25rem", padding: "0.05rem 0.4rem" } }, t("summary.estimated", "Estimated"))
+            ),
             React.createElement("div", {
               style: { fontSize: "0.75rem", fontWeight: 600, fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.85, marginTop: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
               title: label
             }, label),
             React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.6, marginTop: "0.15rem" } },
-              totalCost > 0 ? (Math.round(((j.total_cost || 0) / totalCost) * 100)) + "% of total cost" : ""
+              totalCost > 0 ? (Math.round(((j.tot_estimated_cost || 0) / totalCost) * 100)) + "% " + t("leaderboard.of_total_est_cost", "% of total est cost") : ""
             )
           )
         )
@@ -92,12 +97,12 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
     (() => {
       const j = jobList.length > 0 ? jobList.reduce((a, b) => ((b.total_tokens || 0) > (a.total_tokens || 0) ? b : a), jobList[0]) : null;
       const label = j ? (j.name || j.job_id) : "\u2014";
-      return React.createElement("div", cardProps(onTopTokensClick, "Top Tokens details", { minWidth: 0, overflow: "hidden" }),
+      return React.createElement("div", cardProps(onTopTokensClick, t("leaderboard.top_tokens", "Top Tokens") + " details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
               React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, BlocksIcon(14)),
-              React.createElement(CardTitle, null, "Top Tokens"),
+              React.createElement(CardTitle, null, t("leaderboard.top_tokens", "Top Tokens")),
               React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
             )
           ),
@@ -110,7 +115,7 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
               title: label
             }, label),
             React.createElement("div", { style: { fontSize: "0.75rem", fontFamily: "var(--theme-font-mono, monospace)", opacity: 0.6, marginTop: "0.15rem" } },
-              totalTokens > 0 ? (Math.round(((j.total_tokens || 0) / totalTokens) * 100)) + "% of total tokens" : ""
+              totalTokens > 0 ? (Math.round(((j.total_tokens || 0) / totalTokens) * 100)) + "% " + t("leaderboard.of_total_tokens", "% of total tokens") : ""
             )
           )
         )
@@ -127,12 +132,12 @@ export function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopToke
         : null;
       const label = j ? (j.name || j.job_id) : "\u2014";
       const p = j && j.projections && j.projections.pace != null ? j.projections.pace : null;
-      return React.createElement("div", cardProps(onTopPaceClick, "Top Pace details", { minWidth: 0, overflow: "hidden" }),
+      return React.createElement("div", cardProps(onTopPaceClick, t("leaderboard.most_efficient", "Top Pace") + " details", { minWidth: 0, overflow: "hidden" }),
         React.createElement(Card, { style: { flex: 1 } },
           React.createElement(CardHeader, null,
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", width: "100%" } },
               React.createElement("span", { style: { color: "#ff5722", lineHeight: 0 } }, MetronomeIcon(14)),
-              React.createElement(CardTitle, null, "Top Pace"),
+              React.createElement(CardTitle, null, t("leaderboard.most_efficient", "Top Pace")),
               React.createElement("span", { style: { marginLeft: "auto", lineHeight: 0, opacity: 0.4 } }, InfoIcon({ size: 14, style: { color: "var(--foreground-base, var(--foreground))" } }))
             )
           ),

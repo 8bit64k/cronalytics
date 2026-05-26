@@ -8,7 +8,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from hermes_constants import get_hermes_home
+try:
+    from hermes_constants import get_hermes_home
+    _HERMES_HOME = Path(get_hermes_home())
+except Exception:
+    import os
+    hermes_home = os.environ.get("HERMES_HOME", "")
+    if hermes_home:
+        _HERMES_HOME = Path(hermes_home)
+    else:
+        _HERMES_HOME = Path.home() / ".hermes"
 
 # ---------------------------------------------------------------------------
 # Polling / retry schedule
@@ -22,7 +31,7 @@ MAX_RETRIES: int = len(RETRY_DELAYS)             # 3 attempts total
 # Path resolution
 # ---------------------------------------------------------------------------
 
-HERMES_HOME: Path = Path(get_hermes_home())
+HERMES_HOME: Path = _HERMES_HOME
 
 # Operational session store (Hermes core) — the source of truth for cost data.
 STATE_DB: Path = HERMES_HOME / "state.db"
@@ -30,7 +39,7 @@ STATE_DB: Path = HERMES_HOME / "state.db"
 # Plugin-owned fact DB  —  stores derived cron run data.
 # Lives inside the plugin directory so it survives migrations,
 # but is .gitignored so the repo stays clean.
-PLUGIN_DIR: Path = Path(__file__).parent.resolve()
+PLUGIN_DIR: Path = HERMES_HOME / "plugins" / "cronalytics"
 FACT_DB: Path = PLUGIN_DIR / "facts.db"
 
 # Watermark file for reconciliation scanner (Phase 2).

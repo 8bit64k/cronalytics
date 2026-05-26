@@ -1,18 +1,31 @@
 import { React, Card, CardHeader, CardTitle, CardContent, Badge, Button } from "../lib/sdk.js";
 import { fmtCost, fmtCompact, fmtDuration, fmtTime, fmtRel, fmtSyncAge, paceColor, paceBg } from "../lib/formatters.js";
 import { ClockIcon, RefreshCwIcon } from "../lib/icons.js";
+import { useCronalyticsI18n } from "../i18n/index.js";
 
 export function JobBreakdown({
   jobList, sortedJobs, sortConfig, expandedId,
   syncing, syncInfo, days, windowLabel,
   onSync, onSort, onExpandToggle, onSelectJob
 }) {
+  const t = useCronalyticsI18n();
+  const HEADERS = [
+    t("job_breakdown.job", "Job"),
+    t("job_breakdown.runs", "Runs"),
+    t("job_breakdown.avg_time", "Avg Duration"),
+    t("job_breakdown.est_cost", "Est Cost"),
+    t("job_breakdown.avg_est_cost", "Avg Est Cost"),
+    t("job_breakdown.nominal_mo", "Nominal/mo"),
+    t("job_breakdown.trend_mo", "Trend/mo"),
+    t("job_breakdown.pace", "Pace"),
+  ];
+
   return React.createElement(Card, { style: { marginBottom: "1.5rem" } },
     React.createElement(CardHeader, null,
       React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" } },
         React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "0.5rem" } },
           ClockIcon(16),
-          React.createElement(CardTitle, null, "Jobs Breakdown")
+          React.createElement(CardTitle, null, t("job_breakdown.title", "Jobs Breakdown"))
         ),
         React.createElement("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center" } },
           React.createElement(Button, {
@@ -23,9 +36,9 @@ export function JobBreakdown({
           }, syncing
             ? React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: "0.35rem" } },
                 RefreshCwIcon(14, { style: { animation: "cronalytics-spin 1s linear infinite" } }),
-                "Syncing"
+                t("shared.loading", "Syncing")
               )
-            : "Sync Now"
+            : t("shared.sync_now", "Sync Now")
           ),
           syncInfo && syncInfo.lastSync && (() => {
             const age = fmtSyncAge(syncInfo.lastSync);
@@ -45,24 +58,25 @@ export function JobBreakdown({
       jobList.length === 0
         ? React.createElement("div", { style: { opacity: 0.6, padding: "1rem 0" } },
           syncing
-            ? "Syncing cron sessions..."
+            ? t("shared.loading", "Syncing cron sessions...")
             : (syncInfo && syncInfo.lastSync
-              ? "No jobs in " + windowLabel.toLowerCase() + ". Last sync: " + syncInfo.lastSync.split("T").join(" ").slice(0, 19) + " UTC"
-              : "No cron jobs captured. Click Sync Now to backfill from state.db.")
+              ? t("job_breakdown.no_jobs_window", "No jobs in {window}. Last sync: {time} UTC", { window: windowLabel.toLowerCase(), time: syncInfo.lastSync.split("T").join(" ").slice(0, 19) })
+              : t("job_breakdown.no_jobs_sync", "No cron jobs captured. Click Sync Now to backfill from state.db."))
         )
         : React.createElement("div", { style: { overflow: "auto" } },
           React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" } },
             React.createElement("thead", null,
               React.createElement("tr", { style: { borderBottom: "1px solid var(--color-border)" } },
-                ["Job", "Runs", "Avg Time", "Total Cost", "Avg Cost", "Nominal/mo", "Trend/mo", "Pace"].map(h => {
+                HEADERS.map(h => {
+
                   const isActive = sortConfig.key === h;
                   return React.createElement("th", {
                     key: h,
                     tabIndex: 0,
                     role: "button",
                     "aria-label": isActive
-                      ? "Sorted by " + h + ", " + (sortConfig.direction === "asc" ? "ascending" : "descending")
-                      : "Sort by " + h,
+                      ? t("job_breakdown.sorted_by", "Sorted by {col}, {dir}", { col: h, dir: sortConfig.direction === "asc" ? t("job_breakdown.ascending", "ascending") : t("job_breakdown.descending", "descending") })
+                      : t("job_breakdown.sort_by", "Sort by {col}", { col: h }),
                     onClick: () => onSort(h),
                     onKeyDown: (e) => {
                       if (e.key === "Enter" || e.key === " ") {
@@ -71,7 +85,7 @@ export function JobBreakdown({
                       }
                     },
                     style: {
-                      textAlign: h === "Job" ? "left" : "right",
+                      textAlign: h === HEADERS[0] ? "left" : "right",
                       padding: "0.5rem 0.35rem",
                       cursor: "pointer",
                       fontFamily: "var(--theme-font-mono, monospace)",
@@ -79,7 +93,7 @@ export function JobBreakdown({
                       userSelect: "none",
                       borderBottom: "2px solid var(--color-border)",
                     },
-                    title: h === "Pace" ? "Pace = Trend \u00f7 Nominal. Under 1.0\u00d7 = under budget. Over 2.0\u00d7 = over budget." : undefined
+                    title: h === t("job_breakdown.pace", "Pace") ? "Pace = Trend \u00f7 Nominal. Under 1.0\u00d7 = under budget. Over 2.0\u00d7 = over budget." : undefined
                   }, h + (isActive ? (sortConfig.direction === "asc" ? " \u2191" : " \u2193") : ""));
                 })
               )
@@ -99,13 +113,13 @@ export function JobBreakdown({
                       j.job_mode === "no_agent" && React.createElement(Badge, {
                         size: "xs",
                         style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.7 }
-                      }, "No agent")
+                      }, t("job_breakdown.mode_no_agent", "No agent"))
                     )
                   ),
                   React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, (j.runs || 0).toLocaleString()),
                   React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem", fontFamily: "var(--theme-font-mono, monospace)" } }, fmtDuration(j.avg_duration)),
-                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.total_cost)),
-                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.avg_cost)),
+                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.tot_estimated_cost)),
+                  React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } }, fmtCost(j.avg_estimated_cost)),
                   React.createElement("td", { style: { textAlign: "right", padding: "0.4rem 0.35rem" } },
                     j.projections && j.projections.projected_cost_30d != null
                       ? fmtCost(j.projections.projected_cost_30d) + "/mo"
@@ -140,10 +154,10 @@ export function JobBreakdown({
                       React.createElement("div", {
                         style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.72rem" }
                       },
-                        "Tokens: " + fmtCompact(j.total_tokens) + " total "
-                          + "(" + fmtCompact(j.total_input_tokens) + " in / "
-                          + fmtCompact(j.total_output_tokens) + " out / "
-                          + fmtCompact(j.total_cache_read_tokens) + " cached)"
+                        t("summary.tokens", "Tokens") + ": " + fmtCompact(j.total_tokens) + " total "
+                          + "(" + fmtCompact(j.total_input_tokens) + " " + t("summary.in", "in") + " / "
+                          + fmtCompact(j.total_output_tokens) + " " + t("summary.out", "out") + " / "
+                          + fmtCompact(j.total_cache_read_tokens) + " " + t("summary.cached", "cached") + ")"
                       ),
                       React.createElement("div", {
                         style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.72rem" }
@@ -156,11 +170,11 @@ export function JobBreakdown({
                         React.createElement("div", {
                           style: { fontFamily: "var(--theme-font-mono, monospace)", fontSize: "0.7rem", opacity: 0.7, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "flex", alignItems: "center", gap: "0.5rem" }
                         },
-                          (j.projections && j.projections.schedule_display ? j.projections.schedule_display : "No schedule"),
-                          "   Last: ", fmtTime(j.last_run),
-                          j.last_model ? "   using " + j.last_model : "",
-                          "   Next: ", j.projections && j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014",
-                          j.job_mode === "no_agent" && React.createElement("span", { style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.5, marginLeft: "0.25rem" } }, "[No agent]")
+                          (j.projections && j.projections.schedule_display ? j.projections.schedule_display : t("job_breakdown.no_schedule", "No schedule")),
+                          "   " + t("job_breakdown.last", "Last") + ": ", fmtTime(j.last_run),
+                          j.last_model ? "   " + t("job_breakdown.using", "using") + " " + j.last_model : "",
+                          "   " + t("job_breakdown.next", "Next") + ": ", j.projections && j.projections.next_run_at ? fmtRel(j.projections.next_run_at) : "\u2014",
+                          j.job_mode === "no_agent" && React.createElement("span", { style: { fontSize: "0.6rem", textTransform: "uppercase", opacity: 0.5, marginLeft: "0.25rem" } }, "[" + t("job_breakdown.mode_no_agent", "No agent") + "]")
                         ),
                         React.createElement("button", {
                           type: "button",
@@ -179,7 +193,7 @@ export function JobBreakdown({
                           },
                           onMouseEnter: (e) => { e.currentTarget.style.background = "rgba(255,255,255,0.15)"; },
                           onMouseLeave: (e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; },
-                        }, "See Runs")
+                        }, t("job_breakdown.see_runs", "See Runs"))
                       )
                     )
                   )

@@ -299,9 +299,16 @@ def row_exists(db_path: Path, session_id: str) -> bool:
 # Aggregation queries (Phase 3 API)
 # ---------------------------------------------------------------------------
 
-def query_summary(db_path: Path, days: int = 30, outcome: str = "both", mode: str = "all") -> dict[str, Any]:
+def query_summary(db_path: Path, days: int = 30, outcome: str = "all", mode: str = "all") -> dict[str, Any]:
     """Return aggregate stats for cron runs in the last N days (0 = all time)."""
     conn = get_conn(db_path)
+
+    # DB age check: need at least 1.75 full periods for meaningful trend comparison
+    db_age_days = 0.0
+    if days > 0:
+        cursor = conn.execute("SELECT COALESCE(MIN(run_time), 0) FROM cron_runs")
+        min_run_time = cursor.fetchone()[0] or 0.0
+        db_age_days = (time.time() - min_run_time) / 86400
 
     conditions: list[str] = []
     params: list[Any] = []
@@ -349,7 +356,7 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "both", mode: st
         params,
     )
     by_model = [
-        {"model": r[0] or "unknown", "runs": r[1], "total_cost": round(r[2], 4) if r[2] is not None else None}
+        {"model": r[0] or "unknown", "runs": r[1], "tot_estimated_cost": round(r[2], 4) if r[2] is not None else None}
         for r in cursor.fetchall()
     ]
 
@@ -374,9 +381,10 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "both", mode: st
         prev_runs, prev_cost = cursor.fetchone()
         prev_info = {
             "runs": prev_runs or 0,
-            "cost": round(prev_cost, 4) if prev_cost is not None else None,
+            "estimated_cost": round(prev_cost, 4) if prev_cost is not None else None,
         }
-        if prev_cost is not None and prev_cost > 0 and total_est_cost is not None:
+        if (prev_cost is not None and prev_cost > 0 and total_est_cost is not None
+                and db_age_days >= days * 1.75):
             delta = (total_est_cost - prev_cost) / prev_cost
             if delta > 0.05:
                 trend = "↑"
@@ -399,8 +407,9 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "both", mode: st
     return {
         "days": days,
         "total_runs": total_runs,
-        "total_estimated_cost": round(total_est_cost, 4) if total_est_cost is not None else None,
-        "total_actual_cost": None,  # Suppressed: incomplete data is worse than no data. Re-enable when coverage is reliable.
+        "tot_estimated_cost": round(total_est_cost, 4) if total_est_cost is not None else None,
+        "tot_actual_cost": None,  # Suppressed: incomplete data is worse than no data.
+        # Re-enable when coverage is reliable.
         "total_tokens": total_tokens,
         "total_input_tokens": total_in or 0,
         "total_output_tokens": total_out or 0,
@@ -410,15 +419,15 @@ def query_summary(db_path: Path, days: int = 30, outcome: str = "both", mode: st
         "avg_duration_seconds": round(avg_dur, 2) if avg_dur is not None else None,
         "success_runs": success_runs or 0,
         "failure_runs": failure_runs or 0,
-        "success_cost": round(success_cost, 4) if success_cost is not None else None,
-        "failure_cost": round(failure_cost, 4) if failure_cost is not None else None,
+        "success_estimated_cost": round(success_cost, 4) if success_cost is not None else None,
+        "failure_estimated_cost": round(failure_cost, 4) if failure_cost is not None else None,
         "cost_by_model": by_model,
-        "previous_period": prev_info if days > 0 else {},
-        "trend": trend if days > 0 else "→",
+        "previous_period": prev_info if (days > 0 and db_age_days >= days * 1.75) else {},
+        "trend": trend if (days > 0 and db_age_days >= days * 1.75) else "→",
     }
 
 
-def query_jobs(db_path: Path, days: int = 30, outcome: str = "both", mode: str = "all") -> list[dict[str, Any]]:
+def query_jobs(db_path: Path, days: int = 30, outcome: str = "all", mode: str = "all") -> list[dict[str, Any]]:
     """Return per-job aggregates (0 = all time)."""
     conn = get_conn(db_path)
 
@@ -439,8 +448,8 @@ def query_jobs(db_path: Path, days: int = 30, outcome: str = "both", mode: str =
         f"""
         SELECT job_id,
                count(*) AS runs,
-               SUM(estimated_cost_usd) AS total_cost,
-               AVG(estimated_cost_usd) AS avg_cost,
+               SUM(estimated_cost_usd) AS tot_estimated_cost,
+               AVG(estimated_cost_usd) AS avg_estimated_cost,
                MAX(run_time) AS last_run,
                COALESCE(MIN(run_time), 0) AS first_run,
                MAX(model) AS last_model,
@@ -452,12 +461,12 @@ def query_jobs(db_path: Path, days: int = 30, outcome: str = "both", mode: str =
                AVG(duration_seconds) AS avg_duration,
                count(CASE WHEN success = 1 THEN 1 END) AS success_runs,
                count(CASE WHEN success = 0 THEN 1 END) AS failure_runs,
-               SUM(CASE WHEN success = 1 THEN estimated_cost_usd END) AS success_cost,
-               SUM(CASE WHEN success = 0 THEN estimated_cost_usd END) AS failure_cost,
+               SUM(CASE WHEN success = 1 THEN estimated_cost_usd END) AS success_estimated_cost,
+               SUM(CASE WHEN success = 0 THEN estimated_cost_usd END) AS failure_estimated_cost,
                MAX(job_mode) AS job_mode
         FROM cron_runs{where}
         GROUP BY job_id
-        ORDER BY total_cost DESC
+        ORDER BY tot_estimated_cost DESC
         """,
         params,
     )
@@ -465,8 +474,8 @@ def query_jobs(db_path: Path, days: int = 30, outcome: str = "both", mode: str =
         {
             "job_id": r[0],
             "runs": r[1],
-            "total_cost": round(r[2], 4) if r[2] is not None else None,
-            "avg_cost": round(r[3], 4) if r[3] is not None else None,
+            "tot_estimated_cost": round(r[2], 4) if r[2] is not None else None,
+            "avg_estimated_cost": round(r[3], 4) if r[3] is not None else None,
             "last_run": r[4],
             "first_run": r[5],
             "last_model": r[6] or "unknown",
@@ -479,8 +488,8 @@ def query_jobs(db_path: Path, days: int = 30, outcome: str = "both", mode: str =
             "avg_duration": round(r[12], 2) if r[12] is not None else None,
             "success_runs": r[13] or 0,
             "failure_runs": r[14] or 0,
-            "success_cost": round(r[15], 4) if r[15] is not None else None,
-            "failure_cost": round(r[16], 4) if r[16] is not None else None,
+            "success_estimated_cost": round(r[15], 4) if r[15] is not None else None,
+            "failure_estimated_cost": round(r[16], 4) if r[16] is not None else None,
             "job_mode": r[17] or "agent",
         }
         for r in cursor.fetchall()
@@ -488,14 +497,14 @@ def query_jobs(db_path: Path, days: int = 30, outcome: str = "both", mode: str =
 
 
 def query_job_runs(
-    db_path: Path, job_id: str, limit: int = 50, days: int = 0,
-    outcome: str = "both", sort_key: str = "run_time", sort_dir: str = "desc",
+    db_path: Path, job_id: str, limit: int = 0, days: int = 0,
+    outcome: str = "all", sort_key: str = "run_time", sort_dir: str = "desc",
     mode: str = "all",
 ) -> list[dict[str, Any]]:
     """Return individual run history for a specific job (0 = all time).
 
-    Supports filtering by outcome (both/success/failure) and custom sorting:
-    run_time, estimated_cost_usd, duration_seconds, success, model.
+    Supports filtering by outcome (all/success/failure) and custom sorting:
+    run_time, estimated_cost, duration_seconds, success, model.
     """
     conn = get_conn(db_path)
     conditions = ["job_id = ?"]
@@ -516,8 +525,13 @@ def query_job_runs(
     where = " WHERE " + " AND ".join(conditions)
 
     # Safe column whitelist — only allow known sortable columns
-    safe_cols = {"run_time", "estimated_cost_usd", "duration_seconds", "success", "model", "input_tokens"}
-    order_col = sort_key if sort_key in safe_cols else "run_time"
+    safe_cols = {"run_time", "estimated_cost_usd", "duration_seconds", "success", "model", "input_tokens", "job_mode"}
+    sort_col_map = {"estimated_cost": "estimated_cost_usd"}
+    order_col = (
+        sort_col_map.get(sort_key, sort_key)
+        if sort_key in safe_cols or sort_key in sort_col_map
+        else "run_time"
+    )
     order_dir = "DESC" if sort_dir == "desc" else "ASC"
 
     cursor = conn.execute(
@@ -532,16 +546,16 @@ def query_job_runs(
         FROM cron_runs
         {where}
         ORDER BY {order_col} {order_dir}
-        LIMIT ?
+        {("LIMIT ?" if limit > 0 else "")}
         """,
-        params + [limit],
+        (params + [limit]) if limit > 0 else params,
     )
     cols = [
         "session_id", "job_id", "run_time", "ended_at",
         "duration_seconds", "model",
         "input_tokens", "output_tokens", "reasoning_tokens",
         "cache_read_tokens", "cache_write_tokens",
-        "estimated_cost_usd", "actual_cost_usd",
+        "estimated_cost", "actual_cost",
         "cost_status", "billing_provider",
         "end_reason", "success", "job_mode",
     ]
@@ -583,7 +597,7 @@ def query_health(db_path: Path) -> dict[str, Any]:
     }
 
 
-def query_models(db_path: Path, days: int = 30, outcome: str = "both", mode: str = "all") -> list[dict[str, Any]]:
+def query_models(db_path: Path, days: int = 30, outcome: str = "all", mode: str = "all") -> list[dict[str, Any]]:
     """Return per-model usage aggregates (0 = all time)."""
     conn = get_conn(db_path)
 
@@ -604,14 +618,14 @@ def query_models(db_path: Path, days: int = 30, outcome: str = "both", mode: str
         f"""
         SELECT model,
                count(*) AS runs,
-               SUM(estimated_cost_usd) AS total_cost,
-               AVG(estimated_cost_usd) AS avg_cost,
+               SUM(estimated_cost_usd) AS tot_estimated_cost,
+               AVG(estimated_cost_usd) AS avg_estimated_cost,
                COALESCE(SUM(input_tokens), 0) AS total_input,
                COALESCE(SUM(output_tokens), 0) AS total_output,
                MAX(run_time) AS last_run
         FROM cron_runs{where}
         GROUP BY model
-        ORDER BY total_cost DESC
+        ORDER BY tot_estimated_cost DESC
         """,
         params,
     )
@@ -619,8 +633,8 @@ def query_models(db_path: Path, days: int = 30, outcome: str = "both", mode: str
         {
             "model": r[0] or "unknown",
             "runs": r[1],
-            "total_cost": round(r[2], 4) if r[2] is not None else None,
-            "avg_cost": round(r[3], 4) if r[3] is not None else None,
+            "tot_estimated_cost": round(r[2], 4) if r[2] is not None else None,
+            "avg_estimated_cost": round(r[3], 4) if r[3] is not None else None,
             "total_input_tokens": r[4],
             "total_output_tokens": r[5],
             "last_run": r[6],
@@ -629,7 +643,7 @@ def query_models(db_path: Path, days: int = 30, outcome: str = "both", mode: str
     ]
 
 
-def query_trends(db_path: Path, days: int = 30, outcome: str = "both", mode: str = "all") -> list[dict[str, Any]]:
+def query_trends(db_path: Path, days: int = 30, outcome: str = "all", mode: str = "all") -> list[dict[str, Any]]:
     """Return daily cost and run-count trend (0 = all time)."""
     conn = get_conn(db_path)
 
@@ -650,7 +664,7 @@ def query_trends(db_path: Path, days: int = 30, outcome: str = "both", mode: str
         f"""
         SELECT date(run_time, 'unixepoch') AS day,
                count(*) AS runs,
-               SUM(estimated_cost_usd) AS cost,
+               SUM(estimated_cost_usd) AS estimated_cost,
                COALESCE(SUM(input_tokens), 0) AS input_tokens,
                COALESCE(SUM(output_tokens), 0) AS output_tokens
         FROM cron_runs{where}
@@ -663,7 +677,7 @@ def query_trends(db_path: Path, days: int = 30, outcome: str = "both", mode: str
         {
             "day": r[0],
             "runs": r[1],
-            "cost": round(r[2], 4) if r[2] is not None else None,
+            "estimated_cost": round(r[2], 4) if r[2] is not None else None,
             "input_tokens": r[3],
             "output_tokens": r[4],
         }

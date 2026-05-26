@@ -67,7 +67,7 @@ def temp_db():
 @pytest.fixture
 def fact_db(temp_db):
     """Yield a temporary fact DB with schema already created."""
-    import facts  # noqa: E402 — imported after sys.path setup above
+    from cronalytics import facts  # noqa: E402 — imported after sys.path setup above
     facts.ensure_schema(str(temp_db))
     return temp_db
 

@@ -22,7 +22,7 @@ The result: automation is easy to start, but ongoing cron cost compounds quietly
 
 ## 2. Solution
 
-Cronalytics is a **dashboard plugin** (plus a standalone CLI) that attributes session-level usage and estimated cost to cron-originated runs. It lives inside `hermes dashboard` as a standalone tab at `/cronalytics`.
+Cronalytics is a **dashboard plugin** with an optional terminal CLI that attributes session-level usage and estimated cost to cron-originated runs. It lives inside `hermes dashboard` as a dedicated tab at `/cronalytics`.
 
 > **Terminology (as of Hermes 2026-05):**
 > - **Hermes Agent plugin** — Has a `plugin.yaml`, registers hooks (e.g. `on_session_end`), runs inside the gateway process. Cronalytics is this.
@@ -124,6 +124,8 @@ We deliberately chose **non-blocking** ingestion: the hook writes the `session_i
 ~/.hermes/plugins/cronalytics/facts.db
 ```
 
+**Concurrency:** The database explicitly enables **WAL (Write-Ahead Logging)** mode via `PRAGMA journal_mode=WAL;`. This ensures the background ingester thread can write new runs while the Dashboard API performs aggregation queries simultaneously without "Database is locked" errors.
+
 Why separate?
 - `state.db` is operational. It may be purged, migrated, or schema-migrated by Hermes core.
 - Fact DB rows are **INSERT-only**. No updates, no deletes. If upstream data changes, the snapshot remains.
@@ -160,17 +162,19 @@ CREATE TABLE cron_runs (
 
 ### 4.4 Reconciliation Scanner
 
-The scanner exists because hooks can crash, the plugin can be disabled, or the gateway can restart. It is **not** the primary data path — hooks capture ~99% of events in real time — but it is the safety net.
+The scanner exists because hooks can crash, the plugin can be disabled, or the gateway can restart. It is **not** the primary data path — hooks capture ~99% of events in real time — but it is the safety net. It specifically targets both `state.db` (for agent sessions) and `~/.hermes/cron/output/` (for script-only `no_agent` jobs).
 
 **Algorithm:**
-1. Read watermark JSON (`last_ended_at`).
+1. Read watermark JSON (`last_ended_at` for agent jobs; `last_modified` for script offsets).
 2. Query `state.db` for `source='cron'` rows with `ended_at > watermark`.
-3. Batch-insert new rows into fact DB.
-4. Write new watermark = `max(ended_at)`.
+3. Scan filesystem for script output artifacts newer than watermark.
+4. Batch-insert new rows into fact DB.
+5. Write new watermark.
 
 **Trigger sources:**
 - Bootstrap thread on every plugin load (catches gaps from downtime).
 - Manual `POST /api/plugins/cronalytics/sync` ("Sync Now" button).
+- Background worker fallback if `on_session_end` fails to resolve a session.
 
 ### 4.5 Standalone `/cronalytics` Tab
 
@@ -180,19 +184,19 @@ The original design specified three slots (`cron:top`, `cron:bottom`) injected i
 2. Vertical slice delivery: a full page is faster to build and test than coordinating multiple slot injections.
 3. Navigation clarity: users expect "Cronalytics" as a distinct view, not a patch on top of the scheduler CRUD.
 
-The manifest no longer claims any sidebar slots. The `/cronalytics` tab is the sole UI surface.
+The `/cronalytics` tab is the primary UI surface.
 
 ### 4.6 Fixed-Window Projection Math
 
 Early versions used the *data span* (actual days between first and last run) as the denominator for trend calculations. This broke an algebraic invariant: the sum of per-job trends did not equal the aggregate trend, because each job had a different data span.
 
-**Decision:** Use the user's selected filter window (7D, 30D, 90D, All) as the fixed denominator for all trend math.
+**Decision:** Use the user's selected filter window (7D, 30D, 90D) as the fixed denominator for all trend math. Type `0` for all time.
 
 | Metric | Formula |
 |--------|---------|
-| Daily cost | `total_cost / days_filter` *(or all-time span if days=0)* |
+| Daily cost | `tot_estimated_cost / days_filter` *(or all-time span if days=0)* |
 | Trend 30d | `daily_cost × 30` |
-| Nominal 30d | `avg_cost × scheduled_runs_30d` *(from croniter)* |
+| Nominal 30d | `avg_estimated_cost × scheduled_runs_30d` *(from croniter)* |
 | Pace | `trend_30d / nominal_30d` |
 | Drift | `observed_runs / scheduled_runs_in_window` *(API only; not surfaced in UI yet)* |
 
@@ -319,7 +323,7 @@ run_job() ──▶ run_conversation() ──▶ on_session_end(platform="cron")
 - Surface aggregates (total cost, runs, tokens, pace) in a dashboard tab.
 - Project future spend based on schedule (nominal) and current pace (trend).
 - Distinguish agent vs script-only jobs.
-- Provide a standalone CLI for terminal-based inspection.
+- Provide a terminal CLI for terminal-based inspection.
 
 ### What Cronalytics Does NOT Do
 - **Create or edit jobs** — use the built-in `/cron` page.
@@ -333,34 +337,96 @@ run_job() ──▶ run_conversation() ──▶ on_session_end(platform="cron")
 
 ## 7. i18n / Localization
 
-**Status:** English-only. Hermes core has an i18n system (`useI18n`, 16 locales: `en`, `zh`, `zh-hant`, `ja`, `de`, `es`, `fr`, `tr`, `uk`, `af`, `ko`, `it`, `ga`, `pt`, `ru`, `hu`), but **zero existing plugins integrate with it** — including Kanban and hermes-achievements, which are core-bundled.
+**Status:** Production-ready Multi-locale support (`en`, `es`, `zh-CN`, `zh-TW`). 
 
-**Why:** Hermes plugins are loaded as `<script>`-injected IIFE bundles. The i18n context lives inside the main React tree and is **not exposed through the plugin SDK**. A plugin cannot cleanly import `useI18n` from the dashboard bundle.
+**Architecture:** 
+Cronalytics implements a **self-hosted i18n layer** that bridges with the Hermes Core `locale` state. While other bundled plugins (Kanban, Achievements) consume translations directly via `SDK.useI18n()` and rely on Hermes' built-in catalogs, Cronalytics maintains its own catalog registry (`registerCatalog`) to support languages and technical terminology beyond what Hermes core provides.
 
-**Design decision:**
-1. All UI strings are centralized in `dashboard/src/lib/formatters.js` (labels, tooltips, educational copy). No display strings are scattered in JSX.
-2. This makes future string extraction trivial when Hermes exposes plugin-localization support (or when we choose to bundle our own i18n layer).
-3. No premature implementation — adding a translation system adds bundle size and complexity for a capability no other plugin offers today.
-4. If a non-English user opens an Issue or Discussion, we respond in their language where feasible, but the product UI remains English for now.
+**Why self-hosted:**
+1. **Independent locale control:** Hermes core supports 16 locales, but Cronalytics may need languages or regional variants (e.g., `zh-TW`) that are not in the core bundle.
+2. **Product Glossary enforcement:** Technical terms like "Pace" require precise, domain-specific translation that generic Hermes catalogs cannot guarantee.
+3. **The "2/4 Consensus" Protocol:** Our multi-model validation pipeline requires owning the entire translation catalog to enforce statistical agreement and outlier rejection.
 
-**Trigger for adoption:** If NousResearch/hermes-agent exposes a `HERMES_PLUGIN_SDK.i18n` interface or begins requiring i18n compliance for bundled plugins, we centralize and extract strings within one release cycle.
+**How other plugins do it:**
+Kanban and Achievements call `const { t } = SDK.useI18n()` directly. Hermes exposes a namespaced translation object (e.g., `t.kanban.title`). This is simpler but limits plugins to whatever languages Hermes ships.
+
+**Developer Requirement:**
+Zero hardcoded strings in JSX. Every label must use the `useCronalyticsI18n()` hook with a technical key + English fallback. See `docs/I18N_PROTOCOL.md` and `AGENTS.md`.
+
+---
+## 8. Terminal CLI
+
+Cronalytics ships a terminal data tool (`cronalytics/cli.py`) that queries `facts.db` directly and renders monospace-aligned ASCII tables or `--json` envelopes. It is designed for **scripts, agents, and programmatic consumption** — not human visual exploration.
+
+### Design Philosophy: Dashboard for People, CLI for Agents
+
+The CLI is a **dumb data pipe**. It aggregates, formats, and emits. It never interprets.
+
+| Layer | Role | Consumer |
+|-------|------|----------|
+| **CLI** | Data pipe | Scripts, agents, `jq`, Python |
+| **Skill** | Interpretation framework | Hermes agent (fuzzy reasoning) |
+| **Agent** | Force multiplier | Human operator |
+| **Human** | Final authority | Decision maker |
+
+### Architecture
+
+```
+User / Agent
+    │
+    ▼
++------------+    +------------+    +------------+
+│   Skill    │ → │    CLI     │ → │  facts.db   │
+│ (heuristics,│    │ (queries,  │    │ (append-   │
+│ guardrails,│    │  renders)  │    │  only)     │
+│ confidence)│    +------------+    +------------+
++------------+         ↑
+                       │
+                  state.db
+                  (cron sessions)
+```
+
+### CLI Design Decisions
+
+1. **Single file** (`cli.py`, ~1000 lines) — self-contained, no external deps beyond Python stdlib + croniter. Works from the plugin directory directly.
+2. **Shell entry point** — `cronalytics` (via `pip install -e`) or `alias cronalytics='python -m cronalytics.cli'` for the module path.
+3. **Every data command except `all` supports `--json`** — structured envelopes with `period`, `start_date`, `end_date`, `outcome`, `mode`, and `data`. Pipe-friendly.
+4. **Job name resolution** — reads `~/.hermes/cron/jobs.json` to map `job_id` → human-readable name, applies truncation + `[N]` badge.
+5. **Projection computation** — calls `schedule.get_job_projections()` per-job to compute `pace`, `drift_ratio`, `scheduled_runs_*`, etc. JSON path mirrors rendered path exactly.
+6. **Leader Board** — `summary` command selects top job per category (runs, cost, tokens, pace) and computes `% of total` share, matching the dashboard's spotlight cards.
+7. **ASCII art banners** — Unicode box-drawing with emoji-aware width calculation (`_visual_len()`). Consistent with `hermes insights` visual style.
+
+### Filter Grammar
+
+Every data command shares the same filter surface:
+
+- `--days N` — window in days (`0` = all time)
+- `--outcome all|success|failure` — outcome filter
+- `--mode all|agent|no_agent` — job mode filter
+
+This means `cronalytics jobs --days 7 --json` and `cronalytics models --days 7 --json` apply identical filters. An agent reading the skill learns one grammar and applies it everywhere.
 
 ---
 
-## 8. File Layout
+## 9. File Layout
 
 ```
 cronalytics/
 ├── plugin.yaml              # Manifest: name, version, hooks
 ├── __init__.py              # register(ctx): schema, recovery, hook, bootstrap scanner
-├── config.py                # Paths, retry delays, jitter
-├── facts.py                 # Fact DB: schema, insert, queries
-├── ingester.py              # Hook handler, pending.jsonl, background worker
-├── scanner.py               # Reconciliation scanner + watermark I/O
-├── schedule.py              # Cron parsing, projection math (croniter)
-├── cli.py                   # Standalone terminal interface
-├── logger.py                # Simple prefixed logger
-├── checkpoint.py            # Session state serialization for multi-session dev
+├── cronalytics/             # Core package
+│   ├── cli.py             # Terminal interface (entry point)
+│   ├── config.py          # Paths, retry delays, jitter
+│   ├── facts.py           # Fact DB: schema, insert, queries
+│   ├── ingester.py        # Hook handler, pending.jsonl, background worker
+│   ├── scanner.py         # Reconciliation scanner + watermark I/O
+│   ├── schedule.py        # Cron parsing, projection math (croniter)
+│   ├── logger.py          # Simple prefixed logger
+│   └── checkpoint.py      # Session state serialization for multi-session dev
+├── skills/
+│   └── devops/
+│       └── cronalytics/
+│           └── SKILL.md     # Built-in diagnostic skill for agents
 ├── dashboard/
 │   ├── manifest.json        # Dashboard plugin manifest
 │   ├── plugin_api.py        # FastAPI router (importlib-safe)
@@ -368,12 +434,12 @@ cronalytics/
 │   ├── src/                 # Modular frontend source (13 components)
 │   └── dist/
 │       └── index.js         # Frontend bundle (React + HERMES_PLUGIN_SDK)
-└── tests/                   # 83 pytest tests
+└── tests/                   # 149 pytest tests (83 original + 66 CLI)
 ```
 
 ---
 
-## 9. Positioning
+## 10. Positioning
 
 > Turn hidden automation into visible spend.
 
@@ -381,5 +447,5 @@ See what your cron jobs are costing before background automation becomes backgro
 
 ---
 
-*Version: 1.0.0*  
-*Last updated: 2026-05-11*
+*Version: 1.1.0*  
+*Last updated: 2026-05-26*

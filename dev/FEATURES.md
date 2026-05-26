@@ -1,6 +1,6 @@
 # Features — Cronalytics
 
-> **Version:** 1.0.0
+> **Version:** 1.1.0
 > **Scope:** Living catalog of all implemented functionality.
 
 This document lists every implemented feature, the rationale for its inclusion, and the formulas or data sources it relies on. If something is not listed here, it is not implemented.
@@ -35,7 +35,7 @@ If the gateway restarts, `ingester.start()` replays `pending.jsonl` into the in-
 
 ### 1.4 Session Parsing
 
-Session IDs follow the format `cron_{job_id}_{YYYYMMDD}_{HHMMSS}`. The parser drops the prefix (`cron_`) and the final two segments (date + time) to recover the stable `job_id`. Early versions incorrectly dropped only one segment, causing every run to appear as a distinct job; this was fixed in Phase 2.5.
+Session IDs follow the format `cron_{job_id}_{YYYYMMDD}_{HHMMSS}`. The parser drops the prefix (`cron_`) and the final two segments (date + time) to recover the stable `job_id`.
 
 ### 1.5 Script-Job Capture (No-Agent Mode)
 
@@ -163,16 +163,16 @@ All endpoints are mounted at `/api/plugins/cronalytics/`.
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/health` | `GET` | Fact DB health, total runs, unique jobs, last sync watermark |
-| `/summary?days=N&outcome=both&mode=all` | `GET` | Aggregated headline stats + schedule-aware projections |
-| `/jobs?days=N&outcome=both&mode=all` | `GET` | Per-job aggregates with projections |
+| `/summary?days=N&outcome=all&mode=all` | `GET` | Aggregated headline stats + schedule-aware projections |
+| `/jobs?days=N&outcome=all&mode=all` | `GET` | Per-job aggregates with projections |
 | `/jobs/{job_id}/runs` | `GET` | Individual run history for a specific job |
-| `/models?days=N&outcome=both&mode=all` | `GET` | Per-model cost/token breakdown |
-| `/trends?days=N&outcome=both&mode=all` | `GET` | Daily cost + runs bars over time |
+| `/models?days=N&outcome=all&mode=all` | `GET` | Per-model cost/token breakdown |
+| `/trends?days=N&outcome=all&mode=all` | `GET` | Daily cost + runs bars over time |
 | `/sync` | `POST` | Trigger manual reconciliation scan |
 
 All endpoints return JSON wrapped as `{"plugin": "cronalytics", ...}`.
 The `days` parameter accepts `0` (all time) or `1–365`.
-The `outcome` parameter accepts `both`, `success`, `failure`.
+The `outcome` parameter accepts `all`, `success`, `failure`.
 The `mode` parameter accepts `all`, `agent`, `no_agent`.
 
 ---
@@ -187,7 +187,7 @@ The `mode` parameter accepts `all`, `agent`, `no_agent`.
   "label": "Cronalytics",
   "description": "Cost and operational observability for Hermes cron jobs",
   "icon": "Clock",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "tab": {"path": "/cronalytics", "position": "end", "hidden": false},
   "slots": ["pre-main", "post-main"],
   "entry": "dist/index.js",
@@ -213,8 +213,8 @@ Progressive zoom-responsive wrapping: at high zoom levels, Refresh breaks away f
 
 #### Row 1 — Summary Board
 
-- **Job Runs** — total run count in selected window vs. prior period delta (↑/↓ %).
-- **Cost** — total `estimated_cost_usd` in amber `#f5a623`; vs-prior delta + ✓/✗ success/failure breakdown + wasted cost. Actual cost sub-line is suppressed until provider billing coverage is reliable. In Failure mode, headline flips to red and label changes to "Wasted".
+- **Job Runs** — total run count in selected window vs. prior period delta (↑/↓ %). Trend comparison requires the database to contain at least 1.75× the filter window (e.g., 52.5 days of history for a 30-day filter) before showing directional arrows. Shorter history displays "→" (flat) to avoid misleading spikes from partial prior windows.
+- **Cost** — total `estimated_cost_usd` in amber `#f5a623`; vs-prior delta + ✓/✗ success/failure breakdown + wasted cost. Trend comparison requires the database to contain at least 1.75× the filter window (e.g., 52.5 days for a 30-day filter). Shorter history displays "→" (flat). Actual cost sub-line is suppressed until provider billing coverage is reliable. In Failure mode, headline flips to red and label changes to "Wasted".
 - **Tokens** — total tokens in blue `#5b8def`; 3-row micro proportion bars (In, Out, Cached).
 - **Pace** — aggregate `trend_monthly_total / nominal_monthly_total`; font-only color:
   - `< 1.0×` — green `#4ade80` (under nominal)
@@ -227,7 +227,7 @@ All four cards are clickable and open educational modals.
 
 Four spotlight cards derived live from `jobList`, icon accent `#ff5722`:
 - **Top Runs** — highest `runs` job; `% of total runs` sub-line.
-- **Top Cost** — highest `total_cost` job; amber headline `#f5a623`; `% of total cost` sub-line.
+- **Top Cost** — highest `tot_estimated_cost` job; amber headline `#f5a623`; `% of total cost` sub-line.
 - **Top Tokens** — highest `total_tokens` job; blue headline `#5b8def`; `% of total tokens` sub-line.
 - **Top Pace** — highest `projections.pace` job; font-colored via `paceColor()`. Surfaces the job most at risk of exceeding its nominal budget.
 
@@ -239,15 +239,15 @@ Proportional bar chart showing the top 5 models by estimated cost. Each row show
 
 #### Jobs Breakdown Table
 
-Eight sortable columns: **Job**, **Runs**, **Avg Time**, **Total Cost**, **Avg Cost**, **Nominal/mo**, **Trend/mo**, **Pace**.
+Eight sortable columns: **Job**, **Runs**, **Avg Duration**, **Total Cost**, **Avg Cost**, **Nominal/mo**, **Trend/mo**, **Pace**.
 
 - **Job** — human-readable name from `jobs.json` (falls back to `job_id`). Shows `[No agent]` badge for script jobs.
 - **Runs** — number of executions in the window.
-- **Avg Time** — average duration per run.
+- **Avg Duration** — average duration per run.
 - **Total Cost** — sum of `estimated_cost_usd`.
-- **Avg Cost** — `total_cost / runs`.
-- **Nominal/mo** — `avg_cost × scheduled_runs_30d` (what it *should* cost if run exactly on schedule).
-- **Trend/mo** — `(total_cost / days_filter) × 30` (what it *will* cost if current pace continues).
+- **Avg Cost** — `tot_estimated_cost / runs`.
+- **Nominal/mo** — `avg_estimated_cost × scheduled_runs_30d` (what it *should* cost if run exactly on schedule).
+- **Trend/mo** — `(tot_estimated_cost / days_filter) × 30` (what it *will* cost if current pace continues).
 - **Pace** — `trend / nominal`. Color-coded badge with background tint.
 
 Clicking a row expands a detail panel (colSpan 8) showing:
@@ -285,40 +285,61 @@ If no data exists at all:
 
 ---
 
-## 6. Standalone CLI
+## 6. Terminal CLI
 
 A terminal interface that mirrors the dashboard data without requiring a browser.
 
+```bash
+cronalytics <command> [--days N]
 ```
-python -m cronalytics.cli <command> [--days N]
-```
+
+### 6.1 Full Report Chain (Default)
+
+Executing `cronalytics` (bare) or `cronalytics all` triggers an orchestrated **Full Report Chain**. It sequentially executes and renders five sub-commands into a unified terminal view:
+1. `health`
+2. `summary`
+3. `jobs`
+4. `models`
+5. `trends`
+
+**Note:** The `--json` flag is explicitly forbidden with the `all` command to prevent ambiguous multi-schema output.
+
+### 6.2 Data Sub-commands
 
 | Command | Output |
 |---------|--------|
-| `summary` | Headline runs, cost, tokens, trend arrow, cost-by-model table |
-| `jobs` | Per-job table with ID, runs, cost, tokens, pace |
-| `runs --job ID` | Individual run history (time, duration, cost, tokens, model) |
+| `summary` | Headline runs, cost, tokens, trend arrow, cost-by-model table, **Leader Board** |
+| `jobs` | Per-job table with ID, Human Name, Runs, Cost, Avg Duration, Tokens, and Pace |
+| `runs --job ID` | Individual run history (time, duration, cost, tokens, model, success) |
 | `models` | Per-model aggregate table |
 | `trends` | Daily bar chart (ASCII) of cost + runs |
 | `health` | Fact DB metadata, job count, last sync |
 
-**Shared flag:** `--days N` (default 30, `0` = all time).
+### 6.3 Experimental & Deep Analytics (JSON only)
 
-Formatting conventions:
-- Cost: `$X.XX`
-- Tokens: `K`/`M` suffixes
-- Tables: monospace-aligned ASCII boxes matching `hermes insights` style
+The following metrics are implemented and available in `--json` output for advanced diagnostic work, but are considered **experimental**. They are not surfaced in the primary UI/CLI tables as they may be unreliable depending on model provider reporting or Hermes core version.
+
+- **Drift Ratio** (`drift_ratio`) — `observed_runs / scheduled_in_window`. Detects over-firing (retries) or missed ticks.
+- **Iteration Depth** (`api_call_count`, `tool_call_count`) — Measure of how "hard" an agent is working per run.
+- **Message Depth** (`message_count`) — Conversation length per run.
+- **Actual Cost** (`actual_cost_usd`) — Matches provider billing exactly; currently suppressed in summaries due to inconsistent provider coverage.
 
 ---
 
-## 7. Formulas & Data Sources
+## 7. i18n Localization Engine
 
-### 7.1 Fixed-Window Projection Math
+- **Cross-Locale Parity:** All dashboard features are localized for English, Spanish, Simplified Chinese, and Traditional Chinese.
+- **Consensus-Validated:** Phrasing validated via 4 independent AI models.
+- **Agent Enforcement:** Repository architecture enforces zero-hardcoded-string compliance (see `AGENTS.md`).
+
+## 8. Formulas & Data Sources
+
+### 8.1 Fixed-Window Projection Math
 
 All trend calculations use the **user-selected filter window** as the denominator, not the actual data span.
 
 ```
-daily_cost = total_cost / days_filter         # days_filter = 7, 30, 90, or all-time span
+daily_cost = tot_estimated_cost / days_filter         # days_filter = 7, 30, 90, or all-time span
 trend_30d  = daily_cost * 30
 trend_90d  = daily_cost * 90
 trend_1yr  = daily_cost * 365
@@ -329,16 +350,16 @@ trend_1yr  = daily_cost * 365
 - Prevents stale averages from jobs with sparse runs.
 - Makes jobs comparable: same denominator, same time horizon.
 
-### 7.2 Nominal (Schedule-Based) Projection
+### 8.2 Nominal (Schedule-Based) Projection
 
 ```
 scheduled_runs_30d = count_occurrences(schedule_expr, now, now + 30 days)
-nominal_30d        = avg_cost * scheduled_runs_30d
+nominal_30d        = avg_estimated_cost * scheduled_runs_30d
 ```
 
 Uses `croniter` for cron expressions and simple `timedelta` math for interval schedules (`every N minutes`).
 
-### 7.3 Pace
+### 8.3 Pace
 
 ```
 pace = trend_30d / nominal_30d
@@ -348,7 +369,7 @@ pace = trend_30d / nominal_30d
 - `pace == 1.0` — actual spend matches scheduled expectation.
 - `pace > 1.0` — actual spend exceeds scheduled expectation (over-running or drifting).
 
-### 7.4 Drift Ratio
+### 8.4 Drift Ratio
 
 ```
 scheduled_in_window = count_occurrences(schedule_expr, now - observed_window, now)
@@ -360,7 +381,7 @@ Drift answers: *"How many times did this job actually run, compared to how many 
 - `drift > 1.0` — running more often than scheduled (retries, external triggers, interval overlap).
 - `drift < 1.0` — running less often than scheduled (missed ticks, job disabled).
 
-### 7.5 Aggregate Pace
+### 8.5 Aggregate Pace
 
 ```
 nominal_monthly_total = Σ(nominal_30d across all jobs)
@@ -370,7 +391,7 @@ aggregate_pace        = trend_monthly_total / nominal_monthly_total
 
 Because the math is fixed-window, the aggregate pace is always the exact sum of its parts.
 
-### 7.6 Data Sources
+### 8.6 Data Sources
 
 | Data | Source File | Description |
 |------|-------------|-------------|
@@ -383,9 +404,9 @@ Because the math is fixed-window, the aggregate pace is always the exact sum of 
 
 ---
 
-## 8. Configuration
+## 9. Configuration
 
-All values are hardcoded defaults in `config.py`. There is no user-editable configuration file yet (planned for v1.1).
+All values are hardcoded defaults in `config.py`. There is no user-editable configuration file yet.
 
 ```python
 RETRY_DELAYS = [3.0, 8.0, 15.0]   # seconds before each worker attempt
@@ -402,22 +423,23 @@ Paths:
 
 ---
 
-## 9. Test Coverage
+## 10. Test Coverage
 
-83 pytest tests covering:
+149 pytest tests covering:
 - `facts.py` — schema creation, ingestion, aggregation queries, job_id parsing
 - `scanner.py` — watermark I/O, session fetching, batch insert, script scanning
 - `schedule.py` — cron expression parsing, projection math, edge cases
 - `ingester.py` — hook handler, pending file ops, worker loop, retry logic
 - `plugin_api.py` — all 7 API endpoints, response shapes, filter params
+- `cli.py` — all commands, filters, error handling. `--json` output on every data subcommand except `all`.
 
-Run: `uv run pytest -q`
+Run: `python -m pytest tests/ -v --tb=short`
 
 Lint/type: `uv run ruff check . && uv run mypy .`
 
 ---
 
-## 10. Known Limitations
+## 11. Known Limitations
 
 These are **intentional boundaries or acknowledged gaps**, not bugs.
 
@@ -428,9 +450,9 @@ These are **intentional boundaries or acknowledged gaps**, not bugs.
 5. **Job detail modal capped at 200 runs.** High-frequency jobs show full count in the table but drill-down is limited.
 6. **Native `title` tooltips on table headers only.** Column headers use browser-native `title` for simple explanations. Custom tooltips were explored and reverted due to viewport-edge positioning complexity on iPad Safari.
 7. **Mobile layout functional but not optimized.** The table uses horizontal scroll on narrow viewports.
-8. **Focus trap deferred to v1.1.** Modal focus management works for typical usage but does not trap Tab cycles inside the modal.
+8. **Focus trap deferred to a future release.** Modal focus management works for typical usage but does not trap Tab cycles inside the modal.
 
 ---
 
-*Version: 1.0.0*  
-*Last updated: 2026-05-11*
+*Version: 1.1.0*  
+*Last updated: 2026-05-26*

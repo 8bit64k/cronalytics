@@ -15,7 +15,7 @@ from pathlib import Path
 def _load_facts():
     """Load facts.py dynamically via importlib (no package context needed)."""
     plugin_root = Path(__file__).resolve().parent.parent
-    path = plugin_root / "facts.py"
+    path = plugin_root / "cronalytics" / "facts.py"
     spec = importlib.util.spec_from_file_location("croninsights_test_facts", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)

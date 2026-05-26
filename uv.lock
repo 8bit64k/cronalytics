@@ -38,6 +38,15 @@ wheels = [
 ]
 
 [[package]]
+name = "argcomplete"
+version = "3.6.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/38/61/0b9ae6399dd4a58d8c1b1dc5a27d6f2808023d0b5dd3104bb99f45a33ff6/argcomplete-3.6.3.tar.gz", hash = "sha256:62e8ed4fd6a45864acc8235409461b72c9a28ee785a2011cc5eb78318786c89c", size = 73754, upload-time = "2025-10-20T03:33:34.741Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/74/f5/9373290775639cb67a2fce7f629a1c240dce9f12fe927bc32b2736e16dfc/argcomplete-3.6.3-py3-none-any.whl", hash = "sha256:f5007b3a600ccac5d25bbce33089211dfd49eab4a7718da3f10e3082525a92ce", size = 43846, upload-time = "2025-10-20T03:33:33.021Z" },
+]
+
+[[package]]
 name = "ast-serialize"
 version = "0.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -95,9 +104,10 @@ wheels = [
 
 [[package]]
 name = "cronalytics"
-version = "1.0.0"
+version = "1.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "argcomplete" },
     { name = "croniter" },
     { name = "fastapi" },
 ]
@@ -112,6 +122,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "argcomplete", specifier = ">=3.0" },
     { name = "croniter", specifier = ">=1.0" },
     { name = "fastapi", specifier = ">=0.100" },
 ]

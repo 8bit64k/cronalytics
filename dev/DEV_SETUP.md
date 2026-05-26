@@ -1,46 +1,34 @@
 # Developer Setup
 
-This guide is for contributors and developers working on the Cronalytics plugin itself. End users should follow [`INSTALL.md`](INSTALL.md).
+This guide is for contributors and developers working on the Cronalytics plugin itself. End users should follow [`INSTALL.md`](../INSTALL.md).
 
-## Symlink Your Local Build (Recommended)
+## Running from Source
 
-Keep your git repo and the active plugin in sync:
-
-```bash
-mkdir -p ~/.hermes/plugins
-ln -s /path/to/cronalytics ~/.hermes/plugins/cronalytics
-```
-
-Any change you make in your build directory is immediately reflected after a gateway restart.
-
-## Copy Method (If Symlink Fails)
-
-Some environments don't follow symlinks for plugin loading:
+For development, clone the repo and install the plugin from your local path:
 
 ```bash
-mkdir -p ~/.hermes/plugins
-cp -r /path/to/cronalytics ~/.hermes/plugins/cronalytics
+hermes plugins install /path/to/cronalytics --enable
 ```
 
-You'll need to re-copy after every change.
+Or work directly in `~/.hermes/plugins/cronalytics/` if you already installed from GitHub.
 
 ## Running Tests
 
 ```bash
-uv run pytest -q
+python -m pytest tests/ -v --tb=short
 ```
 
 For verbose output:
 
 ```bash
-uv run pytest -v
+python -m pytest tests/ -v
 ```
 
 ## Lint & Type Check
 
 ```bash
-uv run ruff check .
-uv run mypy .
+ruff check .
+mypy .
 ```
 
 ## Building the Dashboard
@@ -56,10 +44,10 @@ Produces `dashboard/dist/index.js`.
 
 1. Make changes in your git repo
 2. `node dashboard/build.js` if you touched frontend code
-3. `hermes gateway restart` if you touched backend code
-4. Hard-refresh browser
-5. `uv run pytest -q` before committing
+3. Restart the Hermes dashboard server if you touched backend code
+4. Hard-refresh browser (`Ctrl+Shift+R` or `Cmd+Shift+R`)
+5. `python -m pytest tests/ -v --tb=short` before committing
 
 ---
 
-*For end-user install/uninstall, see [`INSTALL.md`](INSTALL.md) and [`UNINSTALL.md`](UNINSTALL.md).*
+*For end-user install/uninstall, see [`INSTALL.md`](INSTALL.md) and [`UNINSTALL.md`](../UNINSTALL.md).*
