@@ -25,7 +25,7 @@
    <img src="https://img.shields.io/badge/share-0088CC?logo=telegram&logoColor=white">
  </a>
 
-👀 [Watch this repo](https://github.com/8bit64k/cronalytics/subscription) to get notified of new releases.
+[Watch this repo](https://github.com/8bit64k/cronalytics/subscription) to get notified of new releases. 👀 
 
 <br/>
 
