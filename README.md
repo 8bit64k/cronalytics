@@ -9,11 +9,11 @@
  <a href="https://github.com/8bit64k/cronalytics/commits/main">
    <img src="https://img.shields.io/github/last-commit/8bit64k/cronalytics" alt="Last Commit">
  </a>
- <a href="#">
-   <img src="https://img.shields.io/badge/Hermes_Agent-supported-blueviolet.svg" alt="Hermes Agent">
- </a>
  <a href="https://github.com/8bit64k/cronalytics/actions/workflows/ci.yml">
    <img src="https://github.com/8bit64k/cronalytics/actions/workflows/ci.yml/badge.svg" alt="CI">
+ </a>
+ <a href="#">
+   <img src="https://img.shields.io/badge/Hermes_Agent-supported-blueviolet.svg" alt="Hermes Agent">
  </a>
  <a href="https://x.com/intent/tweet?text=Check%20out%20this%20project%20on%20GitHub:%20https://github.com/8bit64k/cronalytics%20%23HermesAgent%20%23NousResearch">
   <img src="https://img.shields.io/badge/share-000000?logo=x&logoColor=white">
