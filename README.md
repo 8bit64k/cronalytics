@@ -167,8 +167,8 @@ For full details about usage and common workflows see **[USAGE.md](docs/USAGE.md
 Cronalytics implements a self-hosted internationalization layer for independent Hermes plugins. All UI elements, educational explainers, and metrics are fully localized for:
 - 🇺🇸 **English** (Source of Truth)
 - 🇪🇸 **Spanish** (Professional/Technical)
-- 🇨🇳 **Chinese Simplified** (zh-CN)
-- 🇹🇼 **Chinese Traditional** (zh-TW)
+- 🇨🇳 **Chinese Simplified** (zh)
+- 🇹🇼 **Chinese Traditional** (zh-hant)
 
 ### CLI — terminal access:
 - `summary` — headline aggregates + leader board + cost-by-model table

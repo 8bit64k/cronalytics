@@ -6,7 +6,7 @@
 ### New Features
 1. Terminal CLI Tool
 2. Agent Diagnostic Skill
-3. **Multilingual/Localization Support (i18n)**: coverage for [en, es, zh-CN, zh-TW].
+3. **Multilingual/Localization Support (i18n)**: coverage for [en, es, zh, zh-hant].
 
 ### Improvements
 - **Trend Spikes:** Gated arrows behind 1.75x history window to prevent false alarms.

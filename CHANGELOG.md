@@ -11,7 +11,7 @@ All notable changes to Cronalytics.
 - **Terminal CLI** — `cronalytics` command (via `pip install -e`) with 7 subcommands: `summary`, `jobs`, `runs`, `models`, `trends`, `health`, `all`. Full `--json` output on every data command except `all`. `--days`, `--outcome`, `--mode` filters across all commands. Leader Board spotlight in `summary`. Job name resolution from `jobs.json`.
 - **Agent Diagnostic Skill** — Built-in `cronalytics` skill with structured 7-step diagnostic workflow (time window verification → baseline health → job-level drill → per-run investigation → failure pattern → model economics → trend validation). Confidence-graded anomaly detection (HIGH / MEDIUM / LOW) with supporting evidence requirements. "Known Ways to Fool Yourself" guardrails (age-gating, script job awareness, variance checks). Cross-references `jobs.json` for scheduling context and silent failure detection.
 - **Test suite expanded to 149 tests** (83 original + 66 CLI tests) — all passing, `ruff` + `mypy` clean (note: `mypy` excludes `ingester.py`, `scanner.py`, `__init__.py`, and `dashboard/`; `disallow_untyped_defs = false`).
-- **Multilingual/Localization Support (i18n)**: coverage for [en, es, zh-CN, zh-TW]
+- **Multilingual/Localization Support (i18n)**: coverage for [en, es, zh, zh-hant]
 
 ### Changed
 

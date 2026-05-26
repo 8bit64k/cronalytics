@@ -1,6 +1,6 @@
 import { registerCatalog } from "./index.js";
 
-registerCatalog("zh-TW", {
+registerCatalog("zh-hant", {
   // cost
   cost: {
     trend_formula: "趨勢 % = ((目前成本 − 上期成本) / 上期成本) × 100",

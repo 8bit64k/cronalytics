@@ -38,10 +38,10 @@ function getLocale() {
     code = navigator.language || "en";
   }
   
-  // Try full match first (e.g. zh-TW, zh-CN)
+  // Try full match first (e.g. zh, zh-hant, es)
   if (CATALOGS[code]) return code;
   
-  // Fallback to base language (e.g. zh-CN -> zh)
+  // Fallback to base language (e.g. zh-hant -> zh, en-GB -> en)
   const base = code.split("-")[0];
   if (CATALOGS[base]) return base;
 

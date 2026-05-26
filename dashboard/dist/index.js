@@ -1,5 +1,5 @@
 (() => {
-  // dashboard/src/lib/sdk.js
+  // src/lib/sdk.js
   var SDK = window.__HERMES_PLUGIN_SDK__;
   var PLUGINS = window.__HERMES_PLUGINS__;
   if (!SDK || !PLUGINS) {
@@ -10,7 +10,7 @@
   var fetchJSON = SDK.fetchJSON;
   var { Card, CardHeader, CardTitle, CardContent, Badge, Button } = SDK.components;
 
-  // dashboard/src/components/ErrorBoundary.js
+  // src/components/ErrorBoundary.js
   var PluginErrorBoundary = class extends React.Component {
     constructor(props) {
       super(props);
@@ -39,7 +39,7 @@
     }
   };
 
-  // dashboard/src/lib/validate.js
+  // src/lib/validate.js
   var IS_DEV = (() => {
     try {
       return typeof process !== "undefined" && process.env && false;
@@ -148,7 +148,7 @@
     return void 0;
   }
 
-  // dashboard/src/hooks/useApi.js
+  // src/hooks/useApi.js
   function useApi(path) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -189,7 +189,7 @@
     return { isOpen, open, close };
   }
 
-  // dashboard/src/i18n/index.js
+  // src/i18n/index.js
   var CATALOGS = {};
   function registerCatalog(lang, messages) {
     CATALOGS[lang] = messages;
@@ -245,7 +245,7 @@
     };
   }
 
-  // dashboard/src/components/Modal.js
+  // src/components/Modal.js
   function Modal({ isOpen, onClose, children, maxWidth }) {
     const t = useCronalyticsI18n();
     const backdropRef = useRef(null);
@@ -347,7 +347,7 @@
     );
   }
 
-  // dashboard/src/components/DaySelector.js
+  // src/components/DaySelector.js
   var PRESETS = [
     { label: "7D", value: 7 },
     { label: "30D", value: 30 },
@@ -452,7 +452,7 @@
     return elements;
   }
 
-  // dashboard/src/components/OutcomeToggle.js
+  // src/components/OutcomeToggle.js
   function OutcomeToggle({ selected, onChange, label }) {
     const t = useCronalyticsI18n();
     const OPTIONS = [
@@ -493,7 +493,7 @@
     );
   }
 
-  // dashboard/src/components/ModeToggle.js
+  // src/components/ModeToggle.js
   function ModeToggle({ selected, onChange, label }) {
     const t = useCronalyticsI18n();
     const OPTIONS = [
@@ -534,7 +534,7 @@
     );
   }
 
-  // dashboard/src/lib/formatters.js
+  // src/lib/formatters.js
   function fmtCost(n) {
     if (n == null) return "\u2014";
     if (n === 0) return "$0.00";
@@ -603,7 +603,7 @@
     return "transparent";
   }
 
-  // dashboard/src/components/JobDetailView.js
+  // src/components/JobDetailView.js
   function JobDetailView({ jobId, jobName, days, outcome, sortKey, sortDir }) {
     const t = useCronalyticsI18n();
     const [sKey, setSKey] = useState(sortKey);
@@ -813,7 +813,7 @@
     );
   }
 
-  // dashboard/src/components/HeroBanner.js
+  // src/components/HeroBanner.js
   function HeroBanner() {
     const t = useCronalyticsI18n();
     const [collapsed, setCollapsed] = useState(() => {
@@ -932,7 +932,7 @@
     );
   }
 
-  // dashboard/src/lib/icons.js
+  // src/lib/icons.js
   function CpuIcon(size) {
     return React.createElement(
       "svg",
@@ -1119,7 +1119,7 @@
     );
   }
 
-  // dashboard/src/components/SummaryBoard.js
+  // src/components/SummaryBoard.js
   function SummaryBoard({ summary, days, outcome, onRunsClick, onCostClick, onTokensClick, onPaceClick }) {
     const t = useCronalyticsI18n();
     const s = summary || {};
@@ -1381,7 +1381,7 @@
     );
   }
 
-  // dashboard/src/components/LeaderBoard.js
+  // src/components/LeaderBoard.js
   function LeaderBoard({ jobList, onTopRunsClick, onTopCostClick, onTopTokensClick, onTopPaceClick }) {
     const t = useCronalyticsI18n();
     const totalRuns = jobList.reduce((sum, j) => sum + (j.runs || 0), 0);
@@ -1590,7 +1590,7 @@
     );
   }
 
-  // dashboard/src/components/ModelBreakdown.js
+  // src/components/ModelBreakdown.js
   function ModelBreakdown({ costByModel }) {
     const t = useCronalyticsI18n();
     if (!costByModel || costByModel.length === 0) return null;
@@ -1657,7 +1657,7 @@
     );
   }
 
-  // dashboard/src/components/JobBreakdown.js
+  // src/components/JobBreakdown.js
   function JobBreakdown({
     jobList,
     sortedJobs,
@@ -1919,7 +1919,7 @@
     );
   }
 
-  // dashboard/src/components/CronalyticsTab.js
+  // src/components/CronalyticsTab.js
   function CronalyticsTab() {
     const t = useCronalyticsI18n();
     const [days, setDaysRaw] = useState(() => {
@@ -2642,7 +2642,7 @@
     );
   }
 
-  // dashboard/src/i18n/en.js
+  // src/i18n/en.js
   registerCatalog("en", {
     // HeroBanner — the greeting
     hero: {
@@ -2823,7 +2823,7 @@
     }
   });
 
-  // dashboard/src/i18n/es.js
+  // src/i18n/es.js
   registerCatalog("es", {
     // cost
     cost: {
@@ -3006,7 +3006,7 @@
     }
   });
 
-  // dashboard/src/i18n/zh-CN.js
+  // src/i18n/zh.js
   registerCatalog("zh", {
     // cost
     cost: {
@@ -3189,8 +3189,8 @@
     }
   });
 
-  // dashboard/src/i18n/zh-TW.js
-  registerCatalog("zh-TW", {
+  // src/i18n/zh-hant.js
+  registerCatalog("zh-hant", {
     // cost
     cost: {
       trend_formula: "\u8DA8\u52E2 % = ((\u76EE\u524D\u6210\u672C \u2212 \u4E0A\u671F\u6210\u672C) / \u4E0A\u671F\u6210\u672C) \xD7 100",
@@ -3372,7 +3372,7 @@
     }
   });
 
-  // dashboard/src/index.js
+  // src/index.js
   PLUGINS.register("cronalytics", function CronalyticsWrapped() {
     return React.createElement(
       PluginErrorBoundary,
