@@ -25,6 +25,8 @@
    <img src="https://img.shields.io/badge/share-0088CC?logo=telegram&logoColor=white">
  </a>
 
+👀 [Watch this repo](https://github.com/8bit64k/cronalytics/subscription) to get notified of new releases.
+
 <br/>
 
 /ˈkrɒn.əˌlɪt.ɪks/ (noun)
@@ -33,8 +35,6 @@
 2. The dashboard for agentic automations in Hermes.
 
 Observe. Measure. Optimize.
-
-👀 [Watch this repo](https://github.com/8bit64k/cronalytics/subscription) to get notified of new releases.
 
 Cronalytics is a Hermes Agent plugin that attributes session-level usage and estimated cost to every cron-originated run, so you can see what your scheduled jobs are costing you. It hooks into `on_session_end`, stores derived analytics in a local SQLite fact database, and surfaces them through **three** complementary interfaces: a hermes dashboard tab, a CLI tool for programmatic access, and an agent skill for cron health/diagnostics and comprehensive assessments. The current version is v1.1.0.
 
