@@ -6,7 +6,7 @@
 
 Observe. Measure. Optimize.
 
-👀 [Watch this repo](https://github.com/8bit64k/cronalytics/subscription) to get notified of new releases.
+[Watch this repo](https://github.com/8bit64k/cronalytics/subscription) to get notified of new releases. 👀
 
 <br/>
  <a href="https://github.com/8bit64k/cronalytics/releases">
