@@ -8,7 +8,7 @@ Observe. Measure. Optimize.
 
 👀 [Watch this repo](https://github.com/8bit64k/cronalytics/subscription) to get notified of new releases.
 
-<br/><br/>
+<br/>
  <a href="https://github.com/8bit64k/cronalytics/releases">
    <img src="https://img.shields.io/github/v/tag/8bit64k/cronalytics?label=Release" alt="Latest Release">
  </a>
