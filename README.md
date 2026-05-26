@@ -7,7 +7,7 @@
 Observe. Measure. Optimize.
 <br/><br/>
  <a href="https://github.com/8bit64k/cronalytics/releases">
-   <img src="https://img.shields.io/github/v/release/8bit64k/cronalytics?label=Release" alt="Latest Release">
+   <img src="https://img.shields.io/github/v/tag/8bit64k/cronalytics?label=Release" alt="Latest Release">
  </a>
  <a href="https://github.com/8bit64k/cronalytics/blob/main/LICENSE">
    <img src="https://img.shields.io/github/license/8bit64k/cronalytics" alt="License">
