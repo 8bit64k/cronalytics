@@ -3,11 +3,11 @@
  <a href="https://github.com/8bit64k/cronalytics/releases">
    <img src="https://img.shields.io/badge/Release-v1.1.0-blue" alt="Latest Release">
  </a>
- <a href="https://github.com/8bit64k/cronalytics/blob/main/LICENSE">
+ <a href="https://github.com/8bit64k/cronalytics/blob/master/LICENSE">
    <img src="https://img.shields.io/github/license/8bit64k/cronalytics" alt="License">
  </a>
- <a href="https://github.com/8bit64k/cronalytics/commits/main">
-   <img src="https://img.shields.io/github/last-commit/8bit64k/cronalytics" alt="Last Commit">
+ <a href="https://github.com/8bit64k/cronalytics/commits/master">
+   <img src="https://img.shields.io/github/last-commit/8bit64k/cronalytics/master" alt="Last Commit">
  </a>
  <a href="https://github.com/8bit64k/cronalytics/actions/workflows/ci.yml">
    <img src="https://github.com/8bit64k/cronalytics/actions/workflows/ci.yml/badge.svg" alt="CI">
