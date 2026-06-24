@@ -159,6 +159,19 @@ cd ~/.hermes/plugins/cronalytics && python -m cronalytics.cli --help
 
 If you've already `pip install`ed and it still isn't found, check that your `pip` user bin directory is in your `$PATH`. Pip will warn you on install if it isn't.
 
+### The Cronalytics tab loads but shows no data, and the console shows 404 errors on `/api/plugins/cronalytics/*`. What happened?
+
+You likely updated Hermes Agent between June 22 and June 24, 2026. A temporary security change in Hermes during that window blocked user-installed plugins from registering their Python backend routes, so the dashboard never mounted Cronalytics's API. The frontend loaded but every API call returned 404.
+
+This was reverted on June 24, 2026. Update Hermes to the latest version and restart the dashboard:
+
+```bash
+hermes update
+hermes dashboard --stop && sleep 2 && hermes dashboard
+```
+
+Then hard-refresh the browser. See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for full details.
+
 ### Can I use Cronalytics without the Hermes dashboard?
 
 You can use the CLI without opening the dashboard: `cronalytics summary --days 7`. But Cronalytics needs the dashboard plugin infrastructure to **collect** data (the `on_session_end` hook only fires inside a running dashboard server). The CLI reads from the fact database; it doesn't produce data on its own.
