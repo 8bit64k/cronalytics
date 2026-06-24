@@ -4,6 +4,27 @@
 
 ---
 
+## `404: No such API endpoint: /api/plugins/cronalytics/summary`
+
+**Symptoms:** The Cronalytics dashboard tab loads but shows no data. The browser console (or `hermes logs`) shows `404: {"detail":"No such API endpoint: /api/plugins/cronalytics/summary"}`. The backend routes that the frontend calls (`/api/plugins/cronalytics/health`, `/summary`, `/jobs`, `/sync`, `/models`, `/trends`) all return 404.
+
+**Cause:** You updated Hermes Agent between June 22 and June 24, 2026. A security change in Hermes (commit `8845f3316`, PR #43719) restricted dashboard plugin backend auto-import to bundled plugins only — user-installed plugins like Cronalytics could no longer register their FastAPI routes, so the dashboard server never mounted `/api/plugins/cronalytics/*`. The plugin's static UI (JS/CSS) still loaded, but every API call it made hit the dashboard's SPA catch-all and returned 404.
+
+This was reverted by Nous Research on June 24, 2026 (commit `c42d44cb2`, PR #51950). User-installed plugins in `~/.hermes/plugins/` are trusted again.
+
+**Fix:** Update Hermes Agent to the latest version and restart the dashboard:
+
+```bash
+hermes update
+hermes dashboard --stop && sleep 2 && hermes dashboard
+```
+
+Then hard-refresh the browser (`Ctrl+Shift+R` or `Cmd+Shift+R`).
+
+**How to verify:** Run `hermes logs` after the dashboard starts and confirm there are no `refusing dashboard backend` warnings. The Cronalytics tab should populate data within a few seconds of loading.
+
+---
+
 ## Reverse Proxy Returns HTML for API Routes
 
 If you run the Hermes dashboard behind a reverse proxy (e.g., **Caddy**, **Nginx**) and see JSON parse errors (`Unexpected token '<'`), the proxy may be routing API requests incorrectly. The Hermes dashboard serves the SPA fallback (`index.html`) for any unmatched route, so any proxy misconfiguration sends HTML instead of JSON to `/api/plugins/cronalytics/*`.
@@ -47,27 +68,6 @@ If you see plugin API routes mounted in the dashboard server logs (e.g., `/api/p
 The Cronalytics API (and all Hermes plugin APIs) requires the dashboard's ephemeral session token. This token is generated when the dashboard starts and is injected into the SPA's `index.html`.
 
 **Fix:** Use the dashboard **Sync Now** button instead. If you must use `curl` from a script, extract `window.__HERMES_SESSION_TOKEN__` from the dashboard page source and pass it in the `X-Hermes-Session-Token` header.
-
----
-
-## `404: No such API endpoint: /api/plugins/cronalytics/summary`
-
-**Symptoms:** The Cronalytics dashboard tab loads but shows no data. The browser console (or `hermes logs`) shows `404: {"detail":"No such API endpoint: /api/plugins/cronalytics/summary"}`. The backend routes that the frontend calls (`/api/plugins/cronalytics/health`, `/summary`, `/jobs`, `/sync`, `/models`, `/trends`) all return 404.
-
-**Cause:** You updated Hermes Agent between June 22 and June 24, 2026. A security change in Hermes (commit `8845f3316`, PR #43719) restricted dashboard plugin backend auto-import to bundled plugins only — user-installed plugins like Cronalytics could no longer register their FastAPI routes, so the dashboard server never mounted `/api/plugins/cronalytics/*`. The plugin's static UI (JS/CSS) still loaded, but every API call it made hit the dashboard's SPA catch-all and returned 404.
-
-This was reverted by Nous Research on June 24, 2026 (commit `c42d44cb2`, PR #51950). User-installed plugins in `~/.hermes/plugins/` are trusted again.
-
-**Fix:** Update Hermes Agent to the latest version and restart the dashboard:
-
-```bash
-hermes update
-hermes dashboard --stop && sleep 2 && hermes dashboard
-```
-
-Then hard-refresh the browser (`Ctrl+Shift+R` or `Cmd+Shift+R`).
-
-**How to verify:** Run `hermes logs` after the dashboard starts and confirm there are no `refusing dashboard backend` warnings. The Cronalytics tab should populate data within a few seconds of loading.
 
 ---
 
