@@ -98,6 +98,12 @@ A built-in diagnostic skill that teaches Hermes agents how to analyze your cron 
 
 The agent loads the `cronalytics` skill, follows a structured 7-step diagnostic workflow (time window verification → baseline → job-level drill → per-run investigation → failure pattern → model economics → trend validation), cross-references `jobs.json`, and grades every finding by confidence (HIGH / MEDIUM / LOW) with supporting evidence and alternative explanations.
 
+#### Companion X/Twitter cron jobs
+
+If a scheduled Hermes job reads X/Twitter trends, watches replies, or prepares campaign reports, install [Hermes Tweet](https://github.com/Xquik-dev/hermes-tweet) alongside Cronalytics. Hermes Tweet supplies the X/Twitter tools; Cronalytics keeps the cron run history, duration, token, model, and success data visible for those scheduled social workflows.
+
+Keep any write-style actions gated in Hermes Tweet, then use Cronalytics to audit the scheduled job separately from the social account permissions.
+
 ### First-Time Setup
 
 After install, the plugin needs data:
