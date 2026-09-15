@@ -116,6 +116,7 @@ COLUMN_MAP: dict[str, str] = {
 
 def ensure_schema(db_path: Path) -> sqlite3.Connection:
     """Return a connection with WAL mode and schema up-to-date."""
+    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(db_path), check_same_thread=False)
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA synchronous=NORMAL")
