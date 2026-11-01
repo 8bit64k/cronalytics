@@ -4,7 +4,7 @@ Fires on every on_session_end, filters for platform=="cron", persists
 the session_id to a durable pending file, then a background worker retries
 state.db lookup with exponential-backoff-like delays and capped jitter.
 
-The pending file (~/.hermes/plugins/cronalytics/pending.jsonl) survives
+The pending file (~/.hermes/plugin-data/cronalytics/pending.jsonl) survives
 gateway restarts so no captured session is lost between plugin reloads.
 """
 

@@ -49,7 +49,7 @@ Hermes `no_agent` cron jobs execute scripts without invoking an LLM. They produc
 
 ### 2.1 Schema
 
-SQLite database at `~/.hermes/plugins/cronalytics/facts.db`.
+SQLite database at `~/.hermes/plugin-data/cronalytics/facts.db`.
 
 ```sql
 CREATE TABLE cron_runs (
@@ -398,9 +398,9 @@ Because the math is fixed-window, the aggregate pace is always the exact sum of 
 | Session cost, tokens, model | `~/.hermes/state.db` (Hermes core) | Operational SQLite. Queried at ingestion time. |
 | Job schedules, names | `~/.hermes/cron/jobs.json` (Hermes core) | Read-only at query time for name resolution and cron expression parsing. |
 | Script job artifacts | `~/.hermes/cron/output/*.md` | No-agent job output files. Scanned for timestamps. |
-| Derived analytics | `~/.hermes/plugins/cronalytics/facts.db` | Append-only fact DB owned by the plugin. |
-| Sync watermark | `~/.hermes/plugins/cronalytics/watermark.json` | JSON file tracking last `ended_at` processed. |
-| Pending queue | `~/.hermes/plugins/cronalytics/pending.jsonl` | Line-delimited JSON of sessions waiting for ingestion. |
+| Derived analytics | `~/.hermes/plugin-data/cronalytics/facts.db` | Append-only fact DB owned by the plugin. |
+| Sync watermark | `~/.hermes/plugin-data/cronalytics/watermark.json` | JSON file tracking last `ended_at` processed. |
+| Pending queue | `~/.hermes/plugin-data/cronalytics/pending.jsonl` | Line-delimited JSON of sessions waiting for ingestion. |
 
 ---
 
@@ -416,10 +416,16 @@ MAX_RETRIES  = 3                  # derived from len(RETRY_DELAYS)
 
 Paths:
 - `STATE_DB` = `~/.hermes/state.db`
-- `FACT_DB` = `<plugin_dir>/facts.db`
-- `WATERMARK_FILE` = `<plugin_dir>/watermark.json`
-- `PENDING_FILE` = `<plugin_dir>/pending.jsonl`
+- `DATA_DIR` = `~/.hermes/plugin-data/cronalytics` (per profile; override with `CRONALYTICS_DATA_DIR`)
+- `FACT_DB` = `<DATA_DIR>/facts.db`
+- `WATERMARK_FILE` = `<DATA_DIR>/watermark.json`
+- `PENDING_FILE` = `<DATA_DIR>/pending.jsonl`
 - `OUTPUT_DIR` = `~/.hermes/cron/output`
+
+Runtime state is kept out of the plugin directory on purpose: Hermes hashes the files of a
+Python plugin member into its dependency stamp, so state written next to the code makes every
+`hermes` start rebuild the dependency environment. Installs that still have state in the plugin
+directory are migrated once on load; the old files are moved to `<DATA_DIR>/legacy-<timestamp>/`.
 
 ---
 

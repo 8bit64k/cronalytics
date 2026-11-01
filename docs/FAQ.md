@@ -202,16 +202,16 @@ cronalytics all --days 0 --json
 cronalytics jobs --days 0 --json | jq '.data'
 
 # Complete snapshot: everything in the database
-sqlite3 ~/.hermes/plugins/cronalytics/facts.db '.mode json' 'SELECT * FROM cron_runs;'
+sqlite3 ~/.hermes/plugin-data/cronalytics/facts.db '.mode json' 'SELECT * FROM cron_runs;'
 ```
 
-The fact database is a standard SQLite file (`~/.hermes/plugins/cronalytics/facts.db`). You can query it directly with any SQLite client.
+The fact database is a standard SQLite file (`~/.hermes/plugin-data/cronalytics/facts.db`). You can query it directly with any SQLite client.
 
 ### How do I reset everything and start over?
 
 1. Stop the Hermes dashboard: `hermes dashboard --stop`
-2. Delete the fact database: `rm ~/.hermes/plugins/cronalytics/facts.db`
-3. Delete the watermark: `rm ~/.hermes/plugins/cronalytics/watermark.json`
+2. Delete the fact database: `rm ~/.hermes/plugin-data/cronalytics/facts.db`
+3. Delete the watermark: `rm ~/.hermes/plugin-data/cronalytics/watermark.json`
 4. Reinstall the plugin (or restart the dashboard to trigger a fresh bootstrap)
 5. Click **Sync Now** to backfill available history
 

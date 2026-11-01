@@ -13,10 +13,10 @@ Navigate to the **Plugins** tab in the Hermes dashboard. Find Cronalytics in the
 ## Method 2: Manual Removal
 
 ```bash
-rm -rf ~/.hermes/plugins/cronalytics
+rm -rf ~/.hermes/plugins/cronalytics ~/.hermes/plugin-data/cronalytics
 ```
 
-This removes the plugin code, fact database (`facts.db`), sync watermark (`watermark.json`), and pending queue (`pending.jsonl`).
+This removes the plugin code and its runtime data: fact database (`facts.db`), sync watermark (`watermark.json`), and pending queue (`pending.jsonl`). The data directory lives outside the plugin code; keep it if you plan to reinstall.
 
 If you added `cronalytics` to `plugins.enabled` in `~/.hermes/config.yaml`, remove it:
 
@@ -38,13 +38,13 @@ hermes gateway restart
 If you want to keep your analytics history before uninstalling, back up the fact database:
 
 ```bash
-cp ~/.hermes/plugins/cronalytics/facts.db ~/cronalytics-backup-$(date +%Y%m%d).db
+cp ~/.hermes/plugin-data/cronalytics/facts.db ~/cronalytics-backup-$(date +%Y%m%d).db
 ```
 
 To restore later, reinstall the plugin and copy the backup back:
 
 ```bash
-cp ~/cronalytics-backup-YYYYMMDD.db ~/.hermes/plugins/cronalytics/facts.db
+cp ~/cronalytics-backup-YYYYMMDD.db ~/.hermes/plugin-data/cronalytics/facts.db
 ```
 
 ---
