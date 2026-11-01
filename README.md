@@ -335,9 +335,9 @@ All current settings are hardcoded defaults. There is no user-editable config fi
 
 Paths are resolved automatically:
 - `STATE_DB`: `~/.hermes/state.db` (Hermes core session store)
-- `FACT_DB`: `~/.hermes/plugins/cronalytics/facts.db` (plugin-owned SQLite)
-- `WATERMARK_FILE`: `~/.hermes/plugins/cronalytics/watermark.json`
-- `PENDING_FILE`: `~/.hermes/plugins/cronalytics/pending.jsonl`
+- `FACT_DB`: `~/.hermes/plugin-data/cronalytics/facts.db` (plugin-owned SQLite)
+- `WATERMARK_FILE`: `~/.hermes/plugin-data/cronalytics/watermark.json`
+- `PENDING_FILE`: `~/.hermes/plugin-data/cronalytics/pending.jsonl`
 
 ---
 
@@ -392,5 +392,5 @@ See **[CHANGELOG.md](CHANGELOG.md)** for the full version history.
 ---
 
 *Plugin path: `~/.hermes/plugins/cronalytics/`*  
-*Fact DB: `~/.hermes/plugins/cronalytics/facts.db`*  
+*Fact DB: `~/.hermes/plugin-data/cronalytics/facts.db`*  
 *API base: `/api/plugins/cronalytics/`*

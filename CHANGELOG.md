@@ -4,6 +4,14 @@ All notable changes to Cronalytics.
 
 ---
 
+## Unreleased
+
+### Fixed
+
+- **Runtime state moved out of the plugin directory** (#10) — `facts.db`, `watermark.json` and `pending.jsonl` now live in `~/.hermes/plugin-data/cronalytics/` (per profile, override with `CRONALYTICS_DATA_DIR`). Hermes hashes the files of a Python plugin member into its dependency stamp, so state written next to the code triggered a full dependency rebuild on every `hermes` start. Existing state is migrated once on load (SQLite backup API); the old files are moved to `legacy-<timestamp>/` in the data directory.
+
+---
+
 ## v1.1.0 (2026-05-26)
 
 ### Added

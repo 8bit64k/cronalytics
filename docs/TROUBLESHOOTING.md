@@ -95,7 +95,7 @@ If your CLI is environment-isolated (e.g. running in a raw shell without your us
 ## Problem: Dashboard is not updating after a cron run.
 
 **Check the Ingestion Queue:**
-Cronalytics uses a durable queue file: `~/.hermes/plugins/cronalytics/pending.jsonl`.
+Cronalytics uses a durable queue file: `~/.hermes/plugin-data/cronalytics/pending.jsonl`.
 - If this file exists and is growing, the gateway is capturing sessions but the background worker is failing to ingest them into the fact DB.
 - Check the gateway logs: `hermes logs --gateway`. Look for `[cronalytics]` warnings about `state.db` timeouts or retries.
 - The worker waits up to 17 seconds for Hermes to flush the session to disk; if your system is under heavy load, it may require manual sync.

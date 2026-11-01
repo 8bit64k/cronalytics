@@ -110,7 +110,7 @@ module or a shell pipeline instead:
 ```bash
 python3 -c "
 import json, sqlite3
-db = sqlite3.connect('/home/nick/.hermes/plugins/cronalytics/facts.db')
+db = sqlite3.connect('/home/nick/.hermes/plugin-data/cronalytics/facts.db')
 with open('/home/nick/.hermes/cron/jobs.json') as f:
     jobs = {j['id'] for j in json.load(f)['jobs']}
 c = db.cursor()
